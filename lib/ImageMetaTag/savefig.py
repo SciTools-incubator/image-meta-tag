@@ -13,7 +13,7 @@ from PIL import PngImagePlugin
 def savefig(filename, img_format=None, img_converter=0, do_trim=False, verbose=False, img_tags=None, \
                  keep_open=False, dpi=None):
     '''
-    Little routine to wrap over savefig, to include file size optimisation and png image tagging
+    Little routine to wrap over matplotlib.pyplot.savefig, to include file size optimisation and image tagging
     
     The filesize optimisation depends on the img_converter input passes into image_file_postproc
     
@@ -24,6 +24,7 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, verbose=F
     
       img_converter: this sets the level of image maniupulation, which can be done
                      at the same time as any tags are applied.
+                     
       do_trim: switch to trim whitespace around the image
 
       img_tags: a dictionary of tags to be added to the image metadata.
@@ -68,7 +69,7 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, verbose=F
 def image_file_postproc(filename, outfile=None, img_converter=0, do_trim=False, img_tags=None, verbose=False):
     '''Image post-processing
     
-    Arguments: filename   the namme of the file to process
+    Arguments: filename   the name of the image file to process
     
     Options:
       outfile: If supplied, the processing will be applied to a new file, with this name. If not supplied, the 
@@ -103,13 +104,13 @@ def image_file_postproc(filename, outfile=None, img_converter=0, do_trim=False, 
             # use the image library to open the file:
             im_obj = Image.open(filename)
             if do_trim:
-                # call the im_trim routiune defined above:
-                im_obj = im_trim(im_obj)
+                # call the _im_trim routiune defined above:
+                im_obj = _im_trim(im_obj)
             if img_tags:
                 # add the tags
-                im_obj = im_add_png_tags(im_obj, img_tags)
+                im_obj = _im_add_png_tags(im_obj, img_tags)
                 # and save with metadata
-                im_pngsave_addmeta(im_obj, outfile, optimize=True, verbose=verbose)
+                _im_pngsave_addmeta(im_obj, outfile, optimize=True, verbose=verbose)
             else:
                 # simple save
                 im_obj.save(outfile, optimize=True)
@@ -118,9 +119,9 @@ def image_file_postproc(filename, outfile=None, img_converter=0, do_trim=False, 
         # use the image library to open the file:
         im_obj = Image.open(filename)
         
-        # call the im_trim routiune defined above:
+        # call the _im_trim routiune defined above:
         if do_trim:
-            im_obj = im_trim(im_obj)
+            im_obj = _im_trim(im_obj)
         
         # images start out as RGBA, strip out the alpha channel first by covnerting to RGB,
         # then you convert to the next format (that's key to keeping image quality, I think):
@@ -138,9 +139,10 @@ def image_file_postproc(filename, outfile=None, img_converter=0, do_trim=False, 
             im_obj = im_obj.convert('RGB').convert('P', palette=Image.WEB)
         
         
+        # add tags, if needed:
         if img_tags:
-            im_obj = im_add_png_tags(im_obj, img_tags)
-            im_pngsave_addmeta(im_obj, outfile, optimize=True, verbose=verbose)
+            im_obj = _im_add_png_tags(im_obj, img_tags)
+            _im_pngsave_addmeta(im_obj, outfile, optimize=True, verbose=verbose)
         else:
             # simple save
             im_obj.save(outfile, optimize=True)
@@ -150,10 +152,9 @@ def image_file_postproc(filename, outfile=None, img_converter=0, do_trim=False, 
     # now report the file size change:
     en_fsize = os.path.getsize(outfile)
     if verbose:
-        print '%s%s%s%s%s%s' % ('File: "', filename, \
-                            '".\n    Starting filesize: ', st_fsize, ', final filesize: ', en_fsize)
+        print 'File: "%s". Size: %s, to %s bytes' % (filename, st_fsize, en_fsize)
 
-def im_trim(im_obj):
+def _im_trim(im_obj):
     'Trims an image object using Python Image Library'
     # make a white background:
     backg = Image.new(im_obj.mode, im_obj.size, im_obj.getpixel((0, 0)))
@@ -169,7 +170,13 @@ def im_trim(im_obj):
     else:
         return im_obj
     
-def im_pngsave_addmeta(im_obj, outfile, optimize=True, verbose=False):
+def _im_add_png_tags(im_obj, png_tags):
+    'adds img_tags to an image object for later saving'
+    for key, val in png_tags.iteritems():
+        im_obj.info[key] = val
+    return im_obj
+
+def _im_pngsave_addmeta(im_obj, outfile, optimize=True, verbose=False):
     'saves an image object to a png file, adding metadata using the info tag...'
     # these can be automatically added to Image.info dict
     # they are not user-added metadata
@@ -191,10 +198,4 @@ def im_pngsave_addmeta(im_obj, outfile, optimize=True, verbose=False):
 
     # and save
     im_obj.save(outfile, "PNG", optimize=optimize, pnginfo=meta)
-    
-def im_add_png_tags(im_obj, png_tags):
-    'adds img_tags to an image object for later saving'
-    for key, val in png_tags.iteritems():
-        im_obj.info[key] = val
-    return im_obj
 
