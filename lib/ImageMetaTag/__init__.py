@@ -1,8 +1,9 @@
 '''
-Created on 13 Aug 2015
+A python library providing a system of tagging image files as created by 
+matplotlib and a web page and javascript image display interface based on tagged images.
 
-@author: freb
+@author: Malcolm.E.Brooks@metoffice.gov.uk
 '''
 
-from savefig import savefig
+from savefig import savefig, image_file_postproc
 from img_dict import ImageDict
