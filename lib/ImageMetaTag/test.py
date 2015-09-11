@@ -67,7 +67,7 @@ def plot_random_data(random_data, i_rand, plot_col, col_name, trims,
     plt.title('Sum of two random integers between 1 and 6')
     
     outfile = '%s/rolls_%s_%s.%s' % (img_savedir, n_rolls, plot_col, img_format)
-    plt.savefig(outfile+'.png')
+    plt.savefig(outfile)
     
     # save the figure, using different image-meta-tag options
     # and tag the images.
@@ -105,11 +105,11 @@ def plot_random_data(random_data, i_rand, plot_col, col_name, trims,
     plt.close()
     
     
-    outfile = '%s/dist_%s_%s' % (img_savedir, n_rolls, plot_col)
+    outfile = '%s/dist_%s_%s.%s' % (img_savedir, n_rolls, plot_col, img_format)
     _count, _bins, _ignored = plt.hist(random_data[i_rand], [x+0.5 for x in range(13)], color=plot_col, normed=True)
     plt.xlim([1, 13])
     plt.title('Distribution of %s random integers between 1 and 6' % n_rolls )
-    plt.savefig(outfile+'.png')
+    plt.savefig(outfile)
     
     for trim in trims:
         for compression in compression_levels:
