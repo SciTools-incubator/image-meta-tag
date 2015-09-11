@@ -79,8 +79,11 @@ class ImageDict():
         outstr = self.dict_print(self.dict, indent=1, outstr=outstr)
         return outstr
     
-    def append(self, new_dict, devmode=False):
-        'appends a new dictionary (with a single element in each layer!) into a current plot dictionary'
+    def append(self, new_dict, devmode=False, skip_key_relist=False):
+        '''
+        appends a new dictionary (with a single element in each layer!) into a current ImageDict
+        The skip_key_relist option can be set to True to stop the regeneration of key lists.
+        '''
         if isinstance(new_dict, ImageDict):
             merged_dict = dict( self.mergedicts(self.dict, new_dict.dict) )
             self.dict = merged_dict
@@ -89,7 +92,9 @@ class ImageDict():
             self.dict = merged_dict
         else:
             raise ValueError('Cannot append data type %s to a ImageDict' % type(new_dict))
-        self.keys = self.list_keys_by_depth(devmode=devmode)
+        
+        if not skip_key_relist:
+            self.keys = self.list_keys_by_depth(devmode=devmode)
         # TODO: if there is a full_name_mapping, check that the new item hasn't added something to it
         
     def dict_union(self, in_dict, new_dict):
@@ -118,9 +123,16 @@ class ImageDict():
             else:
                 yield (k, dict2[k])
                 
-    def remove(self, rm_dict):
-        'removes a dictionary from within a plot dictionary'
+    def remove(self, rm_dict, skip_key_relist=False):
+        '''
+        removes a dictionary from within an ImageDict.
+        The skip_key_relist option can be set to True to stop the regeneration of key lists.
         
+        TIP: Because the remove process needs to prune empty sections afterwards, it can be slow.
+        When working with large dictionaries, and removing a large number of elements from it, is often faster
+        to build up a dictionary of things you want to remove, and then do one remove at the end.
+        '''
+       
         # delete the items in question from the dictionary - this can leave empty branches of the dictionary though:
         if isinstance(rm_dict, ImageDict):
             self.dict_remove(self.dict, rm_dict.dict)
@@ -133,7 +145,8 @@ class ImageDict():
         while dicts_to_prune:
             dicts_to_prune = self.dict_prune(self.dict)
         # relist the keys:
-        self.keys = self.list_keys_by_depth()
+        if not skip_key_relist:
+            self.keys = self.list_keys_by_depth()
         
         # TODO: if there is a full_name_mapping, check that the new item hasn't removed something to it
     
