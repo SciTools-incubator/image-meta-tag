@@ -114,8 +114,10 @@ def write_page_head_and_start_body(file_obj=None, title=None, description=None, 
     
     
 def write_js_setup_defaults(selector_prefix=None, list_prefix=None, file_list_name=None):
-    # this is the internal name the different selectors, associated lists for the selectors, and the
-    # list of files (all with a numbered suffix):
+    '''
+    this specifies defaults for the internal names the different selectors, associated lists for 
+    the selectors, and the list of files (all with a numbered suffix)
+    '''
     if selector_prefix is None:
         selector_prefix = 'sel'
     if list_prefix is None:
@@ -630,7 +632,7 @@ function set_img_from_id() {
   // set the string to use the the_image div:
   var the_file = '<p>Sorry, there is no image for that selection.</p>'
   //
-  for(var file_ind=0, len=file_list.length;  file_ind < len-1; file_ind++) {
+  for(var file_ind=0, len=file_list.length;  file_ind < len; file_ind++) {
     // compare the arrays, using the array compare method we added earlier:
     //alert([file_list[file_ind].id, ':', selected_id])
     if ( selected_id.compares( file_ids[file_ind]) ){
