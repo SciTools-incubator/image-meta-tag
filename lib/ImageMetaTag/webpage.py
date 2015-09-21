@@ -20,7 +20,7 @@ import os
 from ImageMetaTag import ImageDict
 
 
-def write_full_page(img_dict, filepath, page_longname, verbose=False, internal=False):
+def write_full_page(img_dict, filepath, page_longname, preamble=None, verbose=False, internal=False):
     '''
     Writes out an ImageDict as a webpage, to a given filepath.
     The file is overwritten.
@@ -47,7 +47,7 @@ def write_full_page(img_dict, filepath, page_longname, verbose=False, internal=F
     # open the file - this is a nice and simple file so just use the with open...
     with open(filepath, 'w') as out_file:
         # write out the start of the file:
-        write_page_head_and_start_body(file_obj=out_file, title=page_longname, 
+        write_page_head_and_start_body(file_obj=out_file, title=page_longname, preamble=preamble, 
                                        description=None, keywords=None, internal=internal)
 #       # write out the plot dictionary as a set of javascript variables, to be read into the scripts below: 
         write_js(img_dict, file_obj=out_file, selector_prefix=selector_prefix, list_prefix=list_prefix, \
@@ -64,7 +64,8 @@ def write_full_page(img_dict, filepath, page_longname, verbose=False, internal=F
         print 'File "%s" complete.' % filepath        
     
     
-def write_page_head_and_start_body(file_obj=None, title=None, description=None, keywords=None, internal=False):
+def write_page_head_and_start_body(file_obj=None, title=None, description=None, keywords=None, internal=False,
+                                   preamble=None):
     'writes out header information for a html page, including the locations of dojo scripts and resources'
     
     # locations of the dojo javascript framework resources and api:
@@ -100,10 +101,15 @@ def write_page_head_and_start_body(file_obj=None, title=None, description=None, 
     # now start the body:
     file_obj.write('''
     <body class="soria" bgcolor="#FFFFFF" text="#000000" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
-    <!-- access the dojo javascript library -->
     ''')
+    
+    if not preamble is None:
+        file_obj.write(preamble)
+    
     # and, crucially, declare the location of the javascript api:
-    dojo_script_str = '<script type="text/javascript" src="'
+    dojo_script_str = '''
+<!-- access the dojo javascript library -->
+<script type="text/javascript" src="'''
     if internal:
         dojo_script_str += dojo_local_script
     else:

@@ -313,8 +313,20 @@ def __main__():
     out_page = '%s/page.html' % img_savedir
     out_page_para = '%s/page_para.html' % img_savedir
     
-    imt.webpage.write_full_page(img_dict, out_page, 'Test ImageDict webpage', verbose=True, internal=True)
-    imt.webpage.write_full_page(img_dict, out_page_para, 'Test ImageDict webpage (Parallel version)', verbose=True, internal=True)
+    webpage_preamble = '''
+<div id='logo' style='float:left;'>
+  <img src=http://www-nwp/~dust/monitoring/Monitoring/logo.png></td>
+</div>
+<div id='preamble'>
+    <p>&nbsp;</p>
+    <h1>This is a test page for the ImageMetaTag module.</h1>
+</div>
+'''
+    
+    imt.webpage.write_full_page(img_dict, out_page, 'Test ImageDict webpage', 
+                                preamble=webpage_preamble, verbose=True, internal=True)
+    imt.webpage.write_full_page(img_dict, out_page_para, 'Test ImageDict webpage (Parallel version)', 
+                                preamble=webpage_preamble, verbose=True, internal=True)
 
 
     # now, finally, produce a large ImageDict:
