@@ -5,6 +5,8 @@ matplotlib and a web page and javascript image display interface based on tagged
 @author: Malcolm.E.Brooks@metoffice.gov.uk
 '''
 
+__version__ = '0.1'
+
 from savefig import savefig, image_file_postproc
 from img_dict import ImageDict
 from img_dict import readmeta_from_image, dict_heirachy_from_list, dict_split
