@@ -12,7 +12,7 @@ DATE_START = datetime.now()
 # and a format to print to stdour:
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S"
 
-import os, sys, errno, subprocess
+import os, sys, errno
 
 import numpy as np
 import matplotlib.pyplot as plt
