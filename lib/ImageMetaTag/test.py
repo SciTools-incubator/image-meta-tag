@@ -12,13 +12,17 @@ DATE_START = datetime.now()
 # and a format to print to stdour:
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S"
 
-import os, errno
+import os, sys, errno
 
 import numpy as np
 import matplotlib.pyplot as plt
 import cPickle as pickle
 from multiprocessing import Pool
 
+# make sure test is using the version of ImageMetaTag being tested:
+# (this would normally be added already, by installation, but for testing, we
+#  need to be testing the version we are making changes too!)
+sys.path.insert(0, os.sep.join(os.path.normpath(sys.argv[0]).split( os.sep)[0:-2]) )
 # Now, import ImageMetaTag to do things:
 import ImageMetaTag as imt
 
@@ -91,6 +95,7 @@ def plot_random_data(random_data, i_rand, plot_col, col_name, trims,
             img_tags['data source'] = 'Some random data'
             img_tags['plot owner'] = plot_owner
             img_tags['plot created by'] = this_routine
+            img_tags['ImageMetaTag version'] = imt.__version__
             
             imt.savefig(outfile, do_trim=trim, 
                         img_converter=compression, 
@@ -130,6 +135,7 @@ def plot_random_data(random_data, i_rand, plot_col, col_name, trims,
             img_tags['data source'] = 'Some random data'
             img_tags['plot owner'] = plot_owner
             img_tags['plot created by'] = this_routine
+            img_tags['ImageMetaTag version'] = imt.__version__
             
             imt.savefig(outfile, do_trim=trim, 
                         img_converter=compression, 
@@ -323,11 +329,23 @@ def __main__():
 </div>
 '''
     
+    # add a post-amble, including some server side includes for last-modified, and a disk usage string.
+    webpage_postamble = r'''
+<div id='postamble'>
+  This page was last modified
+  <!--#config timefmt="%H:%M, %d %B %Y" -->
+  <!--#echo var="LAST_MODIFIED"--><br>
+'''
+    webpage_postamble += plot_owner
+    webpage_postamble += '\n</div>'
+    
+    # now write out the webpages:
     imt.webpage.write_full_page(img_dict, out_page, 'Test ImageDict webpage', 
-                                preamble=webpage_preamble, verbose=True, internal=True)
+                                preamble=webpage_preamble, postamble=webpage_postamble, 
+                                verbose=True, internal=True)
     imt.webpage.write_full_page(img_dict, out_page_para, 'Test ImageDict webpage (Parallel version)', 
-                                preamble=webpage_preamble, verbose=True, internal=True)
-
+                                preamble=webpage_preamble, postamble=webpage_postamble, 
+                                verbose=True, internal=True)
 
     # now, finally, produce a large ImageDict:
     print 'Producing a very large ImageDict, as a scalability and speed test'

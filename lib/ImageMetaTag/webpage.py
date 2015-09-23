@@ -20,7 +20,7 @@ import os
 from ImageMetaTag import ImageDict
 
 
-def write_full_page(img_dict, filepath, page_longname, preamble=None, verbose=False, internal=False):
+def write_full_page(img_dict, filepath, page_longname, preamble=None, postamble=None, verbose=False, internal=False):
     '''
     Writes out an ImageDict as a webpage, to a given filepath.
     The file is overwritten.
@@ -59,6 +59,9 @@ def write_full_page(img_dict, filepath, page_longname, preamble=None, verbose=Fa
                        url_separator='|', url_type='int')
 #        # now write out the end, which includes the placeholders for the actual stuff that appears on the page:
         write_js_placeholders(file_obj=out_file, dict_depth=img_dict.dict_depth(), style='horiz dropdowns')           
+    
+        if not postamble is None:
+            out_file.write(postamble)
     
     if verbose:
         print 'File "%s" complete.' % filepath        
