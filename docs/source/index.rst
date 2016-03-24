@@ -3,15 +3,26 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to ImageMetaTag's documentation!
-========================================
+ImageMetaTag - Image metadata tagging and presentation
+======================================================
+
+.. automodule:: ImageMetaTag
+
+ImageMetaTag is released under a BSD 3-Clause License.
+
+Supported image file formats: png
 
 Contents:
 
 .. toctree::
    :maxdepth: 2
 
-
+   savefig
+   db
+   ImageDict
+   webpage
+   test
+   versions
 
 Indices and tables
 ==================
@@ -19,4 +30,5 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
 
