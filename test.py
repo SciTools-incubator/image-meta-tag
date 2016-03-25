@@ -33,6 +33,26 @@ LOGO_PADDING = 5
 # Now, import ImageMetaTag to do things:
 import ImageMetaTag as imt
 
+def get_webdir():
+    'Works out the location to use as webdir'
+    
+    home = os.getenv('HOME')
+    webdir = None
+    
+    dirs_to_check = ['%s/public_html' % home, '%s/Public' % home]
+    for check_dir in dirs_to_check:
+        if os.path.isdir(check_dir):
+            webdir = '%s/ImageMetaTagTest' % check_dir
+            break
+    if not webdir:
+        raise ValueError('Cannot find appropriate web dir from: %s' % dirs_to_check)
+    
+    # make it if it doesn't exist:
+    if not os.path.isdir(webdir):
+        mkdir_p(webdir)
+    
+    return webdir
+    
 def get_user_and_email():
     '''
     guesses the users email address from /etc/aliases.
@@ -276,7 +296,7 @@ def __main__():
     n_random_data = 5
     random_data = make_random_data(n_random_data)
 
-    webdir = '%s/public_html/ImageMetaTagTest' % os.getenv('HOME')
+    webdir = get_webdir()
     os.chdir(webdir)
     # img_savedir is now relative to webdir:
     img_savedir = 'images'
@@ -684,15 +704,15 @@ def __main__():
                                 'Test ImageDict webpage',
                                 preamble=webpage_preamble, postamble=webpage_postamble,
                                 initial_selectors=initial_selectors,
-                                verbose=True, internal=True, only_show_rel_url=True)
+                                verbose=True, internal=False, only_show_rel_url=True)
     imt.webpage.write_full_page(img_dict, out_page_para,
                                 'Test ImageDict webpage (Parallel version)',
                                 preamble=webpage_preamble, postamble=webpage_postamble,
-                                verbose=True, internal=True, only_show_rel_url=False)
+                                verbose=True, internal=False, only_show_rel_url=False)
     imt.webpage.write_full_page(img_dict_multi, out_page_multi,
                                 'Test ImageDict webpage (mutli image version)',
                                 preamble=webpage_preamble, postamble=webpage_postamble,
-                                verbose=True, internal=True, url_type='str')
+                                verbose=True, internal=False, url_type='str')
 
     # now, finally, produce a large ImageDict:
     if not args.no_biggus_dictus:
@@ -803,7 +823,7 @@ def __main__():
         date_start_web = datetime.now()
         out_page_big = '%s/biggus_pageus.html' % img_savedir
         imt.webpage.write_full_page(biggus_dictus_imigus, out_page_big,
-                                    'Test ImageDict webpage', verbose=True, internal=True)
+                                    'Test ImageDict webpage', verbose=True, internal=False)
         print_simple_timer(date_start_web, datetime.now(), 'Large parallel dict webpage')
 
 
