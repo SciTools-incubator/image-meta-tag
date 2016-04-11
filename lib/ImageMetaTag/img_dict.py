@@ -267,8 +267,11 @@ class ImageDict():
                 yield list_element
 
     def list_keys_by_depth(self, devmode=False):
-        'Converts the sets, from keys_by_depth to a list (where they can be ordered and indexed)'
-        keys = self.keys_by_depth(self.dict)
+        '''
+        Converts the sets, from keys_by_depth to a list (where they can be ordered and indexed).
+        This also produces the unique subdirectory locations of all images.
+        '''
+        keys, subdirs = self.keys_by_depth(self.dict)
 
         out_keys = {}
         for level in keys.keys():
@@ -278,22 +281,34 @@ class ImageDict():
             out_keys[level] = sorted(out_keys[level])
 
         self.keys = out_keys
+        self.subdirs = sorted(list(subdirs))
         #return out_keys
 
-    def keys_by_depth(self, in_dict, depth=0, keys=None):
+    def keys_by_depth(self, in_dict, depth=0, keys=None, subdirs=None):
         '''
-        Returns a dictionary of sets, containing the keys at each level of
-        the dictionary (keyed by the level number)
+        Returns:
+        
+        * a dictionary of sets, containing the keys at each level of
+        the dictionary (keyed by the level number).
+        * a set of the subdirectories for the target images
         '''
         if keys is None:
             keys = {}
+            subdirs = set([])
         if not depth in keys:
             keys[depth] = set()
         for key in in_dict:
             keys[depth].add(key)
             if isinstance(in_dict[key], dict):
-                self.keys_by_depth(in_dict[key], depth+1, keys)
-        return keys
+                self.keys_by_depth(in_dict[key], depth+1, keys, subdirs)
+            elif isinstance(in_dict[key], list):
+                # we have a list of images:
+                for img_file in in_dict[key]:
+                    subdirs.add(os.path.split(img_file)[0])
+            elif isinstance(in_dict[key], str):
+                # we have the location of a single image;
+                subdirs.add(os.path.split(in_dict[key])[0])
+        return keys, subdirs
 
     def key_at_depth(self, dct, dpt):
         'returns the keys of a dictionary, at a given depth'
@@ -606,7 +621,7 @@ class ImageDict():
             else:
                 return None
         return sub_dict
-
+    
 
 def readmeta_from_image(img_file, img_format=None):
     '''Reads the metadata added by the ImageMetaTag savefig, from an image file,

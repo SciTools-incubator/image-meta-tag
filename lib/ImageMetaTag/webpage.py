@@ -26,7 +26,7 @@ TODO: set up the dojo scripts/resources in a section for template type files
 .. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks
 '''
 
-import os
+import os, pdb
 from ImageMetaTag import ImageDict
 
 def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=None,
@@ -261,7 +261,10 @@ def write_js(img_dict, file_obj=None, selector_prefix=None, list_prefix=None, fi
     # their final details, and the id values of the key lists that refer to them:
 
 
-    # write out the file names:
+    # write out the file names in two stages, first the subdirectories, then use those
+    # in the filenames..
+    file_obj.write('var sd = %s;\n' % img_dict.subdirs)
+        
     file_obj.write('var file_list = [\n')
     for (item, ind_of_item) in enumerate(key_ind):
         tmp_dict = img_dict.dict
@@ -273,16 +276,20 @@ def write_js(img_dict, file_obj=None, selector_prefix=None, list_prefix=None, fi
             raise ValueError, 'Bottom level of plot dictionary contains more dictionaries!'
         elif isinstance(tmp_dict, str):
             # a string - this content is the plot it's referring to:
-            if item < len(key_ind)-1:
-                file_obj.write('  "%s",\n' % (tmp_dict))
+            img_path_split = os.path.split(tmp_dict)
+            sd_ind = img_dict.subdirs.index(img_path_split[0])
+            if item < len(key_ind) - 1:
+                file_obj.write('  sd[%s] + "/%s",\n' % (sd_ind, img_path_split[1]))
             else:
-                file_obj.write('  "%s"\n' % (tmp_dict))
+                file_obj.write('  sd[%s] + "/%s"' % (sd_ind, img_path_split[1]))
         elif isinstance(tmp_dict, list):
             # a list of plots:
             if len(tmp_dict) > 0:
                 out_list_str = '  ['
                 for list_content in tmp_dict:
-                    out_list_str += '"%s", ' % list_content
+                    img_path_split = os.path.split(list_content)
+                    sd_ind = img_dict.subdirs.index(img_path_split[0])
+                    out_list_str += 'sd[%s] + "%s", ' % (sd_ind, img_path_split[1])
                 out_list_str = out_list_str[0:-2] + ']'
             else:
                 # write out an empty list... not sure how the javascript would interpret that!
