@@ -26,7 +26,7 @@ TODO: set up the dojo scripts/resources in a section for template type files
 .. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks
 '''
 
-import os
+import os, pdb
 from ImageMetaTag import ImageDict
 
 def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=None,
@@ -232,22 +232,22 @@ def write_js(img_dict, file_obj=None, selector_prefix=None, list_prefix=None, fi
                 # this key list only has one thing in it!
                 if level < dict_depth - 1:
                     # and it's not the last key;
-                    file_obj.write('  {id: %s, list: [{id: 0, label: "%s"}]},\n' % (level, key_name))
+                    file_obj.write('{id:%s,list:[{id:0,label:"%s"}]},\n' % (level, key_name))
                 else:
                     # it's also the last key (so not comma!)
-                    file_obj.write('  {id: %s, list: [{id: 0, label: "%s"}]}\n' % (level, key_name))
+                    file_obj.write('{id:%s,list:[{id:0,label:"%s"}]}\n' % (level, key_name))
             elif key_id == 0:
                 # the start of a key list:
-                file_obj.write('  {id: %s, list: [{id: 0, label: "%s"},\n' % (level, key_name))
+                file_obj.write('{id:%s,list:[{id:0,label:"%s"},\n' % (level, key_name))
             elif key_id < len(keys[level]) - 1:
                 # not the last item for this key list:
-                file_obj.write('        {id: %s, label: "%s"},\n' %(key_id, key_name))
+                file_obj.write('{id:%s,label:"%s"},\n' %(key_id, key_name))
             elif level < dict_depth - 1:
                 # the last item for this key list, but it's not the last one:
-                file_obj.write('        {id: %s, label: "%s"}]},\n' %(key_id, key_name))
+                file_obj.write('{id:%s,label:"%s"}]},\n' %(key_id, key_name))
             else:
                 # the last item of the last key list (so no comma!)
-                file_obj.write('        {id: %s, label: "%s"}]}\n' %(key_id, key_name))
+                file_obj.write('{id:%s,label:"%s"}]}\n' %(key_id, key_name))
 
     # and close the plot dictionary var:
     file_obj.write('];\n')
@@ -261,7 +261,10 @@ def write_js(img_dict, file_obj=None, selector_prefix=None, list_prefix=None, fi
     # their final details, and the id values of the key lists that refer to them:
 
 
-    # write out the file names:
+    # write out the file names in two stages, first the subdirectories, then use those
+    # in the filenames..
+    file_obj.write('var sd = %s;\n' % img_dict.subdirs)
+        
     file_obj.write('var file_list = [\n')
     for (item, ind_of_item) in enumerate(key_ind):
         tmp_dict = img_dict.dict
@@ -273,20 +276,24 @@ def write_js(img_dict, file_obj=None, selector_prefix=None, list_prefix=None, fi
             raise ValueError, 'Bottom level of plot dictionary contains more dictionaries!'
         elif isinstance(tmp_dict, str):
             # a string - this content is the plot it's referring to:
-            if item < len(key_ind)-1:
-                file_obj.write('  "%s",\n' % (tmp_dict))
+            img_path_split = os.path.split(tmp_dict)
+            sd_ind = img_dict.subdirs.index(img_path_split[0])
+            if item < len(key_ind) - 1:
+                file_obj.write('sd[%s]+"/%s",\n' % (sd_ind, img_path_split[1]))
             else:
-                file_obj.write('  "%s"\n' % (tmp_dict))
+                file_obj.write('sd[%s]+"/%s"' % (sd_ind, img_path_split[1]))
         elif isinstance(tmp_dict, list):
             # a list of plots:
             if len(tmp_dict) > 0:
-                out_list_str = '  ['
+                out_list_str = '['
                 for list_content in tmp_dict:
-                    out_list_str += '"%s", ' % list_content
+                    img_path_split = os.path.split(list_content)
+                    sd_ind = img_dict.subdirs.index(img_path_split[0])
+                    out_list_str += 'sd[%s]+"%s", ' % (sd_ind, img_path_split[1])
                 out_list_str = out_list_str[0:-2] + ']'
             else:
                 # write out an empty list... not sure how the javascript would interpret that!
-                out_list_str = '  []'
+                out_list_str = '[]'
                 msg = 'Webpage not prepared to handle empty lists - not sure what they mean!'
                 raise NotImplementedError(msg)
             if item < len(key_ind)-1:
@@ -313,20 +320,17 @@ def write_js(img_dict, file_obj=None, selector_prefix=None, list_prefix=None, fi
         elif isinstance(tmp_dict, (str, list)):
             # a string, or list of strings - this content is the plot it's referring to:
             if item < len(key_ind)-1:
-                file_obj.write('  %s,\n' % (ind_of_item))
+                file_obj.write('%s,\n' % (str(ind_of_item).replace(' ', '')))
             else:
-                file_obj.write('  %s\n' % (ind_of_item))
+                file_obj.write('%s\n' % (str(ind_of_item).replace(' ', '')))
         else:
             msg = 'Wrong type of thing (%s) at bottom of the plot dictionary:\n  %s' \
                             % (type(tmp_dict), tmp_dict)
             raise ValueError(msg)
-    file_obj.write(']\n')
+    file_obj.write('];\n')
 
     # close the javascript section:
-    file_obj.write('''
-</script>
-
-''')
+    file_obj.write('</script>')
 
 def write_js_setup(img_dict, file_obj=None, pagename=None, tab_s_name=None,
                    initial_selectors=None,
