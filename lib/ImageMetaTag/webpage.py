@@ -289,7 +289,7 @@ def write_js(img_dict, file_obj=None, selector_prefix=None, list_prefix=None, fi
                 for list_content in tmp_dict:
                     img_path_split = os.path.split(list_content)
                     sd_ind = img_dict.subdirs.index(img_path_split[0])
-                    out_list_str += 'sd[%s]+"%s", ' % (sd_ind, img_path_split[1])
+                    out_list_str += 'sd[%s]+"/%s", ' % (sd_ind, img_path_split[1])
                 out_list_str = out_list_str[0:-2] + ']'
             else:
                 # write out an empty list... not sure how the javascript would interpret that!
