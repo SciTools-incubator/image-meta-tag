@@ -16,7 +16,7 @@ colour palette manipulation to reduce filesizes.
 .. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks
 '''
 
-__version__ = '0.1'
+__version__ = '0.2'
 
 # list fo file formats which are valid for saving metadata to:
 META_IMG_FORMATS = ['png']
