@@ -789,7 +789,6 @@ def simple_dict_filter(simple_dict, tests, raise_key_mismatch=False):
     # the input tests can also contain a tuple that define how multiple
     # images can be grouped together:
     has_complex_test = False
-    first_tuple_passes = False
     if not tests is None:
         for i_test, test in enumerate(tests.keys()):
             if tests[test] is None:
@@ -810,25 +809,29 @@ def simple_dict_filter(simple_dict, tests, raise_key_mismatch=False):
                     # multi-element list:
                     test_is_tuple = [isinstance(x, tuple) for x in tests[test]]
                     if any(test_is_tuple):
+                        
                         has_complex_test = True
 
                         # now loop through all of the tuples within the test:
                         any_tuple_passes = False
                         # this marks whether it is the FIRST element in a tuple (and so the one that
                         # would typically be used for processing a set of images)
+                        first_tuple_passes = False
                         tuple_tests = compress(tests[test], test_is_tuple)
                         for tuple_test in tuple_tests:
                             if simple_dict[test] in tuple_test[1]:
                                 # failed this test, so it counts as a failure:
                                 any_tuple_passes = True
                             # and is this the first element in the tuple:
-                            first_tuple_passes = simple_dict[test] == tuple_test[1][0]
-
+                            if simple_dict[test] == tuple_test[1][0]:
+                                first_tuple_passes = True
+                                
                         # if none of the tuple tests pass, then make a note of that:
                         if not any_tuple_passes:
                             passes[i_test] = False
-                        # and make a note if this wasn't first:
-                        if not first_tuple_passes:
+                            passes_and_first[i_test] = False
+                        elif not first_tuple_passes:
+                            # and make a note if this wasn't first:
                             passes_and_first[i_test] = False
 
                         # also apply a test in the simple case:

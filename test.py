@@ -478,70 +478,77 @@ def __main__():
 
         # now we are filterig one of the levels of the dict (multi_depth) by the multi_keys list:
         if use_multi and first_multi:
+            
             for tuple_test in key_filter[tagorder[multi_depth]]:
                 if isinstance(tuple_test, tuple):
+                    
                     # split the tuple test up into meaningful variable names:
                     group_name = tuple_test[0] # the name, as it will be in img_dict_multi
                     group_values = tuple_test[1] # the contents that will be grouped together
-
-                    # first of all, lookup to see if this combination has already been
-                    # added to img_dict_multi. do this by creating a list of keys to
-                    # lookup within the ImageDict:
-                    img_dict_key_lookup = [img_info[x] for x in tagorder]
-                    img_dict_key_lookup[multi_depth] = group_name
-
-                    if len(img_dict_multi.dict) == 0:
-                        already_in_img_dict_multi = False
-                    else:
-                        if img_dict_multi.return_from_list(img_dict_key_lookup) is None:
+                    
+                    # now check that the image is the first element of this tuple_test:
+                    if img_info[tagorder[multi_depth]] == group_values[0]:
+                        # lookup to see if this combination has already been
+                        # added to img_dict_multi. do this by creating a list of keys to
+                        # lookup within the ImageDict:
+                        img_dict_key_lookup = [img_info[x] for x in tagorder]
+                        img_dict_key_lookup[multi_depth] = group_name
+    
+                        if len(img_dict_multi.dict) == 0:
                             already_in_img_dict_multi = False
                         else:
-                            already_in_img_dict_multi = True
-
-                    if already_in_img_dict_multi:
-                        msg = 'Adding a multi-image that has already been added.'
-                        msg += ' Checks on first_image_multi should prevent that.'
-                        raise ValueError(msg)
-                    else:
-                        # this group hasn't already been added to the img_dict_multi:
-
-                        if group_name in img_dict.keys[multi_depth]:
-                            # the group_name shouldn't be the same as a key that identifies a
-                            # single image. That will cause problems, and will change what is
-                            # presented depening on the order that the img_file, img_info comes
-                            # up in images_and_tags.iteritems()
-                            msg = 'A multi image group has the same key name as a single image'
-                            raise ValueError(msg)
-                        all_img_relpaths = []
-
-                        for this_value in group_values:
-                            # now use the img_dict_key_lookup again,
-                            # only this time looking for this_value
-                            img_dict_key_lookup[multi_depth] = this_value
-                            # and look in the main img_dict as that already has all the images,
-                            # sorted and easily accessible:
-                            all_img_relpaths.append(img_dict.return_from_list(img_dict_key_lookup))
-                            #
-                            # If more complicated processing is required, substitutions or
-                            # fudging values, then this could be done here.
-
-
-                        if multi_req_all and any([x is None for x in all_img_relpaths]):
-                            # we need all images in this list, and one fails, so just pass:
-                            pass
+                            if img_dict_multi.return_from_list(img_dict_key_lookup) is None:
+                                already_in_img_dict_multi = False
+                            else:
+                                already_in_img_dict_multi = True
+    
+                        if already_in_img_dict_multi:
+                            print 'multi image already added!'
+                            print img_dict_key_lookup
+                            
+                            #msg = 'Adding a multi-image that has already been added.'
+                            #msg += ' Checks on first_image_multi should prevent that.'
+                            #raise ValueError(msg)
                         else:
-                            # now create a multi element dict, pretending to be an
-                            # image with the same properties:
-                            tmp_img_info = {}
-                            for tag_name in tagorder:
-                                tmp_img_info[tag_name] = img_info[tag_name]
-                            # with the exception of the one at multi_depth, which is the group_name:
-                            tmp_img_info[tagorder[multi_depth]] = group_name
-
-                            tmp_dict = imt.dict_heirachy_from_list(tmp_img_info,
-                                                                   all_img_relpaths,
-                                                                   tagorder)
-                            img_dict_multi.append(imt.ImageDict(tmp_dict))
+                            # this group hasn't already been added to the img_dict_multi:
+    
+                            if group_name in img_dict.keys[multi_depth]:
+                                # the group_name shouldn't be the same as a key that identifies a
+                                # single image. That will cause problems, and will change what is
+                                # presented depening on the order that the img_file, img_info comes
+                                # up in images_and_tags.iteritems()
+                                msg = 'A multi image group has the same key name as a single image'
+                                raise ValueError(msg)
+                            all_img_relpaths = []
+    
+                            for this_value in group_values:
+                                # now use the img_dict_key_lookup again,
+                                # only this time looking for this_value
+                                img_dict_key_lookup[multi_depth] = this_value
+                                # and look in the main img_dict as that already has all the images,
+                                # sorted and easily accessible:
+                                all_img_relpaths.append(img_dict.return_from_list(img_dict_key_lookup))
+                                #
+                                # If more complicated processing is required, substitutions or
+                                # fudging values, then this could be done here.
+    
+    
+                            if multi_req_all and any([x is None for x in all_img_relpaths]):
+                                # we need all images in this list, and one fails, so just pass:
+                                pass
+                            else:
+                                # now create a multi element dict, pretending to be an
+                                # image with the same properties:
+                                tmp_img_info = {}
+                                for tag_name in tagorder:
+                                    tmp_img_info[tag_name] = img_info[tag_name]
+                                # with the exception of the one at multi_depth, which is the group_name:
+                                tmp_img_info[tagorder[multi_depth]] = group_name
+    
+                                tmp_dict = imt.dict_heirachy_from_list(tmp_img_info,
+                                                                       all_img_relpaths,
+                                                                       tagorder)
+                                img_dict_multi.append(imt.ImageDict(tmp_dict))
 
                 else:
                     # this test is a standard one, not a tuple defining a multi image, so just pass:
@@ -594,68 +601,71 @@ def __main__():
                     group_name = tuple_test[0] # the name, for img_dict_multi
                     group_values = tuple_test[1] # the contents that will be grouped
 
-                    # first of all, lookup to see if this combination has already been
-                    # added to img_dict_multi. do this by creating a list of keys to
-                    # lookup within the ImageDict:
-                    img_dict_key_lookup = [img_info[x] for x in tagorder]
-                    img_dict_key_lookup[multi_depth] = group_name
-
-                    if len(img_dict_multi.dict) == 0:
-                        already_in_img_dict_multi = False
-                    else:
-                        if img_dict_multi.return_from_list(img_dict_key_lookup) is None:
+                    
+                    # now check that the image is the first element of this tuple_test:
+                    if img_info[tagorder[multi_depth]] == group_values[0]:
+                        # first of all, lookup to see if this combination has already been
+                        # added to img_dict_multi. do this by creating a list of keys to
+                        # lookup within the ImageDict:
+                        img_dict_key_lookup = [img_info[x] for x in tagorder]
+                        img_dict_key_lookup[multi_depth] = group_name
+    
+                        if len(img_dict_multi.dict) == 0:
                             already_in_img_dict_multi = False
                         else:
-                            already_in_img_dict_multi = True
-
-                    if already_in_img_dict_multi:
-                        msg = 'Adding a multi-image that has already been added.'
-                        msg = ' Checks on first_image_multishould prevent that.'
-                        raise ValueError(msg)
-                    else:
-                        # this group hasn't already been added to the img_dict_multi:
-
-                        if group_name in img_dict.keys[multi_depth]:
-                            # the group_name shouldn't be the same as a key that identifies
-                            # a single image. That will cause problems, and will change what
-                            # is presented depening on the order that the img_file, img_info
-                            # comes up in images_and_tags.iteritems()
-                            msg = 'A multi image group has the same key name as a single image'
-                            raise ValueError(msg)
-                        all_img_relpaths = []
-
-                        for this_value in group_values:
-
-                            # now produce a set of tags to search teh databse for:
-                            select_tags = {}
-                            for i_tag, tag_name in enumerate(tagorder):
-                                if i_tag == multi_depth:
-                                    select_tags[tag_name] = this_value
-                                else:
-                                    select_tags[tag_name] = img_info[tag_name]
-                            # and look in the main img_dict as that already
-                            # has all the images, sorted and easily accessible:
-                            sel_file_list, _ = imt.db.select_dbcr_by_tags(dbcr, select_tags)
-                            if len(sel_file_list) == 1:
-                                all_img_relpaths.append(sel_file_list[0])
+                            if img_dict_multi.return_from_list(img_dict_key_lookup) is None:
+                                already_in_img_dict_multi = False
                             else:
-                                all_img_relpaths.append(None)
-
-                        if multi_req_all and any([x is None for x in all_img_relpaths]):
-                            # we need all images in this list, and one fails, so just pass:
-                            pass
+                                already_in_img_dict_multi = True
+    
+                        if already_in_img_dict_multi:
+                            msg = 'Adding a multi-image that has already been added.'
+                            msg = ' Checks on first_image_multishould prevent that.'
+                            raise ValueError(msg)
                         else:
-                            # now create a multi element dict, pretending
-                            # to be an image with the same properties:
-                            tmp_img_info = {}
-                            for tag_name in tagorder:
-                                tmp_img_info[tag_name] = img_info[tag_name]
-                            # with the exception of the one at multi_depth, which is the group_name:
-                            tmp_img_info[tagorder[multi_depth]] = group_name
-
-                            tmp_dict = imt.dict_heirachy_from_list(tmp_img_info,
-                                                                   all_img_relpaths, tagorder)
-                            img_dict_multi.append(imt.ImageDict(tmp_dict))
+                            # this group hasn't already been added to the img_dict_multi:
+    
+                            if group_name in img_dict.keys[multi_depth]:
+                                # the group_name shouldn't be the same as a key that identifies
+                                # a single image. That will cause problems, and will change what
+                                # is presented depening on the order that the img_file, img_info
+                                # comes up in images_and_tags.iteritems()
+                                msg = 'A multi image group has the same key name as a single image'
+                                raise ValueError(msg)
+                            all_img_relpaths = []
+    
+                            for this_value in group_values:
+    
+                                # now produce a set of tags to search teh databse for:
+                                select_tags = {}
+                                for i_tag, tag_name in enumerate(tagorder):
+                                    if i_tag == multi_depth:
+                                        select_tags[tag_name] = this_value
+                                    else:
+                                        select_tags[tag_name] = img_info[tag_name]
+                                # and look in the main img_dict as that already
+                                # has all the images, sorted and easily accessible:
+                                sel_file_list, _ = imt.db.select_dbcr_by_tags(dbcr, select_tags)
+                                if len(sel_file_list) == 1:
+                                    all_img_relpaths.append(sel_file_list[0])
+                                else:
+                                    all_img_relpaths.append(None)
+    
+                            if multi_req_all and any([x is None for x in all_img_relpaths]):
+                                # we need all images in this list, and one fails, so just pass:
+                                pass
+                            else:
+                                # now create a multi element dict, pretending
+                                # to be an image with the same properties:
+                                tmp_img_info = {}
+                                for tag_name in tagorder:
+                                    tmp_img_info[tag_name] = img_info[tag_name]
+                                # with the exception of the one at multi_depth, which is the group_name:
+                                tmp_img_info[tagorder[multi_depth]] = group_name
+    
+                                tmp_dict = imt.dict_heirachy_from_list(tmp_img_info,
+                                                                       all_img_relpaths, tagorder)
+                                img_dict_multi.append(imt.ImageDict(tmp_dict))
 
                 else:
                     # this test is a standard one, not a tuple defining a multi image, so just pass:
