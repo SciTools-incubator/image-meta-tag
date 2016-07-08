@@ -358,8 +358,13 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
                 dbcn.commit()
             
             if do_vacuum:
+                if allow_retries:
+                    # need to re-open the db, if we allowed retries:
+                    dbcn, dbcr = open_db_file(db_file)
                 dbcn.execute("VACUUM")
-            dbcn.close()
+                dbcn.close()
+            elif not allow_retries:
+                dbcn.close()
 
 def select_dbfile_by_tags(db_file, select_tags):
     '''selects from a database file the entries that match a dict of field names/acceptable values
