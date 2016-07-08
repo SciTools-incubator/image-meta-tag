@@ -98,7 +98,8 @@ def merge_db_files(main_db_file, add_db_file, delete_add_db=False, delete_added_
     if delete_add_db:
         rmfile(add_db_file)
     elif delete_added_entries:
-        del_plots_from_dbfile(add_db_file, add_filelist, do_vacuum=False)
+        del_plots_from_dbfile(add_db_file, add_filelist, do_vacuum=False,
+                              allow_retries=True, skip_warning=True)
 
 
 def open_or_create_db_file(db_file, img_info, restart_db=False, timeout=DEFAULT_DB_TIMEOUT):
@@ -276,10 +277,18 @@ def process_select_star_from(db_contents, dbcr):
     # we're good, return the data:
     return filename_list, out_dict
 
-def del_plots_from_dbfile(db_file, filenames, do_vacuum=True):
+def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True,
+                          db_timeout=DEFAULT_DB_TIMEOUT, db_attempts=DEFAULT_DB_ATTEMPTS,
+                          skip_warning=False):
     '''deletes a list of files from a database created by :mod:`ImageMetaTag.db`
 
-    do_vacuum - if True, the database will be restructured/cleaned after the delete.
+    do_vacuum - if True, the database will be restructured/cleaned after the delete
+    allow_retries - if True, retries will be allowed if the database is locked
+                    if False there are noretries, but sleep commands try to avoid the need
+    db_timeout - overide default database timeouts, if doing retries
+    db_attempts - overide default number of attempts, if doing retries
+    skip_warning - do not warn if a filename, that has been requested to be deleted, 
+                   does not exist in the database
     '''
 
     if not isinstance(filenames, list):
@@ -293,22 +302,61 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True):
         if not os.path.isfile(db_file) or len(fn_list) == 0:
             pass
         else:
-            # just open the database:
-            dbcn, dbcr = open_db_file(db_file)
-            # delete the contents:
-            for i_fn, fname in enumerate(fn_list):
-                try:
-                    dbcr.execute("DELETE FROM %s WHERE fname=?" % SQLITE_IMG_INFO_TABLE, (fname,))
-                except:
-                    # if this fails, print a warning... need to figure out why this happens
-                    print 'WARNING: unable to delete file entry: "%s", type "%s" from database' \
-                                % (fname, type(fname))
-                # commit every 100 to give other processes a chance:
-                if i_fn % 100 == 0:
-                    dbcn.commit()
-                    time.sleep(1)
-            # commit, and vacuum if required:
-            dbcn.commit()
+            
+            if allow_retries:
+                # split the list of filenames up into appropciately sized chunks, so that concurrent
+                # delete commands each have a chance to complete:
+                # 200 is arbriatily chosen, but seems to work
+                chunk_size = 200
+                for chunk_o_filenames in [fn_list[i:i+chunk_size] for i in xrange(0, len(fn_list), chunk_size)]:
+                    # within each chunk of files, need to open the db, with time out retries etc:
+                    n_tries = 1
+                    wrote_db = False
+                    while not wrote_db and n_tries <= db_attempts:
+                        try:
+                            # open the database
+                            dbcn, dbcr = open_db_file(db_file, timeout=db_timeout)
+                            # go through the file chunk, one by one, and delete:
+                            for fname in chunk_o_filenames:
+                                try:
+                                    dbcr.execute("DELETE FROM %s WHERE fname=?" % SQLITE_IMG_INFO_TABLE, (fname,))
+                                except:
+                                    if not skip_warning:
+                                        # if this fails, print a warning... need to figure out why this happens
+                                        print 'WARNING: unable to delete file entry: "%s", type "%s" from database' \
+                                                    % (fname, type(fname))
+                            dbcn.commit()
+                            # if we got here, then we're good!
+                            wrote_db = True
+                            # finally close (for this chunk)
+                            dbcn.close()
+                        except sqlite3.OperationalError as OpErr:
+                            # main database is locked:
+                            print '%s database timeout deleting from file "%s", %s s' \
+                                            % (dt_now_str(), db_file, n_tries * db_timeout)
+                            n_tries += 1
+                    # if we went through all the attempts then it is time to raise the error:
+                    if n_tries > db_attempts:
+                        raise sqlite3.OperationalError(OpErr.message)
+            else:
+                # just open the database:
+                dbcn, dbcr = open_db_file(db_file)
+                # delete the contents:
+                for i_fn, fname in enumerate(fn_list):
+                    try:
+                        dbcr.execute("DELETE FROM %s WHERE fname=?" % SQLITE_IMG_INFO_TABLE, (fname,))
+                    except:
+                        if not skip_warning:
+                            # if this fails, print a warning... need to figure out why this happens
+                            print 'WARNING: unable to delete file entry: "%s", type "%s" from database' \
+                                        % (fname, type(fname))
+                    # commit every 100 to give other processes a chance:
+                    if i_fn % 100 == 0:
+                        dbcn.commit()
+                        time.sleep(1)
+                # commit, and vacuum if required:
+                dbcn.commit()
+            
             if do_vacuum:
                 dbcn.execute("VACUUM")
             dbcn.close()
