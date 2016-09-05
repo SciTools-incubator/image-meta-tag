@@ -35,10 +35,10 @@ import ImageMetaTag as imt
 
 def get_webdir():
     'Works out the location to use as webdir'
-    
+
     home = os.getenv('HOME')
     webdir = None
-    
+
     dirs_to_check = ['%s/public_html' % home, '%s/Public' % home]
     for check_dir in dirs_to_check:
         if os.path.isdir(check_dir):
@@ -46,13 +46,13 @@ def get_webdir():
             break
     if not webdir:
         raise ValueError('Cannot find appropriate web dir from: %s' % dirs_to_check)
-    
+
     # make it if it doesn't exist:
     if not os.path.isdir(webdir):
         mkdir_p(webdir)
-    
+
     return webdir
-    
+
 def get_user_and_email():
     '''
     guesses the users email address from /etc/aliases.
@@ -155,7 +155,7 @@ def plot_random_data(random_data, i_rand, plot_col, col_name, trims, borders,
                             verbose=imt_verbose,
                             db_file=imt_db, db_timeout=db_timeout,
                             logo_file=LOGO_FILE, logo_width=LOGO_SIZE, logo_padding=LOGO_PADDING)
-                
+
                 # now store those tags
                 images_and_tags[outfile] = img_tags
                 # and check they are the same as those that come from reading
@@ -384,14 +384,38 @@ def __main__():
 
     # we are also going to construct it using data loaded in from the imt_db file, rather
     # than the list and metadata built up by the plotting. Read in by:
+    #
+    # this simply loads ALL of the image metadata:
     db_img_list, db_images_and_tags = imt.db.read_img_info_from_dbfile(imt_db)
-    # verfiy the integrity of the database, relative to the plotting/pickling process:
+    #
+    # now verfiy the integrity of the database, relative to the plotting/pickling process:
     img_list = sorted(images_and_tags.keys())
     db_img_list.sort()
     if not img_list == db_img_list:
         raise ValueError('List of plots differ between database and plotting/pickle versions')
     if not images_and_tags == db_images_and_tags:
         raise ValueError('images_and_tags differ between database and plotting/pickle versions')
+    #
+    # For memory optimisation of large image databases, we want to make sure the dictionary
+    # we get back is as small as possible in memory:
+    #
+    # these are the tags that we actually need to work with for the web page:
+    required_tags = ['number of rolls', 'plot type', 'plot color',
+                     'image trim', 'border', 'image compression']
+    db_img_list, db_images_and_tags = imt.db.read_img_info_from_dbfile(imt_db,
+                                                                       required_tags=required_tags)
+    # and this will return a list of all of the unique metadata strings,
+    # as there is a lot of duplication, and the returned db_images_and_tags will
+    # reference the strings witin that list, rahter than contain the duplicated strings:
+    tag_strings = []
+    db_img_list, db_images_and_tags = imt.db.read_img_info_from_dbfile(imt_db,
+                                                                       tag_strings=tag_strings)
+    # and this both filters out un-needed tags and uses the tag_strings list as a reference
+    tag_strings = []
+    db_img_list, db_images_and_tags = imt.db.read_img_info_from_dbfile(imt_db,
+                                                                       required_tags=required_tags,
+                                                                       tag_strings=tag_strings)
+
     # now make the next page:
     n_proc = 4
     skip_key_relist = True
@@ -416,7 +440,7 @@ def __main__():
     img_dict_para = pool_out[0]
     for i_dict in range(1, len(pool_out)):
         img_dict_para.append(pool_out[i_dict])
-        
+
     if skip_key_relist:
         # if we skipped relisting the keys (as it's faster to do that)
         # then make sure we list them at the end:
@@ -478,14 +502,12 @@ def __main__():
 
         # now we are filterig one of the levels of the dict (multi_depth) by the multi_keys list:
         if use_multi and first_multi:
-            
             for tuple_test in key_filter[tagorder[multi_depth]]:
                 if isinstance(tuple_test, tuple):
-                    
                     # split the tuple test up into meaningful variable names:
                     group_name = tuple_test[0] # the name, as it will be in img_dict_multi
                     group_values = tuple_test[1] # the contents that will be grouped together
-                    
+
                     # now check that the image is the first element of this tuple_test:
                     if img_info[tagorder[multi_depth]] == group_values[0]:
                         # lookup to see if this combination has already been
@@ -493,7 +515,7 @@ def __main__():
                         # lookup within the ImageDict:
                         img_dict_key_lookup = [img_info[x] for x in tagorder]
                         img_dict_key_lookup[multi_depth] = group_name
-    
+
                         if len(img_dict_multi.dict) == 0:
                             already_in_img_dict_multi = False
                         else:
@@ -501,17 +523,16 @@ def __main__():
                                 already_in_img_dict_multi = False
                             else:
                                 already_in_img_dict_multi = True
-    
+
                         if already_in_img_dict_multi:
                             print 'multi image already added!'
                             print img_dict_key_lookup
-                            
                             #msg = 'Adding a multi-image that has already been added.'
                             #msg += ' Checks on first_image_multi should prevent that.'
                             #raise ValueError(msg)
                         else:
                             # this group hasn't already been added to the img_dict_multi:
-    
+
                             if group_name in img_dict.keys[multi_depth]:
                                 # the group_name shouldn't be the same as a key that identifies a
                                 # single image. That will cause problems, and will change what is
@@ -520,7 +541,7 @@ def __main__():
                                 msg = 'A multi image group has the same key name as a single image'
                                 raise ValueError(msg)
                             all_img_relpaths = []
-    
+
                             for this_value in group_values:
                                 # now use the img_dict_key_lookup again,
                                 # only this time looking for this_value
@@ -531,8 +552,8 @@ def __main__():
                                 #
                                 # If more complicated processing is required, substitutions or
                                 # fudging values, then this could be done here.
-    
-    
+
+
                             if multi_req_all and any([x is None for x in all_img_relpaths]):
                                 # we need all images in this list, and one fails, so just pass:
                                 pass
@@ -544,7 +565,7 @@ def __main__():
                                     tmp_img_info[tag_name] = img_info[tag_name]
                                 # with the exception of the one at multi_depth, which is the group_name:
                                 tmp_img_info[tagorder[multi_depth]] = group_name
-    
+
                                 tmp_dict = imt.dict_heirachy_from_list(tmp_img_info,
                                                                        all_img_relpaths,
                                                                        tagorder)
@@ -601,7 +622,6 @@ def __main__():
                     group_name = tuple_test[0] # the name, for img_dict_multi
                     group_values = tuple_test[1] # the contents that will be grouped
 
-                    
                     # now check that the image is the first element of this tuple_test:
                     if img_info[tagorder[multi_depth]] == group_values[0]:
                         # first of all, lookup to see if this combination has already been
@@ -609,7 +629,7 @@ def __main__():
                         # lookup within the ImageDict:
                         img_dict_key_lookup = [img_info[x] for x in tagorder]
                         img_dict_key_lookup[multi_depth] = group_name
-    
+
                         if len(img_dict_multi.dict) == 0:
                             already_in_img_dict_multi = False
                         else:
@@ -617,14 +637,14 @@ def __main__():
                                 already_in_img_dict_multi = False
                             else:
                                 already_in_img_dict_multi = True
-    
+
                         if already_in_img_dict_multi:
                             msg = 'Adding a multi-image that has already been added.'
                             msg = ' Checks on first_image_multishould prevent that.'
                             raise ValueError(msg)
                         else:
                             # this group hasn't already been added to the img_dict_multi:
-    
+
                             if group_name in img_dict.keys[multi_depth]:
                                 # the group_name shouldn't be the same as a key that identifies
                                 # a single image. That will cause problems, and will change what
@@ -633,9 +653,9 @@ def __main__():
                                 msg = 'A multi image group has the same key name as a single image'
                                 raise ValueError(msg)
                             all_img_relpaths = []
-    
+
                             for this_value in group_values:
-    
+
                                 # now produce a set of tags to search teh databse for:
                                 select_tags = {}
                                 for i_tag, tag_name in enumerate(tagorder):
@@ -650,7 +670,7 @@ def __main__():
                                     all_img_relpaths.append(sel_file_list[0])
                                 else:
                                     all_img_relpaths.append(None)
-    
+
                             if multi_req_all and any([x is None for x in all_img_relpaths]):
                                 # we need all images in this list, and one fails, so just pass:
                                 pass
@@ -662,7 +682,7 @@ def __main__():
                                     tmp_img_info[tag_name] = img_info[tag_name]
                                 # with the exception of the one at multi_depth, which is the group_name:
                                 tmp_img_info[tagorder[multi_depth]] = group_name
-    
+
                                 tmp_dict = imt.dict_heirachy_from_list(tmp_img_info,
                                                                        all_img_relpaths, tagorder)
                                 img_dict_multi.append(imt.ImageDict(tmp_dict))

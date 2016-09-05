@@ -203,13 +203,26 @@ def write_img_to_open_db(dbcr, filename, img_info, add_strict=False, attempt_rep
     finally:
         pass
 
-def read_img_info_from_dbfile(db_file, db_timeout=DEFAULT_DB_TIMEOUT,
+def read_img_info_from_dbfile(db_file, required_tags=None, tag_strings=None,
+                              db_timeout=DEFAULT_DB_TIMEOUT,
                               db_attempts=DEFAULT_DB_ATTEMPTS):
-    '''reads in the database written by write_img_to_dbfile
+    '''
+    reads in the database written by write_img_to_dbfile
+
+    options:
+     * required_tags - a list of image tags to return, and to fail if not all are present
+     * tag_strings - an input list that will be populated with the unique values of the image tags.
 
     returns:
-     * a list of filenames (payloads for the :class:`ImageMetaTag.ImageDict` )
+     * a list of filenames (payloads for the :class:`ImageMetaTag.ImageDict` class )
      * a dictionary, by filename, containing a dictionary of the image metadata as *tagname: value*
+
+    If tag_strings is not supplied, then the returned dictionary will contain a large number of
+    duplicated strings, which can be an inefficient used of memory with large databases.
+    If tag_strings is supplied, it will be populated with a unique list of strings used as tags 
+    and the dictionary will only contain references to this list. This can reduce memory usage
+    considerably, both for the dictionary itself but also of an :class:`ImageMetaTag.ImageDict`
+    produced with the dictionary.
 
     Will return None, None if there is a problem.
     '''
@@ -226,7 +239,9 @@ def read_img_info_from_dbfile(db_file, db_timeout=DEFAULT_DB_TIMEOUT,
                     # open the connection and the cursor:
                     dbcn, dbcr = open_db_file(db_file, timeout=db_timeout)
                     # read it:
-                    filename_list, out_dict = read_img_info_from_dbcursor(dbcr)
+                    filename_list, out_dict = read_img_info_from_dbcursor(dbcr,
+                                                                required_tags=required_tags,
+                                                                tag_strings=tag_strings)
                     # close connection:
                     dbcn.close()
                     read_db = True
@@ -243,19 +258,32 @@ def read_img_info_from_dbfile(db_file, db_timeout=DEFAULT_DB_TIMEOUT,
             dbcn.close()
             return filename_list, out_dict
 
-def read_img_info_from_dbcursor(dbcr):
-    'does the reading for read_img_info_from_dbfile (so it can be used in other routines too)'
+def read_img_info_from_dbcursor(dbcr, required_tags=None, tag_strings=None):
+    '''
+    does the reading for read_img_info_from_dbfile (so it can be used in other routines too)
+
+    Options
+     * required_tags - a list of image tags to return, and to fail if not all are present
+     * tag_strings - an input list that will be populated with the unique values of the image tags
+    '''
     # read in the data from the database:
     db_contents = dbcr.execute('select * from %s' % SQLITE_IMG_INFO_TABLE).fetchall()
     # and convert that to a useful dict/list combo:
-    filename_list, out_dict = process_select_star_from(db_contents, dbcr)
+    filename_list, out_dict = process_select_star_from(db_contents, dbcr,
+                                                       required_tags=required_tags,
+                                                       tag_strings=tag_strings)
     return filename_list, out_dict
 
-def process_select_star_from(db_contents, dbcr):
-    '''converts the output from a select * from ....  command into a standard output format
+def process_select_star_from(db_contents, dbcr, required_tags=None, tag_strings=None):
+    '''
+    converts the output from a select * from ....  command into a standard output format
+
+    Options
+     * required_tags - a list of image tags to return, and to fail if not all are present
+     * tag_strings - an input list that will be populated with the unique values of the image tags
 
     returns as :func:`ImageMetaTag.db.read_img_info_from_dbfile`, but filtered accord to the select.
-     * a list of filenames (payloads for the ImageDict)
+     * a list of filenames (payloads for the :class:`ImageMetaTag.ImageDict`)
      * a dictionary, by filename, containing a dictionary of the image metadata as *tagname: value*
     '''
     # get the name of the fields from the cursor descripton:
@@ -263,31 +291,115 @@ def process_select_star_from(db_contents, dbcr):
     filename_list = []
     # get the name of the fields from the cursor descripton:
     field_names = [r[0] for r in dbcr.description]
-    # now iterate and make a dictionary to return:
-    for row in db_contents:
-        fname = str(row[0])
-        filename_list.append(fname)
-        img_info = {}
-        for tag_name, tag_val in zip(field_names[1:], row[1:]):
-            img_info[db_name_to_info_key(tag_name)] = str(tag_val)
-        out_dict[fname] = img_info
-        # return None, None if the contents are empty:
-        if len(filename_list) == 0 and len(out_dict) == 0:
-            return None, None
+
+    # the required_tags input is a list of tag names (as strings):
+    if required_tags is not None:
+        if not isinstance(required_tags, list):
+            raise ValueError('Input required_tags should be a list of strings')
+        else:
+            for test_str in required_tags:
+                if not isinstance(test_str, str):
+                    raise ValueError('Input required_tags should be a list of strings')
+
+    if tag_strings is not None:
+        if not isinstance(tag_strings, list):
+            raise ValueError('Input tag_strings should be a list')
+
+    # now iterate and make a dictionary to return,
+    # with the tests outside the loops so they're not tested for every row and element:
+    if required_tags is None and tag_strings is None:
+        for row in db_contents:
+            fname = str(row[0])
+            filename_list.append(fname)
+            img_info = {}
+            for tag_name, tag_val in zip(field_names[1:], row[1:]):
+                img_info[db_name_to_info_key(tag_name)] = str(tag_val)
+            out_dict[fname] = img_info
+            # return None, None if the contents are empty:
+            if len(filename_list) == 0 and len(out_dict) == 0:
+                return None, None
+    elif required_tags is not None and tag_strings is None:
+        for row in db_contents:
+            fname = str(row[0])
+            filename_list.append(fname)
+            img_info = {}
+            for tag_name, tag_val in zip(field_names[1:], row[1:]):
+                tag_name_full = db_name_to_info_key(tag_name)
+                if tag_name_full in required_tags:
+                    img_info[tag_name_full] = str(tag_val)
+            if len(img_info) != len(required_tags):
+                raise ValueError('Database entry does not contain all of the required_tags')
+
+            out_dict[fname] = img_info
+            # return None, None if the contents are empty:
+            if len(filename_list) == 0 and len(out_dict) == 0:
+                return None, None
+    elif required_tags is None and tag_strings is not None:
+        # we want all tags, but we want them as referneces to a common list:
+        for row in db_contents:
+            fname = str(row[0])
+            filename_list.append(fname)
+            img_info = {}
+            for tag_name, tag_val in zip(field_names[1:], row[1:]):
+                str_tag_val = str(tag_val)
+                try:
+                    # loacate the tag_string in the list:
+                    tag_index = tag_strings.index(str_tag_val)
+                    # and refernece it:
+                    img_info[db_name_to_info_key(tag_name)] = tag_strings[tag_index]
+                except ValueError:
+                    # tag not yet in the tag_strings list, so
+                    # add the new string onto the end:
+                    tag_strings.append(str_tag_val)
+                    # and reference it:
+                    img_info[db_name_to_info_key(tag_name)] = tag_strings[-1]
+            out_dict[fname] = img_info
+            # return None, None if the contents are empty:
+            if len(filename_list) == 0 and len(out_dict) == 0:
+                return None, None
+    else:
+        # we want to filter the tags, and we want them as referneces to a common list:
+        for row in db_contents:
+            fname = str(row[0])
+            filename_list.append(fname)
+            img_info = {}
+            for tag_name, tag_val in zip(field_names[1:], row[1:]):
+                # test to see if the tag name is required:
+                tag_name_full = db_name_to_info_key(tag_name)
+                if tag_name_full in required_tags:
+                    str_tag_val = str(tag_val)
+                    try:
+                        # loacate the tag_string in the list:
+                        tag_index = tag_strings.index(str_tag_val)
+                        # and refernece it:
+                        img_info[tag_name_full] = tag_strings[tag_index]
+                    except ValueError:
+                        # tag not yet in the tag_strings list, so
+                        # add the new string onto the end:
+                        tag_strings.append(str_tag_val)
+                        # and reference it:
+                        img_info[tag_name_full] = tag_strings[-1]
+            out_dict[fname] = img_info
+            # return None, None if the contents are empty:
+            if len(filename_list) == 0 and len(out_dict) == 0:
+                return None, None
+
+
     # we're good, return the data:
     return filename_list, out_dict
 
 def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True,
                           db_timeout=DEFAULT_DB_TIMEOUT, db_attempts=DEFAULT_DB_ATTEMPTS,
                           skip_warning=False):
-    '''deletes a list of files from a database created by :mod:`ImageMetaTag.db`
+    '''
+    deletes a list of files from a database created by :mod:`ImageMetaTag.db`
 
     do_vacuum - if True, the database will be restructured/cleaned after the delete
     allow_retries - if True, retries will be allowed if the database is locked
                     if False there are noretries, but sleep commands try to avoid the need
     db_timeout - overide default database timeouts, if doing retries
     db_attempts - overide default number of attempts, if doing retries
-    skip_warning - do not warn if a filename, that has been requested to be deleted, 
+    skip_warning - do not warn if a filename, that has been requested to be deleted,
                    does not exist in the database
     '''
 
@@ -302,7 +414,6 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
         if not os.path.isfile(db_file) or len(fn_list) == 0:
             pass
         else:
-            
             if allow_retries:
                 # split the list of filenames up into appropciately sized chunks, so that concurrent
                 # delete commands each have a chance to complete:
