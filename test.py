@@ -338,7 +338,18 @@ def __main__():
     plot_owner = 'Created by %s' % get_user_and_email()
 
     images_and_tags = {}
-
+    
+    # what are the full names of those tags:
+    tag_full_names = {'number of rolls': 'Number of rolls',
+                      'plot type': 'Plot type',
+                      'plot color': 'Plot color',
+                      'image trim': 'Image trimmed?',
+                      'border': 'Image border',
+                      'image compression': 'Image compression',
+                      }
+    # if we want to present these, have them as an ordered list, by tagorder:
+    tagorder_full = [tag_full_names[x] for x in tagorder]
+    
     metadata_pickle = '%s/meta.p' % img_savedir
     if not (args.skip_plotting and os.path.isfile(metadata_pickle) and os.path.isfile(imt_db)):
         if os.path.isfile(imt_db):
@@ -374,9 +385,10 @@ def __main__():
         tmp_dict = imt.dict_heirachy_from_list(img_info, img_file, tagorder)
         if not img_dict:
             img_dict = imt.ImageDict(tmp_dict, selector_animated=selector_animated,
-                                     animation_direction=animation_direction)
+                                     animation_direction=animation_direction,
+                                     level_names=tagorder_full)
         else:
-            img_dict.append(imt.ImageDict(tmp_dict))
+            img_dict.append(imt.ImageDict(tmp_dict, level_names=tagorder_full))
 
     # this test the same thing, but created in parallel. This isn't needed for a small
     # set of plots like this example, but the code appears to scale well.
@@ -748,7 +760,8 @@ def __main__():
                                 'Test ImageDict webpage',
                                 preamble=webpage_preamble, postamble=webpage_postamble,
                                 initial_selectors=initial_selectors,
-                                verbose=True, internal=False, only_show_rel_url=True)
+                                verbose=True, internal=False, only_show_rel_url=True,
+                                show_selector_names=True)
     imt.webpage.write_full_page(img_dict, out_page_para,
                                 'Test ImageDict webpage (Parallel version)',
                                 preamble=webpage_preamble, postamble=webpage_postamble,

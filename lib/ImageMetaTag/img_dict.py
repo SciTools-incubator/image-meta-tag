@@ -28,8 +28,8 @@ class ImageDict():
     of metadata items, use :func:`ImageMetaTag.dict_heirachy_from_list`
 
     Options:
-    * full_name_mapping - a dictionary mapping each tagname to a full name/description of what \
-                          the metadata item means.
+    * level_names - a list of the tagnames, in full, giving a name/description of what \
+                    the metadata item means. Ordered by level of the input dict.
     * selector_widths - a list of html strings giving the widths of each selector in the \
                         output webpage.
     * selector_animated - an integer indicating which selector on the output webpage is \
@@ -38,9 +38,19 @@ class ImageDict():
                              moves backwards.
 
     '''
-    def __init__(self, input_dict, full_name_mapping=None,
+    def __init__(self, input_dict, level_names=None,
                  selector_widths=None, selector_animated=None,
                  animation_direction=None):
+
+        if level_names is None:
+            self.level_names = None
+        else:
+            if not isinstance(level_names, list):
+                msg = 'A mapping of key names to full names has been supplied, but it is not a list'
+                raise ValueError(msg)
+            else:
+                self.level_names = level_names
+                
         # set the dictionary:
         self.dict = input_dict
         # now list the keys, at each level, as lists. These can be reorderd by the calling routine,
@@ -48,15 +58,9 @@ class ImageDict():
         self.list_keys_by_depth()
 
         dict_depth = self.dict_depth()
-
-        if full_name_mapping is None:
-            self.full_name_mapping = None
-        else:
-            if not isinstance(full_name_mapping, dict):
-                msg = 'A mapping of key names to full names has been supplied, but it is not a dict'
-                raise ValueError(msg)
-            else:
-                self.full_name_mapping = full_name_mapping
+        if self.level_names is not None:
+            if dict_depth != len(self.level_names):
+                raise ValueError('Mismatch between depth of dictionary and level_names')
 
         # this controls the width of the selector, on the resultant webpage:
         if selector_widths is None:
@@ -119,8 +123,13 @@ class ImageDict():
         if not skip_key_relist:
             self.list_keys_by_depth(devmode=devmode)
 
-        # TODO: if there is a full_name_mapping, check that the
-        # new item hasn't added something to it
+        # if there is a level_names, check that the
+        # new dict is consistent:
+        if isinstance(new_dict, ImageDict) and self.level_names is not None:
+            if new_dict.level_names is not None:
+                if self.level_names != new_dict.level_names:
+                    raise ValueError('Attempting to append two ImageDict objects with'
+                                     ' different level_names')
 
     def dict_union(self, in_dict, new_dict):
         'produces the union of a dictionary of dictionaries'
@@ -177,9 +186,6 @@ class ImageDict():
         # relist the keys:
         if not skip_key_relist:
             self.list_keys_by_depth()
-
-        # TODO: if there is a full_name_mapping, check that the
-        # new item hasn't removed something to it
 
     def dict_remove(self, in_dict, rm_dict):
         '''
@@ -275,10 +281,8 @@ class ImageDict():
 
         out_keys = {}
         for level in keys.keys():
-            # convert to a list:
-            out_keys[level] = list(keys[level])
-            # and sort HERE:
-            out_keys[level] = sorted(out_keys[level])
+            # convert to a sorted list:
+            out_keys[level] = sorted(list(keys[level]))
 
         self.keys = out_keys
         self.subdirs = sorted(list(subdirs))
