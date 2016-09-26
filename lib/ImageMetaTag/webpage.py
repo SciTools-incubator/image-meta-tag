@@ -50,7 +50,7 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
     * internal - If True, internal copies of the dojo Javascript API and css files will be used.
     * initial_selectors - A list of initial values for the selectors, to be passed into \
                           :func:`ImageMetaTag.webpage.write_js_setup`.
-    * show_selector_names - switches on diplsaying the selector full names defined by the 
+    * show_selector_names - switches on diplsaying the selector full names defined by the \
                             :class:`ImageMetaTag.ImageDict`.full_name_mapping
     * url_type - determines the type of URL at the bottom of the ImageMetaTag section. Can be \
                  'int' or 'str'.
@@ -87,7 +87,7 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
                        initial_selectors=initial_selectors, pagename=page_filename,
                        url_separator='|', url_type=url_type)
         # now write out the end, which includes the placeholders for the actual stuff that appears on the page:
-        # (if show_selector_names is False, then the input level_names list is empty):          
+        # (if show_selector_names is False, then the input level_names list is empty):
         write_js_placeholders(file_obj=out_file, dict_depth=img_dict.dict_depth(),
                               style='horiz dropdowns', 
                               level_names=show_selector_names * img_dict.level_names)
@@ -928,7 +928,8 @@ def write_js_placeholders(file_obj=None, dict_depth=None, selector_prefix=None,
                         those people viewing the webpage!)
     * style - In future, it would be great to write out different types of webpages. For now \
               they are always horizontal dropdown menus: 'horiz dropdowns'.
-    * level_names - a list of full names, for the selectors, of length dict_depth.
+    * level_names - a list of full names, for the selectors, of length dict_depth. This does \
+                    not work well if :class:`ImageMetaTag.ImageDict`.selector_widths is not set.
     '''
 
     if selector_prefix is None:
@@ -937,7 +938,7 @@ def write_js_placeholders(file_obj=None, dict_depth=None, selector_prefix=None,
     apply_level_names = False
     if level_names:
         if not isinstance(level_names, list):
-            raise ValueError('level_names needs to be a list, of length dict_depth')
+            raise ValueError('level_names needs to be a list of length dict_depth')
         if len(level_names) != dict_depth:
             raise ValueError('level_names needs to be a list, of length dict_depth')
         apply_level_names = True
@@ -956,17 +957,31 @@ def write_js_placeholders(file_obj=None, dict_depth=None, selector_prefix=None,
         
         # for each level of depth in the plot dictionary, add a span to hold the selector:
         if apply_level_names:
-            # TODO: this is almost therem but the layout isn't quite right!
-            for lev in range(dict_depth):
-                file_obj.write('   <span>{}<br>'.format(level_names[lev]))
-                file_obj.write('     <span id="%s%s">&nbsp;</span>'% (selector_prefix, lev))
-                file_obj.write('   </span>')
+            # if we want labelled selectors, then write out
+            # a table, with pairs of label, selector, in columns:
+            file_obj.write('''
+   <table border=0 cellspacing=3 cellpadding=0>
+     <tr>
+''')
+            for level in range(dict_depth):
+                file_obj.write('''       <td>{}</td>'''.format(level_names[level]))
+            file_obj.write('''
+     </tr>
+     <tr>
+''')
+            for level in range(dict_depth):
+                file_obj.write('     <td><span id="%s%s">&nbsp;</span></td>'% (selector_prefix, level))
+            file_obj.write('''
+     </tr>
+   </table>
+''')
         else:
+            # simply a set of spans, in a line:
             for lev in range(dict_depth):
                 file_obj.write('''
    <span id="%s%s">&nbsp;</span>''' % (selector_prefix, lev))
 
-        # now add somewhere for the image to go:
+        # now add somewhere for the animator buttons and the image(s):
         file_obj.write('''
    <br>
    <span id="animator1">&nbsp;</span>
