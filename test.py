@@ -585,7 +585,8 @@ def __main__():
                                 tmp_img_info = {}
                                 for tag_name in tagorder:
                                     tmp_img_info[tag_name] = img_info[tag_name]
-                                # with the exception of the one at multi_depth, which is the group_name:
+                                # with the exception of the one at multi_depth,
+                                # which is the group_name:
                                 tmp_img_info[tagorder[multi_depth]] = group_name
 
                                 tmp_dict = imt.dict_heirachy_from_list(tmp_img_info,
@@ -702,7 +703,8 @@ def __main__():
                                 tmp_img_info = {}
                                 for tag_name in tagorder:
                                     tmp_img_info[tag_name] = img_info[tag_name]
-                                # with the exception of the one at multi_depth, which is the group_name:
+                                # with the exception of the one at multi_depth,
+                                # which is the group_name:
                                 tmp_img_info[tagorder[multi_depth]] = group_name
 
                                 tmp_dict = imt.dict_heirachy_from_list(tmp_img_info,

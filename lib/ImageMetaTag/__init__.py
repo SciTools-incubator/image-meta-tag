@@ -1,6 +1,7 @@
 '''
 ImageMetaTag is a python package built around a wrapper for
-`savefig <http://matplotlib.org/api/pyplot_api.html?highlight=savefig#matplotlib.pyplot.savefig>`_ in
+`savefig <http://matplotlib.org/api/pyplot_api.html?highlight=savefig#matplotlib.pyplot.savefig>`
+in
 `matplotlib <http://matplotlib.org/>`_, which adds metadata tags to supported image file formats.
 
 Once the images have been tagged, it can also be used to manage an
@@ -29,4 +30,4 @@ from ImageMetaTag.savefig import savefig, image_file_postproc
 from ImageMetaTag.img_dict import ImageDict, readmeta_from_image, dict_heirachy_from_list, \
                                   dict_split, simple_dict_filter, check_for_required_keys
 # we want all of the functions in webpage and db, as a separate level
-import webpage, db
+import ImageMetaTag.webpage, ImageMetaTag.db
