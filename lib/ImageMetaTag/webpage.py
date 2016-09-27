@@ -1,5 +1,5 @@
 '''
-Sub-module containing functions to write out an ImageDict to a webpage.
+Sub-module containing functions to write out an :class:`ImageMetaTag.ImageDict` to a webpage.
 
 This can either be done using write_full_page, to produce a page with just a set of
 selectors to browse the ImageDict, or the different components can be added to a
@@ -31,10 +31,10 @@ from ImageMetaTag import ImageDict
 
 def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=None,
                     preamble=None, postamble=None, internal=False,
-                    initial_selectors=None,
+                    initial_selectors=None, show_selector_names=False,
                     url_type='int', only_show_rel_url=False, verbose=False):
     '''
-    Writes out an ImageDict as a webpage, to a given file location.
+    Writes out an :class:`ImageMetaTag.ImageDict` as a webpage, to a given file location.
     The file is overwritten.
 
     Currently only able to write out a page with horizontal dropdown menus, but other
@@ -50,6 +50,8 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
     * internal - If True, internal copies of the dojo Javascript API and css files will be used.
     * initial_selectors - A list of initial values for the selectors, to be passed into \
                           :func:`ImageMetaTag.webpage.write_js_setup`.
+    * show_selector_names - switches on diplsaying the selector full names defined by the \
+                            :class:`ImageMetaTag.ImageDict`.full_name_mapping
     * url_type - determines the type of URL at the bottom of the ImageMetaTag section. Can be \
                  'int' or 'str'.
     * only_show_rel_url - If True, the wepage will only show relative urls in is link section.
@@ -84,9 +86,12 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
                        file_list_name=file_list_name,
                        initial_selectors=initial_selectors, pagename=page_filename,
                        url_separator='|', url_type=url_type)
-        # now write out the end, which includes the placeholders for the actual stuff that appears on the page:
+        # now write out the end, which includes the placeholders for the actual
+        # stuff that appears on the page:
+        # (if show_selector_names is False, then the input level_names list is empty):
         write_js_placeholders(file_obj=out_file, dict_depth=img_dict.dict_depth(),
-                              style='horiz dropdowns')
+                              style='horiz dropdowns',
+                              level_names=show_selector_names * img_dict.level_names)
 
         if not postamble is None:
             out_file.write(postamble)
@@ -179,7 +184,7 @@ def write_js(img_dict, file_obj=None, selector_prefix=None, list_prefix=None, fi
              only_show_rel_url=False, devmode=False):
     '''
     Writes an ImageDict to a file object, as a set of javascript variables.
-    
+
     * selector_prefix - prefix for the variable names of the selectors (these are visible to \
                         those people viewing the webpage!)
     * list_prefix - prefix to the javascript variable names to hold the lists indices that map \
@@ -264,7 +269,7 @@ def write_js(img_dict, file_obj=None, selector_prefix=None, list_prefix=None, fi
     # write out the file names in two stages, first the subdirectories, then use those
     # in the filenames..
     file_obj.write('var sd = %s;\n' % img_dict.subdirs)
-        
+
     file_obj.write('var file_list = [\n')
     for (item, ind_of_item) in enumerate(key_ind):
         tmp_dict = img_dict.dict
@@ -913,7 +918,7 @@ function step_selected_id(incr){
 ''')
 
 def write_js_placeholders(file_obj=None, dict_depth=None, selector_prefix=None,
-                          style='horiz dropdowns'):
+                          style='horiz dropdowns', level_names=False):
     '''
     Write the final details (which is the stuff that actually gets read!) at the end of a tab
     containing stdout stuff to a file object.
@@ -924,10 +929,22 @@ def write_js_placeholders(file_obj=None, dict_depth=None, selector_prefix=None,
                         those people viewing the webpage!)
     * style - In future, it would be great to write out different types of webpages. For now \
               they are always horizontal dropdown menus: 'horiz dropdowns'.
+    * level_names - a list of full names, for the selectors, of length dict_depth. This does \
+                    not work well if :class:`ImageMetaTag.ImageDict`.selector_widths is not set.
     '''
 
     if selector_prefix is None:
         selector_prefix, _junk1, _junk2 = write_js_setup_defaults()
+
+    apply_level_names = False
+    if level_names:
+        if not isinstance(level_names, list):
+            raise ValueError('level_names needs to be a list of length dict_depth')
+        if len(level_names) != dict_depth:
+            raise ValueError('level_names needs to be a list, of length dict_depth')
+        apply_level_names = True
+    else:
+        apply_level_names = False
 
     if style == 'horiz dropdowns':
         file_obj.write('''
@@ -936,15 +953,36 @@ def write_js_placeholders(file_obj=None, dict_depth=None, selector_prefix=None,
  <tr>
   <td>
    <font size=3>
-   <br>''')
+   <br>
+''')
 
         # for each level of depth in the plot dictionary, add a span to hold the selector:
-        # TODO: include the selector full_name_mapping
-        for lev in range(dict_depth):
+        if apply_level_names:
+            # if we want labelled selectors, then write out
+            # a table, with pairs of label, selector, in columns:
             file_obj.write('''
+   <table border=0 cellspacing=3 cellpadding=0>
+     <tr>
+''')
+            for level in range(dict_depth):
+                file_obj.write('''       <td>{}</td>'''.format(level_names[level]))
+            file_obj.write('''
+     </tr>
+     <tr>
+''')
+            for level in range(dict_depth):
+                file_obj.write('     <td><span id="%s%s">&nbsp;</span></td>' % (selector_prefix, level))
+            file_obj.write('''
+     </tr>
+   </table>
+''')
+        else:
+            # simply a set of spans, in a line:
+            for lev in range(dict_depth):
+                file_obj.write('''
    <span id="%s%s">&nbsp;</span>''' % (selector_prefix, lev))
 
-        # now add somewhere for the image to go:
+        # now add somewhere for the animator buttons and the image(s):
         file_obj.write('''
    <br>
    <span id="animator1">&nbsp;</span>

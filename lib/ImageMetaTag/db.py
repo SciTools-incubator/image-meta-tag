@@ -433,7 +433,8 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
                                     dbcr.execute("DELETE FROM %s WHERE fname=?" % SQLITE_IMG_INFO_TABLE, (fname,))
                                 except:
                                     if not skip_warning:
-                                        # if this fails, print a warning... need to figure out why this happens
+                                        # if this fails, print a warning...
+                                        # need to figure out why this happens
                                         print 'WARNING: unable to delete file entry: "%s", type "%s" from database' \
                                                     % (fname, type(fname))
                             dbcn.commit()
@@ -458,7 +459,8 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
                         dbcr.execute("DELETE FROM %s WHERE fname=?" % SQLITE_IMG_INFO_TABLE, (fname,))
                     except:
                         if not skip_warning:
-                            # if this fails, print a warning... need to figure out why this happens
+                            # if this fails, print a warning...
+                            # need to figure out why this happens
                             print 'WARNING: unable to delete file entry: "%s", type "%s" from database' \
                                         % (fname, type(fname))
                     # commit every 100 to give other processes a chance:

@@ -337,8 +337,28 @@ def __main__():
     sort_methods = ['numeric', 'sort', 'sort', 'sort', borders_str, 'sort']
     plot_owner = 'Created by %s' % get_user_and_email()
 
-    images_and_tags = {}
+    # what are the full names of those tags:
+    tag_full_names = {'number of rolls': 'Number of rolls',
+                      'plot type': 'Plot type',
+                      'plot color': 'Plot color',
+                      'image trim': 'Image trimmed?',
+                      'border': 'Image border',
+                      'image compression': 'Image compression',
+                     }
+    sel_widths = {'number of rolls': '180px',
+                  'plot type': '120px',
+                  'plot color': '200px',
+                  'image trim': '150px',
+                  'border': '100px',
+                  'image compression': '200px',
+                 }
+    # if we want to present these, have them as an ordered list, by tagorder:
+    sel_names_list = [tag_full_names[x] for x in tagorder]
+    sel_widths_list = [sel_widths[x] for x in tagorder]
 
+    # this will become a large dict of images and their metadata:
+    images_and_tags = {}
+    
     metadata_pickle = '%s/meta.p' % img_savedir
     if not (args.skip_plotting and os.path.isfile(metadata_pickle) and os.path.isfile(imt_db)):
         if os.path.isfile(imt_db):
@@ -374,9 +394,11 @@ def __main__():
         tmp_dict = imt.dict_heirachy_from_list(img_info, img_file, tagorder)
         if not img_dict:
             img_dict = imt.ImageDict(tmp_dict, selector_animated=selector_animated,
-                                     animation_direction=animation_direction)
+                                     animation_direction=animation_direction,
+                                     level_names=sel_names_list,
+                                     selector_widths=sel_widths_list)
         else:
-            img_dict.append(imt.ImageDict(tmp_dict))
+            img_dict.append(imt.ImageDict(tmp_dict, level_names=sel_names_list))
 
     # this test the same thing, but created in parallel. This isn't needed for a small
     # set of plots like this example, but the code appears to scale well.
@@ -563,7 +585,8 @@ def __main__():
                                 tmp_img_info = {}
                                 for tag_name in tagorder:
                                     tmp_img_info[tag_name] = img_info[tag_name]
-                                # with the exception of the one at multi_depth, which is the group_name:
+                                # with the exception of the one at multi_depth,
+                                # which is the group_name:
                                 tmp_img_info[tagorder[multi_depth]] = group_name
 
                                 tmp_dict = imt.dict_heirachy_from_list(tmp_img_info,
@@ -680,7 +703,8 @@ def __main__():
                                 tmp_img_info = {}
                                 for tag_name in tagorder:
                                     tmp_img_info[tag_name] = img_info[tag_name]
-                                # with the exception of the one at multi_depth, which is the group_name:
+                                # with the exception of the one at multi_depth,
+                                # which is the group_name:
                                 tmp_img_info[tagorder[multi_depth]] = group_name
 
                                 tmp_dict = imt.dict_heirachy_from_list(tmp_img_info,
@@ -748,7 +772,8 @@ def __main__():
                                 'Test ImageDict webpage',
                                 preamble=webpage_preamble, postamble=webpage_postamble,
                                 initial_selectors=initial_selectors,
-                                verbose=True, internal=False, only_show_rel_url=True)
+                                verbose=True, internal=False, only_show_rel_url=True,
+                                show_selector_names=True)
     imt.webpage.write_full_page(img_dict, out_page_para,
                                 'Test ImageDict webpage (Parallel version)',
                                 preamble=webpage_preamble, postamble=webpage_postamble,
