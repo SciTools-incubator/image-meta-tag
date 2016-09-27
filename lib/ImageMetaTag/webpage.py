@@ -88,10 +88,13 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
                        url_separator='|', url_type=url_type)
         # now write out the end, which includes the placeholders for the actual
         # stuff that appears on the page:
-        # (if show_selector_names is False, then the input level_names list is empty):
+        if show_selector_names:
+            level_names = img_dict.level_names
+        else:
+            level_names = False
         write_js_placeholders(file_obj=out_file, dict_depth=img_dict.dict_depth(),
                               style='horiz dropdowns',
-                              level_names=show_selector_names * img_dict.level_names)
+                              level_names=level_names)
 
         if not postamble is None:
             out_file.write(postamble)
