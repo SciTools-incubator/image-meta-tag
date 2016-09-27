@@ -9,8 +9,10 @@ them and creates a web page.
 
 from datetime import datetime
 DATE_START = datetime.now()
-# and a format to print to stdour:
+# and a detailed format to print to stdout:
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S"
+# and a more friendly format for the output webpages:
+DATE_FORMAT_WWW = "%Y-%m-%d"
 
 import os, shutil, sys, errno, argparse, copy, random, pdb
 
@@ -358,7 +360,7 @@ def __main__():
 
     # this will become a large dict of images and their metadata:
     images_and_tags = {}
-    
+
     metadata_pickle = '%s/meta.p' % img_savedir
     if not (args.skip_plotting and os.path.isfile(metadata_pickle) and os.path.isfile(imt_db)):
         if os.path.isfile(imt_db):
@@ -747,14 +749,11 @@ def __main__():
 
     # add a post-amble, including some server side
     #includes for last-modified, and a disk usage string.
-    webpage_postamble = r'''
-<div id='postamble'>
-  This page was last modified
-  <!--#config timefmt="%H:%M, %d %B %Y" -->
-  <!--#echo var="LAST_MODIFIED"--><br>
-'''
-    webpage_postamble += plot_owner
-    webpage_postamble += '\n</div>'
+    webpage_postamble = r'''<div id='postamble'>
+  This page was last modified {}<br>
+  {}
+</div>
+'''.format(datetime.now().strftime(DATE_FORMAT_WWW), plot_owner)
 
     # for the test page, we want to start the page on an image that isn't the first one:
     for i_key in range(len(img_dict.keys)):
