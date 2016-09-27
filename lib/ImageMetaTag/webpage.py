@@ -955,8 +955,7 @@ def write_js_placeholders(file_obj=None, dict_depth=None, selector_prefix=None,
 <table border=0 cellspacing=0 cellpadding=0 width=99% align=center>
  <tr>
   <td>
-   <font size=3>
-   <br>''')
+   <font size=3>''')
         # for each level of depth in the plot dictionary, add a span to hold the selector:
         if apply_level_names:
             # if we want labelled selectors, then write out
@@ -975,16 +974,15 @@ def write_js_placeholders(file_obj=None, dict_depth=None, selector_prefix=None,
                 file_obj.write('<td><span id="%s%s">&nbsp;</span></td>' % (selector_prefix, level))
             file_obj.write('''
      </tr>
-   </table>
-''')
+   </table>''')
         else:
             # simply a set of spans, in a line:
             for lev in range(dict_depth):
                 file_obj.write('''
    <span id="%s%s">&nbsp;</span>''' % (selector_prefix, lev))
-
+            file_obj.write('\n   <br>')
         # now add somewhere for the animator buttons and the image(s):
-        file_obj.write('''   <br>
+        file_obj.write('''
    <span id="animator1">&nbsp;</span>
    <span id="animator2">&nbsp;</span>
    <br>
