@@ -948,14 +948,12 @@ def write_js_placeholders(file_obj=None, dict_depth=None, selector_prefix=None,
 
     if style == 'horiz dropdowns':
         file_obj.write('''
-<!-- Now f"or some placeholders for the scripts to put content -->
+<!-- Now some placeholders for the scripts to put content -->
 <table border=0 cellspacing=0 cellpadding=0 width=99% align=center>
  <tr>
   <td>
    <font size=3>
-   <br>
-''')
-
+   <br>''')
         # for each level of depth in the plot dictionary, add a span to hold the selector:
         if apply_level_names:
             # if we want labelled selectors, then write out
@@ -963,15 +961,15 @@ def write_js_placeholders(file_obj=None, dict_depth=None, selector_prefix=None,
             file_obj.write('''
    <table border=0 cellspacing=3 cellpadding=0>
      <tr>
-''')
+       ''')
             for level in range(dict_depth):
-                file_obj.write('''       <td>{}</td>'''.format(level_names[level]))
+                file_obj.write('<td>{}</td>'.format(level_names[level]))
             file_obj.write('''
      </tr>
      <tr>
-''')
+       ''')
             for level in range(dict_depth):
-                file_obj.write('     <td><span id="%s%s">&nbsp;</span></td>' % (selector_prefix, level))
+                file_obj.write('<td><span id="%s%s">&nbsp;</span></td>' % (selector_prefix, level))
             file_obj.write('''
      </tr>
    </table>
@@ -983,8 +981,7 @@ def write_js_placeholders(file_obj=None, dict_depth=None, selector_prefix=None,
    <span id="%s%s">&nbsp;</span>''' % (selector_prefix, lev))
 
         # now add somewhere for the animator buttons and the image(s):
-        file_obj.write('''
-   <br>
+        file_obj.write('''   <br>
    <span id="animator1">&nbsp;</span>
    <span id="animator2">&nbsp;</span>
    <br>
