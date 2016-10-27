@@ -394,12 +394,13 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
     '''
     deletes a list of files from a database created by :mod:`ImageMetaTag.db`
 
-    do_vacuum - if True, the database will be restructured/cleaned after the delete
-    allow_retries - if True, retries will be allowed if the database is locked
-                    if False there are noretries, but sleep commands try to avoid the need
-    db_timeout - overide default database timeouts, if doing retries
-    db_attempts - overide default number of attempts, if doing retries
-    skip_warning - do not warn if a filename, that has been requested to be deleted,
+    * do_vacuum - if True, the database will be restructured/cleaned after the delete
+    * allow_retries - if True, retries will be allowed if the database is locked.\
+                    If False there are no retries, but sleep commands try to avoid the need\
+                    when doing a large number of deletes.
+    * db_timeout - overide default database timeouts, if doing retries
+    * db_attempts - overide default number of attempts, if doing retries
+    * skip_warning - do not warn if a filename, that has been requested to be deleted,\
                    does not exist in the database
     '''
 

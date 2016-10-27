@@ -6,13 +6,13 @@ ImageMetaTag.ImageDict
 .. automodule:: ImageMetaTag.ImageDict
 
 The ImageDict Class
--------------
+-------------------
 
 .. autoclass:: ImageMetaTag.ImageDict
    :members:
 
 Functions useful in preparing ImageDicts
----------------------
+----------------------------------------
 
 .. autofunction:: ImageMetaTag.readmeta_from_image
 .. autofunction:: ImageMetaTag.dict_heirachy_from_list

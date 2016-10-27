@@ -444,12 +444,13 @@
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    deletes a list of files from a database created by :mod:`ImageMetaTag.db`</span>
 
-<span class="sd">    do_vacuum - if True, the database will be restructured/cleaned after the delete</span>
-<span class="sd">    allow_retries - if True, retries will be allowed if the database is locked</span>
-<span class="sd">                    if False there are noretries, but sleep commands try to avoid the need</span>
-<span class="sd">    db_timeout - overide default database timeouts, if doing retries</span>
-<span class="sd">    db_attempts - overide default number of attempts, if doing retries</span>
-<span class="sd">    skip_warning - do not warn if a filename, that has been requested to be deleted,</span>
+<span class="sd">    * do_vacuum - if True, the database will be restructured/cleaned after the delete</span>
+<span class="sd">    * allow_retries - if True, retries will be allowed if the database is locked.\</span>
+<span class="sd">                    If False there are no retries, but sleep commands try to avoid the need\</span>
+<span class="sd">                    when doing a large number of deletes.</span>
+<span class="sd">    * db_timeout - overide default database timeouts, if doing retries</span>
+<span class="sd">    * db_attempts - overide default number of attempts, if doing retries</span>
+<span class="sd">    * skip_warning - do not warn if a filename, that has been requested to be deleted,\</span>
 <span class="sd">                   does not exist in the database</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 

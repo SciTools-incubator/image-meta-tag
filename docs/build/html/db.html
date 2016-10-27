@@ -100,15 +100,13 @@ produced with the dictionary.</p>
 <dt id="ImageMetaTag.db.del_plots_from_dbfile">
 <tt class="descclassname">ImageMetaTag.db.</tt><tt class="descname">del_plots_from_dbfile</tt><big>(</big><em>db_file</em>, <em>filenames</em>, <em>do_vacuum=True</em>, <em>allow_retries=True</em>, <em>db_timeout=6</em>, <em>db_attempts=20</em>, <em>skip_warning=False</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/db.html#del_plots_from_dbfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.del_plots_from_dbfile" title="Permalink to this definition">¶</a></dt>
 <dd><p>deletes a list of files from a database created by <a class="reference internal" href="#module-ImageMetaTag.db" title="ImageMetaTag.db"><tt class="xref py py-mod docutils literal"><span class="pre">ImageMetaTag.db</span></tt></a></p>
-<p>do_vacuum - if True, the database will be restructured/cleaned after the delete
-allow_retries - if True, retries will be allowed if the database is locked</p>
-<blockquote>
-<div>if False there are noretries, but sleep commands try to avoid the need</div></blockquote>
-<p>db_timeout - overide default database timeouts, if doing retries
-db_attempts - overide default number of attempts, if doing retries
-skip_warning - do not warn if a filename, that has been requested to be deleted,</p>
-<blockquote>
-<div>does not exist in the database</div></blockquote>
+<ul class="simple">
+<li>do_vacuum - if True, the database will be restructured/cleaned after the delete</li>
+<li>allow_retries - if True, retries will be allowed if the database is locked.                    If False there are no retries, but sleep commands try to avoid the need                    when doing a large number of deletes.</li>
+<li>db_timeout - overide default database timeouts, if doing retries</li>
+<li>db_attempts - overide default number of attempts, if doing retries</li>
+<li>skip_warning - do not warn if a filename, that has been requested to be deleted,                   does not exist in the database</li>
+</ul>
 </dd></dl>
 
 <dl class="function">
