@@ -8,7 +8,7 @@ ImageMetaTag - Image metadata tagging and presentation
 
 .. automodule:: ImageMetaTag
 
-ImageMetaTag is released under a BSD 3-Clause License.
+ImageMetaTag is released under a BSD 3-Clause License. WhooHoo!
 
 Supported image file formats: png
 
