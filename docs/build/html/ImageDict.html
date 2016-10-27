@@ -152,10 +152,9 @@ so needs cleaning up afterwards.</p>
 <tt class="descname">keys_by_depth</tt><big>(</big><em>in_dict</em>, <em>depth=0</em>, <em>keys=None</em>, <em>subdirs=None</em><big>)</big><a class="headerlink" href="#ImageMetaTag.ImageDict.keys_by_depth" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns:</p>
 <ul class="simple">
-<li>a dictionary of sets, containing the keys at each level of</li>
+<li>a dictionary of sets, containing the keys at each level of          the dictionary (keyed by the level number).</li>
+<li>a set of the subdirectories for the target images</li>
 </ul>
-<p>the dictionary (keyed by the level number).
-* a set of the subdirectories for the target images</p>
 </dd></dl>
 
 <dl class="method">
@@ -273,13 +272,8 @@ in_dict - the dictionary to split</p>
 <dd><p>Tests the contents of a simple, un-heirachical dict (properties an image) against
 a set of tests.</p>
 <p>An example set of tests:
-tests = {&#8216;number of rolls&#8217;: [&#8216;6 simulated rolls&#8217;, &#8216;216 simulated rolls&#8217;, &#8216;1296 simulated rolls&#8217;],</p>
-<blockquote>
-<div>&#8216;plot color&#8217;: None,
-&#8216;image compression&#8217;: None,
-&#8216;plot type&#8217;: [&#8216;Histogram&#8217;, (&#8216;All&#8217;, [&#8216;Histogram&#8217;, &#8216;Line plots&#8217;])],
-&#8216;image trim&#8217;: None}</div></blockquote>
-<p>Here, the &#8216;number of rolls&#8217; is restricted to a simple list.</p>
+tests = {&#8216;number of rolls&#8217;: [&#8216;6 simulated rolls&#8217;, &#8216;216 simulated rolls&#8217;, &#8216;1296 simulated rolls&#8217;],             &#8216;plot color&#8217;: None,             &#8216;image compression&#8217;: None,             &#8216;plot type&#8217;: [&#8216;Histogram&#8217;, (&#8216;All&#8217;, [&#8216;Histogram&#8217;, &#8216;Line plots&#8217;])],             &#8216;image trim&#8217;: None}
+Here, the &#8216;number of rolls&#8217; is restricted to a simple list.</p>
 <p>The plot type is filtered according to &#8216;Histogram&#8217;, and there is also a second element that
 contains both &#8216;Histogram and &#8216;Line plots&#8217; which are to be presented together.</p>
 <p>The other image characteristics are not filtered.</p>

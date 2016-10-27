@@ -36,7 +36,6 @@ class ImageDict():
                           to be animated.
     * animation_dicrection - +1 indicates the animation moves forwards, -1 indicates it \
                              moves backwards.
-
     '''
     def __init__(self, input_dict, level_names=None,
                  selector_widths=None, selector_animated=None,
@@ -292,8 +291,8 @@ class ImageDict():
         '''
         Returns:
         
-        * a dictionary of sets, containing the keys at each level of
-        the dictionary (keyed by the level number).
+        * a dictionary of sets, containing the keys at each level of\
+          the dictionary (keyed by the level number).
         * a set of the subdirectories for the target images
         '''
         if keys is None:
@@ -757,10 +756,10 @@ def simple_dict_filter(simple_dict, tests, raise_key_mismatch=False):
     a set of tests.
 
     An example set of tests:
-    tests = {'number of rolls': ['6 simulated rolls', '216 simulated rolls', '1296 simulated rolls'],
-             'plot color': None,
-             'image compression': None,
-             'plot type': ['Histogram', ('All', ['Histogram', 'Line plots'])],
+    tests = {'number of rolls': ['6 simulated rolls', '216 simulated rolls', '1296 simulated rolls'],\
+             'plot color': None,\
+             'image compression': None,\
+             'plot type': ['Histogram', ('All', ['Histogram', 'Line plots'])],\
              'image trim': None}
     Here, the 'number of rolls' is restricted to a simple list.
 

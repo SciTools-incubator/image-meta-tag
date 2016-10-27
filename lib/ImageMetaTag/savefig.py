@@ -127,7 +127,8 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
 def image_file_postproc(filename, outfile=None, img_converter=0, do_trim=False, trim_border=0,
                         logo_file=None, logo_width=40, logo_padding=0, logo_pos=0,
                         do_thumb=False, img_tags=None, verbose=False):
-    '''Image post-processing for :func:`ImageMetaTag.savefig`.
+    '''
+    Does the image post-processing for :func:`ImageMetaTag.savefig`.
 
     Arguments: filename the name of the image file to process
 
