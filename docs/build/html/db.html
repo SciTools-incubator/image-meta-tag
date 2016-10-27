@@ -1,0 +1,312 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ImageMetaTag.db &mdash; ImageMetaTag 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ImageMetaTag 0.2 documentation" href="index.html" />
+    <link rel="next" title="ImageMetaTag.ImageDict" href="ImageDict.html" />
+    <link rel="prev" title="ImageMetaTag.savefig" href="savefig.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ImageDict.html" title="ImageMetaTag.ImageDict"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="savefig.html" title="ImageMetaTag.savefig"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">ImageMetaTag 0.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-ImageMetaTag.db">
+<span id="imagemetatag-db"></span><h1>ImageMetaTag.db<a class="headerlink" href="#module-ImageMetaTag.db" title="Permalink to this headline">¶</a></h1>
+<p>Module containing a set of functions to create/write to/read
+and maintain an sqlite3 database of image files.</p>
+<div class="section" id="commonly-used-functions">
+<h2>Commonly used functions<a class="headerlink" href="#commonly-used-functions" title="Permalink to this headline">¶</a></h2>
+<p>For most use cases, the following functions provide the required functionality to use the database:</p>
+<dl class="function">
+<dt id="ImageMetaTag.db.write_img_to_dbfile">
+<tt class="descclassname">ImageMetaTag.db.</tt><tt class="descname">write_img_to_dbfile</tt><big>(</big><em>db_file</em>, <em>filename</em>, <em>img_info</em>, <em>add_strict=False</em>, <em>timeout=6</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/db.html#write_img_to_dbfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.write_img_to_dbfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes an entry to a database file containing the filename and image info.</p>
+<p>If the database file does not exist, it will be created.</p>
+<p>The img_info should be a dictionary containing a number of  tag_name: value   pairs.</p>
+<p>The timeout is in seconds.</p>
+<p>This is commonly used in <a class="reference internal" href="savefig.html#ImageMetaTag.savefig" title="ImageMetaTag.savefig"><tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.savefig()</span></tt></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ImageMetaTag.db.read_img_info_from_dbfile">
+<tt class="descclassname">ImageMetaTag.db.</tt><tt class="descname">read_img_info_from_dbfile</tt><big>(</big><em>db_file</em>, <em>required_tags=None</em>, <em>tag_strings=None</em>, <em>db_timeout=6</em>, <em>db_attempts=20</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/db.html#read_img_info_from_dbfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.read_img_info_from_dbfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>reads in the database written by write_img_to_dbfile</p>
+<dl class="docutils">
+<dt>options:</dt>
+<dd><ul class="first last simple">
+<li>required_tags - a list of image tags to return, and to fail if not all are present</li>
+<li>tag_strings - an input list that will be populated with the unique values of the image tags.</li>
+</ul>
+</dd>
+<dt>returns:</dt>
+<dd><ul class="first last simple">
+<li>a list of filenames (payloads for the <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a> class )</li>
+<li>a dictionary, by filename, containing a dictionary of the image metadata as <em>tagname: value</em></li>
+</ul>
+</dd>
+</dl>
+<p>If tag_strings is not supplied, then the returned dictionary will contain a large number of
+duplicated strings, which can be an inefficient used of memory with large databases.
+If tag_strings is supplied, it will be populated with a unique list of strings used as tags 
+and the dictionary will only contain references to this list. This can reduce memory usage
+considerably, both for the dictionary itself but also of an <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a>
+produced with the dictionary.</p>
+<p>Will return None, None if there is a problem.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ImageMetaTag.db.del_plots_from_dbfile">
+<tt class="descclassname">ImageMetaTag.db.</tt><tt class="descname">del_plots_from_dbfile</tt><big>(</big><em>db_file</em>, <em>filenames</em>, <em>do_vacuum=True</em>, <em>allow_retries=True</em>, <em>db_timeout=6</em>, <em>db_attempts=20</em>, <em>skip_warning=False</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/db.html#del_plots_from_dbfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.del_plots_from_dbfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>deletes a list of files from a database created by <a class="reference internal" href="#module-ImageMetaTag.db" title="ImageMetaTag.db"><tt class="xref py py-mod docutils literal"><span class="pre">ImageMetaTag.db</span></tt></a></p>
+<p>do_vacuum - if True, the database will be restructured/cleaned after the delete
+allow_retries - if True, retries will be allowed if the database is locked</p>
+<blockquote>
+<div>if False there are noretries, but sleep commands try to avoid the need</div></blockquote>
+<p>db_timeout - overide default database timeouts, if doing retries
+db_attempts - overide default number of attempts, if doing retries
+skip_warning - do not warn if a filename, that has been requested to be deleted,</p>
+<blockquote>
+<div>does not exist in the database</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="ImageMetaTag.db.select_dbfile_by_tags">
+<tt class="descclassname">ImageMetaTag.db.</tt><tt class="descname">select_dbfile_by_tags</tt><big>(</big><em>db_file</em>, <em>select_tags</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/db.html#select_dbfile_by_tags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.select_dbfile_by_tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>selects from a database file the entries that match a dict of field names/acceptable values
+Returns the output, processed by <a class="reference internal" href="#ImageMetaTag.db.process_select_star_from" title="ImageMetaTag.db.process_select_star_from"><tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.db.process_select_star_from()</span></tt></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="functions-for-opening-creating-db-files">
+<h2>Functions for opening/creating db files<a class="headerlink" href="#functions-for-opening-creating-db-files" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="ImageMetaTag.db.open_or_create_db_file">
+<tt class="descclassname">ImageMetaTag.db.</tt><tt class="descname">open_or_create_db_file</tt><big>(</big><em>db_file</em>, <em>img_info</em>, <em>restart_db=False</em>, <em>timeout=6</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/db.html#open_or_create_db_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.open_or_create_db_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Opens a database file and sets up initial tables, then returns the connection and cursor.
+Setting the restart_db option deletes the current db file and starts again:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ImageMetaTag.db.open_db_file">
+<tt class="descclassname">ImageMetaTag.db.</tt><tt class="descname">open_db_file</tt><big>(</big><em>db_file</em>, <em>timeout=6</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/db.html#open_db_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.open_db_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Just opens an existing db_file, but we could do more extensive retries here:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ImageMetaTag.db.read_db_file_to_mem">
+<tt class="descclassname">ImageMetaTag.db.</tt><tt class="descname">read_db_file_to_mem</tt><big>(</big><em>db_file</em>, <em>timeout=6</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/db.html#read_db_file_to_mem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.read_db_file_to_mem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Opens a pre-existing database file into a copy held in memory. This can be accessed much
+faster when doing extenstive work (a lot of select operations, for instance).</p>
+<p>There is a time cost in doing this; it takes a few seconds to read in a large database,
+so it is only worth doing when doing a lot of operations.</p>
+<p>Tests on selects on a large-ish database (250k rows) suggested it was worth doing
+for &gt; 100 selects.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="functions-for-working-with-open-databases">
+<h2>Functions for working with open databases<a class="headerlink" href="#functions-for-working-with-open-databases" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="ImageMetaTag.db.write_img_to_open_db">
+<tt class="descclassname">ImageMetaTag.db.</tt><tt class="descname">write_img_to_open_db</tt><big>(</big><em>dbcr</em>, <em>filename</em>, <em>img_info</em>, <em>add_strict=False</em>, <em>attempt_replace=False</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/db.html#write_img_to_open_db"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.write_img_to_open_db" title="Permalink to this definition">¶</a></dt>
+<dd><p>Does the work for write_img_to_dbfile to add an image to the open database</p>
+<ul class="simple">
+<li>add_strict: if True then it will report a ValueError if you                   try and include fields that aren&#8217;t defined in the table</li>
+<li>attempt_replace: if True, then it will attempt to replace a database                   entry if the image is already present. Otherwise it will ignore it.</li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="ImageMetaTag.db.read_img_info_from_dbcursor">
+<tt class="descclassname">ImageMetaTag.db.</tt><tt class="descname">read_img_info_from_dbcursor</tt><big>(</big><em>dbcr</em>, <em>required_tags=None</em>, <em>tag_strings=None</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/db.html#read_img_info_from_dbcursor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.read_img_info_from_dbcursor" title="Permalink to this definition">¶</a></dt>
+<dd><p>does the reading for read_img_info_from_dbfile (so it can be used in other routines too)</p>
+<dl class="docutils">
+<dt>Options</dt>
+<dd><ul class="first last simple">
+<li>required_tags - a list of image tags to return, and to fail if not all are present</li>
+<li>tag_strings - an input list that will be populated with the unique values of the image tags</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="ImageMetaTag.db.select_dbcr_by_tags">
+<tt class="descclassname">ImageMetaTag.db.</tt><tt class="descname">select_dbcr_by_tags</tt><big>(</big><em>dbcr</em>, <em>select_tags</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/db.html#select_dbcr_by_tags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.select_dbcr_by_tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Selects from an open database cursor the entries that match a dict of field
+names &amp; acceptable values.</p>
+<p>Returns the output, processed by <a class="reference internal" href="#ImageMetaTag.db.process_select_star_from" title="ImageMetaTag.db.process_select_star_from"><tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.db.process_select_star_from()</span></tt></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="internal-functions">
+<h2>Internal functions<a class="headerlink" href="#internal-functions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="ImageMetaTag.db.db_name_to_info_key">
+<tt class="descclassname">ImageMetaTag.db.</tt><tt class="descname">db_name_to_info_key</tt><big>(</big><em>in_str</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/db.html#db_name_to_info_key"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.db_name_to_info_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>inverse of info_key_to_db_name</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ImageMetaTag.db.info_key_to_db_name">
+<tt class="descclassname">ImageMetaTag.db.</tt><tt class="descname">info_key_to_db_name</tt><big>(</big><em>in_str</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/db.html#info_key_to_db_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.info_key_to_db_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>consistently convert a name in the img_info dict to something to be used in the database</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ImageMetaTag.db.process_select_star_from">
+<tt class="descclassname">ImageMetaTag.db.</tt><tt class="descname">process_select_star_from</tt><big>(</big><em>db_contents</em>, <em>dbcr</em>, <em>required_tags=None</em>, <em>tag_strings=None</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/db.html#process_select_star_from"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.process_select_star_from" title="Permalink to this definition">¶</a></dt>
+<dd><p>converts the output from a select * from ....  command into a standard output format</p>
+<dl class="docutils">
+<dt>Options</dt>
+<dd><ul class="first last simple">
+<li>required_tags - a list of image tags to return, and to fail if not all are present</li>
+<li>tag_strings - an input list that will be populated with the unique values of the image tags</li>
+</ul>
+</dd>
+<dt>returns as <a class="reference internal" href="#ImageMetaTag.db.read_img_info_from_dbfile" title="ImageMetaTag.db.read_img_info_from_dbfile"><tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.db.read_img_info_from_dbfile()</span></tt></a>, but filtered accord to the select.</dt>
+<dd><ul class="first last simple">
+<li>a list of filenames (payloads for the <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a>)</li>
+<li>a dictionary, by filename, containing a dictionary of the image metadata as <em>tagname: value</em></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="utility-functions">
+<h2>Utility functions<a class="headerlink" href="#utility-functions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="ImageMetaTag.db.scan_dir_for_db">
+<tt class="descclassname">ImageMetaTag.db.</tt><tt class="descname">scan_dir_for_db</tt><big>(</big><em>basedir</em>, <em>db_file</em>, <em>img_tag_req=None</em>, <em>subdir_excl_list=None</em>, <em>known_file_tags=None</em>, <em>verbose=False</em>, <em>no_file_ext=False</em>, <em>return_timings=False</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/db.html#scan_dir_for_db"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.scan_dir_for_db" title="Permalink to this definition">¶</a></dt>
+<dd><p>A useful utility that scans a dir for images that can go into a database.
+This should only be used to build a database from a directroy of tagged images that
+did not previously use a database. For optimal performance, build the database as the
+plots are created.</p>
+<ul class="simple">
+<li>img_tag_req - a list of tag names that are to be applied/created</li>
+<li>subdir_excl_list - a list of subdirectories that don&#8217;t need to be scanned</li>
+<li>no_file_ext - logical to include, or not, the file extension in the filenames                     saved to the database</li>
+<li>known_file_tags - if supplied, this is a dict (keyed by filename entry),                         containing a dict of tags already known                         (so you don;t need to read them from the files themselves).</li>
+<li>verbose - verbose output</li>
+</ul>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ImageMetaTag.db</a><ul>
+<li><a class="reference internal" href="#commonly-used-functions">Commonly used functions</a></li>
+<li><a class="reference internal" href="#functions-for-opening-creating-db-files">Functions for opening/creating db files</a></li>
+<li><a class="reference internal" href="#functions-for-working-with-open-databases">Functions for working with open databases</a></li>
+<li><a class="reference internal" href="#internal-functions">Internal functions</a></li>
+<li><a class="reference internal" href="#utility-functions">Utility functions</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="savefig.html"
+                        title="previous chapter">ImageMetaTag.savefig</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ImageDict.html"
+                        title="next chapter">ImageMetaTag.ImageDict</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/db.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ImageDict.html" title="ImageMetaTag.ImageDict"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="savefig.html" title="ImageMetaTag.savefig"
+             >previous</a> |</li>
+        <li><a href="index.html">ImageMetaTag 0.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Malcolm Brooks.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>
