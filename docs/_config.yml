@@ -1,0 +1,1 @@
+include: [docs/build/html/_modules/, docs/build/html/_sources, docs/build/html/_static]
