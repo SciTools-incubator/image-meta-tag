@@ -7,3 +7,5 @@ As the image metadata tagging process involves reading the image using the Image
 ImageMetaTag is released under a BSD 3-Clause License.
 
 Supported image file formats: png
+
+Documentation is available via [GitHub Pages](http://scitools-incubator.github.io/image-meta-tag/build/html/index.html "ImageMetaTag Documentation on GitHub Pages")
