@@ -8,7 +8,7 @@
     
     <title>ImageMetaTag.db &mdash; ImageMetaTag 0.2 documentation</title>
     
-    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -40,7 +40,27 @@
           <li><a href="../index.html" >Module code</a> &raquo;</li>
           <li><a href="../ImageMetaTag.html" accesskey="U">ImageMetaTag</a> &raquo;</li> 
       </ul>
-    </div>  
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
 
     <div class="document">
       <div class="documentwrapper">
@@ -49,7 +69,7 @@
             
   <h1>Source code for ImageMetaTag.db</h1><div class="highlight"><pre>
 <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">Module containing a set of functions to create/write to/read</span>
+<span class="sd">This module contains a set of functions to create/write to/read</span>
 <span class="sd">and maintain an sqlite3 database of image files.</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
@@ -82,7 +102,9 @@
 
 <span class="sd">    The img_info should be a dictionary containing a number of  tag_name: value   pairs.</span>
 
-<span class="sd">    The timeout is in seconds.</span>
+<span class="sd">    Options:</span>
+<span class="sd">     * add_strict - passed into :func:`ImageMetaTag.db.write_img_to_open_db`</span>
+<span class="sd">     * timeout - default timeout to try and write to the database.</span>
 
 <span class="sd">    This is commonly used in :func:`ImageMetaTag.savefig`</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -709,26 +731,6 @@
 </pre></div>
 
           </div>
-        </div>
-      </div>
-      <div class="sphinxsidebar">
-        <div class="sphinxsidebarwrapper">
-            <p class="logo"><a href="../../index.html">
-              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
-            </a></p>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
-    <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>

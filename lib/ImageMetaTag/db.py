@@ -1,5 +1,5 @@
 '''
-Module containing a set of functions to create/write to/read
+This module contains a set of functions to create/write to/read
 and maintain an sqlite3 database of image files.
 '''
 
@@ -32,7 +32,9 @@ def write_img_to_dbfile(db_file, filename, img_info, add_strict=False, timeout=D
 
     The img_info should be a dictionary containing a number of  tag_name: value   pairs.
 
-    The timeout is in seconds.
+    Options:
+     * add_strict - passed into :func:`ImageMetaTag.db.write_img_to_open_db`
+     * timeout - default timeout to try and write to the database.
 
     This is commonly used in :func:`ImageMetaTag.savefig`
     '''

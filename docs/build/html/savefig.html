@@ -8,7 +8,7 @@
     
     <title>ImageMetaTag.savefig &mdash; ImageMetaTag 0.2 documentation</title>
     
-    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -45,7 +45,47 @@
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">ImageMetaTag 0.2 documentation</a> &raquo;</li> 
       </ul>
-    </div>  
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ImageMetaTag.savefig</a><ul>
+<li><a class="reference internal" href="#the-savefig-wrapper">The savefig wrapper</a></li>
+<li><a class="reference internal" href="#other-functions">Other functions</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">ImageMetaTag - Image metadata tagging and presentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="db.html"
+                        title="next chapter">ImageMetaTag.db</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/savefig.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
 
     <div class="document">
       <div class="documentwrapper">
@@ -58,7 +98,7 @@
 and basic image maniupulation.</p>
 <div class="section" id="the-savefig-wrapper">
 <h2>The savefig wrapper<a class="headerlink" href="#the-savefig-wrapper" title="Permalink to this headline">¶</a></h2>
-<p>The main only function that is usaully needed from this module is savegfig iteself:</p>
+<p>The main only function that is usaully needed from this module is savefig wrapper iteself:</p>
 <dl class="function">
 <dt id="ImageMetaTag.savefig">
 <tt class="descclassname">ImageMetaTag.</tt><tt class="descname">savefig</tt><big>(</big><em>filename</em>, <em>img_format=None</em>, <em>img_converter=0</em>, <em>do_trim=False</em>, <em>trim_border=0</em>, <em>do_thumb=False</em>, <em>img_tags=None</em>, <em>keep_open=False</em>, <em>dpi=None</em>, <em>logo_file=None</em>, <em>logo_width=40</em>, <em>logo_padding=0</em>, <em>logo_pos=0</em>, <em>db_file=None</em>, <em>db_timeout=6</em>, <em>db_attempts=20</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#ImageMetaTag.savefig" title="Permalink to this definition">¶</a></dt>
@@ -123,8 +163,9 @@ right  corner, for instance.</p>
 <li><p class="first">logo_padding - a number of pixels to pad around the logo (default to zero)</p>
 </li>
 <li><dl class="first docutils">
-<dt>logo_pos - corner position of the logo (following pyplot.legend, but for corners)                * 0: &#8216;best&#8217; in this context will be upper left (default)</dt>
+<dt>logo_pos - corner position of the logo (following pyplot.legend, but for corners):</dt>
 <dd><ul class="first last simple">
+<li>0: &#8216;best&#8217; in this context will be upper left (default)</li>
 <li>TODO: 1: &#8216;upper right&#8217;</li>
 <li>2: &#8216;upper left&#8217;</li>
 <li>TODO: 3: &#8216;lower left&#8217;</li>
@@ -147,46 +188,6 @@ right  corner, for instance.</p>
 
 
           </div>
-        </div>
-      </div>
-      <div class="sphinxsidebar">
-        <div class="sphinxsidebarwrapper">
-            <p class="logo"><a href="index.html">
-              <img class="logo" src="_static/logo.png" alt="Logo"/>
-            </a></p>
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">ImageMetaTag.savefig</a><ul>
-<li><a class="reference internal" href="#the-savefig-wrapper">The savefig wrapper</a></li>
-<li><a class="reference internal" href="#other-functions">Other functions</a></li>
-</ul>
-</li>
-</ul>
-
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="index.html"
-                        title="previous chapter">ImageMetaTag - Image metadata tagging and presentation</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="db.html"
-                        title="next chapter">ImageMetaTag.db</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/savefig.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
