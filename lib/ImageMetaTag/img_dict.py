@@ -28,14 +28,14 @@ class ImageDict():
     of metadata items, use :func:`ImageMetaTag.dict_heirachy_from_list`
 
     Options:
-    * level_names - a list of the tagnames, in full, giving a name/description of what \
-                    the metadata item means. Ordered by level of the input dict.
-    * selector_widths - a list of html strings giving the widths of each selector in the \
-                        output webpage.
-    * selector_animated - an integer indicating which selector on the output webpage is \
-                          to be animated.
-    * animation_dicrection - +1 indicates the animation moves forwards, -1 indicates it \
-                             moves backwards.
+     * level_names - a list of the tagnames, in full, giving a name/description of what \
+                     the metadata item means. Ordered by level of the input dict.
+     * selector_widths - a list of html strings giving the widths of each selector in the \
+                         output webpage.
+     * selector_animated - an integer indicating which selector on the output webpage is \
+                           to be animated.
+     * animation_dicrection - +1 indicates the animation moves forwards, -1 indicates it \
+                              moves backwards.
     '''
     def __init__(self, input_dict, level_names=None,
                  selector_widths=None, selector_animated=None,
