@@ -108,11 +108,16 @@ pages for browsing the images.</p>
 <p>The input_dict should be a heirachical dictionary of dictionaries, containing
 the image metadata, in the required order. In order to convert a flat dictionary
 of metadata items, use <a class="reference internal" href="#ImageMetaTag.dict_heirachy_from_list" title="ImageMetaTag.dict_heirachy_from_list"><tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.dict_heirachy_from_list()</span></tt></a></p>
-<p>Options:
-* level_names - a list of the tagnames, in full, giving a name/description of what                     the metadata item means. Ordered by level of the input dict.
-* selector_widths - a list of html strings giving the widths of each selector in the                         output webpage.
-* selector_animated - an integer indicating which selector on the output webpage is                           to be animated.
-* animation_dicrection - +1 indicates the animation moves forwards, -1 indicates it                              moves backwards.</p>
+<dl class="docutils">
+<dt>Options:</dt>
+<dd><ul class="first last simple">
+<li>level_names - a list of the tagnames, in full, giving a name/description of what                      the metadata item means. Ordered by level of the input dict.</li>
+<li>selector_widths - a list of html strings giving the widths of each selector in the                          output webpage.</li>
+<li>selector_animated - an integer indicating which selector on the output webpage is                            to be animated.</li>
+<li>animation_dicrection - +1 indicates the animation moves forwards, -1 indicates it                               moves backwards.</li>
+</ul>
+</dd>
+</dl>
 <dl class="method">
 <dt id="ImageMetaTag.ImageDict.append">
 <tt class="descname">append</tt><big>(</big><em>new_dict</em>, <em>devmode=False</em>, <em>skip_key_relist=False</em><big>)</big><a class="headerlink" href="#ImageMetaTag.ImageDict.append" title="Permalink to this definition">¶</a></dt>
@@ -364,7 +369,7 @@ contains both &#8216;Histogram and &#8216;Line plots&#8217; which are to be pres
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2015, Malcolm Brooks.
+        &copy; Copyright 2015-2016, British Crown Copyright.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
