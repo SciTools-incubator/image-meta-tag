@@ -8,7 +8,7 @@
     
     <title>ImageMetaTag.db &mdash; ImageMetaTag 0.2 documentation</title>
     
-    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -45,7 +45,50 @@
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">ImageMetaTag 0.2 documentation</a> &raquo;</li> 
       </ul>
-    </div>  
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ImageMetaTag.db</a><ul>
+<li><a class="reference internal" href="#commonly-used-functions">Commonly used functions</a></li>
+<li><a class="reference internal" href="#functions-for-opening-creating-db-files">Functions for opening/creating db files</a></li>
+<li><a class="reference internal" href="#functions-for-working-with-open-databases">Functions for working with open databases</a></li>
+<li><a class="reference internal" href="#internal-functions">Internal functions</a></li>
+<li><a class="reference internal" href="#utility-functions">Utility functions</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="savefig.html"
+                        title="previous chapter">ImageMetaTag.savefig</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ImageDict.html"
+                        title="next chapter">ImageMetaTag.ImageDict</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/db.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
 
     <div class="document">
       <div class="documentwrapper">
@@ -54,7 +97,7 @@
             
   <div class="section" id="module-ImageMetaTag.db">
 <span id="imagemetatag-db"></span><h1>ImageMetaTag.db<a class="headerlink" href="#module-ImageMetaTag.db" title="Permalink to this headline">¶</a></h1>
-<p>Module containing a set of functions to create/write to/read
+<p>This module contains a set of functions to create/write to/read
 and maintain an sqlite3 database of image files.</p>
 <div class="section" id="commonly-used-functions">
 <h2>Commonly used functions<a class="headerlink" href="#commonly-used-functions" title="Permalink to this headline">¶</a></h2>
@@ -65,7 +108,14 @@ and maintain an sqlite3 database of image files.</p>
 <dd><p>Writes an entry to a database file containing the filename and image info.</p>
 <p>If the database file does not exist, it will be created.</p>
 <p>The img_info should be a dictionary containing a number of  tag_name: value   pairs.</p>
-<p>The timeout is in seconds.</p>
+<dl class="docutils">
+<dt>Options:</dt>
+<dd><ul class="first last simple">
+<li>add_strict - passed into <a class="reference internal" href="#ImageMetaTag.db.write_img_to_open_db" title="ImageMetaTag.db.write_img_to_open_db"><tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.db.write_img_to_open_db()</span></tt></a></li>
+<li>timeout - default timeout to try and write to the database.</li>
+</ul>
+</dd>
+</dl>
 <p>This is commonly used in <a class="reference internal" href="savefig.html#ImageMetaTag.savefig" title="ImageMetaTag.savefig"><tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.savefig()</span></tt></a></p>
 </dd></dl>
 
@@ -237,49 +287,6 @@ plots are created.</p>
 
 
           </div>
-        </div>
-      </div>
-      <div class="sphinxsidebar">
-        <div class="sphinxsidebarwrapper">
-            <p class="logo"><a href="index.html">
-              <img class="logo" src="_static/logo.png" alt="Logo"/>
-            </a></p>
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">ImageMetaTag.db</a><ul>
-<li><a class="reference internal" href="#commonly-used-functions">Commonly used functions</a></li>
-<li><a class="reference internal" href="#functions-for-opening-creating-db-files">Functions for opening/creating db files</a></li>
-<li><a class="reference internal" href="#functions-for-working-with-open-databases">Functions for working with open databases</a></li>
-<li><a class="reference internal" href="#internal-functions">Internal functions</a></li>
-<li><a class="reference internal" href="#utility-functions">Utility functions</a></li>
-</ul>
-</li>
-</ul>
-
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="savefig.html"
-                        title="previous chapter">ImageMetaTag.savefig</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="ImageDict.html"
-                        title="next chapter">ImageMetaTag.ImageDict</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/db.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>

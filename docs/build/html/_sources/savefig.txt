@@ -7,7 +7,7 @@ ImageMetaTag.savefig
 
 The savefig wrapper
 -------------
-The main only function that is usaully needed from this module is savegfig iteself:
+The main only function that is usaully needed from this module is savefig wrapper iteself:
 
 .. autofunction:: ImageMetaTag.savefig
 

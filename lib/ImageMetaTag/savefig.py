@@ -152,7 +152,7 @@ def image_file_postproc(filename, outfile=None, img_converter=0, do_trim=False, 
                    smaller size. The aspect ratio of the logo image is always maintained. \
                    Defaults to 40 pixels.
     * logo_padding - a number of pixels to pad around the logo (default to zero)
-    * logo_pos - corner position of the logo (following pyplot.legend, but for corners) \
+    * logo_pos - corner position of the logo (following pyplot.legend, but for corners):
                * 0: 'best' in this context will be upper left (default)
                * TODO: 1: 'upper right'
                * 2: 'upper left'
