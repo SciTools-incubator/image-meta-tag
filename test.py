@@ -821,7 +821,7 @@ def __main__():
         print_simple_timer(date_start_big, datetime.now(), 'Large parallel dict processing')
         # and now make we big dict webpage (and time it too)
         date_start_web = datetime.now()
-        out_page_big = '%s/biggus_pageus.html' % img_savedir
+        out_page_big = '%s/biggus_pageus.html' % webdir
         imt.webpage.write_full_page(biggus_dictus_imigus, out_page_big,
                                     'Test ImageDict webpage', verbose=True, internal=False)
         print_simple_timer(date_start_web, datetime.now(), 'Large parallel dict webpage')
