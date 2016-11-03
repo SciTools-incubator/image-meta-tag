@@ -110,11 +110,7 @@ def plot_random_data(random_data, i_rand, plot_col, col_name, trims, borders,
     else:
         plt.title('Sum of two random integers between 1 and 6\n')
 
-
-    # plot individual rolls:
-    rolls_savedir = '%s/rolls' % img_savedir
-    mkdir_p(rolls_savedir)
-    outfile = '%s/%s_%s.%s' % (rolls_savedir, n_rolls, plot_col, img_format)
+    outfile = '%s/rolls_%s_%s.%s' % (img_savedir, n_rolls, plot_col, img_format)
     plt.savefig(outfile)
 
     # save the figure, using different image-meta-tag options
@@ -126,8 +122,8 @@ def plot_random_data(random_data, i_rand, plot_col, col_name, trims, borders,
             these_borders = [0]
         for border in these_borders:
             for compression in compression_levels:
-                outfile = '%s/imt_%s_%s_compression_%s' \
-                        % (rolls_savedir, n_rolls, plot_col, compression)
+                outfile = '%s/rolls_imt_%s_%s_compression_%s' \
+                        % (img_savedir, n_rolls, plot_col, compression)
                 if trim:
                     outfile += '_trim_b%s' % border
                     trim_str = 'Image trimmed'
@@ -164,10 +160,8 @@ def plot_random_data(random_data, i_rand, plot_col, col_name, trims, borders,
 
     plt.close()
 
-    # now plot distributions:
-    dist_savedir = '%s/dists' % img_savedir
-    mkdir_p(dist_savedir)
-    outfile = '%s/%s_%s.%s' % (dist_savedir, n_rolls, plot_col, img_format)
+
+    outfile = '%s/dist_%s_%s.%s' % (img_savedir, n_rolls, plot_col, img_format)
     _count, _bins, _ignored = plt.hist(random_data[i_rand],
                                        [x + 0.5 for x in range(13)],
                                        color=plot_col, normed=True)
@@ -182,8 +176,8 @@ def plot_random_data(random_data, i_rand, plot_col, col_name, trims, borders,
             these_borders = [0]
         for border in these_borders:
             for compression in compression_levels:
-                outfile = '%s/imt_%s_%s_compression_%s' \
-                        % (dist_savedir, n_rolls, plot_col, compression)
+                outfile = '%s/dist_imt_%s_%s_compression_%s' \
+                        % (img_savedir, n_rolls, plot_col, compression)
                 if trim:
                     outfile += '_trim_b%s' % border
                     trim_str = 'Image trimmed'
@@ -394,7 +388,7 @@ def __main__():
         raise ValueError('images_and_tags differ between database and plotting/pickle versions')
     # now make the next page:
     n_proc = 4
-    skip_key_relist = True
+    skip_key_relist = False # default setting
     extra_opts = (tagorder, skip_key_relist, selector_animated, animation_direction)
     subdict_gen = imt.dict_split(db_images_and_tags, n_split=n_proc, extra_opts=extra_opts)
     if n_proc == 1:
@@ -410,18 +404,10 @@ def __main__():
         proc_pool.close()
         proc_pool.join()
 
-
-
     # now stitch the parallel image dict back together:
     img_dict_para = pool_out[0]
     for i_dict in range(1, len(pool_out)):
         img_dict_para.append(pool_out[i_dict])
-        
-    if skip_key_relist:
-        # if we skipped relisting the keys (as it's faster to do that)
-        # then make sure we list them at the end:
-        img_dict_para.list_keys_by_depth()
-
 
     # sort the keys:
     img_dict.sort_keys(sort_methods)
@@ -756,7 +742,7 @@ def __main__():
                                     for i_8 in xrange(8):
                                         for i_9 in xrange(9):
                                             # we don't want to actually make an image!
-                                            img_name = '%s/%s/%s/%s/%s/%s_%s_%s_%s_no_image.png ' \
+                                            img_name = 'no_image_%s_%s_%s_%s_%s_%s_%s_%s_%s.png ' \
                                                     % (i_1, i_2, i_3, i_4, i_5, i_6, i_7, i_8, i_9)
                                             img_info = {'l1': 'Lev 1: %s' % i_1,
                                                         'l2': 'Lev 2: %s' % i_2,
@@ -835,7 +821,7 @@ def __main__():
         print_simple_timer(date_start_big, datetime.now(), 'Large parallel dict processing')
         # and now make we big dict webpage (and time it too)
         date_start_web = datetime.now()
-        out_page_big = '%s/biggus_pageus.html' % webdir
+        out_page_big = '%s/biggus_pageus.html' % img_savedir
         imt.webpage.write_full_page(biggus_dictus_imigus, out_page_big,
                                     'Test ImageDict webpage', verbose=True, internal=False)
         print_simple_timer(date_start_web, datetime.now(), 'Large parallel dict webpage')
