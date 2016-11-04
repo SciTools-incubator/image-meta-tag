@@ -374,7 +374,7 @@ def __main__():
 
     # this test the same thing, but created in parallel. This isn't needed for a small
     # set of plots like this example, but the code appears to scale well.
-    # (within the Met Office, this code is used to produce internal web pages with 200,000+ images).
+    # (within the Met Office, this code is used to produce internal web pages with 500,000+ images).
 
     # we are also going to construct it using data loaded in from the imt_db file, rather
     # than the list and metadata built up by the plotting. Read in by:
@@ -704,15 +704,16 @@ def __main__():
                                 'Test ImageDict webpage',
                                 preamble=webpage_preamble, postamble=webpage_postamble,
                                 initial_selectors=initial_selectors,
-                                verbose=True, internal=False, only_show_rel_url=True)
+                                verbose=True, only_show_rel_url=True, 
+                                write_intmed_tmpfile=True)
     imt.webpage.write_full_page(img_dict, out_page_para,
                                 'Test ImageDict webpage (Parallel version)',
                                 preamble=webpage_preamble, postamble=webpage_postamble,
-                                verbose=True, internal=False, only_show_rel_url=False)
+                                verbose=True, only_show_rel_url=False)
     imt.webpage.write_full_page(img_dict_multi, out_page_multi,
                                 'Test ImageDict webpage (mutli image version)',
                                 preamble=webpage_preamble, postamble=webpage_postamble,
-                                verbose=True, internal=False, url_type='str')
+                                verbose=True, url_type='str')
 
     # now, finally, produce a large ImageDict:
     if not args.no_biggus_dictus:
@@ -823,7 +824,7 @@ def __main__():
         date_start_web = datetime.now()
         out_page_big = '%s/biggus_pageus.html' % webdir
         imt.webpage.write_full_page(biggus_dictus_imigus, out_page_big,
-                                    'Test ImageDict webpage', verbose=True, internal=False)
+                                    'Test ImageDict webpage', verbose=True)
         print_simple_timer(date_start_web, datetime.now(), 'Large parallel dict webpage')
 
 
