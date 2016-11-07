@@ -19,7 +19,7 @@ If the latter, then the following sections are needed:
 .. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks
 '''
 
-import os, json, pdb, shutil, tempfile
+import os, json, pdb, shutil, tempfile, re
 import ImageMetaTag as imt
 
 # single indent to be used on the output webpage 
@@ -147,6 +147,8 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
 
     if  write_intmed_tmpfile:
         # now move the json, then the html files:
+        os.chmod(tmp_json_filepath, 0644)
+        os.chmod(tmp_html_filepath, 0644)
         shutil.move(tmp_json_filepath, json_filepath)
         shutil.move(tmp_html_filepath, filepath)
 
@@ -321,17 +323,25 @@ def write_json(img_dict, json_file):
     '''
     if not isinstance(img_dict, imt.ImageDict):
         raise ValueError('input img_dict is not an ImageMetaTag.ImageDict')
-    # TODO: compress this, with reg expressions to replace the strings with placeholders for
-    # key names, subdirectories, and lots of other things....
+    # TODO: ivestigate using zblib to compress this, and pako.js to decompress, client side:
     dict_as_json = json.dumps(img_dict.dict, separators=(',',':'))
+
+    # if we're not doing any fancy compression, then use subdirectories to reduce the string size:
+    for i_sd, subdir in enumerate(img_dict.subdirs):
+        dict_as_json = re.sub('"{}'.format(subdir), 'sd[{}]+"'.format(i_sd), dict_as_json)
+
+    out_str = '''
+var sd = {};
+var imt = {};
+'''.format(img_dict.subdirs, dict_as_json)
     
     if isinstance(json_file, str):
         # input is a string, assume it's the file path to write to:
         with open(json_file, 'w') as file_obj:
-            file_obj.write('var sd = %s;\n' % img_dict.subdirs)
+            file_obj.write(out_str)
     else:
         # input is a file object:
-        json_file.write('var imt = %s;\n\n' % dict_as_json)
+        json_file.write(out_str)
 
 def write_js_placeholders(file_obj=None, dict_depth=None, selector_prefix=None,
                           style='horiz dropdowns'):
