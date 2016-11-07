@@ -28,19 +28,28 @@ class ImageDict():
     of metadata items, use :func:`ImageMetaTag.dict_heirachy_from_list`
 
     Options:
-    * full_name_mapping - a dictionary mapping each tagname to a full name/description of what \
-                          the metadata item means.
-    * selector_widths - a list of html strings giving the widths of each selector in the \
-                        output webpage.
-    * selector_animated - an integer indicating which selector on the output webpage is \
-                          to be animated.
-    * animation_dicrection - +1 indicates the animation moves forwards, -1 indicates it \
-                             moves backwards.
-
+     * level_names - a list of the tagnames, in full, giving a name/description of what \
+                     the metadata item means. Ordered by level of the input dict.
+     * selector_widths - a list of html strings giving the widths of each selector in the \
+                         output webpage.
+     * selector_animated - an integer indicating which selector on the output webpage is \
+                           to be animated.
+     * animation_dicrection - +1 indicates the animation moves forwards, -1 indicates it \
+                              moves backwards.
     '''
-    def __init__(self, input_dict, full_name_mapping=None,
+    def __init__(self, input_dict, level_names=None,
                  selector_widths=None, selector_animated=None,
                  animation_direction=None):
+
+        if level_names is None:
+            self.level_names = None
+        else:
+            if not isinstance(level_names, list):
+                msg = 'A mapping of key names to full names has been supplied, but it is not a list'
+                raise ValueError(msg)
+            else:
+                self.level_names = level_names
+                
         # set the dictionary:
         self.dict = input_dict
         # now list the keys, at each level, as lists. These can be reorderd by the calling routine,
@@ -48,15 +57,9 @@ class ImageDict():
         self.list_keys_by_depth()
 
         dict_depth = self.dict_depth()
-
-        if full_name_mapping is None:
-            self.full_name_mapping = None
-        else:
-            if not isinstance(full_name_mapping, dict):
-                msg = 'A mapping of key names to full names has been supplied, but it is not a dict'
-                raise ValueError(msg)
-            else:
-                self.full_name_mapping = full_name_mapping
+        if self.level_names is not None:
+            if dict_depth != len(self.level_names):
+                raise ValueError('Mismatch between depth of dictionary and level_names')
 
         # this controls the width of the selector, on the resultant webpage:
         if selector_widths is None:
@@ -119,8 +122,13 @@ class ImageDict():
         if not skip_key_relist:
             self.list_keys_by_depth(devmode=devmode)
 
-        # TODO: if there is a full_name_mapping, check that the
-        # new item hasn't added something to it
+        # if there is a level_names, check that the
+        # new dict is consistent:
+        if isinstance(new_dict, ImageDict) and self.level_names is not None:
+            if new_dict.level_names is not None:
+                if self.level_names != new_dict.level_names:
+                    raise ValueError('Attempting to append two ImageDict objects with'
+                                     ' different level_names')
 
     def dict_union(self, in_dict, new_dict):
         'produces the union of a dictionary of dictionaries'
@@ -177,9 +185,6 @@ class ImageDict():
         # relist the keys:
         if not skip_key_relist:
             self.list_keys_by_depth()
-
-        # TODO: if there is a full_name_mapping, check that the
-        # new item hasn't removed something to it
 
     def dict_remove(self, in_dict, rm_dict):
         '''
@@ -275,10 +280,8 @@ class ImageDict():
 
         out_keys = {}
         for level in keys.keys():
-            # convert to a list:
-            out_keys[level] = list(keys[level])
-            # and sort HERE:
-            out_keys[level] = sorted(out_keys[level])
+            # convert to a sorted list:
+            out_keys[level] = sorted(list(keys[level]))
 
         self.keys = out_keys
         self.subdirs = sorted(list(subdirs))
@@ -288,8 +291,8 @@ class ImageDict():
         '''
         Returns:
         
-        * a dictionary of sets, containing the keys at each level of
-        the dictionary (keyed by the level number).
+        * a dictionary of sets, containing the keys at each level of\
+          the dictionary (keyed by the level number).
         * a set of the subdirectories for the target images
         '''
         if keys is None:
@@ -753,10 +756,10 @@ def simple_dict_filter(simple_dict, tests, raise_key_mismatch=False):
     a set of tests.
 
     An example set of tests:
-    tests = {'number of rolls': ['6 simulated rolls', '216 simulated rolls', '1296 simulated rolls'],
-             'plot color': None,
-             'image compression': None,
-             'plot type': ['Histogram', ('All', ['Histogram', 'Line plots'])],
+    tests = {'number of rolls': ['6 simulated rolls', '216 simulated rolls', '1296 simulated rolls'],\
+             'plot color': None,\
+             'image compression': None,\
+             'plot type': ['Histogram', ('All', ['Histogram', 'Line plots'])],\
              'image trim': None}
     Here, the 'number of rolls' is restricted to a simple list.
 
@@ -789,7 +792,6 @@ def simple_dict_filter(simple_dict, tests, raise_key_mismatch=False):
     # the input tests can also contain a tuple that define how multiple
     # images can be grouped together:
     has_complex_test = False
-    first_tuple_passes = False
     if not tests is None:
         for i_test, test in enumerate(tests.keys()):
             if tests[test] is None:
@@ -810,25 +812,29 @@ def simple_dict_filter(simple_dict, tests, raise_key_mismatch=False):
                     # multi-element list:
                     test_is_tuple = [isinstance(x, tuple) for x in tests[test]]
                     if any(test_is_tuple):
+                        
                         has_complex_test = True
 
                         # now loop through all of the tuples within the test:
                         any_tuple_passes = False
                         # this marks whether it is the FIRST element in a tuple (and so the one that
                         # would typically be used for processing a set of images)
+                        first_tuple_passes = False
                         tuple_tests = compress(tests[test], test_is_tuple)
                         for tuple_test in tuple_tests:
                             if simple_dict[test] in tuple_test[1]:
                                 # failed this test, so it counts as a failure:
                                 any_tuple_passes = True
                             # and is this the first element in the tuple:
-                            first_tuple_passes = simple_dict[test] == tuple_test[1][0]
-
+                            if simple_dict[test] == tuple_test[1][0]:
+                                first_tuple_passes = True
+                                
                         # if none of the tuple tests pass, then make a note of that:
                         if not any_tuple_passes:
                             passes[i_test] = False
-                        # and make a note if this wasn't first:
-                        if not first_tuple_passes:
+                            passes_and_first[i_test] = False
+                        elif not first_tuple_passes:
+                            # and make a note if this wasn't first:
                             passes_and_first[i_test] = False
 
                         # also apply a test in the simple case:

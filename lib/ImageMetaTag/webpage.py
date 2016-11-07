@@ -1,5 +1,5 @@
 '''
-Sub-module containing functions to write out an ImageDict to a webpage.
+This sub-module contains functions to write out an :class:`ImageMetaTag.ImageDict` to a webpage.
 
 This can either be done using write_full_page, to produce a page with just a set of
 selectors to browse the ImageDict, or the different components can be added to a
@@ -9,12 +9,14 @@ To write out a full page, use :func:`ImageMetaTag.webpage.write_full_page`.
 
 If the latter, then the following sections are needed:
 
-    * :func:`ImageMetaTag.write_js_to_header` - writes out the javascript information to the\
+    * :func:`ImageMetaTag.webpage.write_js_to_header` - writes out the javascript information to the\
                                                 html header
     * :func:`ImageMetaTag.webpage.write_js_placeholders` - writes out the placeholders that\
                                                         the javascript will write images to.
     * :func:`ImageMetaTag.webpage.write_json` - writes out the :class:`ImageMetaTag.ImageDict`\
                                                 as a json.dump to a json file
+    * :func:`ImageMetaTag.webpage.copy_required_javascript` - copies required javascript library \
+                                                          to the required location.
 
 .. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks
 '''
@@ -28,7 +30,7 @@ LEN_INDENT = len(INDENT)
 
 def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=None,
                     preamble=None, postamble=None,
-                    initial_selectors=None,
+                    initial_selectors=None,show_selector_names=False,
                     url_type='int', only_show_rel_url=False, verbose=False,
                     style='horiz dropdowns', write_intmed_tmpfile=False,
                     description=None, keywords=None):
@@ -46,11 +48,15 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
     * preamble : html text added at the top of the <body> text, but before the ImageMetaTag \
                  section. Can be quite extensive.
     * postable : html text added after the ImageMetaTag section.
-    * initial_selectors - A list of initial values for the selectors.
+    * initial_selectors - A list of initial values for the selectors, to be passed into \
+                          :func:`ImageMetaTag.webpage.write_js_setup`.
+    * show_selector_names - switches on diplsaying the selector full names defined by the \
+                            :class:`ImageMetaTag.ImageDict`.full_name_mapping
     * url_type - determines the type of URL at the bottom of the ImageMetaTag section. Can be \
                  'int' or 'str'.
     * only_show_rel_url - If True, the wepage will only show relative urls in is link section.
     * verbose - If True, stdout will be more verbose
+    * style - the style of output page to write, currently only 'horiz dropdowns' is valid
     * write_intmed_tmpfile - If True, files are written out to temporary filenames and then \
                              moved when completed.
     * description - html description metadata
@@ -105,9 +111,9 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
         # write out the start of the file:
         out_file.write(ind + '<html>\n')
         # increase the indent level:
-        ind = indent_up_one(ind)
+        ind = _indent_up_one(ind)
         out_file.write(ind + '<head>\n')
-        ind = indent_up_one(ind)
+        ind = _indent_up_one(ind)
         if not title is None:
             out_file.write('{}<title>{}</title>\n'.format(ind, title))
         out_file.write(ind+'<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">\n')
@@ -120,9 +126,9 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
                            style=style, ind=ind,
                            description=description, keywords=keywords)        
         # now close the script and head:
-        ind = indent_down_one(ind)
+        ind = _indent_down_one(ind)
         out_file.write(ind + '</script>\n')
-        ind = indent_down_one(ind)
+        ind = _indent_down_one(ind)
         out_file.write(ind + '</head>\n')
         
         # now start the body:
@@ -134,9 +140,14 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
         if not preamble is None:
             out_file.write(preamble)
 
-        # now write out the end, which includes the placeholders for the actual stuff that appears on the page:
+        # now write out the end, which includes the placeholders for the actual
+        # stuff that appears on the page:
+        if show_selector_names:
+            level_names = img_dict.level_names
+        else:
+            level_names = False
         write_js_placeholders(file_obj=out_file, dict_depth=img_dict.dict_depth(),
-                              style=style)
+                              style=style, level_names=level_names)
 
         if not postamble is None:
             out_file.write(postamble + '\n')
@@ -203,7 +214,7 @@ def write_js_to_header(img_dict, initial_selectors=None, style=None,
     
     # now write out the javascript cnfiguration variables:
     file_obj.write(ind + '<script type="text/javascript">\n')
-    ind = indent_up_one(ind)
+    ind = _indent_up_one(ind)
     
     # in case the page we are writing is embedded as a frame, write out the top
     # level page here;
@@ -236,7 +247,7 @@ def write_js_to_header(img_dict, initial_selectors=None, style=None,
     # values internally or text which looks more meaningful to the user:
     file_obj.write('{}var url_type = "{}";\n'.format(ind, url_type))
     # the show_rel_url logical (converted to a string to init a javascript bool)
-    file_obj.write('{}var show_rel_url = {};\n'.format(ind, py_to_js_bool(only_show_rel_url)))
+    file_obj.write('{}var show_rel_url = {};\n'.format(ind, _py_to_js_bool(only_show_rel_url)))
     
     # the selected_id needs to be defined here too, as it's used as a global variable
     # (it will be overwritten later if the URL changes it, and when selectors/stepping change it):
@@ -276,10 +287,10 @@ def write_js_to_header(img_dict, initial_selectors=None, style=None,
     # now write out the lists of keys, to the different levels:
     keys_to_js = [str(x[1]) for x in img_dict.keys.iteritems()]
     file_obj.write('{}var key_lists = [{},\n'.format(ind, keys_to_js[0]))
-    ind = indent_up_one(ind)
+    ind = _indent_up_one(ind)
     for i_depth in range(1, dict_depth):
         file_obj.write('{}{},\n'.format(ind, keys_to_js[i_depth]))
-    ind = indent_down_one(ind)
+    ind = _indent_down_one(ind)
     file_obj.write(ind + '];\n')
     
     # now some top level things:
@@ -296,10 +307,10 @@ def write_js_to_header(img_dict, initial_selectors=None, style=None,
     
     # now, the main call:
     file_obj.write(ind + 'window.onload = function() {\n')
-    ind = indent_up_one(ind)
+    ind = _indent_up_one(ind)
     file_obj.write(ind + '// redefine onload, so it does this:\n')
     file_obj.write(ind + 'imt_main();\n')
-    ind = indent_down_one(ind)
+    ind = _indent_down_one(ind)
     file_obj.write(ind + '};\n')
     # END of the imt specifc header content:
 
@@ -344,7 +355,7 @@ var imt = {};
         json_file.write(out_str)
 
 def write_js_placeholders(file_obj=None, dict_depth=None, selector_prefix=None,
-                          style='horiz dropdowns'):
+                          style='horiz dropdowns', level_names=False):
     '''
     Writes the placeholders into the page body, for the javascript to manipulate
 
@@ -354,33 +365,71 @@ def write_js_placeholders(file_obj=None, dict_depth=None, selector_prefix=None,
                         those people viewing the webpage!)
     * style - In future, it would be great to write out different types of webpages. For now \
               they are always horizontal dropdown menus: 'horiz dropdowns'.
+    * level_names - if supplied, this need to be a list of full names, for the selectors, of \
+                    length dict_depth.
     '''
 
     if selector_prefix is None:
         selector_prefix, _junk1, _junk2 = write_js_setup_defaults()
 
+    apply_level_names = False
+    if level_names:
+        if not isinstance(level_names, list):
+            raise ValueError('level_names needs to be a list of length dict_depth')
+        if len(level_names) != dict_depth:
+            raise ValueError('level_names needs to be a list, of length dict_depth')
+        apply_level_names = True
+    else:
+        apply_level_names = False
+
     if style == 'horiz dropdowns':
         file_obj.write('''
-<!-- Now f"or some placeholders for the scripts to put content -->
+<!-- Now for some placeholders for the scripts to put content -->
 <table border=0 cellspacing=0 cellpadding=0 width=99% align=center>
  <tr>
   <td>
-   <font size=3>
-   <br>''')
-
+   <font size=3>''')
         # for each level of depth in the plot dictionary, add a span to hold the selector:
-        # TODO: include the selector full_name_mapping
-        for lev in range(dict_depth):
+        if apply_level_names:
+            # if we want labelled selectors, then write out
+            # a table, with pairs of label, selector, in columns:
             file_obj.write('''
+   <table border=0 cellspacing=0 cellpadding=0 style='border-spacing: 3px 0;'>
+     <tr>
+''')
+            for level in range(dict_depth):
+                file_obj.write('       <td>{}&nbsp;&nbsp;</td>\n'.format(level_names[level]))
+            file_obj.write('''     </tr>
+     <tr>
+''')
+            for level in range(dict_depth):
+                file_obj.write('       <td><span id="%s%s">&nbsp;</span></td>\n' % (selector_prefix, level))
+            file_obj.write('''     </tr>
+''')
+            # add the placeholder for animators buttons:
+            file_obj.write('''     <tr>
+      <td colspan={}>
+        <span id="animator1">&nbsp;</span>
+        <span id="animator2">&nbsp;</span>
+      </td>
+    </tr>
+   </table>
+'''.format(dict_depth))
+        else:
+            # simply a set of spans, in a line:
+            for lev in range(dict_depth):
+                file_obj.write('''
    <span id="%s%s">&nbsp;</span>''' % (selector_prefix, lev))
-
-        # now add somewhere for the image to go:
-        file_obj.write('''
-   <br>
+            file_obj.write('\n   <br>')
+            # add the placeholder for animators buttons:
+            file_obj.write('''
    <span id="animator1">&nbsp;</span>
    <span id="animator2">&nbsp;</span>
-   <br>
-   <div id="the_image">Please wait while the page is loading</div>
+       <br>
+    ''')
+            
+        # now add somewhere for the image to go:
+        file_obj.write('''   <div id="the_image">Please wait while the page is loading</div>
    <br>
    <div id="the_url">....</div>''')
 
@@ -433,21 +482,21 @@ not being overwritten. Your webpage may be broken!'''.format(file_dir, file_to_c
         
     return file_to_copy
 
-def indent_up_one(ind):
+def _indent_up_one(ind):
     'increases the indent level of an input ind by one'
     n_indents = len(ind) / LEN_INDENT
     return INDENT * (n_indents + 1) 
     
-def indent_down_one(ind):
+def _indent_down_one(ind):
     'decreases the indent level of an input ind by one'
     n_indents = len(ind) / LEN_INDENT
     return INDENT * max(n_indents - 1, 0) 
     
-def py_to_js_bool(py_bool):
+def _py_to_js_bool(py_bool):
     'Converts a python boolean to a string, in javascript bool format (all lower case)'
     if py_bool is True:
         return 'true'
     elif py_bool is False:
         return 'false'
     else:
-        raise ValueError('input to py_to_js_bool is not a boolean, it is: %s' % py_bool)
+        raise ValueError('input to _py_to_js_bool is not a boolean, it is: %s' % py_bool)

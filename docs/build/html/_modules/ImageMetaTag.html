@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ImageMetaTag &mdash; ImageMetaTag 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="ImageMetaTag 0.2 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">ImageMetaTag 0.2 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/logo.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for ImageMetaTag</h1><div class="highlight"><pre>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">ImageMetaTag is a python package built around a wrapper for</span>
+<span class="sd">`savefig &lt;http://matplotlib.org/api/pyplot_api.html?highlight=savefig#matplotlib.pyplot.savefig&gt;`_</span>
+<span class="sd">in</span>
+<span class="sd">`matplotlib &lt;http://matplotlib.org/&gt;`_, which adds metadata tags to supported image file formats.</span>
+
+<span class="sd">Once the images have been tagged, it can also be used to manage an</span>
+<span class="sd">`SQL database &lt;https://docs.python.org/2/library/sqlite3.html&gt;`_ of images and their metadata.</span>
+<span class="sd">The image metadata can be used to produce an</span>
+<span class="sd">:class:`ImageMetaTag.ImageDict` object: a structured/heirachical dictionary of dictionaries</span>
+<span class="sd">which can be used to easily create web pages to present large numbers of images.</span>
+
+<span class="sd">As the image metadata tagging process involves reading the image using the Image library,</span>
+<span class="sd">a few common image post-processing options are included such as cropping, logo addition and</span>
+<span class="sd">colour palette manipulation to reduce filesizes.</span>
+
+<span class="sd">.. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&#39;0.2&#39;</span>
+
+<span class="c"># list fo file formats which are valid for saving metadata to:</span>
+<span class="n">META_IMG_FORMATS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;png&#39;</span><span class="p">]</span>
+
+<span class="c"># default timeout and retries for database access:</span>
+<span class="n">DEFAULT_DB_TIMEOUT</span> <span class="o">=</span> <span class="mi">6</span>
+<span class="n">DEFAULT_DB_ATTEMPTS</span> <span class="o">=</span> <span class="mi">20</span>
+
+<span class="kn">from</span> <span class="nn">ImageMetaTag.savefig</span> <span class="kn">import</span> <span class="n">savefig</span><span class="p">,</span> <span class="n">image_file_postproc</span>
+<span class="kn">from</span> <span class="nn">ImageMetaTag.img_dict</span> <span class="kn">import</span> <span class="n">ImageDict</span><span class="p">,</span> <span class="n">readmeta_from_image</span><span class="p">,</span> <span class="n">dict_heirachy_from_list</span><span class="p">,</span> \
+                                  <span class="n">dict_split</span><span class="p">,</span> <span class="n">simple_dict_filter</span><span class="p">,</span> <span class="n">check_for_required_keys</span>
+<span class="c"># we want all of the functions in webpage and db, as a separate level</span>
+<span class="kn">import</span> <span class="nn">ImageMetaTag.webpage</span><span class="o">,</span> <span class="nn">ImageMetaTag.db</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">ImageMetaTag 0.2 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015-2016, British Crown Copyright.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>
