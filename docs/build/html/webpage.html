@@ -86,6 +86,10 @@
   <div class="section" id="module-ImageMetaTag.webpage">
 <span id="imagemetatag-webpage"></span><h1>ImageMetaTag.webpage<a class="headerlink" href="#module-ImageMetaTag.webpage" title="Permalink to this headline">¶</a></h1>
 <p>This sub-module contains functions to write out an <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a> to a webpage.</p>
+<p>The webpages are made up of a single .html file, which is the page to be loaded to view the images.
+Alongside this is a short ImageMetaTag javascript library held in a &#8216;.js&#8217; file 
+(currently held in a single file) and a .json file contain the <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a>
+tree strcuture as a JSON data strcuture.</p>
 <p>This can either be done using write_full_page, to produce a page with just a set of
 selectors to browse the ImageDict, or the different components can be added to a
 page as it is being constructed (reading in an html template, for instance).</p>
@@ -99,6 +103,10 @@ page as it is being constructed (reading in an html template, for instance).</p>
 <li><a class="reference internal" href="#ImageMetaTag.webpage.copy_required_javascript" title="ImageMetaTag.webpage.copy_required_javascript"><tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.webpage.copy_required_javascript()</span></tt></a> - copies required javascript library                                                           to the required location.</li>
 </ul>
 </div></blockquote>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">At present, the only webpage style that can be produced is a set of horizontal dropdownmenus, but more will hopefully be added soon.</p>
+</div>
 <dl class="function">
 <dt id="ImageMetaTag.webpage.copy_required_javascript">
 <tt class="descclassname">ImageMetaTag.webpage.</tt><tt class="descname">copy_required_javascript</tt><big>(</big><em>file_dir</em>, <em>style</em>, <em>overwrite=True</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/webpage.html#copy_required_javascript"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.webpage.copy_required_javascript" title="Permalink to this definition">¶</a></dt>
@@ -178,7 +186,7 @@ webpage styles could be added.</p>
 <dl class="function">
 <dt id="ImageMetaTag.webpage.write_json">
 <tt class="descclassname">ImageMetaTag.webpage.</tt><tt class="descname">write_json</tt><big>(</big><em>img_dict</em>, <em>json_file</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/webpage.html#write_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.webpage.write_json" title="Permalink to this definition">¶</a></dt>
-<dd><p>Writes a json dump to a target file path</p>
+<dd><p>Writes a json dump of the <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a> tree strucuture to a target file path</p>
 </dd></dl>
 
 </div>

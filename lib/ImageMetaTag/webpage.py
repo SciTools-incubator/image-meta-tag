@@ -1,6 +1,11 @@
 '''
 This sub-module contains functions to write out an :class:`ImageMetaTag.ImageDict` to a webpage.
 
+The webpages are made up of a single .html file, which is the page to be loaded to view the images.
+Alongside this is a short ImageMetaTag javascript library held in a '.js' file 
+(currently held in a single file) and a .json file contain the :class:`ImageMetaTag.ImageDict`
+tree strcuture as a JSON data strcuture.
+
 This can either be done using write_full_page, to produce a page with just a set of
 selectors to browse the ImageDict, or the different components can be added to a
 page as it is being constructed (reading in an html template, for instance).
@@ -17,6 +22,9 @@ If the latter, then the following sections are needed:
                                                 as a json.dump to a json file
     * :func:`ImageMetaTag.webpage.copy_required_javascript` - copies required javascript library \
                                                           to the required location.
+                                                          
+.. TIP:: At present, the only webpage style that can be produced is a set of horizontal dropdown\
+menus, but more will hopefully be added soon. 
 
 .. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks
 '''
@@ -330,7 +338,7 @@ def write_js_setup_defaults(selector_prefix=None, list_prefix=None, file_list_na
 
 def write_json(img_dict, json_file):
     '''
-    Writes a json dump to a target file path
+    Writes a json dump of the :class:`ImageMetaTag.ImageDict` tree strucuture to a target file path
     '''
     if not isinstance(img_dict, imt.ImageDict):
         raise ValueError('input img_dict is not an ImageMetaTag.ImageDict')
