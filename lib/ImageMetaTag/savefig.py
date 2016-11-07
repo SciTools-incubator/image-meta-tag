@@ -5,7 +5,7 @@ and basic image maniupulation.
 .. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks
 '''
 
-import os, sqlite3
+import os, sqlite3, pdb
 import matplotlib.pyplot as plt
 from datetime import datetime
 
@@ -415,9 +415,9 @@ def _img_premult_resize(img_obj, size=None):
     img_obj = img_obj.convert('RGBA')
     premult = np.fromstring(img_obj.tostring(), dtype=np.uint8)
     alpha_layer = premult[3::4] / 255.0
-    premult[0::4] *= alpha_layer
-    premult[1::4] *= alpha_layer
-    premult[2::4] *= alpha_layer
+    premult[0::4] = premult[0::4] * alpha_layer
+    premult[1::4] = premult[1::4] * alpha_layer
+    premult[2::4] = premult[2::4] * alpha_layer
     new_img_obj = Image.fromstring("RGBA", img_obj.size, premult.tostring())
 
     #new_img_obj = new_img_obj.filter(ImageFilter.SMOOTH)
