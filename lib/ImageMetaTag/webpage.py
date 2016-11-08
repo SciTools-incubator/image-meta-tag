@@ -69,40 +69,53 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
                              moved when completed.
     * description - html description metadata
     * keywords - html keyword metadata
+    
+    Returns a list of files that the the created webpage is dependent upon
     '''
+    
+    page_dependencies = []
 
-    if not isinstance(img_dict, imt.ImageDict):
-        raise ValueError('write_full_page work on an ImageMetaTag ImageDict.')
-    dict_depth = img_dict.dict_depth(uniform_depth=True)
+    if not (isinstance(img_dict, imt.ImageDict) or img_dict is None):
+        raise ValueError('write_full_page works on an ImageMetaTag ImageDict.')
     
     if page_filename is None:
         page_filename = os.path.basename(filepath)
 
     # other files involved:
     file_dir, file_name = os.path.split(filepath)
-    file_name_no_ext = os.path.splitext(file_name)[0]
-    # json file to hold the image_dict branching data etc:
-    json_file = file_name_no_ext + '.json'
-    json_filepath = os.path.join(file_dir, json_file)
-    if write_intmed_tmpfile:
-        with tempfile.NamedTemporaryFile('w', suffix='.json', prefix='imt_',
-                                         dir=file_dir, delete=False) as json_file_obj:
-            # now write out a json file:
-            write_json(img_dict, json_file_obj)
-            tmp_json_filepath = json_file_obj.name
+    page_dependencies.append(file_name)
+    
+    if img_dict is None:
+        pass
     else:
-        write_json(img_dict, json_filepath)
-    
-    # now make sure the required javascript library is copied over to the file_dir:
-    js_file = copy_required_javascript(file_dir, style)
-    
-    # this is the internal name the different selectors, associated lists for the selectors, and
-    # the list of files (all with a numbered suffix):
-    selector_prefix = 'sel'
-    list_prefix = 'list'
-    file_list_name = 'file_list'
-    url_separator = '|'
-    
+        # we have real data to work with:
+        dict_depth = img_dict.dict_depth(uniform_depth=True)
+        
+        file_name_no_ext = os.path.splitext(file_name)[0]
+        # json file to hold the image_dict branching data etc:
+        json_file = file_name_no_ext + '.json'
+        page_dependencies.append(json_file)
+        json_filepath = os.path.join(file_dir, json_file)
+        if write_intmed_tmpfile:
+            with tempfile.NamedTemporaryFile('w', suffix='.json', prefix='imt_',
+                                             dir=file_dir, delete=False) as json_file_obj:
+                # now write out a json file:
+                write_json(img_dict, json_file_obj)
+                tmp_json_filepath = json_file_obj.name
+        else:
+            write_json(img_dict, json_filepath)
+            
+        # now make sure the required javascript library is copied over to the file_dir:
+        js_file = copy_required_javascript(file_dir, style)
+        page_dependencies.append(js_file)
+        
+        # this is the internal name the different selectors, associated lists for the selectors, and
+        # the list of files (all with a numbered suffix):
+        selector_prefix = 'sel'
+        list_prefix = 'list'
+        file_list_name = 'file_list'
+        url_separator = '|'
+        
     # now write the actual output file:
     if write_intmed_tmpfile:
         # get a temporary file:
@@ -114,6 +127,7 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
         filepath_to_write = filepath
     # start the indent:
     ind = ''
+
     # open the file - this is a nice and simple file so just use the with open...
     with open(filepath_to_write, 'w') as out_file:
         # write out the start of the file:
@@ -125,54 +139,70 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
         if not title is None:
             out_file.write('{}<title>{}</title>\n'.format(ind, title))
         out_file.write(ind+'<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">\n')
-        # now write out the specific stuff to the html header:
-        write_js_to_header(img_dict, initial_selectors=initial_selectors,
-                           file_obj=out_file, json_file=json_file, js_file=js_file,
-                           pagename=page_filename, tabname=tab_s_name,
-                           selector_prefix=selector_prefix, url_separator='|', url_type=url_type,
-                           only_show_rel_url=only_show_rel_url,
-                           style=style, ind=ind,
-                           description=description, keywords=keywords)        
+        
+        if img_dict is None:
+            # now write out the specific stuff to the html header:
+            write_js_to_header(img_dict,
+                               file_obj=out_file,
+                               pagename=page_filename, tabname=tab_s_name,
+                               ind=ind,
+                               description=description, keywords=keywords)        
+        else:
+            # now write out the specific stuff to the html header:
+            write_js_to_header(img_dict, initial_selectors=initial_selectors,
+                               file_obj=out_file, json_file=json_file, js_file=js_file,
+                               pagename=page_filename, tabname=tab_s_name,
+                               selector_prefix=selector_prefix, url_separator='|', url_type=url_type,
+                               only_show_rel_url=only_show_rel_url,
+                               style=style, ind=ind,
+                               description=description, keywords=keywords)        
         # now close the script and head:
         ind = _indent_down_one(ind)
         out_file.write(ind + '</script>\n')
         ind = _indent_down_one(ind)
         out_file.write(ind + '</head>\n')
-        
+            
         # now start the body:
         margins = 'leftmargin="0" topmargin="0" marginwidth="0" marginheight="0"'
         bgcolor = 'bcolor="#FFFFFF"'
         text_color =  'text="#000000"'
         out_file.write('{}<body {} {} {}>\n'.format(ind, bgcolor, text_color, margins))
-
+    
         if not preamble is None:
             out_file.write(preamble)
-
-        # now write out the end, which includes the placeholders for the actual
-        # stuff that appears on the page:
-        if show_selector_names:
-            level_names = img_dict.level_names
+    
+    
+        if img_dict is None:
+            out_file.write('<p><h1>No images are available for this page.</h1></p>')
         else:
-            level_names = False
-        write_js_placeholders(file_obj=out_file, dict_depth=img_dict.dict_depth(),
-                              style=style, level_names=level_names)
-
+            # now write out the end, which includes the placeholders for the actual
+            # stuff that appears on the page:
+            if show_selector_names:
+                level_names = img_dict.level_names
+            else:
+                level_names = False
+            write_js_placeholders(file_obj=out_file, dict_depth=img_dict.dict_depth(),
+                                  style=style, level_names=level_names)
+    
         if not postamble is None:
             out_file.write(postamble + '\n')
 
         # finish the body, and html:
         out_file.write(ind + '</body>\n')
         out_file.write('\n</html>')
+    
+        if  write_intmed_tmpfile:
+            # now move the json, then the html files:
+            if img_dict is not None:
+                os.chmod(tmp_json_filepath, 0644)
+                shutil.move(tmp_json_filepath, json_filepath)
+            os.chmod(tmp_html_filepath, 0644)
+            shutil.move(tmp_html_filepath, filepath)
+    
+        if verbose:
+            print 'File "%s" complete.' % filepath
 
-    if  write_intmed_tmpfile:
-        # now move the json, then the html files:
-        os.chmod(tmp_json_filepath, 0644)
-        os.chmod(tmp_html_filepath, 0644)
-        shutil.move(tmp_json_filepath, json_filepath)
-        shutil.move(tmp_html_filepath, filepath)
-
-    if verbose:
-        print 'File "%s" complete.' % filepath
+    return page_dependencies
 
 def write_js_to_header(img_dict, initial_selectors=None, style=None,
                        file_obj=None, json_file=None, js_file=None,
@@ -205,122 +235,122 @@ def write_js_to_header(img_dict, initial_selectors=None, style=None,
     * keywords - html keyword metadata
     '''
     
-    if not isinstance(img_dict, imt.ImageDict):
+    if not (isinstance(img_dict, imt.ImageDict) or img_dict is None):
         raise ValueError('Input img_dict is not an ImageMetaTag ImageDict')
-    dict_depth=img_dict.dict_depth()
 
     if not description is None:
         file_obj.write('{}<meta name="description" content="{}">\n'.format(ind, description))
     if not keywords is None:
         file_obj.write('{}<meta name="keywords" content="{}">\n'.format(ind, keywords))
 
+    if not img_dict is None:
+        # add a reference to the data structure:
+        file_obj.write('{}<script type="text/javascript" src="{}"></script>\n'.format(ind, json_file))
+        # now add a reference to the javascript functions to implement the style:
+        file_obj.write('{}<script type="text/javascript" src="{}"></script>\n'.format(ind, js_file))
+        
+        # now write out the javascript cnfiguration variables:
+        file_obj.write(ind + '<script type="text/javascript">\n')
+        ind = _indent_up_one(ind)
+        
+        # in case the page we are writing is embedded as a frame, write out the top
+        # level page here;
+        file_obj.write('{}var pagename = "{}"\n'.format(ind, pagename))
+        # the tab name is used in setting up the URL in nested frames:
+        file_obj.write('{}var tab_name = "{}";\n'.format(ind, tabname))
     
-    # add a reference to the data structure:
-    file_obj.write('{}<script type="text/javascript" src="{}"></script>\n'.format(ind, json_file))
-    # now add a reference to the javascript functions to implement the style:
-    file_obj.write('{}<script type="text/javascript" src="{}"></script>\n'.format(ind, js_file))
+        dict_depth = img_dict.dict_depth()
+        # the key_to_selector variable is what maps each set of keys onto a selector on the page:
+        key_to_selector = str([selector_prefix + str(x) for x in range(dict_depth)])
+        file_obj.write('{}var key_to_selector = {};\n'.format(ind, key_to_selector))
     
-    # now write out the javascript cnfiguration variables:
-    file_obj.write(ind + '<script type="text/javascript">\n')
-    ind = _indent_up_one(ind)
+        # and the width is what determines how large the selector appears on the page:
+        file_obj.write('{}var selector_widths = {};\n'.format(ind, str(img_dict.selector_widths)))
+        
+        # this determines whether a selector uses the animation controls on a page:
+        file_obj.write('{}var anim_sel = {};\n'.format(ind, img_dict.selector_animated))
+        # and the direction the animation runs in:
+        file_obj.write('{}var anim_dir = {};\n'.format(ind, img_dict.animation_direction))
+        # and the direction the animation runs in:
     
-    # in case the page we are writing is embedded as a frame, write out the top
-    # level page here;
-    file_obj.write('{}var pagename = "{}"\n'.format(ind, pagename))
-    # the tab name is used in setting up the URL in nested frames:
-    file_obj.write('{}var tab_name = "{}";\n'.format(ind, tabname))
-
-    # the key_to_selector variable is what maps each set of keys onto a selector on the page:
-    key_to_selector = str([selector_prefix + str(x) for x in range(dict_depth)])
-    file_obj.write('{}var key_to_selector = {};\n'.format(ind, key_to_selector))
-
-    # and the width is what determines how large the selector appears on the page:
-    file_obj.write('{}var selector_widths = {};\n'.format(ind, str(img_dict.selector_widths)))
-    
-    # this determines whether a selector uses the animation controls on a page:
-    file_obj.write('{}var anim_sel = {};\n'.format(ind, img_dict.selector_animated))
-    # and the direction the animation runs in:
-    file_obj.write('{}var anim_dir = {};\n'.format(ind, img_dict.animation_direction))
-    # and the direction the animation runs in:
-
-    # the url_separator is the text character that goes between the variables in the url:
-    if url_separator == '&':
-        msg = 'Cannot use "&" as the url_separator, as some strings will '
-        msg += 'become html special characters. For instance &para-global '
-        msg += 'will be treated as a paragraph then -global, not the intended string.'
-        raise ValueError(msg)
-    file_obj.write('{}var url_separator = "{}";\n'.format(ind, url_separator))
-
-    # the url_type determines whether the url is full of integers (int), with meaningful
-    # values internally or text which looks more meaningful to the user:
-    file_obj.write('{}var url_type = "{}";\n'.format(ind, url_type))
-    # the show_rel_url logical (converted to a string to init a javascript bool)
-    file_obj.write('{}var show_rel_url = {};\n'.format(ind, _py_to_js_bool(only_show_rel_url)))
-    
-    # the selected_id needs to be defined here too, as it's used as a global variable
-    # (it will be overwritten later if the URL changes it, and when selectors/stepping change it):
-    if initial_selectors is None:
-        # if it's not set, then set it to something invalid, and the validator
-        # in the javascript will sort it out. It MUST be the right length though:
-        file_obj.write('{}var selected_id = {}\n;'.format(ind, str([-1]*dict_depth)))
-    else:
-        if not isinstance(initial_selectors, list):
-            msg = 'Input initial_selectors must be a list, of length the depth of the ImageDict'
+        # the url_separator is the text character that goes between the variables in the url:
+        if url_separator == '&':
+            msg = 'Cannot use "&" as the url_separator, as some strings will '
+            msg += 'become html special characters. For instance &para-global '
+            msg += 'will be treated as a paragraph then -global, not the intended string.'
             raise ValueError(msg)
-        if len(initial_selectors) != img_dict.dict_depth():
-            msg = 'Input initial_selectors must be a list, of length the depth of the ImageDict'
-            raise ValueError(msg)
-        # the input can either be a list of integer indices, or strings that match:
-        initial_selectors_as_inds = []
-        initial_selectors_as_string = []
-        for i_sel, sel_value in enumerate(initial_selectors):
-            if isinstance(sel_value, int):
-                if sel_value < 0 or sel_value >= len(img_dict.keys[i_sel]):
-                    raise ValueError('initial_selectors contains indices which are out of range')
-                # store the initial_selectors_as_inds
-                initial_selectors_as_inds.append(sel_value)
-                # and as a string:
-                initial_selectors_as_string.append(img_dict.keys[i_sel][sel_value])
-            else:
-                # get the index of that value:
-                initial_selectors_as_inds.append(img_dict.keys[i_sel].index(sel_value))
-                # and simple store the string:
-                initial_selectors_as_string.append(sel_value)
-        # check that's valid:
-        if img_dict.return_from_list(initial_selectors_as_string) is None:
-            raise ValueError('Input initial_selectors does not end up at a valid image/payload')
-        # write that out:
-        file_obj.write('{}var selected_id = {};\n'.format(ind, initial_selectors_as_inds))
+        file_obj.write('{}var url_separator = "{}";\n'.format(ind, url_separator))
     
-    # now write out the lists of keys, to the different levels:
-    keys_to_js = [str(x[1]) for x in img_dict.keys.iteritems()]
-    file_obj.write('{}var key_lists = [{},\n'.format(ind, keys_to_js[0]))
-    ind = _indent_up_one(ind)
-    for i_depth in range(1, dict_depth):
-        file_obj.write('{}{},\n'.format(ind, keys_to_js[i_depth]))
-    ind = _indent_down_one(ind)
-    file_obj.write(ind + '];\n')
-    
-    # now some top level things:
-    if style == 'horiz dropdowns':
-        file_obj.write('''
-{0}// other top level derived variables
-{0}// the depth of the ImageMetaTag ImageDict (number of selectors):
-{0}var n_deep = selected_id.length;
-{0}// a list of the options available to the animator buttons, with the current selectio
-{0}var anim_options = [];
-{0}// the index of the current option for the animator:
-{0}var anim_ind = 0;
-'''.format(ind))
-    
-    # now, the main call:
-    file_obj.write(ind + 'window.onload = function() {\n')
-    ind = _indent_up_one(ind)
-    file_obj.write(ind + '// redefine onload, so it does this:\n')
-    file_obj.write(ind + 'imt_main();\n')
-    ind = _indent_down_one(ind)
-    file_obj.write(ind + '};\n')
-    # END of the imt specifc header content:
+        # the url_type determines whether the url is full of integers (int), with meaningful
+        # values internally or text which looks more meaningful to the user:
+        file_obj.write('{}var url_type = "{}";\n'.format(ind, url_type))
+        # the show_rel_url logical (converted to a string to init a javascript bool)
+        file_obj.write('{}var show_rel_url = {};\n'.format(ind, _py_to_js_bool(only_show_rel_url)))
+        
+        # the selected_id needs to be defined here too, as it's used as a global variable
+        # (it will be overwritten later if the URL changes it, and when selectors/stepping change it):
+        if initial_selectors is None:
+            # if it's not set, then set it to something invalid, and the validator
+            # in the javascript will sort it out. It MUST be the right length though:
+            file_obj.write('{}var selected_id = {}\n;'.format(ind, str([-1]*dict_depth)))
+        else:
+            if not isinstance(initial_selectors, list):
+                msg = 'Input initial_selectors must be a list, of length the depth of the ImageDict'
+                raise ValueError(msg)
+            if len(initial_selectors) != img_dict.dict_depth():
+                msg = 'Input initial_selectors must be a list, of length the depth of the ImageDict'
+                raise ValueError(msg)
+            # the input can either be a list of integer indices, or strings that match:
+            initial_selectors_as_inds = []
+            initial_selectors_as_string = []
+            for i_sel, sel_value in enumerate(initial_selectors):
+                if isinstance(sel_value, int):
+                    if sel_value < 0 or sel_value >= len(img_dict.keys[i_sel]):
+                        raise ValueError('initial_selectors contains indices which are out of range')
+                    # store the initial_selectors_as_inds
+                    initial_selectors_as_inds.append(sel_value)
+                    # and as a string:
+                    initial_selectors_as_string.append(img_dict.keys[i_sel][sel_value])
+                else:
+                    # get the index of that value:
+                    initial_selectors_as_inds.append(img_dict.keys[i_sel].index(sel_value))
+                    # and simple store the string:
+                    initial_selectors_as_string.append(sel_value)
+            # check that's valid:
+            if img_dict.return_from_list(initial_selectors_as_string) is None:
+                raise ValueError('Input initial_selectors does not end up at a valid image/payload')
+            # write that out:
+            file_obj.write('{}var selected_id = {};\n'.format(ind, initial_selectors_as_inds))
+        
+        # now write out the lists of keys, to the different levels:
+        keys_to_js = [str(x[1]) for x in img_dict.keys.iteritems()]
+        file_obj.write('{}var key_lists = [{},\n'.format(ind, keys_to_js[0]))
+        ind = _indent_up_one(ind)
+        for i_depth in range(1, dict_depth):
+            file_obj.write('{}{},\n'.format(ind, keys_to_js[i_depth]))
+        ind = _indent_down_one(ind)
+        file_obj.write(ind + '];\n')
+        
+        # now some top level things:
+        if style == 'horiz dropdowns':
+            file_obj.write('''
+    {0}// other top level derived variables
+    {0}// the depth of the ImageMetaTag ImageDict (number of selectors):
+    {0}var n_deep = selected_id.length;
+    {0}// a list of the options available to the animator buttons, with the current selectio
+    {0}var anim_options = [];
+    {0}// the index of the current option for the animator:
+    {0}var anim_ind = 0;
+    '''.format(ind))
+        
+        # now, the main call:
+        file_obj.write(ind + 'window.onload = function() {\n')
+        ind = _indent_up_one(ind)
+        file_obj.write(ind + '// redefine onload, so it does this:\n')
+        file_obj.write(ind + 'imt_main();\n')
+        ind = _indent_down_one(ind)
+        file_obj.write(ind + '};\n')
+        # END of the imt specifc header content:
 
 
 def write_js_setup_defaults(selector_prefix=None, list_prefix=None, file_list_name=None):
