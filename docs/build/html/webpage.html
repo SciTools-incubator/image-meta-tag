@@ -87,7 +87,7 @@
 <span id="imagemetatag-webpage"></span><h1>ImageMetaTag.webpage<a class="headerlink" href="#module-ImageMetaTag.webpage" title="Permalink to this headline">¶</a></h1>
 <p>This sub-module contains functions to write out an <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a> to a webpage.</p>
 <p>The webpages are made up of a single .html file, which is the page to be loaded to view the images.
-Alongside this is a short ImageMetaTag javascript library held in a &#8216;.js&#8217; file 
+Alongside this is a short ImageMetaTag javascript library held in a &#8216;.js&#8217; file
 (currently held in a single file) and a .json file contain the <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a>
 tree strcuture as a JSON data strcuture.</p>
 <p>This can either be done using write_full_page, to produce a page with just a set of
@@ -97,7 +97,7 @@ page as it is being constructed (reading in an html template, for instance).</p>
 <p>If the latter, then the following sections are needed:</p>
 <blockquote>
 <div><ul class="simple">
-<li><a class="reference internal" href="#ImageMetaTag.webpage.write_js_to_header" title="ImageMetaTag.webpage.write_js_to_header"><tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.webpage.write_js_to_header()</span></tt></a> - writes out the javascript information to the                                                html header</li>
+<li><a class="reference internal" href="#ImageMetaTag.webpage.write_js_to_header" title="ImageMetaTag.webpage.write_js_to_header"><tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.webpage.write_js_to_header()</span></tt></a> - writes out the javascript information                                                to the html header</li>
 <li><a class="reference internal" href="#ImageMetaTag.webpage.write_js_placeholders" title="ImageMetaTag.webpage.write_js_placeholders"><tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.webpage.write_js_placeholders()</span></tt></a> - writes out the placeholders that                                                        the javascript will write images to.</li>
 <li><a class="reference internal" href="#ImageMetaTag.webpage.write_json" title="ImageMetaTag.webpage.write_json"><tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.webpage.write_json()</span></tt></a> - writes out the <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a>                                                as a json.dump to a json file</li>
 <li><a class="reference internal" href="#ImageMetaTag.webpage.copy_required_javascript" title="ImageMetaTag.webpage.copy_required_javascript"><tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.webpage.copy_required_javascript()</span></tt></a> - copies required javascript library                                                           to the required location.</li>
@@ -119,8 +119,10 @@ If the file is different, it will be overwritten if overwrite is True.</p>
 <dl class="function">
 <dt id="ImageMetaTag.webpage.write_full_page">
 <tt class="descclassname">ImageMetaTag.webpage.</tt><tt class="descname">write_full_page</tt><big>(</big><em>img_dict</em>, <em>filepath</em>, <em>title</em>, <em>page_filename=None</em>, <em>tab_s_name=None</em>, <em>preamble=None</em>, <em>postamble=None</em>, <em>initial_selectors=None</em>, <em>show_selector_names=False</em>, <em>url_type='int'</em>, <em>only_show_rel_url=False</em>, <em>verbose=False</em>, <em>style='horiz dropdowns'</em>, <em>write_intmed_tmpfile=False</em>, <em>description=None</em>, <em>keywords=None</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/webpage.html#write_full_page"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.webpage.write_full_page" title="Permalink to this definition">¶</a></dt>
-<dd><p>Writes out an ImageDict as a webpage, to a given file location.
+<dd><p>Writes out an <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a> as a webpage, to a given file location.
 The file is overwritten.</p>
+<p>If the img_dict supplied is None, rather than the appropriate class, then a page will
+be produced with the image selectors missing, and a message saying no images are available.</p>
 <p>Currently only able to write out a page with horizontal dropdown menus, but other
 webpage styles could be added.</p>
 <ul class="simple">
@@ -138,6 +140,7 @@ webpage styles could be added.</p>
 <li>description - html description metadata</li>
 <li>keywords - html keyword metadata</li>
 </ul>
+<p>Returns a list of files that the the created webpage is dependent upon</p>
 </dd></dl>
 
 <dl class="function">
