@@ -291,7 +291,7 @@
 
 <span class="sd">    If tag_strings is not supplied, then the returned dictionary will contain a large number of</span>
 <span class="sd">    duplicated strings, which can be an inefficient used of memory with large databases.</span>
-<span class="sd">    If tag_strings is supplied, it will be populated with a unique list of strings used as tags </span>
+<span class="sd">    If tag_strings is supplied, it will be populated with a unique list of strings used as tags</span>
 <span class="sd">    and the dictionary will only contain references to this list. This can reduce memory usage</span>
 <span class="sd">    considerably, both for the dictionary itself but also of an :class:`ImageMetaTag.ImageDict`</span>
 <span class="sd">    produced with the dictionary.</span>
@@ -542,7 +542,7 @@
                         <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
                 <span class="c"># commit, and vacuum if required:</span>
                 <span class="n">dbcn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
-            
+
             <span class="k">if</span> <span class="n">do_vacuum</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">allow_retries</span><span class="p">:</span>
                     <span class="c"># need to re-open the db, if we allowed retries:</span>
