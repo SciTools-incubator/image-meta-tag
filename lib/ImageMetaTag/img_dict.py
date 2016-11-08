@@ -49,7 +49,7 @@ class ImageDict():
                 raise ValueError(msg)
             else:
                 self.level_names = level_names
-                
+
         # set the dictionary:
         self.dict = input_dict
         # now list the keys, at each level, as lists. These can be reorderd by the calling routine,
@@ -290,7 +290,7 @@ class ImageDict():
     def keys_by_depth(self, in_dict, depth=0, keys=None, subdirs=None):
         '''
         Returns:
-        
+
         * a dictionary of sets, containing the keys at each level of\
           the dictionary (keyed by the level number).
         * a set of the subdirectories for the target images

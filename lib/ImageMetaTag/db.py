@@ -221,7 +221,7 @@ def read_img_info_from_dbfile(db_file, required_tags=None, tag_strings=None,
 
     If tag_strings is not supplied, then the returned dictionary will contain a large number of
     duplicated strings, which can be an inefficient used of memory with large databases.
-    If tag_strings is supplied, it will be populated with a unique list of strings used as tags 
+    If tag_strings is supplied, it will be populated with a unique list of strings used as tags
     and the dictionary will only contain references to this list. This can reduce memory usage
     considerably, both for the dictionary itself but also of an :class:`ImageMetaTag.ImageDict`
     produced with the dictionary.
@@ -472,7 +472,7 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
                         time.sleep(1)
                 # commit, and vacuum if required:
                 dbcn.commit()
-            
+
             if do_vacuum:
                 if allow_retries:
                     # need to re-open the db, if we allowed retries:

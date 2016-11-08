@@ -760,19 +760,24 @@ def __main__():
     # now write out the webpages:
     web_out = {}
     web_out[out_page] = imt.webpage.write_full_page(img_dict, out_page,
-                                        'Test ImageDict webpage',
-                                        preamble=webpage_preamble, postamble=webpage_postamble,
-                                        initial_selectors=initial_selectors,
-                                        verbose=True, only_show_rel_url=True, 
-                                        write_intmed_tmpfile=True, show_selector_names=True)
+                                                    'Test ImageDict webpage',
+                                                    preamble=webpage_preamble,
+                                                    postamble=webpage_postamble,
+                                                    initial_selectors=initial_selectors,
+                                                    verbose=True, only_show_rel_url=True,
+                                                    write_intmed_tmpfile=True,
+                                                    show_selector_names=True)
     web_out[out_page_para] = imt.webpage.write_full_page(img_dict, out_page_para,
-                                        'Test ImageDict webpage (Parallel version)',
-                                        preamble=webpage_preamble, postamble=webpage_postamble,
-                                        verbose=True, only_show_rel_url=False)
+                                                         'Test ImageDict webpage (Parallel)',
+                                                         preamble=webpage_preamble,
+                                                         postamble=webpage_postamble,
+                                                         verbose=True,
+                                                         only_show_rel_url=False)
     web_out[out_page_multi] = imt.webpage.write_full_page(img_dict_multi, out_page_multi,
-                                        'Test ImageDict webpage (mutli image version)',
-                                        preamble=webpage_preamble, postamble=webpage_postamble,
-                                        verbose=True, url_type='str')
+                                                          'Test ImageDict webpage',
+                                                          preamble=webpage_preamble,
+                                                          postamble=webpage_postamble,
+                                                          verbose=True, url_type='str')
 
     print 'Web page outputs\n', web_out
 
