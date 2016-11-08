@@ -34,7 +34,7 @@ function get_selection () {
 		    for (i_val=0, l_val=key_lists[i_ind].length; i_val < l_val; i_val++){
 			if (parms[i_ind] == convertToSlug(key_lists[i_ind][i_val])){
 			    selected_id[i_ind] = i_val;
-			    break
+			    break;
 			}
 		    }
 		}
@@ -148,21 +148,26 @@ function update_selectors(options_at_depth, selected_at_depth, start_depth) {
 function update_selector(depth, options, selected) {
     // updates a selector at a particular depth, with a set of options
     // and the selected value as the current selection:
-    target_div = key_to_selector[depth]
-    //console.log('updating sel', depth)
-    //console.log('  at div', target_div)
-    //console.log('  with options', options)
-    //console.log('  and selected val', selected)
+    target_div = key_to_selector[depth];
+    //console.log('updating sel', depth);
+    //console.log('  at div', target_div);
+    //console.log('  with options', options);
+    //console.log('  and selected val', selected);
 
     // set up the text to define the selector:
     sel_text = "<select id='select_"+ depth
     sel_text += "' onChange='OnSelected("+ depth +")'>\n"
     for (var i_opt=0, len=options.length; i_opt < len; i_opt++){
 	// loop over the options, and write out a line for each one:
+	for (var j_opt=0, len_j=key_lists[depth].length; j_opt < len_j; j_opt++){
+	    // first, get the index in key_lists[depth] to which i_opt refers
+	    // as not every option is used in every selection:
+	    if (key_lists[depth][j_opt] == options[i_opt]){break};
+	}
 	if (options[i_opt] == selected){
-	    sel_text += '  <option value=' + i_opt + ' selected=selected>'+options[i_opt]+'</option>\n'
+	    sel_text += '  <option value=' + j_opt + ' selected=selected>'+options[i_opt]+'</option>\n'
 	} else {
-	    sel_text += '  <option value=' + i_opt + '>'+options[i_opt]+'</option>\n'
+	    sel_text += '  <option value=' + j_opt + '>'+options[i_opt]+'</option>\n'
 	}
     }
     // finish it off:
@@ -176,14 +181,14 @@ function update_selector(depth, options, selected) {
 
 function OnSelected(depth){
     // acts to apply the selection changes for a given selector
-    //console.log(depth)
-    new_value = document.getElementById('select_'+depth).value
-    //console.log(selected_id)
-    selected_id[depth] = parseInt(new_value)
-    //console.log(selected_id)
-    validate_selected_id(depth+1)
-    //console.log(selected_id)    
-    apply_selection(0)
+    //console.log('OnSelected depth:', depth);
+    new_value = document.getElementById('select_'+depth).value;
+    //console.log(selected_id);
+    selected_id[depth] = parseInt(new_value);
+    //console.log(selected_id);
+    validate_selected_id(depth+1);
+    //console.log(selected_id);
+    apply_selection(0);
 }
 
 function validate_selected_id(start_depth) {
@@ -192,14 +197,14 @@ function validate_selected_id(start_depth) {
     // first of all, get the imt information, subsetted to the start_depth
     //console.log(start_depth)
     if (start_depth == 0) {
-	var imt_subset = imt
+	var imt_subset = imt;
     } else {
 	for (var i_d=0; i_d < start_depth; i_d++){
-	    var selected_key = key_lists[i_d][selected_id[i_d]]
+	    var selected_key = key_lists[i_d][selected_id[i_d]];
 	    if (i_d == 0){
 		var imt_subset = imt[selected_key];
 	    } else {
-		imt_subset = imt_subset[selected_key]
+		imt_subset = imt_subset[selected_key];
 	    }
 	}
     }
@@ -227,7 +232,6 @@ function validate_selected_id(start_depth) {
 	// the selected_id is valid for the previous selections, so subset imt and proceed:
 	imt_subset = imt_subset[selected_key]
     }
-
 }
 
 function sorted_by(in_list, order_list) {
