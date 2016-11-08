@@ -721,6 +721,10 @@ def __main__():
     # end timer:
     print_simple_timer(date_start_reorg_multi2, datetime.now(), 'reorg_multi from database')
 
+    # delete the pre-exising javascript, to make sure it's copied over at least once afresh, for testing:
+    if os.path.isfile(os.path.join(webdir, 'imt_dropdown.js')):
+        os.remove(os.path.join(webdir, 'imt_dropdown.js'))
+
     # now create a web page for each of them:
     out_page = '%s/page.html' % webdir
     out_page_para = '%s/page_para.html' % webdir
