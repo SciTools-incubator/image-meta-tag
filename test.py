@@ -758,20 +758,28 @@ def __main__():
             initial_selectors.append(next_sel)
 
     # now write out the webpages:
-    imt.webpage.write_full_page(img_dict, out_page,
-                                'Test ImageDict webpage',
-                                preamble=webpage_preamble, postamble=webpage_postamble,
-                                initial_selectors=initial_selectors,
-                                verbose=True, only_show_rel_url=True, 
-                                write_intmed_tmpfile=True, show_selector_names=True)
-    imt.webpage.write_full_page(img_dict, out_page_para,
-                                'Test ImageDict webpage (Parallel version)',
-                                preamble=webpage_preamble, postamble=webpage_postamble,
-                                verbose=True, only_show_rel_url=False)
-    imt.webpage.write_full_page(img_dict_multi, out_page_multi,
-                                'Test ImageDict webpage (mutli image version)',
-                                preamble=webpage_preamble, postamble=webpage_postamble,
-                                verbose=True, url_type='str')
+    web_out = {}
+    web_out[out_page] = imt.webpage.write_full_page(img_dict, out_page,
+                                                    'Test ImageDict webpage',
+                                                    preamble=webpage_preamble,
+                                                    postamble=webpage_postamble,
+                                                    initial_selectors=initial_selectors,
+                                                    verbose=True, only_show_rel_url=True,
+                                                    write_intmed_tmpfile=True,
+                                                    show_selector_names=True)
+    web_out[out_page_para] = imt.webpage.write_full_page(img_dict, out_page_para,
+                                                         'Test ImageDict webpage (Parallel)',
+                                                         preamble=webpage_preamble,
+                                                         postamble=webpage_postamble,
+                                                         verbose=True,
+                                                         only_show_rel_url=False)
+    web_out[out_page_multi] = imt.webpage.write_full_page(img_dict_multi, out_page_multi,
+                                                          'Test ImageDict webpage',
+                                                          preamble=webpage_preamble,
+                                                          postamble=webpage_postamble,
+                                                          verbose=True, url_type='str')
+
+    print 'Web page outputs\n', web_out
 
     # now, finally, produce a large ImageDict:
     if not args.no_biggus_dictus:
@@ -881,8 +889,8 @@ def __main__():
         # and now make we big dict webpage (and time it too)
         date_start_web = datetime.now()
         out_page_big = '%s/biggus_pageus.html' % webdir
-        imt.webpage.write_full_page(biggus_dictus_imigus, out_page_big,
-                                    'Test ImageDict webpage', verbose=True)
+        web_out[out_page_big] = imt.webpage.write_full_page(biggus_dictus_imigus, out_page_big,
+                                                            'Test ImageDict webpage')
         print_simple_timer(date_start_web, datetime.now(), 'Large parallel dict webpage')
 
 
