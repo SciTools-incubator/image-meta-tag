@@ -16,11 +16,11 @@ from cStringIO import StringIO
 SQLITE_IMG_INFO_TABLE = 'img_info'
 
 def info_key_to_db_name(in_str):
-    'consistently convert a name in the img_info dict to something to be used in the database'
+    'Consistently convert a name in the img_info dict to something to be used in the database'
     return in_str.replace(' ', '__')
 
 def db_name_to_info_key(in_str):
-    'inverse of info_key_to_db_name'
+    'Inverse of info_key_to_db_name'
     # convert to string, to remove unicode string
     return str(in_str).replace('__', ' ')
 
@@ -107,7 +107,9 @@ def merge_db_files(main_db_file, add_db_file, delete_add_db=False, delete_added_
 def open_or_create_db_file(db_file, img_info, restart_db=False, timeout=DEFAULT_DB_TIMEOUT):
     '''
     Opens a database file and sets up initial tables, then returns the connection and cursor.
-    Setting the restart_db option deletes the current db file and starts again:
+    Setting the restart_db option deletes the current db file and starts again.
+    
+    Returns an open database connection (dbcn) and cursor (dbcr)
     '''
 
     if not os.path.isfile(db_file) or restart_db:
@@ -128,7 +130,11 @@ def open_or_create_db_file(db_file, img_info, restart_db=False, timeout=DEFAULT_
     return dbcn, dbcr
 
 def open_db_file(db_file, timeout=DEFAULT_DB_TIMEOUT):
-    'Just opens an existing db_file, but we could do more extensive retries here:'
+    '''
+    Just opens an existing db_file, using timeouts but no retries.
+    
+    Returns an open database connection (dbcn) and cursor (dbcr)
+    '''
 
     dbcn = sqlite3.connect(db_file, timeout=timeout)
     dbcr = dbcn.cursor()
@@ -145,6 +151,8 @@ def read_db_file_to_mem(db_file, timeout=DEFAULT_DB_TIMEOUT):
 
     Tests on selects on a large-ish database (250k rows) suggested it was worth doing
     for > 100 selects.
+
+    Returns an open database connection (dbcn) and cursor (dbcr)
     '''
 
     # read the database into an in-memory file object:
@@ -166,7 +174,7 @@ def read_db_file_to_mem(db_file, timeout=DEFAULT_DB_TIMEOUT):
 
 def write_img_to_open_db(dbcr, filename, img_info, add_strict=False, attempt_replace=False):
     '''
-    Does the work for write_img_to_dbfile to add an image to the open database
+    Does the work for write_img_to_dbfile to add an image to the open database cursor (dbcr)
 
     * add_strict: if True then it will report a ValueError if you \
                   try and include fields that aren't defined in the table
@@ -220,7 +228,7 @@ def read_img_info_from_dbfile(db_file, required_tags=None, tag_strings=None,
      * a dictionary, by filename, containing a dictionary of the image metadata as *tagname: value*
 
     If tag_strings is not supplied, then the returned dictionary will contain a large number of
-    duplicated strings, which can be an inefficient used of memory with large databases.
+    duplicated strings, which can be an inefficient use of memory with large databases.
     If tag_strings is supplied, it will be populated with a unique list of strings used as tags
     and the dictionary will only contain references to this list. This can reduce memory usage
     considerably, both for the dictionary itself but also of an :class:`ImageMetaTag.ImageDict`
@@ -262,7 +270,7 @@ def read_img_info_from_dbfile(db_file, required_tags=None, tag_strings=None,
 
 def read_img_info_from_dbcursor(dbcr, required_tags=None, tag_strings=None):
     '''
-    does the reading for read_img_info_from_dbfile (so it can be used in other routines too)
+    Reads from an open database cursor (dbcr) for read_img_info_from_dbfile and other routines.
 
     Options
      * required_tags - a list of image tags to return, and to fail if not all are present
@@ -278,7 +286,8 @@ def read_img_info_from_dbcursor(dbcr, required_tags=None, tag_strings=None):
 
 def process_select_star_from(db_contents, dbcr, required_tags=None, tag_strings=None):
     '''
-    converts the output from a select * from ....  command into a standard output format
+    Converts the output from a select * from ....  command into a standard output format
+    Requires a database cursor (dbcr) to identify the field names.
 
     Options
      * required_tags - a list of image tags to return, and to fail if not all are present
@@ -394,7 +403,7 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
                           db_timeout=DEFAULT_DB_TIMEOUT, db_attempts=DEFAULT_DB_ATTEMPTS,
                           skip_warning=False):
     '''
-    deletes a list of files from a database created by :mod:`ImageMetaTag.db`
+    deletes a list of files from a database file created by :mod:`ImageMetaTag.db`
 
     * do_vacuum - if True, the database will be restructured/cleaned after the delete
     * allow_retries - if True, retries will be allowed if the database is locked.\
@@ -483,7 +492,8 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
                 dbcn.close()
 
 def select_dbfile_by_tags(db_file, select_tags):
-    '''selects from a database file the entries that match a dict of field names/acceptable values
+    '''
+    Selects from a database file the entries that match a dict of field names/acceptable values
     Returns the output, processed by :func:`ImageMetaTag.db.process_select_star_from`
     '''
     if db_file is None:
@@ -501,7 +511,7 @@ def select_dbfile_by_tags(db_file, select_tags):
 
 def select_dbcr_by_tags(dbcr, select_tags):
     '''
-    Selects from an open database cursor the entries that match a dict of field
+    Selects from an open database cursor (dbcr) the entries that match a dict of field
     names & acceptable values.
 
     Returns the output, processed by :func:`ImageMetaTag.db.process_select_star_from`
