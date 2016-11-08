@@ -43,8 +43,11 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
                     style='horiz dropdowns', write_intmed_tmpfile=False,
                     description=None, keywords=None):
     '''
-    Writes out an ImageDict as a webpage, to a given file location.
+    Writes out an :class:`ImageMetaTag.ImageDict` as a webpage, to a given file location.
     The file is overwritten.
+
+    If the img_dict supplied is None, rather than the appropriate class, then a page will
+    be produced with the image selectors missing, and a message saying no images are available.
 
     Currently only able to write out a page with horizontal dropdown menus, but other
     webpage styles could be added.
