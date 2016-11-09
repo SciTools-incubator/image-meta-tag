@@ -1,4 +1,4 @@
-// ImageMetaTag dropdown menu scripting - vn0.2
+// ImageMetaTag dropdown menu scripting - vn0.4
 function imt_main () {
     // main function, run on load:
     // parse the input url to see if it overides the default selection above
