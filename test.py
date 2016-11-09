@@ -24,7 +24,7 @@ from multiprocessing import Pool
 # make sure test is using the version of ImageMetaTag being tested:
 # (this would normally be added already, by installation, but for testing, we
 #  need to be testing the version we are making changes too!)
-sys.path.insert(0, os.sep.join(os.path.abspath(sys.argv[0]).split(os.sep)[0:-1]) + '/lib')
+sys.path.insert(0, os.sep.join(os.path.abspath(sys.argv[0]).split(os.sep)[0:-1]))
 
 LOGO_FILE = os.sep.join(os.path.abspath(sys.argv[0]).split(os.sep)[0:-1]) + '/logo.png'
 if not os.path.isfile(LOGO_FILE):
