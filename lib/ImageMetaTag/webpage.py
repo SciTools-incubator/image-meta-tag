@@ -528,9 +528,8 @@ def write_js_placeholders(file_obj=None, dict_depth=None, selector_prefix=None,
 
         # now add somewhere for the image to go:
         file_obj.write('''   <div id="the_image">Please wait while the page is loading</div>
-   <br>
    <div id="the_url">....</div>''')
-
+        # and finish off the placeholders:
         file_obj.write('''
    </font>
   </td>

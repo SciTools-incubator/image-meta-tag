@@ -4,7 +4,8 @@ Submodule containing an ImageDict class, and functions for preparing them.
 @author: Malcolm.E.Brooks@metoffice.gov.uk
 '''
 # required imports
-import Image, os, re, collections, inspect
+import os, re, collections, inspect
+from PIL import Image
 # useful for debugging
 import pdb
 
