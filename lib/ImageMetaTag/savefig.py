@@ -12,8 +12,7 @@ from datetime import datetime
 from ImageMetaTag import db, META_IMG_FORMATS, DEFAULT_DB_TIMEOUT, DEFAULT_DB_ATTEMPTS
 
 # image manipulations:
-import Image, ImageChops
-from PIL import PngImagePlugin
+from PIL import Image, ImageChops, PngImagePlugin
 import numpy as np
 
 THUMB_DEFAULT_IMG_SIZE = 150, 150
@@ -413,12 +412,12 @@ def _img_premult_resize(img_obj, size=None):
         size = (40, 40)
 
     img_obj = img_obj.convert('RGBA')
-    premult = np.fromstring(img_obj.tostring(), dtype=np.uint8)
+    premult = np.fromstring(img_obj.tobytes(), dtype=np.uint8)
     alpha_layer = premult[3::4] / 255.0
     premult[0::4] = premult[0::4] * alpha_layer
     premult[1::4] = premult[1::4] * alpha_layer
     premult[2::4] = premult[2::4] * alpha_layer
-    new_img_obj = Image.fromstring("RGBA", img_obj.size, premult.tostring())
+    new_img_obj = Image.frombytes("RGBA", img_obj.size, premult.tobytes())
 
     #new_img_obj = new_img_obj.filter(ImageFilter.SMOOTH)
     res_img_obj = new_img_obj.resize(size, Image.ANTIALIAS)
