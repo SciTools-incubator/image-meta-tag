@@ -11,7 +11,7 @@ for d, _, _ in os.walk(os.path.join(here, 'ImageMetaTag')):
 print packages
 setup_args = dict(
     name='ImageMetaTag',
-    version='0.2',
+    version='0.4',
     description='Image metadata tagging, database and presentation',
     license='BSD3',
     author='Malcolm Brooks',
