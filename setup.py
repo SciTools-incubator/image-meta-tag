@@ -8,7 +8,6 @@ for d, _, _ in os.walk(os.path.join(here, 'ImageMetaTag')):
     if os.path.exists(os.path.join(d, '__init__.py')):
         packages.append(d[len(here)+1:].replace(os.path.sep, '.'))
 
-print packages
 setup_args = dict(
     name='ImageMetaTag',
     version='0.4',
