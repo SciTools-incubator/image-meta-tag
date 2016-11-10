@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ImageMetaTag - test.py &#8212; ImageMetaTag 0.4 documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="ImageMetaTag 0.4 documentation" href="index.html" />
+    <link rel="next" title="Versions of Python" href="versions.html" />
+    <link rel="prev" title="ImageMetaTag.webpage" href="webpage.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="versions.html" title="Versions of Python"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="webpage.html" title="ImageMetaTag.webpage"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.4 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="webpage.html"
+                        title="previous chapter">ImageMetaTag.webpage</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="versions.html"
+                        title="next chapter">Versions of Python</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/test.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="imagemetatag-test-py">
+<h1>ImageMetaTag - test.py<a class="headerlink" href="#imagemetatag-test-py" title="Permalink to this headline">¶</a></h1>
+<p>The test.py script includes tests for the main functionality of ImageMetaTag. It also acts as a demonstration of the code in action.</p>
+<p>Running the command:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">test</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>will create a set of plots of random data, create a number of <code class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></code> objects describing how image metadata should be presented, and write these to webpages to browse them. The images and webpages are created in a directory::</dt>
+<dd>${HOME}/public_html/ImageMetaTagTest</dd>
+</dl>
+<p>The test.py script is not a part of the ImageMetaTag module, it is written to import the module and use it instead.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Currently these links only work within the Met Office</p>
+</div>
+<dl class="docutils">
+<dt>The webpages it produces can be viewed here:</dt>
+<dd><ul class="first last simple">
+<li>A basic page presenting the plots: <a class="reference external" href="http://www-nwp/~freb/ImageMetaTagTest/page.html">http://www-nwp/~freb/ImageMetaTagTest/page.html</a></li>
+<li>A basic page, where the metadata processing was parallelised: <a class="reference external" href="http://www-nwp/~freb/ImageMetaTagTest/page_para.html">http://www-nwp/~freb/ImageMetaTagTest/page_para.html</a></li>
+<li>A page where multiple images are presented at the same time: <a class="reference external" href="http://www-nwp/~freb/ImageMetaTagTest/page_multi.html">http://www-nwp/~freb/ImageMetaTagTest/page_multi.html</a></li>
+</ul>
+</dd>
+</dl>
+<p>The test.py script can be run without re-plotting the random data by:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">test</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">skip</span><span class="o">-</span><span class="n">plotting</span>
+</pre></div>
+</div>
+<p>As a scalability test, once the images have been produced and wepages created, the test.py script also creates a much larger <code class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></code> with 9 factorial (9! = 362880)  members. This process only mimics the metadata, it does not actually create the plots!</p>
+<p>This test can be skipped by running the test as:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">test</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">big</span><span class="o">-</span><span class="nb">dict</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="versions.html" title="Versions of Python"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="webpage.html" title="ImageMetaTag.webpage"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.4 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2015-2016, British Crown Copyright.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
+    </div>
+  </body>
+</html>
