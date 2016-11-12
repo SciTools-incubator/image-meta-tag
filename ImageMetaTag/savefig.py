@@ -412,12 +412,20 @@ def _img_premult_resize(img_obj, size=None):
         size = (40, 40)
 
     img_obj = img_obj.convert('RGBA')
-    premult = np.fromstring(img_obj.tobytes(), dtype=np.uint8)
+    try:
+        premult = np.fromstring(img_obj.tobytes(), dtype=np.uint8)
+        pil_to_bytes = True
+    except AttributeError:
+        premult = np.fromstring(img_obj.tostring(), dtype=np.uint8)
+        pil_to_bytes = False
     alpha_layer = premult[3::4] / 255.0
     premult[0::4] = premult[0::4] * alpha_layer
     premult[1::4] = premult[1::4] * alpha_layer
     premult[2::4] = premult[2::4] * alpha_layer
-    new_img_obj = Image.frombytes("RGBA", img_obj.size, premult.tobytes())
+    if pil_to_bytes:
+        new_img_obj = Image.frombytes("RGBA", img_obj.size, premult.tobytes())
+    else:
+        new_img_obj = Image.fromstring("RGBA", img_obj.size, premult.tostring())
 
     #new_img_obj = new_img_obj.filter(ImageFilter.SMOOTH)
     res_img_obj = new_img_obj.resize(size, Image.ANTIALIAS)
