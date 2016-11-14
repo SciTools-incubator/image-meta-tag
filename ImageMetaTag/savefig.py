@@ -12,7 +12,7 @@ from datetime import datetime
 from ImageMetaTag import db, META_IMG_FORMATS, DEFAULT_DB_TIMEOUT, DEFAULT_DB_ATTEMPTS
 
 # image manipulations:
-from PIL import Image, ImageChops, PngImagePlugin
+from PIL import Image, ImageChops, PngImagePlugin#, ImageFilter
 import numpy as np
 
 THUMB_DEFAULT_IMG_SIZE = 150, 150
@@ -199,44 +199,51 @@ def image_file_postproc(filename, outfile=None, img_converter=0, do_trim=False, 
 
     if logo_file is not None:
         im_obj = _im_logo(im_obj, logo_file, logo_width, logo_padding, logo_pos)
+        
+    if do_thumb:
+        # make a thumbnail image here, if required. It is important to do this 
+        # before we change the colour pallette of the main image, so that there
+        # are sufficent colours to do the interpolation. Afterwards, the thumbnail
+        # can hage its colour table reduced as well.
+        #
+        # set a default thumbnail directory name and determine relative paths
+        thumb_dir_name = THUMB_DEFAULT_DIR_NAME
+        thumb_directory = os.path.join(os.path.split(outfile)[0], thumb_dir_name)
+        thumb_full_path = os.path.join(thumb_directory, os.path.split(outfile)[1])
+        # create thumbnail directory if one does not exist
+        if not os.path.isdir(thumb_directory):
+            os.mkdir(thumb_directory)
+        # set to default thumbnail size if no size specified
+        if do_thumb is True:
+            do_thumb = THUMB_DEFAULT_IMG_SIZE
+        # check input
+        elif not isinstance(do_thumb, tuple):
+            do_thumb = (do_thumb, do_thumb)
+        # create the thumbnail
+        im_thumb = im_obj.copy()
+        im_thumb.thumbnail(do_thumb, Image.ANTIALIAS)
 
     # images start out as RGBA, strip out the alpha channel first by covnerting to RGB,
     # then you convert to the next format (that's key to keeping image quality, I think):
     if img_converter == 1:
         # this is a good quality image, but not very much smaller:
         im_obj = im_obj.convert('RGB')
-
+        if do_thumb:
+            im_thumb = im_thumb.convert('RGB')
     elif img_converter == 2:
         # second conversion to 8-bit 'P', palette mode with an adaptive palette.
         # works well for line plots.
         im_obj = im_obj.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=256)
-
+        if do_thumb:
+            im_thumb = im_thumb.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=256)
     elif img_converter == 3:
         # this is VERY strong optimisation and the result can be speckly.
         im_obj = im_obj.convert('RGB').convert('P', palette=Image.WEB)
+        if do_thumb:
+            im_thumb = im_thumb.convert('RGB').convert('P', palette=Image.WEB)
 
     if do_thumb:
-        # set a default thumbnail directory name and determine relative paths
-        thumb_dir_name = THUMB_DEFAULT_DIR_NAME
-        thumb_directory = os.path.join(os.path.split(outfile)[0], thumb_dir_name)
-        thumb_full_path = os.path.join(thumb_directory, os.path.split(outfile)[1])
-
-        # create thumbnail directory if one does not exist
-        if not os.path.isdir(thumb_directory):
-            os.mkdir(thumb_directory)
-
-        # set to default thumbnail size if no size specified
-        if do_thumb is True:
-            do_thumb = THUMB_DEFAULT_IMG_SIZE
-
-        # check input
-        elif not isinstance(do_thumb, tuple):
-            do_thumb = (do_thumb, do_thumb)
-
-        # create the thumbnail
-        im_thumb = im_obj.copy()
-        im_thumb.thumbnail(do_thumb, Image.ANTIALIAS)
-
+        # now save the thumbnail:
         if img_tags:
             # add the tags
             im_thumb = _im_add_png_tags(im_thumb, img_tags)
@@ -249,6 +256,7 @@ def image_file_postproc(filename, outfile=None, img_converter=0, do_trim=False, 
             # simple save
             im_thumb.save(thumb_full_path, optimize=True)
 
+    # now save the main image:n
     if img_tags:
         # add the tags
         im_obj = _im_add_png_tags(im_obj, img_tags)
@@ -312,7 +320,7 @@ def _im_logo(im_obj, logo_file, logo_width, logo_padding, logo_pos):
     # rescale to the new width and height:
     if logo_width != logo_obj.size[0]:
         logo_height = int(logo_obj.size[1] * float(logo_width) / logo_obj.size[0])
-        res_logo_obj = _img_premult_resize(logo_obj, size=(logo_width, logo_height))
+        res_logo_obj = _img_stong_resize(logo_obj, size=(logo_width, logo_height))
     else:
         res_logo_obj = logo_obj
 
@@ -405,30 +413,25 @@ def _im_pngsave_addmeta(im_obj, outfile, optimize=True, verbose=False):
     # and save
     im_obj.save(outfile, "PNG", optimize=optimize, pnginfo=meta)
 
-def _img_premult_resize(img_obj, size=None):
+def _img_stong_resize(img_obj, size=None):
     'does image pre-processing before a strong resize, to get rid of halo effects'
-
     if size is None:
         size = (40, 40)
-
+    #shrink_ratio = [x/float(y) for x,y in zip(img_obj.size, size)]
+    # make sure the image has an alpha channel:
     img_obj = img_obj.convert('RGBA')
-    try:
-        premult = np.fromstring(img_obj.tobytes(), dtype=np.uint8)
-        pil_to_bytes = True
-    except AttributeError:
-        premult = np.fromstring(img_obj.tostring(), dtype=np.uint8)
-        pil_to_bytes = False
-    alpha_layer = premult[3::4] / 255.0
-    premult[0::4] = premult[0::4] * alpha_layer
-    premult[1::4] = premult[1::4] * alpha_layer
-    premult[2::4] = premult[2::4] * alpha_layer
-    if pil_to_bytes:
-        new_img_obj = Image.frombytes("RGBA", img_obj.size, premult.tobytes())
-    else:
-        new_img_obj = Image.fromstring("RGBA", img_obj.size, premult.tostring())
-
-    #new_img_obj = new_img_obj.filter(ImageFilter.SMOOTH)
+    # premultiply the alpha channel:
+    new_img_obj = _img_premultiplyAlpha(img_obj)
+    ## and smooth is the change is size is large:
+    #if max(shrink_ratio) >= 2:
+    #    new_img_obj = new_img_obj.filter(ImageFilter.SMOOTH)
+    # now resize:
     res_img_obj = new_img_obj.resize(size, Image.ANTIALIAS)
-
     return res_img_obj
 
+def _img_premultiplyAlpha(img_obj):
+    'Premultiplies an input image by its alpha channel, which is useful for stron resizes'
+    # fake transparent image to blend with
+    transparent = Image.new("RGBA", img_obj.size, (0, 0, 0, 0))
+    # blend with transparent image using own alpha
+    return Image.composite(img_obj, transparent, img_obj)
