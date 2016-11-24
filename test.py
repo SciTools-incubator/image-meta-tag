@@ -25,10 +25,8 @@ from multiprocessing import Pool
 # (this would normally be added already, by installation, but for testing, we
 #  need to be testing the version we are making changes too!)
 sys.path.insert(0, os.sep.join(os.path.abspath(sys.argv[0]).split(os.sep)[0:-1]))
-
+ 
 LOGO_FILE = os.sep.join(os.path.abspath(sys.argv[0]).split(os.sep)[0:-1]) + '/logo.png'
-if not os.path.isfile(LOGO_FILE):
-    raise ValueError('No logo file found at: %s' % LOGO_FILE)
 LOGO_SIZE = 60
 LOGO_PADDING = 5
 
@@ -54,6 +52,11 @@ def get_webdir():
         mkdir_p(webdir)
 
     return webdir
+
+def define_imt_db():
+    'Defines the main database file to use to the image metadate:'
+    imt_db = '{}/imt.db'.format(get_webdir())
+    return imt_db
 
 def get_user_and_email():
     '''
@@ -297,14 +300,19 @@ def __main__():
 
     n_random_data = 5
     random_data = make_random_data(n_random_data)
-
+    
+    # working directory to create images and webpage etc.
     webdir = get_webdir()
     os.chdir(webdir)
     # img_savedir is now relative to webdir:
     img_savedir = 'images'
     mkdir_p(img_savedir)
+    
     # a database to store the image metadata, as we write them:
-    imt_db = '%s/imt.db' % webdir
+    imt_db = define_imt_db()
+
+    if not os.path.isfile(LOGO_FILE):
+        raise ValueError('No logo file found at: %s' % LOGO_FILE)
 
     compression_levels = [0, 1, 2, 3]
     trims = [True, False]

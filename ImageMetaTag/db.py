@@ -1,6 +1,10 @@
 '''
 This module contains a set of functions to create/write to/read
-and maintain an sqlite3 database of image files.
+and maintain an sqlite3 database of image files and their associated metadata.
+
+In normal usage it is primarily used by  :func:`ImageMetaTag.savefig` to create the database
+as figures are saved. Once the metadata database has been built up then the metadata can be
+loaded with :func:`ImageMetaTag.db.read_img_info_from_dbfile`.
 '''
 
 import os, sqlite3, fnmatch, time, errno, pdb
@@ -24,13 +28,16 @@ def db_name_to_info_key(in_str):
     # convert to string, to remove unicode string
     return str(in_str).replace('__', ' ')
 
-def write_img_to_dbfile(db_file, filename, img_info, add_strict=False, timeout=DEFAULT_DB_TIMEOUT):
+def write_img_to_dbfile(db_file, img_filename, img_info, add_strict=False, timeout=DEFAULT_DB_TIMEOUT):
     '''
-    Writes an entry to a database file containing the filename and image info.
+    Writes image metadata to a database.
 
-    If the database file does not exist, it will be created.
-
-    The img_info should be a dictionary containing a number of  tag_name: value   pairs.
+    Arguments:
+     * db_file - the database file to write to. If it does not exist, it will be created.
+     * img_filename - the filename of the image to which the metadata applies. Usually this
+                      is either the absolute path, or it is useful to make this the relative path,
+                      from the location of the database file.
+     * img_info - a dictionary containing any number of  {tag_name: value}  pairs to be stored.
 
     Options:
      * add_strict - passed into :func:`ImageMetaTag.db.write_img_to_open_db`
@@ -47,10 +54,65 @@ def write_img_to_dbfile(db_file, filename, img_info, add_strict=False, timeout=D
         # open the database:
         dbcn, dbcr = open_or_create_db_file(db_file, img_info, timeout=timeout)
         # now write:
-        write_img_to_open_db(dbcr, filename, img_info, add_strict=add_strict)
+        write_img_to_open_db(dbcr, img_filename, img_info, add_strict=add_strict)
         # now commit that databasde entry and close:
         dbcn.commit()
         dbcn.close()
+
+def read_img_info_from_dbfile(db_file, required_tags=None, tag_strings=None,
+                              db_timeout=DEFAULT_DB_TIMEOUT,
+                              db_attempts=DEFAULT_DB_ATTEMPTS):
+    '''
+    reads in the database written by write_img_to_dbfile
+
+    options:
+     * required_tags - a list of image tags to return, and to fail if not all are present
+     * tag_strings - an input list that will be populated with the unique values of the image tags.
+
+    returns:
+     * a list of filenames (payloads for the :class:`ImageMetaTag.ImageDict` class )
+     * a dictionary, by filename, containing a dictionary of the image metadata as *tagname: value*
+
+    If tag_strings is not supplied, then the returned dictionary will contain a large number of
+    duplicated strings, which can be an inefficient use of memory with large databases.
+    If tag_strings is supplied, it will be populated with a unique list of strings used as tags
+    and the dictionary will only contain references to this list. This can reduce memory usage
+    considerably, both for the dictionary itself but also of an :class:`ImageMetaTag.ImageDict`
+    produced with the dictionary.
+
+    Will return None, None if there is a problem.
+    '''
+    if db_file is None:
+        return None, None
+    else:
+        if not os.path.isfile(db_file):
+            return None, None
+        else:
+            n_tries = 1
+            read_db = False
+            while not read_db and n_tries <= db_attempts:
+                try:
+                    # open the connection and the cursor:
+                    dbcn, dbcr = open_db_file(db_file, timeout=db_timeout)
+                    # read it:
+                    filename_list, out_dict = read_img_info_from_dbcursor(dbcr,
+                                                                required_tags=required_tags,
+                                                                tag_strings=tag_strings)
+                    # close connection:
+                    dbcn.close()
+                    read_db = True
+                except sqlite3.OperationalError as OpErr:
+                    print '%s database timeout reading from file "%s", %s s' \
+                            % (dt_now_str(), db_file, n_tries * db_timeout)
+                    n_tries += 1
+
+            # if we went through all the attempts then it is time to raise the error:
+            if n_tries > db_attempts:
+                raise sqlite3.OperationalError(OpErr.message)
+
+            # close connection:
+            dbcn.close()
+            return filename_list, out_dict
 
 def merge_db_files(main_db_file, add_db_file, delete_add_db=False, delete_added_entries=False,
                    db_timeout=DEFAULT_DB_TIMEOUT, db_attempts=DEFAULT_DB_ATTEMPTS):
@@ -212,61 +274,6 @@ def write_img_to_open_db(dbcr, filename, img_info, add_strict=False, attempt_rep
             pass
     finally:
         pass
-
-def read_img_info_from_dbfile(db_file, required_tags=None, tag_strings=None,
-                              db_timeout=DEFAULT_DB_TIMEOUT,
-                              db_attempts=DEFAULT_DB_ATTEMPTS):
-    '''
-    reads in the database written by write_img_to_dbfile
-
-    options:
-     * required_tags - a list of image tags to return, and to fail if not all are present
-     * tag_strings - an input list that will be populated with the unique values of the image tags.
-
-    returns:
-     * a list of filenames (payloads for the :class:`ImageMetaTag.ImageDict` class )
-     * a dictionary, by filename, containing a dictionary of the image metadata as *tagname: value*
-
-    If tag_strings is not supplied, then the returned dictionary will contain a large number of
-    duplicated strings, which can be an inefficient use of memory with large databases.
-    If tag_strings is supplied, it will be populated with a unique list of strings used as tags
-    and the dictionary will only contain references to this list. This can reduce memory usage
-    considerably, both for the dictionary itself but also of an :class:`ImageMetaTag.ImageDict`
-    produced with the dictionary.
-
-    Will return None, None if there is a problem.
-    '''
-    if db_file is None:
-        return None, None
-    else:
-        if not os.path.isfile(db_file):
-            return None, None
-        else:
-            n_tries = 1
-            read_db = False
-            while not read_db and n_tries <= db_attempts:
-                try:
-                    # open the connection and the cursor:
-                    dbcn, dbcr = open_db_file(db_file, timeout=db_timeout)
-                    # read it:
-                    filename_list, out_dict = read_img_info_from_dbcursor(dbcr,
-                                                                required_tags=required_tags,
-                                                                tag_strings=tag_strings)
-                    # close connection:
-                    dbcn.close()
-                    read_db = True
-                except sqlite3.OperationalError as OpErr:
-                    print '%s database timeout reading from file "%s", %s s' \
-                            % (dt_now_str(), db_file, n_tries * db_timeout)
-                    n_tries += 1
-
-            # if we went through all the attempts then it is time to raise the error:
-            if n_tries > db_attempts:
-                raise sqlite3.OperationalError(OpErr.message)
-
-            # close connection:
-            dbcn.close()
-            return filename_list, out_dict
 
 def read_img_info_from_dbcursor(dbcr, required_tags=None, tag_strings=None):
     '''
@@ -493,7 +500,8 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
 
 def select_dbfile_by_tags(db_file, select_tags):
     '''
-    Selects from a database file the entries that match a dict of field names/acceptable values
+    Selects from a database file the entries that match a dict of field names/acceptable values.
+    
     Returns the output, processed by :func:`ImageMetaTag.db.process_select_star_from`
     '''
     if db_file is None:

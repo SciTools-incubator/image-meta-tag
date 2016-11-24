@@ -1,7 +1,14 @@
 '''
-Submodule containing an ImageDict class, and functions for preparing them.
+This submodule contains the :class:`ImageMetaTag.ImageDict` class, and functions for preparing them.
 
-@author: Malcolm.E.Brooks@metoffice.gov.uk
+The purpose of an :class:`ImageMetaTag.ImageDict` is to sort the image metadata, supplied to 
+:func:`ImageMetaTag.savefig` and usually stored in a database file, into a useful form that
+can quickly and easily be presented as a webpage by :func:`ImageMetaTag.webpage.write_full_page`.
+
+An easy example of creating a webpage, using an ImageDict is shown in
+`simplest_image_dict.py <simple.html>`_
+
+.. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks
 '''
 # required imports
 import os, re, collections, inspect

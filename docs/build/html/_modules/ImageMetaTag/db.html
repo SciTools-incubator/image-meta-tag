@@ -1,0 +1,775 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ImageMetaTag.db &mdash; ImageMetaTag 0.4 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="ImageMetaTag 0.4 documentation" href="../../index.html" />
+    <link rel="up" title="ImageMetaTag" href="../ImageMetaTag.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">ImageMetaTag 0.4 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../ImageMetaTag.html" accesskey="U">ImageMetaTag</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for ImageMetaTag.db</h1><div class="highlight"><pre>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">This module contains a set of functions to create/write to/read</span>
+<span class="sd">and maintain an sqlite3 database of image files and their associated metadata.</span>
+
+<span class="sd">In normal usage it is primarily used by  :func:`ImageMetaTag.savefig` to create the database</span>
+<span class="sd">as figures are saved. Once the metadata database has been built up then the metadata can be</span>
+<span class="sd">loaded with :func:`ImageMetaTag.db.read_img_info_from_dbfile`.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sqlite3</span><span class="o">,</span> <span class="nn">fnmatch</span><span class="o">,</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">errno</span><span class="o">,</span> <span class="nn">pdb</span>
+
+<span class="kn">from</span> <span class="nn">ImageMetaTag</span> <span class="kn">import</span> <span class="n">META_IMG_FORMATS</span><span class="p">,</span> <span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">,</span> <span class="n">DEFAULT_DB_ATTEMPTS</span>
+<span class="kn">from</span> <span class="nn">ImageMetaTag.img_dict</span> <span class="kn">import</span> <span class="n">readmeta_from_image</span><span class="p">,</span> <span class="n">check_for_required_keys</span>
+
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">cStringIO</span> <span class="kn">import</span> <span class="n">StringIO</span>
+
+<span class="c"># the name of the database table that holds the sqlite database of plot metadata</span>
+<span class="n">SQLITE_IMG_INFO_TABLE</span> <span class="o">=</span> <span class="s">&#39;img_info&#39;</span>
+
+<div class="viewcode-block" id="info_key_to_db_name"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.info_key_to_db_name">[docs]</a><span class="k">def</span> <span class="nf">info_key_to_db_name</span><span class="p">(</span><span class="n">in_str</span><span class="p">):</span>
+    <span class="s">&#39;Consistently convert a name in the img_info dict to something to be used in the database&#39;</span>
+    <span class="k">return</span> <span class="n">in_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39; &#39;</span><span class="p">,</span> <span class="s">&#39;__&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="db_name_to_info_key"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.db_name_to_info_key">[docs]</a><span class="k">def</span> <span class="nf">db_name_to_info_key</span><span class="p">(</span><span class="n">in_str</span><span class="p">):</span>
+    <span class="s">&#39;Inverse of info_key_to_db_name&#39;</span>
+    <span class="c"># convert to string, to remove unicode string</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">in_str</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;__&#39;</span><span class="p">,</span> <span class="s">&#39; &#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="write_img_to_dbfile"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.write_img_to_dbfile">[docs]</a><span class="k">def</span> <span class="nf">write_img_to_dbfile</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">img_filename</span><span class="p">,</span> <span class="n">img_info</span><span class="p">,</span> <span class="n">add_strict</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Writes image metadata to a database.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">     * db_file - the database file to write to. If it does not exist, it will be created.</span>
+<span class="sd">     * img_filename - the filename of the image to which the metadata applies. Usually this</span>
+<span class="sd">                      is either the absolute path, or it is useful to make this the relative path,</span>
+<span class="sd">                      from the location of the database file.</span>
+<span class="sd">     * img_info - a dictionary containing any number of  {tag_name: value}  pairs to be stored.</span>
+
+<span class="sd">    Options:</span>
+<span class="sd">     * add_strict - passed into :func:`ImageMetaTag.db.write_img_to_open_db`</span>
+<span class="sd">     * timeout - default timeout to try and write to the database.</span>
+
+<span class="sd">    This is commonly used in :func:`ImageMetaTag.savefig`</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">img_info</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Size of image info dict is zero&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">db_file</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># open the database:</span>
+        <span class="n">dbcn</span><span class="p">,</span> <span class="n">dbcr</span> <span class="o">=</span> <span class="n">open_or_create_db_file</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">img_info</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+        <span class="c"># now write:</span>
+        <span class="n">write_img_to_open_db</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span> <span class="n">img_filename</span><span class="p">,</span> <span class="n">img_info</span><span class="p">,</span> <span class="n">add_strict</span><span class="o">=</span><span class="n">add_strict</span><span class="p">)</span>
+        <span class="c"># now commit that databasde entry and close:</span>
+        <span class="n">dbcn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="n">dbcn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="read_img_info_from_dbfile"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.read_img_info_from_dbfile">[docs]</a><span class="k">def</span> <span class="nf">read_img_info_from_dbfile</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">required_tags</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tag_strings</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                              <span class="n">db_timeout</span><span class="o">=</span><span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">,</span>
+                              <span class="n">db_attempts</span><span class="o">=</span><span class="n">DEFAULT_DB_ATTEMPTS</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    reads in the database written by write_img_to_dbfile</span>
+
+<span class="sd">    options:</span>
+<span class="sd">     * required_tags - a list of image tags to return, and to fail if not all are present</span>
+<span class="sd">     * tag_strings - an input list that will be populated with the unique values of the image tags.</span>
+
+<span class="sd">    returns:</span>
+<span class="sd">     * a list of filenames (payloads for the :class:`ImageMetaTag.ImageDict` class )</span>
+<span class="sd">     * a dictionary, by filename, containing a dictionary of the image metadata as *tagname: value*</span>
+
+<span class="sd">    If tag_strings is not supplied, then the returned dictionary will contain a large number of</span>
+<span class="sd">    duplicated strings, which can be an inefficient use of memory with large databases.</span>
+<span class="sd">    If tag_strings is supplied, it will be populated with a unique list of strings used as tags</span>
+<span class="sd">    and the dictionary will only contain references to this list. This can reduce memory usage</span>
+<span class="sd">    considerably, both for the dictionary itself but also of an :class:`ImageMetaTag.ImageDict`</span>
+<span class="sd">    produced with the dictionary.</span>
+
+<span class="sd">    Will return None, None if there is a problem.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">db_file</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">db_file</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">n_tries</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">read_db</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">while</span> <span class="ow">not</span> <span class="n">read_db</span> <span class="ow">and</span> <span class="n">n_tries</span> <span class="o">&lt;=</span> <span class="n">db_attempts</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c"># open the connection and the cursor:</span>
+                    <span class="n">dbcn</span><span class="p">,</span> <span class="n">dbcr</span> <span class="o">=</span> <span class="n">open_db_file</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">db_timeout</span><span class="p">)</span>
+                    <span class="c"># read it:</span>
+                    <span class="n">filename_list</span><span class="p">,</span> <span class="n">out_dict</span> <span class="o">=</span> <span class="n">read_img_info_from_dbcursor</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span>
+                                                                <span class="n">required_tags</span><span class="o">=</span><span class="n">required_tags</span><span class="p">,</span>
+                                                                <span class="n">tag_strings</span><span class="o">=</span><span class="n">tag_strings</span><span class="p">)</span>
+                    <span class="c"># close connection:</span>
+                    <span class="n">dbcn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                    <span class="n">read_db</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span> <span class="k">as</span> <span class="n">OpErr</span><span class="p">:</span>
+                    <span class="k">print</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> database timeout reading from file &quot;</span><span class="si">%s</span><span class="s">&quot;, </span><span class="si">%s</span><span class="s"> s&#39;</span> \
+                            <span class="o">%</span> <span class="p">(</span><span class="n">dt_now_str</span><span class="p">(),</span> <span class="n">db_file</span><span class="p">,</span> <span class="n">n_tries</span> <span class="o">*</span> <span class="n">db_timeout</span><span class="p">)</span>
+                    <span class="n">n_tries</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="c"># if we went through all the attempts then it is time to raise the error:</span>
+            <span class="k">if</span> <span class="n">n_tries</span> <span class="o">&gt;</span> <span class="n">db_attempts</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span><span class="p">(</span><span class="n">OpErr</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+
+            <span class="c"># close connection:</span>
+            <span class="n">dbcn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">filename_list</span><span class="p">,</span> <span class="n">out_dict</span>
+</div>
+<span class="k">def</span> <span class="nf">merge_db_files</span><span class="p">(</span><span class="n">main_db_file</span><span class="p">,</span> <span class="n">add_db_file</span><span class="p">,</span> <span class="n">delete_add_db</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">delete_added_entries</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                   <span class="n">db_timeout</span><span class="o">=</span><span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">,</span> <span class="n">db_attempts</span><span class="o">=</span><span class="n">DEFAULT_DB_ATTEMPTS</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Merges two ImageMetaTag database files, with the contents of add_db_file added</span>
+<span class="sd">    to the main_db_file.</span>
+<span class="sd">    The databases should have the same tags within them for the merge to work.</span>
+
+<span class="sd">    Options:</span>
+<span class="sd">    * delete_add_db - if True, the added database file will be deleted afterwards</span>
+<span class="sd">    * delete_added_entries - if delete_add_db is False, this will keep the add_db_file</span>
+<span class="sd">                             but remove the entries from it which were added to the main_db_file.</span>
+<span class="sd">                             This is useful if parallel processes are writing to the databases.</span>
+<span class="sd">                             It does nothing if delete_add_db is True.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="c"># read what we want to add in:</span>
+    <span class="n">add_filelist</span><span class="p">,</span> <span class="n">add_tags</span> <span class="o">=</span> <span class="n">read_img_info_from_dbfile</span><span class="p">(</span><span class="n">add_db_file</span><span class="p">,</span>
+                                                       <span class="n">db_timeout</span><span class="o">=</span><span class="n">db_timeout</span><span class="p">,</span>
+                                                       <span class="n">db_attempts</span><span class="o">=</span><span class="n">db_attempts</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">add_filelist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">add_filelist</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">n_tries</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">wrote_db</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">while</span> <span class="ow">not</span> <span class="n">wrote_db</span> <span class="ow">and</span> <span class="n">n_tries</span> <span class="o">&lt;=</span> <span class="n">db_attempts</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c"># open the main database</span>
+                    <span class="n">dbcn</span><span class="p">,</span> <span class="n">dbcr</span> <span class="o">=</span> <span class="n">open_db_file</span><span class="p">(</span><span class="n">main_db_file</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">db_timeout</span><span class="p">)</span>
+                    <span class="c"># and add in the new contents:</span>
+                    <span class="k">for</span> <span class="n">add_file</span><span class="p">,</span> <span class="n">add_info</span> <span class="ow">in</span> <span class="n">add_tags</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                        <span class="n">write_img_to_open_db</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span> <span class="n">add_file</span><span class="p">,</span> <span class="n">add_info</span><span class="p">)</span>
+                    <span class="n">dbcn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+                    <span class="c"># if we got here, then we&#39;re good!</span>
+                    <span class="n">wrote_db</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="c"># finally close:</span>
+                    <span class="n">dbcn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span> <span class="k">as</span> <span class="n">OpErr</span><span class="p">:</span>
+                    <span class="c"># main database is locked:</span>
+                    <span class="k">print</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> database timeout writing to file &quot;</span><span class="si">%s</span><span class="s">&quot;, </span><span class="si">%s</span><span class="s"> s&#39;</span> \
+                                    <span class="o">%</span> <span class="p">(</span><span class="n">dt_now_str</span><span class="p">(),</span> <span class="n">main_db_file</span><span class="p">,</span> <span class="n">n_tries</span> <span class="o">*</span> <span class="n">db_timeout</span><span class="p">)</span>
+                    <span class="n">n_tries</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="c"># if we went through all the attempts then it is time to raise the error:</span>
+            <span class="k">if</span> <span class="n">n_tries</span> <span class="o">&gt;</span> <span class="n">db_attempts</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span><span class="p">(</span><span class="n">OpErr</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+
+    <span class="c"># delete or tidy:</span>
+    <span class="k">if</span> <span class="n">delete_add_db</span><span class="p">:</span>
+        <span class="n">rmfile</span><span class="p">(</span><span class="n">add_db_file</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">delete_added_entries</span><span class="p">:</span>
+        <span class="n">del_plots_from_dbfile</span><span class="p">(</span><span class="n">add_db_file</span><span class="p">,</span> <span class="n">add_filelist</span><span class="p">,</span> <span class="n">do_vacuum</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                              <span class="n">allow_retries</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">skip_warning</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="open_or_create_db_file"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.open_or_create_db_file">[docs]</a><span class="k">def</span> <span class="nf">open_or_create_db_file</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">img_info</span><span class="p">,</span> <span class="n">restart_db</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Opens a database file and sets up initial tables, then returns the connection and cursor.</span>
+<span class="sd">    Setting the restart_db option deletes the current db file and starts again.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns an open database connection (dbcn) and cursor (dbcr)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">db_file</span><span class="p">)</span> <span class="ow">or</span> <span class="n">restart_db</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">db_file</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">db_file</span><span class="p">)</span>
+        <span class="c"># create a new database file:</span>
+        <span class="n">dbcn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">db_file</span><span class="p">)</span>
+        <span class="n">dbcr</span> <span class="o">=</span> <span class="n">dbcn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+
+        <span class="n">create_command</span> <span class="o">=</span> <span class="s">&#39;CREATE TABLE </span><span class="si">%s</span><span class="s">(fname TEXT PRIMARY KEY,&#39;</span> <span class="o">%</span> <span class="n">SQLITE_IMG_INFO_TABLE</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">img_info</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">create_command</span> <span class="o">+=</span> <span class="s">&#39; </span><span class="si">%s</span><span class="s"> TEXT,&#39;</span> <span class="o">%</span> <span class="n">info_key_to_db_name</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="n">create_command</span> <span class="o">=</span> <span class="n">create_command</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
+        <span class="n">dbcr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">create_command</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># just open the database:</span>
+        <span class="n">dbcn</span><span class="p">,</span> <span class="n">dbcr</span> <span class="o">=</span> <span class="n">open_db_file</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dbcn</span><span class="p">,</span> <span class="n">dbcr</span>
+</div>
+<div class="viewcode-block" id="open_db_file"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.open_db_file">[docs]</a><span class="k">def</span> <span class="nf">open_db_file</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Just opens an existing db_file, using timeouts but no retries.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns an open database connection (dbcn) and cursor (dbcr)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">dbcn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+    <span class="n">dbcr</span> <span class="o">=</span> <span class="n">dbcn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">dbcn</span><span class="p">,</span> <span class="n">dbcr</span>
+</div>
+<div class="viewcode-block" id="read_db_file_to_mem"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.read_db_file_to_mem">[docs]</a><span class="k">def</span> <span class="nf">read_db_file_to_mem</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Opens a pre-existing database file into a copy held in memory. This can be accessed much</span>
+<span class="sd">    faster when doing extenstive work (a lot of select operations, for instance).</span>
+
+<span class="sd">    There is a time cost in doing this; it takes a few seconds to read in a large database,</span>
+<span class="sd">    so it is only worth doing when doing a lot of operations.</span>
+
+<span class="sd">    Tests on selects on a large-ish database (250k rows) suggested it was worth doing</span>
+<span class="sd">    for &gt; 100 selects.</span>
+
+<span class="sd">    Returns an open database connection (dbcn) and cursor (dbcr)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="c"># read the database into an in-memory file object:</span>
+    <span class="c">#dbcn = sqlite3.connect(db_file)</span>
+    <span class="n">dbcn</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">open_db_file</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+    <span class="n">memfile</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">dbcn</span><span class="o">.</span><span class="n">iterdump</span><span class="p">():</span>
+        <span class="n">memfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">line</span><span class="p">)</span>
+    <span class="n">dbcn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">memfile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c"># Create a database in memory and import from memfile</span>
+    <span class="n">dbcn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s">&quot;:memory:&quot;</span><span class="p">)</span>
+    <span class="n">dbcn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span><span class="o">.</span><span class="n">executescript</span><span class="p">(</span><span class="n">memfile</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+    <span class="n">dbcn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="n">dbcr</span> <span class="o">=</span> <span class="n">dbcn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">dbcn</span><span class="p">,</span> <span class="n">dbcr</span>
+</div>
+<div class="viewcode-block" id="write_img_to_open_db"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.write_img_to_open_db">[docs]</a><span class="k">def</span> <span class="nf">write_img_to_open_db</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">img_info</span><span class="p">,</span> <span class="n">add_strict</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">attempt_replace</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Does the work for write_img_to_dbfile to add an image to the open database cursor (dbcr)</span>
+
+<span class="sd">    * add_strict: if True then it will report a ValueError if you \</span>
+<span class="sd">                  try and include fields that aren&#39;t defined in the table</span>
+<span class="sd">    * attempt_replace: if True, then it will attempt to replace a database \</span>
+<span class="sd">                  entry if the image is already present. Otherwise it will ignore it.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="c"># now add in the information:</span>
+    <span class="c"># get the name of the fields from the cursor descripton:</span>
+    <span class="n">_</span> <span class="o">=</span> <span class="n">dbcr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&#39;select * from </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">SQLITE_IMG_INFO_TABLE</span><span class="p">)</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+    <span class="n">field_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">dbcr</span><span class="o">.</span><span class="n">description</span><span class="p">]</span>
+    <span class="c"># convert these to keys:</span>
+    <span class="n">field_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">db_name_to_info_key</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">field_names</span><span class="p">]</span>
+    <span class="c"># now build the command</span>
+    <span class="n">add_command</span> <span class="o">=</span> <span class="s">&#39;INSERT INTO </span><span class="si">%s</span><span class="s">(fname,&#39;</span> <span class="o">%</span> <span class="n">SQLITE_IMG_INFO_TABLE</span>
+    <span class="n">add_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">filename</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">img_info</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">field_names</span><span class="p">:</span>
+            <span class="n">add_command</span> <span class="o">+=</span> <span class="s">&#39; </span><span class="si">%s</span><span class="s">,&#39;</span> <span class="o">%</span> <span class="n">info_key_to_db_name</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="n">add_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">add_strict</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Attempting to add a line to the database that include invalid fields&#39;</span><span class="p">)</span>
+    <span class="c"># add in the right number of ?</span>
+    <span class="n">add_command</span> <span class="o">=</span> <span class="n">add_command</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;) VALUES(&#39;</span> <span class="o">+</span> <span class="s">&#39;?,&#39;</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">add_list</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;?)&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">dbcr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">add_command</span><span class="p">,</span> <span class="n">add_list</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">IntegrityError</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">attempt_replace</span><span class="p">:</span>
+            <span class="c"># try an INSERT OR REPLACE</span>
+            <span class="n">add_command</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;INSERT &#39;</span><span class="p">,</span> <span class="s">&#39;INSERT OR REPLACE &#39;</span><span class="p">)</span>
+            <span class="c"># if this fails, want it to report it&#39;s error message as is, so no &#39;try&#39;:</span>
+            <span class="n">dbcr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">add_command</span><span class="p">,</span> <span class="n">add_list</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># this file is already in the database (as the primary key, so do nothing...)</span>
+            <span class="k">pass</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="read_img_info_from_dbcursor"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.read_img_info_from_dbcursor">[docs]</a><span class="k">def</span> <span class="nf">read_img_info_from_dbcursor</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span> <span class="n">required_tags</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tag_strings</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Reads from an open database cursor (dbcr) for read_img_info_from_dbfile and other routines.</span>
+
+<span class="sd">    Options</span>
+<span class="sd">     * required_tags - a list of image tags to return, and to fail if not all are present</span>
+<span class="sd">     * tag_strings - an input list that will be populated with the unique values of the image tags</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c"># read in the data from the database:</span>
+    <span class="n">db_contents</span> <span class="o">=</span> <span class="n">dbcr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&#39;select * from </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">SQLITE_IMG_INFO_TABLE</span><span class="p">)</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+    <span class="c"># and convert that to a useful dict/list combo:</span>
+    <span class="n">filename_list</span><span class="p">,</span> <span class="n">out_dict</span> <span class="o">=</span> <span class="n">process_select_star_from</span><span class="p">(</span><span class="n">db_contents</span><span class="p">,</span> <span class="n">dbcr</span><span class="p">,</span>
+                                                       <span class="n">required_tags</span><span class="o">=</span><span class="n">required_tags</span><span class="p">,</span>
+                                                       <span class="n">tag_strings</span><span class="o">=</span><span class="n">tag_strings</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">filename_list</span><span class="p">,</span> <span class="n">out_dict</span>
+</div>
+<div class="viewcode-block" id="process_select_star_from"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.process_select_star_from">[docs]</a><span class="k">def</span> <span class="nf">process_select_star_from</span><span class="p">(</span><span class="n">db_contents</span><span class="p">,</span> <span class="n">dbcr</span><span class="p">,</span> <span class="n">required_tags</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tag_strings</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Converts the output from a select * from ....  command into a standard output format</span>
+<span class="sd">    Requires a database cursor (dbcr) to identify the field names.</span>
+
+<span class="sd">    Options</span>
+<span class="sd">     * required_tags - a list of image tags to return, and to fail if not all are present</span>
+<span class="sd">     * tag_strings - an input list that will be populated with the unique values of the image tags</span>
+
+<span class="sd">    returns as :func:`ImageMetaTag.db.read_img_info_from_dbfile`, but filtered accord to the select.</span>
+<span class="sd">     * a list of filenames (payloads for the :class:`ImageMetaTag.ImageDict`)</span>
+<span class="sd">     * a dictionary, by filename, containing a dictionary of the image metadata as *tagname: value*</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c"># get the name of the fields from the cursor descripton:</span>
+    <span class="n">out_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">filename_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c"># get the name of the fields from the cursor descripton:</span>
+    <span class="n">field_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">dbcr</span><span class="o">.</span><span class="n">description</span><span class="p">]</span>
+
+    <span class="c"># the required_tags input is a list of tag names (as strings):</span>
+    <span class="k">if</span> <span class="n">required_tags</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">required_tags</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Input required_tags should be a list of strings&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">test_str</span> <span class="ow">in</span> <span class="n">required_tags</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">test_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Input required_tags should be a list of strings&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">tag_strings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tag_strings</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Input tag_strings should be a list&#39;</span><span class="p">)</span>
+
+    <span class="c"># now iterate and make a dictionary to return,</span>
+    <span class="c"># with the tests outside the loops so they&#39;re not tested for every row and element:</span>
+    <span class="k">if</span> <span class="n">required_tags</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">tag_strings</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">db_contents</span><span class="p">:</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">filename_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+            <span class="n">img_info</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">tag_name</span><span class="p">,</span> <span class="n">tag_val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">field_names</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+                <span class="n">img_info</span><span class="p">[</span><span class="n">db_name_to_info_key</span><span class="p">(</span><span class="n">tag_name</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tag_val</span><span class="p">)</span>
+            <span class="n">out_dict</span><span class="p">[</span><span class="n">fname</span><span class="p">]</span> <span class="o">=</span> <span class="n">img_info</span>
+            <span class="c"># return None, None if the contents are empty:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filename_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">out_dict</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+    <span class="k">elif</span> <span class="n">required_tags</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">tag_strings</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">db_contents</span><span class="p">:</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">filename_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+            <span class="n">img_info</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">tag_name</span><span class="p">,</span> <span class="n">tag_val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">field_names</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+                <span class="n">tag_name_full</span> <span class="o">=</span> <span class="n">db_name_to_info_key</span><span class="p">(</span><span class="n">tag_name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">tag_name_full</span> <span class="ow">in</span> <span class="n">required_tags</span><span class="p">:</span>
+                    <span class="n">img_info</span><span class="p">[</span><span class="n">tag_name_full</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tag_val</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">img_info</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">required_tags</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Database entry does not contain all of the required_tags&#39;</span><span class="p">)</span>
+
+            <span class="n">out_dict</span><span class="p">[</span><span class="n">fname</span><span class="p">]</span> <span class="o">=</span> <span class="n">img_info</span>
+            <span class="c"># return None, None if the contents are empty:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filename_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">out_dict</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+    <span class="k">elif</span> <span class="n">required_tags</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">tag_strings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="c"># we want all tags, but we want them as referneces to a common list:</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">db_contents</span><span class="p">:</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">filename_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+            <span class="n">img_info</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">tag_name</span><span class="p">,</span> <span class="n">tag_val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">field_names</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+                <span class="n">str_tag_val</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tag_val</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c"># loacate the tag_string in the list:</span>
+                    <span class="n">tag_index</span> <span class="o">=</span> <span class="n">tag_strings</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">str_tag_val</span><span class="p">)</span>
+                    <span class="c"># and refernece it:</span>
+                    <span class="n">img_info</span><span class="p">[</span><span class="n">db_name_to_info_key</span><span class="p">(</span><span class="n">tag_name</span><span class="p">)]</span> <span class="o">=</span> <span class="n">tag_strings</span><span class="p">[</span><span class="n">tag_index</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="c"># tag not yet in the tag_strings list, so</span>
+                    <span class="c"># add the new string onto the end:</span>
+                    <span class="n">tag_strings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">str_tag_val</span><span class="p">)</span>
+                    <span class="c"># and reference it:</span>
+                    <span class="n">img_info</span><span class="p">[</span><span class="n">db_name_to_info_key</span><span class="p">(</span><span class="n">tag_name</span><span class="p">)]</span> <span class="o">=</span> <span class="n">tag_strings</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">out_dict</span><span class="p">[</span><span class="n">fname</span><span class="p">]</span> <span class="o">=</span> <span class="n">img_info</span>
+            <span class="c"># return None, None if the contents are empty:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filename_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">out_dict</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># we want to filter the tags, and we want them as referneces to a common list:</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">db_contents</span><span class="p">:</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">filename_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+            <span class="n">img_info</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">tag_name</span><span class="p">,</span> <span class="n">tag_val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">field_names</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+                <span class="c"># test to see if the tag name is required:</span>
+                <span class="n">tag_name_full</span> <span class="o">=</span> <span class="n">db_name_to_info_key</span><span class="p">(</span><span class="n">tag_name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">tag_name_full</span> <span class="ow">in</span> <span class="n">required_tags</span><span class="p">:</span>
+                    <span class="n">str_tag_val</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tag_val</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="c"># loacate the tag_string in the list:</span>
+                        <span class="n">tag_index</span> <span class="o">=</span> <span class="n">tag_strings</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">str_tag_val</span><span class="p">)</span>
+                        <span class="c"># and refernece it:</span>
+                        <span class="n">img_info</span><span class="p">[</span><span class="n">tag_name_full</span><span class="p">]</span> <span class="o">=</span> <span class="n">tag_strings</span><span class="p">[</span><span class="n">tag_index</span><span class="p">]</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="c"># tag not yet in the tag_strings list, so</span>
+                        <span class="c"># add the new string onto the end:</span>
+                        <span class="n">tag_strings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">str_tag_val</span><span class="p">)</span>
+                        <span class="c"># and reference it:</span>
+                        <span class="n">img_info</span><span class="p">[</span><span class="n">tag_name_full</span><span class="p">]</span> <span class="o">=</span> <span class="n">tag_strings</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">out_dict</span><span class="p">[</span><span class="n">fname</span><span class="p">]</span> <span class="o">=</span> <span class="n">img_info</span>
+            <span class="c"># return None, None if the contents are empty:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filename_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">out_dict</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+
+
+    <span class="c"># we&#39;re good, return the data:</span>
+    <span class="k">return</span> <span class="n">filename_list</span><span class="p">,</span> <span class="n">out_dict</span>
+</div>
+<div class="viewcode-block" id="del_plots_from_dbfile"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.del_plots_from_dbfile">[docs]</a><span class="k">def</span> <span class="nf">del_plots_from_dbfile</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">filenames</span><span class="p">,</span> <span class="n">do_vacuum</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">allow_retries</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                          <span class="n">db_timeout</span><span class="o">=</span><span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">,</span> <span class="n">db_attempts</span><span class="o">=</span><span class="n">DEFAULT_DB_ATTEMPTS</span><span class="p">,</span>
+                          <span class="n">skip_warning</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    deletes a list of files from a database file created by :mod:`ImageMetaTag.db`</span>
+
+<span class="sd">    * do_vacuum - if True, the database will be restructured/cleaned after the delete</span>
+<span class="sd">    * allow_retries - if True, retries will be allowed if the database is locked.\</span>
+<span class="sd">                    If False there are no retries, but sleep commands try to avoid the need\</span>
+<span class="sd">                    when doing a large number of deletes.</span>
+<span class="sd">    * db_timeout - overide default database timeouts, if doing retries</span>
+<span class="sd">    * db_attempts - overide default number of attempts, if doing retries</span>
+<span class="sd">    * skip_warning - do not warn if a filename, that has been requested to be deleted,\</span>
+<span class="sd">                   does not exist in the database</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filenames</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">fn_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">filenames</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fn_list</span> <span class="o">=</span> <span class="n">filenames</span>
+
+    <span class="k">if</span> <span class="n">db_file</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">db_file</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">fn_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">allow_retries</span><span class="p">:</span>
+                <span class="c"># split the list of filenames up into appropciately sized chunks, so that concurrent</span>
+                <span class="c"># delete commands each have a chance to complete:</span>
+                <span class="c"># 200 is arbriatily chosen, but seems to work</span>
+                <span class="n">chunk_size</span> <span class="o">=</span> <span class="mi">200</span>
+                <span class="k">for</span> <span class="n">chunk_o_filenames</span> <span class="ow">in</span> <span class="p">[</span><span class="n">fn_list</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">chunk_size</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">fn_list</span><span class="p">),</span> <span class="n">chunk_size</span><span class="p">)]:</span>
+                    <span class="c"># within each chunk of files, need to open the db, with time out retries etc:</span>
+                    <span class="n">n_tries</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="n">wrote_db</span> <span class="o">=</span> <span class="bp">False</span>
+                    <span class="k">while</span> <span class="ow">not</span> <span class="n">wrote_db</span> <span class="ow">and</span> <span class="n">n_tries</span> <span class="o">&lt;=</span> <span class="n">db_attempts</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="c"># open the database</span>
+                            <span class="n">dbcn</span><span class="p">,</span> <span class="n">dbcr</span> <span class="o">=</span> <span class="n">open_db_file</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">db_timeout</span><span class="p">)</span>
+                            <span class="c"># go through the file chunk, one by one, and delete:</span>
+                            <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">chunk_o_filenames</span><span class="p">:</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="n">dbcr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;DELETE FROM </span><span class="si">%s</span><span class="s"> WHERE fname=?&quot;</span> <span class="o">%</span> <span class="n">SQLITE_IMG_INFO_TABLE</span><span class="p">,</span> <span class="p">(</span><span class="n">fname</span><span class="p">,))</span>
+                                <span class="k">except</span><span class="p">:</span>
+                                    <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_warning</span><span class="p">:</span>
+                                        <span class="c"># if this fails, print a warning...</span>
+                                        <span class="c"># need to figure out why this happens</span>
+                                        <span class="k">print</span> <span class="s">&#39;WARNING: unable to delete file entry: &quot;</span><span class="si">%s</span><span class="s">&quot;, type &quot;</span><span class="si">%s</span><span class="s">&quot; from database&#39;</span> \
+                                                    <span class="o">%</span> <span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">fname</span><span class="p">))</span>
+                            <span class="n">dbcn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+                            <span class="c"># if we got here, then we&#39;re good!</span>
+                            <span class="n">wrote_db</span> <span class="o">=</span> <span class="bp">True</span>
+                            <span class="c"># finally close (for this chunk)</span>
+                            <span class="n">dbcn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                        <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span> <span class="k">as</span> <span class="n">OpErr</span><span class="p">:</span>
+                            <span class="c"># main database is locked:</span>
+                            <span class="k">print</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> database timeout deleting from file &quot;</span><span class="si">%s</span><span class="s">&quot;, </span><span class="si">%s</span><span class="s"> s&#39;</span> \
+                                            <span class="o">%</span> <span class="p">(</span><span class="n">dt_now_str</span><span class="p">(),</span> <span class="n">db_file</span><span class="p">,</span> <span class="n">n_tries</span> <span class="o">*</span> <span class="n">db_timeout</span><span class="p">)</span>
+                            <span class="n">n_tries</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="c"># if we went through all the attempts then it is time to raise the error:</span>
+                    <span class="k">if</span> <span class="n">n_tries</span> <span class="o">&gt;</span> <span class="n">db_attempts</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span><span class="p">(</span><span class="n">OpErr</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># just open the database:</span>
+                <span class="n">dbcn</span><span class="p">,</span> <span class="n">dbcr</span> <span class="o">=</span> <span class="n">open_db_file</span><span class="p">(</span><span class="n">db_file</span><span class="p">)</span>
+                <span class="c"># delete the contents:</span>
+                <span class="k">for</span> <span class="n">i_fn</span><span class="p">,</span> <span class="n">fname</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fn_list</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">dbcr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;DELETE FROM </span><span class="si">%s</span><span class="s"> WHERE fname=?&quot;</span> <span class="o">%</span> <span class="n">SQLITE_IMG_INFO_TABLE</span><span class="p">,</span> <span class="p">(</span><span class="n">fname</span><span class="p">,))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_warning</span><span class="p">:</span>
+                            <span class="c"># if this fails, print a warning...</span>
+                            <span class="c"># need to figure out why this happens</span>
+                            <span class="k">print</span> <span class="s">&#39;WARNING: unable to delete file entry: &quot;</span><span class="si">%s</span><span class="s">&quot;, type &quot;</span><span class="si">%s</span><span class="s">&quot; from database&#39;</span> \
+                                        <span class="o">%</span> <span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">fname</span><span class="p">))</span>
+                    <span class="c"># commit every 100 to give other processes a chance:</span>
+                    <span class="k">if</span> <span class="n">i_fn</span> <span class="o">%</span> <span class="mi">100</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">dbcn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+                        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="c"># commit, and vacuum if required:</span>
+                <span class="n">dbcn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">do_vacuum</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">allow_retries</span><span class="p">:</span>
+                    <span class="c"># need to re-open the db, if we allowed retries:</span>
+                    <span class="n">dbcn</span><span class="p">,</span> <span class="n">dbcr</span> <span class="o">=</span> <span class="n">open_db_file</span><span class="p">(</span><span class="n">db_file</span><span class="p">)</span>
+                <span class="n">dbcn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;VACUUM&quot;</span><span class="p">)</span>
+                <span class="n">dbcn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="n">allow_retries</span><span class="p">:</span>
+                <span class="n">dbcn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="select_dbfile_by_tags"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.select_dbfile_by_tags">[docs]</a><span class="k">def</span> <span class="nf">select_dbfile_by_tags</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">select_tags</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Selects from a database file the entries that match a dict of field names/acceptable values.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns the output, processed by :func:`ImageMetaTag.db.process_select_star_from`</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">db_file</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">sel_results</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">db_file</span><span class="p">):</span>
+            <span class="n">sel_results</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># just open the database:</span>
+            <span class="n">dbcn</span><span class="p">,</span> <span class="n">dbcr</span> <span class="o">=</span> <span class="n">open_db_file</span><span class="p">(</span><span class="n">db_file</span><span class="p">)</span>
+            <span class="c"># do the select:</span>
+            <span class="n">sel_results</span> <span class="o">=</span> <span class="n">select_dbcr_by_tags</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span> <span class="n">select_tags</span><span class="p">)</span>
+            <span class="n">dbcn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">sel_results</span>
+</div>
+<div class="viewcode-block" id="select_dbcr_by_tags"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.select_dbcr_by_tags">[docs]</a><span class="k">def</span> <span class="nf">select_dbcr_by_tags</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span> <span class="n">select_tags</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Selects from an open database cursor (dbcr) the entries that match a dict of field</span>
+<span class="sd">    names &amp; acceptable values.</span>
+
+<span class="sd">    Returns the output, processed by :func:`ImageMetaTag.db.process_select_star_from`</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">select_tags</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c"># just read and return the whole thing:</span>
+        <span class="k">return</span> <span class="n">read_img_info_from_dbcursor</span><span class="p">(</span><span class="n">dbcr</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># convert these to lists:</span>
+        <span class="n">tag_names</span> <span class="o">=</span> <span class="n">select_tags</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="n">tag_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">select_tags</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">tag_names</span><span class="p">]</span>
+        <span class="c"># Right... this is where I need to understand how to do a select!</span>
+        <span class="c">#select_command = &#39;SELECT * FROM %s WHERE symbol=?&#39; % SQLITE_IMG_INFO_TABLE</span>
+        <span class="n">select_command</span> <span class="o">=</span> <span class="s">&#39;SELECT * FROM </span><span class="si">%s</span><span class="s"> WHERE &#39;</span> <span class="o">%</span> <span class="n">SQLITE_IMG_INFO_TABLE</span>
+        <span class="n">n_tags</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tag_names</span><span class="p">)</span>
+
+        <span class="n">use_tag_values</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i_tag</span><span class="p">,</span> <span class="n">tag_name</span><span class="p">,</span> <span class="n">tag_val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n_tags</span><span class="p">),</span> <span class="n">tag_names</span><span class="p">,</span> <span class="n">tag_values</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tag_val</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                <span class="c"># if a list or tuple, then use IN:</span>
+                <span class="n">select_command</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> IN (&#39;</span> <span class="o">%</span> <span class="n">info_key_to_db_name</span><span class="p">(</span><span class="n">tag_name</span><span class="p">)</span>
+                <span class="n">select_command</span> <span class="o">+=</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s">&#39;?&#39;</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">tag_val</span><span class="p">))</span>
+                <span class="n">select_command</span> <span class="o">+=</span> <span class="s">&#39;)&#39;</span>
+                <span class="k">if</span> <span class="n">i_tag</span><span class="o">+</span><span class="mi">1</span> <span class="o">&lt;</span> <span class="n">n_tags</span><span class="p">:</span>
+                    <span class="n">select_command</span> <span class="o">+=</span> <span class="s">&#39; AND &#39;</span>
+                <span class="n">use_tag_values</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">tag_val</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># do an exact match:</span>
+                <span class="k">if</span> <span class="n">i_tag</span><span class="o">+</span><span class="mi">1</span> <span class="o">&lt;</span> <span class="n">n_tags</span><span class="p">:</span>
+                    <span class="n">select_command</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> = ? AND &#39;</span> <span class="o">%</span> <span class="n">info_key_to_db_name</span><span class="p">(</span><span class="n">tag_name</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">select_command</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> = ?&#39;</span> <span class="o">%</span> <span class="n">info_key_to_db_name</span><span class="p">(</span><span class="n">tag_name</span><span class="p">)</span>
+                <span class="n">use_tag_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tag_val</span><span class="p">)</span>
+        <span class="n">db_contents</span> <span class="o">=</span> <span class="n">dbcr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">select_command</span><span class="p">,</span> <span class="n">use_tag_values</span><span class="p">)</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+        <span class="c"># and convert that to a useful dict/list combo:</span>
+        <span class="n">filename_list</span><span class="p">,</span> <span class="n">out_dict</span> <span class="o">=</span> <span class="n">process_select_star_from</span><span class="p">(</span><span class="n">db_contents</span><span class="p">,</span> <span class="n">dbcr</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">filename_list</span><span class="p">,</span> <span class="n">out_dict</span>
+</div>
+<div class="viewcode-block" id="scan_dir_for_db"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.scan_dir_for_db">[docs]</a><span class="k">def</span> <span class="nf">scan_dir_for_db</span><span class="p">(</span><span class="n">basedir</span><span class="p">,</span> <span class="n">db_file</span><span class="p">,</span> <span class="n">img_tag_req</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">subdir_excl_list</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">known_file_tags</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                    <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">no_file_ext</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">return_timings</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    A useful utility that scans a dir for images that can go into a database.</span>
+<span class="sd">    This should only be used to build a database from a directroy of tagged images that</span>
+<span class="sd">    did not previously use a database. For optimal performance, build the database as the</span>
+<span class="sd">    plots are created.</span>
+
+<span class="sd">    * img_tag_req - a list of tag names that are to be applied/created</span>
+<span class="sd">    * subdir_excl_list - a list of subdirectories that don&#39;t need to be scanned</span>
+<span class="sd">    * no_file_ext - logical to include, or not, the file extension in the filenames \</span>
+<span class="sd">                    saved to the database</span>
+<span class="sd">    * known_file_tags - if supplied, this is a dict (keyed by filename entry), \</span>
+<span class="sd">                        containing a dict of tags already known \</span>
+<span class="sd">                        (so you don;t need to read them from the files themselves).</span>
+<span class="sd">    * verbose - verbose output</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">known_file_tags</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">known_files</span> <span class="o">=</span> <span class="n">known_file_tags</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">known_files</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">return_timings</span><span class="p">:</span>
+        <span class="n">prev_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+        <span class="n">add_interval</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="c"># total number of entries added</span>
+        <span class="n">n_added</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c"># number of entries added since last timer</span>
+        <span class="n">n_add_this_timer</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c"># and this is the list to return:</span>
+        <span class="n">n_adds</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">timings_per_add</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">basedir</span><span class="p">)</span>
+    <span class="n">first_img</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="s">&#39;./&#39;</span><span class="p">,</span> <span class="n">followlinks</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">topdown</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">subdir_excl_list</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">dirs</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dirs</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">subdir_excl_list</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">meta_img_format</span> <span class="ow">in</span> <span class="n">META_IMG_FORMATS</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="s">&#39;*</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">meta_img_format</span><span class="p">):</span>
+                <span class="c"># append to the list, taking off the preceeding &#39;./&#39; and the file extension:</span>
+                <span class="k">if</span> <span class="n">root</span> <span class="o">==</span> <span class="s">&#39;./&#39;</span><span class="p">:</span>
+                    <span class="n">img_path</span> <span class="o">=</span> <span class="n">filename</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">img_path</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">root</span><span class="p">[</span><span class="mi">2</span><span class="p">:],</span> <span class="n">filename</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">no_file_ext</span><span class="p">:</span>
+                    <span class="n">img_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">img_path</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">img_name</span> <span class="o">=</span> <span class="n">img_path</span>
+
+                <span class="c"># read the metadata:</span>
+                <span class="k">if</span> <span class="n">img_name</span> <span class="ow">in</span> <span class="n">known_files</span><span class="p">:</span>
+                    <span class="c"># if we know this file details, then get it:</span>
+                    <span class="n">known_files</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">img_name</span><span class="p">)</span>
+                    <span class="n">img_info</span> <span class="o">=</span> <span class="n">known_file_tags</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">img_name</span><span class="p">)</span>
+                    <span class="n">read_ok</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># otherwise read from disk:</span>
+                    <span class="p">(</span><span class="n">read_ok</span><span class="p">,</span> <span class="n">img_info</span><span class="p">)</span> <span class="o">=</span> <span class="n">readmeta_from_image</span><span class="p">(</span><span class="n">img_path</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">read_ok</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">img_tag_req</span><span class="p">:</span>
+                        <span class="c"># check to see if an image is needed:</span>
+                        <span class="n">use_img</span> <span class="o">=</span> <span class="n">check_for_required_keys</span><span class="p">(</span><span class="n">img_info</span><span class="p">,</span> <span class="n">img_tag_req</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">use_img</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="k">if</span> <span class="n">use_img</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">first_img</span><span class="p">:</span>
+                            <span class="n">db_cn</span><span class="p">,</span> <span class="n">db_cr</span> <span class="o">=</span> <span class="n">open_or_create_db_file</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">img_info</span><span class="p">,</span>
+                                                                  <span class="n">restart_db</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                            <span class="n">first_img</span> <span class="o">=</span> <span class="bp">False</span>
+                        <span class="n">write_img_to_open_db</span><span class="p">(</span><span class="n">db_cr</span><span class="p">,</span> <span class="n">img_name</span><span class="p">,</span> <span class="n">img_info</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                            <span class="k">print</span> <span class="n">img_name</span>
+
+                        <span class="k">if</span> <span class="n">return_timings</span><span class="p">:</span>
+                            <span class="n">n_added</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="n">n_add_this_timer</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="k">if</span> <span class="n">n_add_this_timer</span> <span class="o">%</span> <span class="n">add_interval</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                                <span class="n">time_interval_s</span> <span class="o">=</span> <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">-</span> <span class="n">prev_time</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+                                <span class="n">timings_per_add</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time_interval_s</span> <span class="o">/</span> <span class="n">add_interval</span><span class="p">)</span>
+                                <span class="n">n_adds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n_added</span><span class="p">)</span>
+                                <span class="c"># increase the add_interval so we don&#39;t swamp</span>
+                                <span class="c"># the processing with timings!</span>
+                                <span class="n">add_interval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n_added</span><span class="p">))</span>
+                                <span class="n">n_add_this_timer</span> <span class="o">=</span> <span class="mi">0</span>
+                                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                                    <span class="k">print</span> <span class="s">&#39;len(n_adds)=</span><span class="si">%s</span><span class="s">, currently every </span><span class="si">%s</span><span class="s">&#39;</span> \
+                                            <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">n_adds</span><span class="p">),</span> <span class="n">add_interval</span><span class="p">)</span>
+
+    <span class="c"># commit and close, and we are done:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">first_img</span><span class="p">:</span>
+        <span class="n">db_cn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="n">db_cn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">return_timings</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">n_adds</span><span class="p">,</span> <span class="n">timings_per_add</span>
+
+</div>
+<span class="k">def</span> <span class="nf">rmfile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    os.remove, but does not complain if the file has already been</span>
+<span class="sd">    deleted (by a parallel process, for instance).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">exc</span><span class="o">.</span><span class="n">errno</span> <span class="o">==</span> <span class="n">errno</span><span class="o">.</span><span class="n">ENOENT</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span> <span class="k">raise</span>
+
+<span class="k">def</span> <span class="nf">dt_now_str</span><span class="p">():</span>
+    <span class="s">&#39;returns datetime.now(), as a string, in a common format&#39;</span>
+    <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&#39;%Y-%m-</span><span class="si">%d</span><span class="s"> %H:%M:%S&#39;</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">ImageMetaTag 0.4 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../ImageMetaTag.html" >ImageMetaTag</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015-2016, British Crown Copyright.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

@@ -3,7 +3,12 @@
 ImageMetaTag.ImageDict
 ======================
 
-.. automodule:: ImageMetaTag.ImageDict
+.. automodule:: ImageMetaTag.img_dict
+
+.. code-block:: python
+  bob
+
+
 
 The ImageDict Class
 -------------------
