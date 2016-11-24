@@ -22,6 +22,7 @@ Contents:
    ImageDict
    webpage
    test
+   simple
    versions
 
 Indices and tables

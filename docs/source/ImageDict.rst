@@ -3,7 +3,7 @@
 ImageMetaTag.ImageDict
 ======================
 
-.. automodule:: ImageMetaTag.ImageDict
+.. automodule:: ImageMetaTag.img_dict
 
 The ImageDict Class
 -------------------

@@ -23,6 +23,9 @@ If the latter, then the following sections are needed:
     * :func:`ImageMetaTag.webpage.copy_required_javascript` - copies required javascript library \
                                                           to the required location.
 
+An easy example of creating a webpage, using an :class:`ImageMetaTag.ImageDict` is shown in
+`simplest_image_dict.py <simple.html>`_
+
 .. TIP:: At present, the only webpage style that can be produced is a set of horizontal dropdown\
 menus, but more will hopefully be added soon.
 

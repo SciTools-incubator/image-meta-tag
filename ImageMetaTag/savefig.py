@@ -1,6 +1,10 @@
 '''
-Module containing a wrapper for matplotlib.pyplot.savefig, which adds image metadata taggging
-and basic image maniupulation.
+This module contains a wrapper for matplotlib.pyplot.savefig. The primary function of the wrapper
+is to add image metadata taggging and database storage of that metadata.
+
+As the output images are already being post-processed to add the metadata, basic image
+manipulation options are included to crop images, add logos and reduce their file size
+by simplifying their colour palette.
 
 .. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks
 '''
@@ -24,7 +28,7 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
             db_file=None, db_timeout=DEFAULT_DB_TIMEOUT, db_attempts=DEFAULT_DB_ATTEMPTS,
             verbose=False, ):
     '''
-    Little routine to wrap over matplotlib.pyplot.savefig, to include file size optimisation and
+    A wrapper around matplotlib.pyplot.savefig, to include file size optimisation and
     image tagging.
 
     The filesize optimisation depends on the img_converter input passes into
@@ -35,9 +39,17 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
 
     Options:
 
-    * img_format - file format of the image, usually without the ".". Currently only the png file \
-                   img_format is supported for tagging/conversion.
+    * img_format - file format of the image. If not supplied it will be guessed from the filename.\
+                   Currently only the png file format is supported for tagging/conversion.
     * img_tags - a dictionary of {tag_name : value} pairs to be added to the image metadata.
+    * db_file - a database file to be used by :func:`ImageMetaTag.db.write_img_to_dbfile` to \
+                store all image metadata so they can be quickly accessed.
+    * db_timeout - change the database timeout (in seconds).
+    * db_attempts - change the number of attempts to write to the database.
+    * dpi - change the image resolution passed into matplotlib.savefig.
+    * keep_open - by default, this savefig wrapper closes the figure after use, except if \
+                  keep_open is True.
+    * verbose - switch for verbose output (reports file sizes before/after conversion)
     * img_converter - see :func:`ImageMetaTag.image_file_postproc`.
     * do_trim - see :func:`ImageMetaTag.image_file_postproc`.
     * trim_border - see :func:`ImageMetaTag.image_file_postproc`.
@@ -46,9 +58,6 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
     * logo_padding - see :func:`ImageMetaTag.image_file_postproc`.
     * logo_pos - see :func:`ImageMetaTag.image_file_postproc`.
     * do_thumb - see :func:`ImageMetaTag.image_file_postproc`.
-    * keep_open - by default, this savefig wrapper closes the figure after use, except if \
-                  keep_open is True.
-    * verbose - switch for verbose output (reports file sizes before/after conversion)
 
     TODO: the logo would also be good if it could accept a list of files, widths,
     positions and paddings. That way different logos could be added to the top left and top
@@ -199,9 +208,9 @@ def image_file_postproc(filename, outfile=None, img_converter=0, do_trim=False, 
 
     if logo_file is not None:
         im_obj = _im_logo(im_obj, logo_file, logo_width, logo_padding, logo_pos)
-        
+
     if do_thumb:
-        # make a thumbnail image here, if required. It is important to do this 
+        # make a thumbnail image here, if required. It is important to do this
         # before we change the colour pallette of the main image, so that there
         # are sufficent colours to do the interpolation. Afterwards, the thumbnail
         # can hage its colour table reduced as well.

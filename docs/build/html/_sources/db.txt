@@ -38,5 +38,7 @@ Internal functions
 
 Utility functions
 ------------------
+The following functions may be very useful for specific occasions, but are nopt intended for regular use:
+
 .. autofunction:: ImageMetaTag.db.scan_dir_for_db
 
