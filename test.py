@@ -115,8 +115,9 @@ def plot_random_data(random_data, i_rand, plot_col, col_name, trims, borders,
     else:
         plt.title('Sum of two random integers between 1 and 6\n')
 
-    outfile = '%s/rolls_%s_%s.%s' % (img_savedir, n_rolls, plot_col, img_format)
-    plt.savefig(outfile)
+    # make the subdirectories:
+    mkdir_p('{}/rolls'.format(img_savedir))
+    mkdir_p('{}/dists'.format(img_savedir))
 
     # save the figure, using different image-meta-tag options
     # and tag the images.
@@ -127,7 +128,7 @@ def plot_random_data(random_data, i_rand, plot_col, col_name, trims, borders,
             these_borders = [0]
         for border in these_borders:
             for compression in compression_levels:
-                outfile = '%s/rolls_imt_%s_%s_compression_%s' \
+                outfile = '%s/rolls/imt_%s_%s_compression_%s' \
                         % (img_savedir, n_rolls, plot_col, compression)
                 if trim:
                     outfile += '_trim_b%s' % border
@@ -172,7 +173,6 @@ def plot_random_data(random_data, i_rand, plot_col, col_name, trims, borders,
                                        color=plot_col, normed=True)
     plt.xlim([1, 13])
     plt.title('Distribution of %s random integers between 1 and 6\n' % n_rolls)
-    plt.savefig(outfile)
 
     for trim in trims:
         if trim:
@@ -181,7 +181,7 @@ def plot_random_data(random_data, i_rand, plot_col, col_name, trims, borders,
             these_borders = [0]
         for border in these_borders:
             for compression in compression_levels:
-                outfile = '%s/dist_imt_%s_%s_compression_%s' \
+                outfile = '%s/dists/imt_%s_%s_compression_%s' \
                         % (img_savedir, n_rolls, plot_col, compression)
                 if trim:
                     outfile += '_trim_b%s' % border
@@ -292,10 +292,12 @@ def __main__():
     parser = argparse.ArgumentParser(\
                         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
                         description="Test routine for ImageMetaTag")
-    parser.add_argument('--skip-plotting', '-s', action='store_true', dest='skip_plotting', \
+    parser.add_argument('--skip-plotting', '-s', action='store_true', dest='skip_plotting',
                         help='Skip making plots, if test plot metadata is available', default=False)
-    parser.add_argument('--no-big-dict', action='store_true', dest='no_biggus_dictus', \
+    parser.add_argument('--no-big-dict', action='store_true', dest='no_biggus_dictus',
                         help='Skip the big dictionary test.', default=False)
+    parser.add_argument('--no-db-rebuild', action='store_true', dest='no_db_rebuild', 
+                        help='Skip rebuilding an image database from images on disk', default=False)
     args = parser.parse_args()
 
     n_random_data = 5
@@ -905,6 +907,35 @@ def __main__():
                                                             'Test ImageDict webpage')
         print_simple_timer(date_start_web, datetime.now(), 'Large parallel dict webpage')
 
+    if not args.no_db_rebuild:
+        print 'Testing imt.db.scan_dir_for_db'
+        # rebuilding an image database from files on disk can be slow, but it can be 
+        # very useulf:
+        rebuild_db = '{}/imt_rebuild.db'.format(webdir)
+        # rebuild the img_savedir, makging sure we don't scan the thumbnail directory:
+        imt.db.scan_dir_for_db(webdir, rebuild_db, restart_db=True, img_tag_req=required_tags,
+                               subdir_excl_list=['thumbnail'], known_file_tags=None, verbose=True)
+        # now load that db and test it:
+        imgs_r, imgs_tags_r = imt.db.read_img_info_from_dbfile(rebuild_db,
+                                                               required_tags=required_tags,
+                                                               tag_strings=tag_strings)
+        # reload the standard db:
+        db_img_list, db_images_and_tags = imt.db.read_img_info_from_dbfile(imt_db)
+        # now validate the rebuild against the standard db:
+        db_img_list.sort()
+        imgs_r.sort()
+        if not db_img_list == imgs_r:
+            raise ValueError('''Mismatch between database of plots, and database produced by
+scanning {}
+Has the directory got other images/old tests in it?'''.format(webdir))
+        # just check the tags of the first image.
+        # Note that as we restricted the rebuild to a subset of tags, the rebuilt database won't
+        # have as many tags as the one produced as the images were produced.
+        for tag_name, tag_value in imgs_tags_r[imgs_r[0]].iteritems():
+            if not db_images_and_tags[db_img_list[0]][tag_name] == tag_value:
+                raise ValueError('Tag values mistmatch between plotted and rebuilt database!')
+
+        print 'Testing of database rebuild functionality complete.'
 
 if __name__ == '__main__':
     __main__()

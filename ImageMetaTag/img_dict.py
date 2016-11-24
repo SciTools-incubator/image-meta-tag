@@ -1,7 +1,7 @@
 '''
 This submodule contains the :class:`ImageMetaTag.ImageDict` class, and functions for preparing them.
 
-The purpose of an :class:`ImageMetaTag.ImageDict` is to sort the image metadata, supplied to 
+The purpose of an :class:`ImageMetaTag.ImageDict` is to sort the image metadata, supplied to
 :func:`ImageMetaTag.savefig` and usually stored in a database file, into a useful form that
 can quickly and easily be presented as a webpage by :func:`ImageMetaTag.webpage.write_full_page`.
 
@@ -428,12 +428,14 @@ class ImageDict():
 
         Valid sort methods so far are mostly focused on meterological terms, and include:
          * 'sort' - just an ordinary sort
-         * 'reverse sort' - a reversed sort
          * 'level' or 'numeric' - starting with the surface and working upwards, then \
                                   'special' levels like cross sections etc.
          * 'T+' - in ascending order of the number after a T+ (or similar) string.
-         * an input list - element in the input list are sorted as per their order \
+         * an input list - Specific elements in the input list are sorted as per their order\
                            in the list, while the rest are just sorted.
+
+        The methods activated by a string can be reversed as 'reverse_sort' or 'reverse_sort',
+        or 'reverse numeric' or 'reverse_numeric'.
         '''
 
         if len(sort_methods) != len(self.keys):
@@ -482,7 +484,7 @@ class ImageDict():
                     # and pull out the labels, in the right order:
                     self.keys[i_key] = [x[0] for x in labels_and_values]
 
-                elif method in ['level', 'numeric']:
+                elif method in ['level', 'numeric', 'reverse_level', 'reverse_numeric']:
                     #'level' - starting with the surface and working upwards, then 'special'
                     # levels like cross sections etc.
 
@@ -529,11 +531,18 @@ class ImageDict():
                     numeric_patterns_and_scalings = [(r'([0-9.eE+-]{1,})', 1.0)]
 
                     # now loop through the different patterns/scalings, and their orders:
-                    pattern_order_loop = [(metre_patterns_and_scalings, 'sort'),
-                                          (pressure_patterns_and_scalings, 'reversed'),
-                                          (model_lev_patterns_and_scalings, 'sort'),
-                                          (lattlong_patterns_and_scalings, 'sort'),
-                                          (numeric_patterns_and_scalings, 'sort')]
+                    if method.startswith('reverse'):
+                        pattern_order_loop = [(metre_patterns_and_scalings, 'reversed'),
+                                              (pressure_patterns_and_scalings, 'sort'),
+                                              (model_lev_patterns_and_scalings, 'reversed'),
+                                              (lattlong_patterns_and_scalings, 'reversed'),
+                                              (numeric_patterns_and_scalings, 'reversed')]
+                    else:
+                        pattern_order_loop = [(metre_patterns_and_scalings, 'sort'),
+                                              (pressure_patterns_and_scalings, 'reversed'),
+                                              (model_lev_patterns_and_scalings, 'sort'),
+                                              (lattlong_patterns_and_scalings, 'sort'),
+                                              (numeric_patterns_and_scalings, 'sort')]
 
                     for patterns_scalings, sort_method in pattern_order_loop:
                         labels_and_values = []
@@ -632,7 +641,7 @@ class ImageDict():
             else:
                 return None
         return sub_dict
-    
+
 
 def readmeta_from_image(img_file, img_format=None):
     '''Reads the metadata added by the ImageMetaTag savefig, from an image file,
@@ -820,7 +829,6 @@ def simple_dict_filter(simple_dict, tests, raise_key_mismatch=False):
                     # multi-element list:
                     test_is_tuple = [isinstance(x, tuple) for x in tests[test]]
                     if any(test_is_tuple):
-                        
                         has_complex_test = True
 
                         # now loop through all of the tuples within the test:

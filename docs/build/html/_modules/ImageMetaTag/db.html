@@ -239,8 +239,15 @@
 <div class="viewcode-block" id="open_or_create_db_file"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.open_or_create_db_file">[docs]</a><span class="k">def</span> <span class="nf">open_or_create_db_file</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">img_info</span><span class="p">,</span> <span class="n">restart_db</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Opens a database file and sets up initial tables, then returns the connection and cursor.</span>
-<span class="sd">    Setting the restart_db option deletes the current db file and starts again.</span>
 <span class="sd">    </span>
+<span class="sd">    Arguments:</span>
+<span class="sd">    * db_file - the database file to open.</span>
+<span class="sd">    * img_info - a dictionary of image metadata to be saved to the database.</span>
+
+<span class="sd">    Options:</span>
+<span class="sd">    * restart_db - when Truem this deletes the current db file and starts again, \</span>
+<span class="sd">                   if it already exists.</span>
+<span class="sd">        </span>
 <span class="sd">    Returns an open database connection (dbcn) and cursor (dbcr)</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
@@ -630,25 +637,39 @@
     <span class="k">return</span> <span class="n">filename_list</span><span class="p">,</span> <span class="n">out_dict</span>
 </div>
 <div class="viewcode-block" id="scan_dir_for_db"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.scan_dir_for_db">[docs]</a><span class="k">def</span> <span class="nf">scan_dir_for_db</span><span class="p">(</span><span class="n">basedir</span><span class="p">,</span> <span class="n">db_file</span><span class="p">,</span> <span class="n">img_tag_req</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">subdir_excl_list</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">known_file_tags</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                    <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">no_file_ext</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">return_timings</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+                    <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">no_file_ext</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">return_timings</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">restart_db</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    A useful utility that scans a dir for images that can go into a database.</span>
-<span class="sd">    This should only be used to build a database from a directroy of tagged images that</span>
-<span class="sd">    did not previously use a database. For optimal performance, build the database as the</span>
-<span class="sd">    plots are created.</span>
+<span class="sd">    A useful utility that scans a directory on disk for images that can go into a database.</span>
+<span class="sd">    This should only be used to build a database from a directory of tagged images that</span>
+<span class="sd">    did not previously use a database, or where the database file has been deleted but the</span>
+<span class="sd">    images have not.</span>
+<span class="sd">    </span>
+<span class="sd">    For optimal performance, build the database as the plots are created (or do not delete</span>
+<span class="sd">    the database by accident).</span>
+<span class="sd">    </span>
+<span class="sd">    Arguments:</span>
+<span class="sd">    * basedir - the directory to start scanning.</span>
+<span class="sd">    * db_file - the database file to save the image metadata to. A pre-existing database file\</span>
+<span class="sd">                will fail unless restart_db is True</span>
 
-<span class="sd">    * img_tag_req - a list of tag names that are to be applied/created</span>
-<span class="sd">    * subdir_excl_list - a list of subdirectories that don&#39;t need to be scanned</span>
-<span class="sd">    * no_file_ext - logical to include, or not, the file extension in the filenames \</span>
-<span class="sd">                    saved to the database</span>
-<span class="sd">    * known_file_tags - if supplied, this is a dict (keyed by filename entry), \</span>
-<span class="sd">                        containing a dict of tags already known \</span>
-<span class="sd">                        (so you don;t need to read them from the files themselves).</span>
-<span class="sd">    * verbose - verbose output</span>
+<span class="sd">    * img_tag_req - a list of tag names that are to be applied/created. Tags not in this list\</span>
+<span class="sd">                    will not be stored. Images without all of these tags are ignored.</span>
+<span class="sd">    * subdir_excl_list - a list of subdirectories that don&#39;t need to be scanned. [&#39;thumbnail&#39;]\</span>
+<span class="sd">                        for instance, will prevent the image thumbnails being included.</span>
+<span class="sd">    * no_file_ext - logical to exclude the file extension in the filenames saved to the database.</span>
+<span class="sd">    * known_file_tags - if supplied, this is a dict (keyed by filename entry),\</span>
+<span class="sd">                        contains a dictionary of {filename: {tag name: value}} already known\</span>
+<span class="sd">                        (so you don&#39;t need to read them from the files themselves). This is very\</span>
+<span class="sd">                        if you have a old backup of a database file that needs updating.</span>
+<span class="sd">    * restart_db - if True, the db_file will be restarted as empty.</span>
+<span class="sd">    * verbose - verbose output.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">db_file</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">restart_db</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;&#39;&#39;scan_dir_for_db will not work on a pre-existing file unless restart_db is True,</span>
+<span class="s">in which case the database file will be restarted. Use with care.&#39;&#39;&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">known_file_tags</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">known_file_tags</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">known_files</span> <span class="o">=</span> <span class="n">known_file_tags</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">known_files</span> <span class="o">=</span> <span class="p">[]</span>

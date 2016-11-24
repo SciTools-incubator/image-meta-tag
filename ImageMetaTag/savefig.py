@@ -4,7 +4,7 @@ is to add image metadata taggging and database storage of that metadata.
 
 As the output images are already being post-processed to add the metadata, basic image
 manipulation options are included to crop images, add logos and reduce their file size
-by simplifying their colour palette.    
+by simplifying their colour palette.
 
 .. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks
 '''
@@ -208,9 +208,9 @@ def image_file_postproc(filename, outfile=None, img_converter=0, do_trim=False, 
 
     if logo_file is not None:
         im_obj = _im_logo(im_obj, logo_file, logo_width, logo_padding, logo_pos)
-        
+
     if do_thumb:
-        # make a thumbnail image here, if required. It is important to do this 
+        # make a thumbnail image here, if required. It is important to do this
         # before we change the colour pallette of the main image, so that there
         # are sufficent colours to do the interpolation. Afterwards, the thumbnail
         # can hage its colour table reduced as well.

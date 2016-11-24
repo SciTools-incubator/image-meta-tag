@@ -105,14 +105,16 @@
 
 <span class="k">def</span> <span class="nf">__main__</span><span class="p">():</span>
     <span class="c"># define the web page directory and image database using the same</span>
-    <span class="c"># functions in test, so they are consistent:     </span>
+    <span class="c"># functions in test, so they are consistent:</span>
     <span class="n">webdir</span> <span class="o">=</span> <span class="n">get_webdir</span><span class="p">()</span>
     <span class="n">imt_db</span> <span class="o">=</span> <span class="n">define_imt_db</span><span class="p">()</span>
-    
-    <span class="c"># these are the image tags that are present in the metadata, and the sort order</span>
-    <span class="c"># we want to present them with on a web page:</span>
-    <span class="n">img_tags</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;number of rolls&#39;</span><span class="p">,</span> <span class="s">&#39;plot type&#39;</span><span class="p">,</span> <span class="s">&#39;plot color&#39;</span><span class="p">,</span>
-                     <span class="s">&#39;image trim&#39;</span><span class="p">,</span> <span class="s">&#39;border&#39;</span><span class="p">,</span> <span class="s">&#39;image compression&#39;</span><span class="p">]</span>
+
+    <span class="c"># these are the image tags that are present in the metadata, and</span>
+    <span class="c"># the sort order we want to present them with on a web page:</span>
+    <span class="n">img_tags</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;plot type&#39;</span><span class="p">,</span> <span class="s">&#39;number of rolls&#39;</span><span class="p">,</span> <span class="s">&#39;plot color&#39;</span><span class="p">,</span>
+                <span class="s">&#39;image trim&#39;</span><span class="p">,</span> <span class="s">&#39;border&#39;</span><span class="p">,</span> <span class="s">&#39;image compression&#39;</span><span class="p">]</span>
+    <span class="c"># and how those tags are to be sorted:</span>
+    <span class="n">sort_methods</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;sort&#39;</span><span class="p">,</span> <span class="s">&#39;numeric&#39;</span><span class="p">,</span> <span class="s">&#39;reverse_sort&#39;</span><span class="p">,</span> <span class="s">&#39;sort&#39;</span><span class="p">,</span> <span class="s">&#39;reverse_numeric&#39;</span><span class="p">,</span> <span class="s">&#39;sort&#39;</span><span class="p">]</span>
 
     <span class="c"># Now load in the database:</span>
     <span class="n">tag_strings</span> <span class="o">=</span> <span class="p">[]</span>
@@ -122,10 +124,10 @@
     <span class="c"># we have supplied the database read with the image tags we expect, and an empty list of values</span>
     <span class="c"># so that we can construct what is returned (and therefore the ImageDict) in a memory</span>
     <span class="c"># efficient way.</span>
-    
+
     <span class="c"># the img_list is a list of the images in the databse file:</span>
     <span class="k">print</span> <span class="n">img_list</span>
-    
+
     <span class="c"># now assemble the ImageDict in the simple way. See test.py for parallel versions etc.</span>
     <span class="n">img_dict</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="k">for</span> <span class="n">img_file</span><span class="p">,</span> <span class="n">img_info</span> <span class="ow">in</span> <span class="n">images_and_tags</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
@@ -139,7 +141,9 @@
             <span class="n">img_dict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">imt</span><span class="o">.</span><span class="n">ImageDict</span><span class="p">(</span><span class="n">tmp_dict</span><span class="p">))</span>
     <span class="c"># printing the img_dict will show it&#39;s heirachy (but is a lot of text):</span>
     <span class="k">print</span> <span class="n">img_dict</span>
-    
+    <span class="c"># now sort the keys of each level of the ImageDict according to the sort_method</span>
+    <span class="n">img_dict</span><span class="o">.</span><span class="n">sort_keys</span><span class="p">(</span><span class="n">sort_methods</span><span class="p">)</span>
+
     <span class="c"># now write a webpage:</span>
     <span class="n">page_filename</span> <span class="o">=</span> <span class="s">&#39;{}/simple.html&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">webdir</span><span class="p">)</span>
     <span class="c"># the title:</span>
@@ -151,7 +155,7 @@
     <span class="n">imt</span><span class="o">.</span><span class="n">webpage</span><span class="o">.</span><span class="n">write_full_page</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">page_filename</span><span class="p">,</span> <span class="n">page_title</span><span class="p">,</span>
                                 <span class="n">preamble</span><span class="o">=</span><span class="n">webpage_preamble</span><span class="p">,</span>
                                 <span class="n">postamble</span><span class="o">=</span><span class="n">webpage_postamble</span><span class="p">)</span>
-    
+
     <span class="c"># and sign off as completed:</span>
     <span class="k">print</span> <span class="s">&#39;completed, using ImageMetaTag at {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">imt</span><span class="o">.</span><span class="n">__path__</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 

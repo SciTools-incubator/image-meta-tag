@@ -169,8 +169,15 @@ def merge_db_files(main_db_file, add_db_file, delete_add_db=False, delete_added_
 def open_or_create_db_file(db_file, img_info, restart_db=False, timeout=DEFAULT_DB_TIMEOUT):
     '''
     Opens a database file and sets up initial tables, then returns the connection and cursor.
-    Setting the restart_db option deletes the current db file and starts again.
-    
+
+    Arguments:
+    * db_file - the database file to open.
+    * img_info - a dictionary of image metadata to be saved to the database.
+
+    Options:
+    * restart_db - when Truem this deletes the current db file and starts again, \
+                   if it already exists.
+
     Returns an open database connection (dbcn) and cursor (dbcr)
     '''
 
@@ -194,7 +201,7 @@ def open_or_create_db_file(db_file, img_info, restart_db=False, timeout=DEFAULT_
 def open_db_file(db_file, timeout=DEFAULT_DB_TIMEOUT):
     '''
     Just opens an existing db_file, using timeouts but no retries.
-    
+
     Returns an open database connection (dbcn) and cursor (dbcr)
     '''
 
@@ -501,7 +508,7 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
 def select_dbfile_by_tags(db_file, select_tags):
     '''
     Selects from a database file the entries that match a dict of field names/acceptable values.
-    
+
     Returns the output, processed by :func:`ImageMetaTag.db.process_select_star_from`
     '''
     if db_file is None:
@@ -560,25 +567,39 @@ def select_dbcr_by_tags(dbcr, select_tags):
     return filename_list, out_dict
 
 def scan_dir_for_db(basedir, db_file, img_tag_req=None, subdir_excl_list=None, known_file_tags=None,
-                    verbose=False, no_file_ext=False, return_timings=False):
+                    verbose=False, no_file_ext=False, return_timings=False, restart_db=False):
     '''
-    A useful utility that scans a dir for images that can go into a database.
-    This should only be used to build a database from a directroy of tagged images that
-    did not previously use a database. For optimal performance, build the database as the
-    plots are created.
+    A useful utility that scans a directory on disk for images that can go into a database.
+    This should only be used to build a database from a directory of tagged images that
+    did not previously use a database, or where the database file has been deleted but the
+    images have not.
 
-    * img_tag_req - a list of tag names that are to be applied/created
-    * subdir_excl_list - a list of subdirectories that don't need to be scanned
-    * no_file_ext - logical to include, or not, the file extension in the filenames \
-                    saved to the database
-    * known_file_tags - if supplied, this is a dict (keyed by filename entry), \
-                        containing a dict of tags already known \
-                        (so you don;t need to read them from the files themselves).
-    * verbose - verbose output
+    For optimal performance, build the database as the plots are created (or do not delete
+    the database by accident).
+
+    Arguments:
+    * basedir - the directory to start scanning.
+    * db_file - the database file to save the image metadata to. A pre-existing database file\
+                will fail unless restart_db is True
+
+    * img_tag_req - a list of tag names that are to be applied/created. Tags not in this list\
+                    will not be stored. Images without all of these tags are ignored.
+    * subdir_excl_list - a list of subdirectories that don't need to be scanned. ['thumbnail']\
+                        for instance, will prevent the image thumbnails being included.
+    * no_file_ext - logical to exclude the file extension in the filenames saved to the database.
+    * known_file_tags - if supplied, this is a dict (keyed by filename entry),\
+                        contains a dictionary of {filename: {tag name: value}} already known\
+                        (so you don't need to read them from the files themselves). This is very\
+                        if you have a old backup of a database file that needs updating.
+    * restart_db - if True, the db_file will be restarted as empty.
+    * verbose - verbose output.
     '''
 
+    if os.path.isfile(db_file) and not restart_db:
+        raise ValueError('''scan_dir_for_db will not work on a pre-existing file unless restart_db
+is True, in which case the database file will be restarted. Use with care.''')
 
-    if not known_file_tags is None:
+    if known_file_tags is not None:
         known_files = known_file_tags.keys()
     else:
         known_files = []
