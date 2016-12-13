@@ -135,7 +135,7 @@ webpage styles could be added.</p>
 <li>preamble : html text added at the top of the &lt;body&gt; text, but before the ImageMetaTag                  section. Can be quite extensive.</li>
 <li>postable : html text added after the ImageMetaTag section.</li>
 <li>initial_selectors - A list of initial values for the selectors, to be passed into                           <tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.webpage.write_js_setup()</span></tt>.</li>
-<li>show_selector_names - switches on diplsaying the selector full names defined by the                             <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a>.full_name_mapping</li>
+<li>show_selector_names - switches on displaying the selector full names defined by the                             <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a>.full_name_mapping</li>
 <li>url_type - determines the type of URL at the bottom of the ImageMetaTag section. Can be                  &#8216;int&#8217; or &#8216;str&#8217;.</li>
 <li>only_show_rel_url - If True, the wepage will only show relative urls in is link section.</li>
 <li>verbose - If True, stdout will be more verbose</li>
@@ -175,7 +175,7 @@ webpage styles could be added.</p>
 
 <dl class="function">
 <dt id="ImageMetaTag.webpage.write_js_placeholders">
-<tt class="descclassname">ImageMetaTag.webpage.</tt><tt class="descname">write_js_placeholders</tt><big>(</big><em>file_obj=None</em>, <em>dict_depth=None</em>, <em>selector_prefix=None</em>, <em>style='horiz dropdowns'</em>, <em>level_names=False</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/webpage.html#write_js_placeholders"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.webpage.write_js_placeholders" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">ImageMetaTag.webpage.</tt><tt class="descname">write_js_placeholders</tt><big>(</big><em>file_obj=None</em>, <em>dict_depth=None</em>, <em>selector_prefix=None</em>, <em>style='horiz dropdowns'</em>, <em>level_names=False</em>, <em>animated_level=None</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/webpage.html#write_js_placeholders"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.webpage.write_js_placeholders" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes the placeholders into the page body, for the javascript to manipulate</p>
 <ul class="simple">
 <li>file_obj - an open file object to write to</li>
@@ -183,6 +183,7 @@ webpage styles could be added.</p>
 <li>selector_prefix - prefix for the variable names of the selectors (these are visible to                         those people viewing the webpage!)</li>
 <li>style - In future, it would be great to write out different types of webpages. For now               they are always horizontal dropdown menus: &#8216;horiz dropdowns&#8217;.</li>
 <li>level_names - if supplied, this need to be a list of full names, for the selectors, of                     length dict_depth.</li>
+<li>animated_level - if supplied, as a string, this will be used to label the animator buttons.</li>
 </ul>
 </dd></dl>
 

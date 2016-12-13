@@ -65,11 +65,11 @@ def read_img_info_from_dbfile(db_file, required_tags=None, tag_strings=None,
     '''
     reads in the database written by write_img_to_dbfile
 
-    options:
+    Options:
      * required_tags - a list of image tags to return, and to fail if not all are present
      * tag_strings - an input list that will be populated with the unique values of the image tags.
 
-    returns:
+    Returns:
      * a list of filenames (payloads for the :class:`ImageMetaTag.ImageDict` class )
      * a dictionary, by filename, containing a dictionary of the image metadata as *tagname: value*
 
@@ -122,8 +122,8 @@ def merge_db_files(main_db_file, add_db_file, delete_add_db=False, delete_added_
     The databases should have the same tags within them for the merge to work.
 
     Options:
-    * delete_add_db - if True, the added database file will be deleted afterwards
-    * delete_added_entries - if delete_add_db is False, this will keep the add_db_file
+     * delete_add_db - if True, the added database file will be deleted afterwards
+     * delete_added_entries - if delete_add_db is False, this will keep the add_db_file
                              but remove the entries from it which were added to the main_db_file.
                              This is useful if parallel processes are writing to the databases.
                              It does nothing if delete_add_db is True.
@@ -171,11 +171,11 @@ def open_or_create_db_file(db_file, img_info, restart_db=False, timeout=DEFAULT_
     Opens a database file and sets up initial tables, then returns the connection and cursor.
 
     Arguments:
-    * db_file - the database file to open.
-    * img_info - a dictionary of image metadata to be saved to the database.
+     * db_file - the database file to open.
+     * img_info - a dictionary of image metadata to be saved to the database.
 
     Options:
-    * restart_db - when Truem this deletes the current db file and starts again, \
+     * restart_db - when Truem this deletes the current db file and starts again, \
                    if it already exists.
 
     Returns an open database connection (dbcn) and cursor (dbcr)
@@ -303,11 +303,12 @@ def process_select_star_from(db_contents, dbcr, required_tags=None, tag_strings=
     Converts the output from a select * from ....  command into a standard output format
     Requires a database cursor (dbcr) to identify the field names.
 
-    Options
+    Options:
      * required_tags - a list of image tags to return, and to fail if not all are present
      * tag_strings - an input list that will be populated with the unique values of the image tags
 
-    returns as :func:`ImageMetaTag.db.read_img_info_from_dbfile`, but filtered accord to the select.
+    Returns:
+    as :func:`ImageMetaTag.db.read_img_info_from_dbfile`, but filtered accord to the select.
      * a list of filenames (payloads for the :class:`ImageMetaTag.ImageDict`)
      * a dictionary, by filename, containing a dictionary of the image metadata as *tagname: value*
     '''
@@ -578,26 +579,27 @@ def scan_dir_for_db(basedir, db_file, img_tag_req=None, subdir_excl_list=None, k
     the database by accident).
 
     Arguments:
-    * basedir - the directory to start scanning.
-    * db_file - the database file to save the image metadata to. A pre-existing database file\
+     * basedir - the directory to start scanning.
+     * db_file - the database file to save the image metadata to. A pre-existing database file\
                 will fail unless restart_db is True
 
-    * img_tag_req - a list of tag names that are to be applied/created. Tags not in this list\
-                    will not be stored. Images without all of these tags are ignored.
-    * subdir_excl_list - a list of subdirectories that don't need to be scanned. ['thumbnail']\
-                        for instance, will prevent the image thumbnails being included.
-    * no_file_ext - logical to exclude the file extension in the filenames saved to the database.
-    * known_file_tags - if supplied, this is a dict (keyed by filename entry),\
-                        contains a dictionary of {filename: {tag name: value}} already known\
-                        (so you don't need to read them from the files themselves). This is very\
-                        if you have a old backup of a database file that needs updating.
-    * restart_db - if True, the db_file will be restarted as empty.
-    * verbose - verbose output.
+    Options:
+     * img_tag_req - a list of tag names that are to be applied/created. Tags not in this list\
+                     will not be stored. Images without all of these tags are ignored.
+     * subdir_excl_list - a list of subdirectories that don't need to be scanned. ['thumbnail']\
+                         for instance, will prevent the image thumbnails being included.
+     * no_file_ext - logical to exclude the file extension in the filenames saved to the database.
+     * known_file_tags - if supplied, this is a dict (keyed by filename entry),\
+                         contains a dictionary of {filename: {tag name: value}} already known\
+                         (so you don't need to read them from the files themselves). This is very\
+                         if you have a old backup of a database file that needs updating.
+     * restart_db - if True, the db_file will be restarted from an empty database.
+     * verbose - verbose output.
     '''
 
     if os.path.isfile(db_file) and not restart_db:
         raise ValueError('''scan_dir_for_db will not work on a pre-existing file unless restart_db
-is True, in which case the database file will be restarted. Use with care.''')
+is True, in which case the database file will be restarted as empty. Use with care.''')
 
     if known_file_tags is not None:
         known_files = known_file_tags.keys()

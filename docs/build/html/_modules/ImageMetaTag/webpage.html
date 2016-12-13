@@ -134,7 +134,7 @@
 <span class="sd">    * postable : html text added after the ImageMetaTag section.</span>
 <span class="sd">    * initial_selectors - A list of initial values for the selectors, to be passed into \</span>
 <span class="sd">                          :func:`ImageMetaTag.webpage.write_js_setup`.</span>
-<span class="sd">    * show_selector_names - switches on diplsaying the selector full names defined by the \</span>
+<span class="sd">    * show_selector_names - switches on displaying the selector full names defined by the \</span>
 <span class="sd">                            :class:`ImageMetaTag.ImageDict`.full_name_mapping</span>
 <span class="sd">    * url_type - determines the type of URL at the bottom of the ImageMetaTag section. Can be \</span>
 <span class="sd">                 &#39;int&#39; or &#39;str&#39;.</span>
@@ -313,8 +313,14 @@
                 <span class="n">level_names</span> <span class="o">=</span> <span class="n">img_dict</span><span class="o">.</span><span class="n">level_names</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">level_names</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="c"># if we&#39;re labelling selectors, and we have an animator button, label that too:</span>
+            <span class="k">if</span> <span class="n">img_dict</span><span class="o">.</span><span class="n">selector_animated</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">show_selector_names</span><span class="p">:</span>
+                <span class="n">anim_level</span> <span class="o">=</span> <span class="n">level_names</span><span class="p">[</span><span class="n">img_dict</span><span class="o">.</span><span class="n">selector_animated</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">anim_level</span> <span class="o">=</span> <span class="bp">None</span>
             <span class="n">write_js_placeholders</span><span class="p">(</span><span class="n">file_obj</span><span class="o">=</span><span class="n">out_file</span><span class="p">,</span> <span class="n">dict_depth</span><span class="o">=</span><span class="n">img_dict</span><span class="o">.</span><span class="n">dict_depth</span><span class="p">(),</span>
-                                  <span class="n">style</span><span class="o">=</span><span class="n">style</span><span class="p">,</span> <span class="n">level_names</span><span class="o">=</span><span class="n">level_names</span><span class="p">)</span>
+                                  <span class="n">style</span><span class="o">=</span><span class="n">style</span><span class="p">,</span> <span class="n">level_names</span><span class="o">=</span><span class="n">level_names</span><span class="p">,</span>
+                                  <span class="n">animated_level</span><span class="o">=</span><span class="n">anim_level</span><span class="p">)</span>
         <span class="c"># the body is done, so the postamble comes in:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">postamble</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">postamble</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
@@ -524,7 +530,8 @@
         <span class="n">json_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">out_str</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="write_js_placeholders"><a class="viewcode-back" href="../../webpage.html#ImageMetaTag.webpage.write_js_placeholders">[docs]</a><span class="k">def</span> <span class="nf">write_js_placeholders</span><span class="p">(</span><span class="n">file_obj</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">dict_depth</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">selector_prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                          <span class="n">style</span><span class="o">=</span><span class="s">&#39;horiz dropdowns&#39;</span><span class="p">,</span> <span class="n">level_names</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+                          <span class="n">style</span><span class="o">=</span><span class="s">&#39;horiz dropdowns&#39;</span><span class="p">,</span> <span class="n">level_names</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                          <span class="n">animated_level</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Writes the placeholders into the page body, for the javascript to manipulate</span>
 
@@ -536,6 +543,7 @@
 <span class="sd">              they are always horizontal dropdown menus: &#39;horiz dropdowns&#39;.</span>
 <span class="sd">    * level_names - if supplied, this need to be a list of full names, for the selectors, of \</span>
 <span class="sd">                    length dict_depth.</span>
+<span class="sd">    * animated_level - if supplied, as a string, this will be used to label the animator buttons.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">if</span> <span class="n">selector_prefix</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
@@ -558,6 +566,12 @@
 <span class="s"> &lt;tr&gt;</span>
 <span class="s">  &lt;td&gt;</span>
 <span class="s">   &lt;font size=3&gt;&#39;&#39;&#39;</span><span class="p">)</span>
+        <span class="c"># a text label for the animator buttons:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">animated_level</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">anim_label</span> <span class="o">=</span> <span class="s">&#39;{}: &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">animated_level</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">anim_label</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
         <span class="c"># for each level of depth in the plot dictionary, add a span to hold the selector:</span>
         <span class="k">if</span> <span class="n">apply_level_names</span><span class="p">:</span>
             <span class="c"># if we want labelled selectors, then write out</span>
@@ -580,12 +594,12 @@
             <span class="c"># add the placeholder for animators buttons:</span>
             <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;     &lt;tr&gt;</span>
 <span class="s">      &lt;td colspan={}&gt;</span>
-<span class="s">        &lt;span id=&quot;animator1&quot;&gt;&amp;nbsp;&lt;/span&gt;</span>
+<span class="s">        {}&lt;span id=&quot;animator1&quot;&gt;&amp;nbsp;&lt;/span&gt;</span>
 <span class="s">        &lt;span id=&quot;animator2&quot;&gt;&amp;nbsp;&lt;/span&gt;</span>
 <span class="s">      &lt;/td&gt;</span>
 <span class="s">    &lt;/tr&gt;</span>
 <span class="s">   &lt;/table&gt;</span>
-<span class="s">&#39;&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dict_depth</span><span class="p">))</span>
+<span class="s">&#39;&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dict_depth</span><span class="p">,</span> <span class="n">anim_label</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c"># simply a set of spans, in a line:</span>
             <span class="k">for</span> <span class="n">lev</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dict_depth</span><span class="p">):</span>
@@ -594,10 +608,10 @@
             <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">   &lt;br&gt;&#39;</span><span class="p">)</span>
             <span class="c"># add the placeholder for animators buttons:</span>
             <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;</span>
-<span class="s">   &lt;span id=&quot;animator1&quot;&gt;&amp;nbsp;&lt;/span&gt;</span>
+<span class="s">   {}&lt;span id=&quot;animator1&quot;&gt;&amp;nbsp;&lt;/span&gt;</span>
 <span class="s">   &lt;span id=&quot;animator2&quot;&gt;&amp;nbsp;&lt;/span&gt;</span>
 <span class="s">       &lt;br&gt;</span>
-<span class="s">    &#39;&#39;&#39;</span><span class="p">)</span>
+<span class="s">    &#39;&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">anim_label</span><span class="p">))</span>
 
         <span class="c"># now add somewhere for the image to go:</span>
         <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;   &lt;div id=&quot;the_image&quot;&gt;Please wait while the page is loading&lt;/div&gt;</span>
