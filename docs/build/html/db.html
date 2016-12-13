@@ -140,13 +140,13 @@ from the location of the database file.</p>
 <tt class="descclassname">ImageMetaTag.db.</tt><tt class="descname">read_img_info_from_dbfile</tt><big>(</big><em>db_file</em>, <em>required_tags=None</em>, <em>tag_strings=None</em>, <em>db_timeout=6</em>, <em>db_attempts=20</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/db.html#read_img_info_from_dbfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.read_img_info_from_dbfile" title="Permalink to this definition">¶</a></dt>
 <dd><p>reads in the database written by write_img_to_dbfile</p>
 <dl class="docutils">
-<dt>options:</dt>
+<dt>Options:</dt>
 <dd><ul class="first last simple">
 <li>required_tags - a list of image tags to return, and to fail if not all are present</li>
 <li>tag_strings - an input list that will be populated with the unique values of the image tags.</li>
 </ul>
 </dd>
-<dt>returns:</dt>
+<dt>Returns:</dt>
 <dd><ul class="first last simple">
 <li>a list of filenames (payloads for the <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a> class )</li>
 <li>a dictionary, by filename, containing a dictionary of the image metadata as <em>tagname: value</em></li>
@@ -189,11 +189,19 @@ produced with the dictionary.</p>
 <dt id="ImageMetaTag.db.open_or_create_db_file">
 <tt class="descclassname">ImageMetaTag.db.</tt><tt class="descname">open_or_create_db_file</tt><big>(</big><em>db_file</em>, <em>img_info</em>, <em>restart_db=False</em>, <em>timeout=6</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/db.html#open_or_create_db_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.open_or_create_db_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Opens a database file and sets up initial tables, then returns the connection and cursor.</p>
-<p>Arguments:
-* db_file - the database file to open.
-* img_info - a dictionary of image metadata to be saved to the database.</p>
-<p>Options:
-* restart_db - when Truem this deletes the current db file and starts again,                    if it already exists.</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd><ul class="first last simple">
+<li>db_file - the database file to open.</li>
+<li>img_info - a dictionary of image metadata to be saved to the database.</li>
+</ul>
+</dd>
+<dt>Options:</dt>
+<dd><ul class="first last simple">
+<li>restart_db - when Truem this deletes the current db file and starts again,                    if it already exists.</li>
+</ul>
+</dd>
+</dl>
 <p>Returns an open database connection (dbcn) and cursor (dbcr)</p>
 </dd></dl>
 
@@ -272,19 +280,21 @@ names &amp; acceptable values.</p>
 <dd><p>Converts the output from a select * from ....  command into a standard output format
 Requires a database cursor (dbcr) to identify the field names.</p>
 <dl class="docutils">
-<dt>Options</dt>
+<dt>Options:</dt>
 <dd><ul class="first last simple">
 <li>required_tags - a list of image tags to return, and to fail if not all are present</li>
 <li>tag_strings - an input list that will be populated with the unique values of the image tags</li>
 </ul>
 </dd>
-<dt>returns as <a class="reference internal" href="#ImageMetaTag.db.read_img_info_from_dbfile" title="ImageMetaTag.db.read_img_info_from_dbfile"><tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.db.read_img_info_from_dbfile()</span></tt></a>, but filtered accord to the select.</dt>
-<dd><ul class="first last simple">
+</dl>
+<p>Returns:
+as <a class="reference internal" href="#ImageMetaTag.db.read_img_info_from_dbfile" title="ImageMetaTag.db.read_img_info_from_dbfile"><tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.db.read_img_info_from_dbfile()</span></tt></a>, but filtered accord to the select.</p>
+<blockquote>
+<div><ul class="simple">
 <li>a list of filenames (payloads for the <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a>)</li>
 <li>a dictionary, by filename, containing a dictionary of the image metadata as <em>tagname: value</em></li>
 </ul>
-</dd>
-</dl>
+</div></blockquote>
 </dd></dl>
 
 </div>
@@ -300,17 +310,24 @@ did not previously use a database, or where the database file has been deleted b
 images have not.</p>
 <p>For optimal performance, build the database as the plots are created (or do not delete
 the database by accident).</p>
-<p>Arguments:
-* basedir - the directory to start scanning.
-* db_file - the database file to save the image metadata to. A pre-existing database file                will fail unless restart_db is True</p>
-<ul class="simple">
-<li>img_tag_req - a list of tag names that are to be applied/created. Tags not in this list                    will not be stored. Images without all of these tags are ignored.</li>
-<li>subdir_excl_list - a list of subdirectories that don&#8217;t need to be scanned. [&#8216;thumbnail&#8217;]                        for instance, will prevent the image thumbnails being included.</li>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd><ul class="first last simple">
+<li>basedir - the directory to start scanning.</li>
+<li>db_file - the database file to save the image metadata to. A pre-existing database file                will fail unless restart_db is True</li>
+</ul>
+</dd>
+<dt>Options:</dt>
+<dd><ul class="first last simple">
+<li>img_tag_req - a list of tag names that are to be applied/created. Tags not in this list                     will not be stored. Images without all of these tags are ignored.</li>
+<li>subdir_excl_list - a list of subdirectories that don&#8217;t need to be scanned. [&#8216;thumbnail&#8217;]                         for instance, will prevent the image thumbnails being included.</li>
 <li>no_file_ext - logical to exclude the file extension in the filenames saved to the database.</li>
-<li>known_file_tags - if supplied, this is a dict (keyed by filename entry),                        contains a dictionary of {filename: {tag name: value}} already known                        (so you don&#8217;t need to read them from the files themselves). This is very                        if you have a old backup of a database file that needs updating.</li>
-<li>restart_db - if True, the db_file will be restarted as empty.</li>
+<li>known_file_tags - if supplied, this is a dict (keyed by filename entry),                         contains a dictionary of {filename: {tag name: value}} already known                         (so you don&#8217;t need to read them from the files themselves). This is very                         if you have a old backup of a database file that needs updating.</li>
+<li>restart_db - if True, the db_file will be restarted from an empty database.</li>
 <li>verbose - verbose output.</li>
 </ul>
+</dd>
+</dl>
 </dd></dl>
 
 </div>

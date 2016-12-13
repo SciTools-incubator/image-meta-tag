@@ -64,7 +64,7 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
     * postable : html text added after the ImageMetaTag section.
     * initial_selectors - A list of initial values for the selectors, to be passed into \
                           :func:`ImageMetaTag.webpage.write_js_setup`.
-    * show_selector_names - switches on diplsaying the selector full names defined by the \
+    * show_selector_names - switches on displaying the selector full names defined by the \
                             :class:`ImageMetaTag.ImageDict`.full_name_mapping
     * url_type - determines the type of URL at the bottom of the ImageMetaTag section. Can be \
                  'int' or 'str'.
@@ -243,8 +243,14 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
                 level_names = img_dict.level_names
             else:
                 level_names = False
+            # if we're labelling selectors, and we have an animator button, label that too:
+            if img_dict.selector_animated > 1 and show_selector_names:
+                anim_level = level_names[img_dict.selector_animated]
+            else:
+                anim_level = None
             write_js_placeholders(file_obj=out_file, dict_depth=img_dict.dict_depth(),
-                                  style=style, level_names=level_names)
+                                  style=style, level_names=level_names,
+                                  animated_level=anim_level)
         # the body is done, so the postamble comes in:
         if not postamble is None:
             out_file.write(postamble + '\n')
@@ -454,7 +460,8 @@ var imt = {};
         json_file.write(out_str)
 
 def write_js_placeholders(file_obj=None, dict_depth=None, selector_prefix=None,
-                          style='horiz dropdowns', level_names=False):
+                          style='horiz dropdowns', level_names=False,
+                          animated_level=None):
     '''
     Writes the placeholders into the page body, for the javascript to manipulate
 
@@ -466,6 +473,7 @@ def write_js_placeholders(file_obj=None, dict_depth=None, selector_prefix=None,
               they are always horizontal dropdown menus: 'horiz dropdowns'.
     * level_names - if supplied, this need to be a list of full names, for the selectors, of \
                     length dict_depth.
+    * animated_level - if supplied, as a string, this will be used to label the animator buttons.
     '''
 
     if selector_prefix is None:
@@ -488,6 +496,12 @@ def write_js_placeholders(file_obj=None, dict_depth=None, selector_prefix=None,
  <tr>
   <td>
    <font size=3>''')
+        # a text label for the animator buttons:
+        if isinstance(animated_level, str):
+            anim_label = '{}: '.format(animated_level)
+        else:
+            anim_label = ''
+
         # for each level of depth in the plot dictionary, add a span to hold the selector:
         if apply_level_names:
             # if we want labelled selectors, then write out
@@ -510,12 +524,12 @@ def write_js_placeholders(file_obj=None, dict_depth=None, selector_prefix=None,
             # add the placeholder for animators buttons:
             file_obj.write('''     <tr>
       <td colspan={}>
-        <span id="animator1">&nbsp;</span>
+        {}<span id="animator1">&nbsp;</span>
         <span id="animator2">&nbsp;</span>
       </td>
     </tr>
    </table>
-'''.format(dict_depth))
+'''.format(dict_depth, anim_label))
         else:
             # simply a set of spans, in a line:
             for lev in range(dict_depth):
@@ -524,10 +538,10 @@ def write_js_placeholders(file_obj=None, dict_depth=None, selector_prefix=None,
             file_obj.write('\n   <br>')
             # add the placeholder for animators buttons:
             file_obj.write('''
-   <span id="animator1">&nbsp;</span>
+   {}<span id="animator1">&nbsp;</span>
    <span id="animator2">&nbsp;</span>
        <br>
-    ''')
+    '''.format(anim_label))
 
         # now add somewhere for the image to go:
         file_obj.write('''   <div id="the_image">Please wait while the page is loading</div>
