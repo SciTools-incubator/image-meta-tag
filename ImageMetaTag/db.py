@@ -33,15 +33,18 @@ def write_img_to_dbfile(db_file, img_filename, img_info, add_strict=False, timeo
     Writes image metadata to a database.
 
     Arguments:
-     * db_file - the database file to write to. If it does not exist, it will be created.
-     * img_filename - the filename of the image to which the metadata applies. Usually this
-                      is either the absolute path, or it is useful to make this the relative path,
-                      from the location of the database file.
-     * img_info - a dictionary containing any number of  {tag_name: value}  pairs to be stored.
+
+    * db_file - the database file to write to. If it does not exist, it will be created.
+    * img_filename - the filename of the image to which the metadata applies. Usually \
+                     this is either the absolute path, or it is useful to make this \
+                     the relative path, from the location of the database file.
+    * img_info - a dictionary containing any number of  {tag_name: value}  pairs to be \
+                 stored.
 
     Options:
-     * add_strict - passed into :func:`ImageMetaTag.db.write_img_to_open_db`
-     * timeout - default timeout to try and write to the database.
+
+    * add_strict - passed into :func:`ImageMetaTag.db.write_img_to_open_db`
+    * timeout - default timeout to try and write to the database.
 
     This is commonly used in :func:`ImageMetaTag.savefig`
     '''
@@ -59,28 +62,34 @@ def write_img_to_dbfile(db_file, img_filename, img_info, add_strict=False, timeo
         dbcn.commit()
         dbcn.close()
 
-def read_img_info_from_dbfile(db_file, required_tags=None, tag_strings=None,
-                              db_timeout=DEFAULT_DB_TIMEOUT,
-                              db_attempts=DEFAULT_DB_ATTEMPTS):
+def read(db_file, required_tags=None, tag_strings=None,
+         db_timeout=DEFAULT_DB_TIMEOUT,
+         db_attempts=DEFAULT_DB_ATTEMPTS):
     '''
     reads in the database written by write_img_to_dbfile
 
     Options:
-     * required_tags - a list of image tags to return, and to fail if not all are present
-     * tag_strings - an input list that will be populated with the unique values of the image tags.
+     * required_tags - a list of image tags to return, and to fail if not all are \
+                       present
+     * tag_strings - an input list that will be populated with the unique values of \
+                     the image tags.
 
     Returns:
      * a list of filenames (payloads for the :class:`ImageMetaTag.ImageDict` class )
-     * a dictionary, by filename, containing a dictionary of the image metadata as *tagname: value*
+     * a dictionary, by filename, containing a dictionary of the image metadata \
+       as *tagname: value*
 
-    If tag_strings is not supplied, then the returned dictionary will contain a large number of
-    duplicated strings, which can be an inefficient use of memory with large databases.
-    If tag_strings is supplied, it will be populated with a unique list of strings used as tags
-    and the dictionary will only contain references to this list. This can reduce memory usage
-    considerably, both for the dictionary itself but also of an :class:`ImageMetaTag.ImageDict`
-    produced with the dictionary.
+    If tag_strings is not supplied, then the returned dictionary will contain a
+    large number of duplicated strings, which can be an inefficient use of memory
+    with large databases. If tag_strings is supplied, it will be populated with a
+    unique list of strings used as tags and the dictionary will only contain 
+    references to this list. This can reduce memory usage considerably, both for 
+    the dictionary itself but also of an :class:`ImageMetaTag.ImageDict` produced 
+    with the dictionary.
 
     Will return None, None if there is a problem.
+
+    In older versions, this was named read_img_info_from_dbfile which will still work.
     '''
     if db_file is None:
         return None, None
@@ -114,19 +123,24 @@ def read_img_info_from_dbfile(db_file, required_tags=None, tag_strings=None,
             dbcn.close()
             return filename_list, out_dict
 
-def merge_db_files(main_db_file, add_db_file, delete_add_db=False, delete_added_entries=False,
+read_img_info_from_dbfile = read
+
+def merge_db_files(main_db_file, add_db_file, delete_add_db=False,
+                   delete_added_entries=False,
                    db_timeout=DEFAULT_DB_TIMEOUT, db_attempts=DEFAULT_DB_ATTEMPTS):
     '''
     Merges two ImageMetaTag database files, with the contents of add_db_file added
-    to the main_db_file.
-    The databases should have the same tags within them for the merge to work.
+    to the main_db_file. The databases should have the same tags within them for the
+    merge to work.
 
     Options:
-     * delete_add_db - if True, the added database file will be deleted afterwards
-     * delete_added_entries - if delete_add_db is False, this will keep the add_db_file
-                             but remove the entries from it which were added to the main_db_file.
-                             This is useful if parallel processes are writing to the databases.
-                             It does nothing if delete_add_db is True.
+
+    * delete_add_db - if True, the added database file will be deleted afterwards
+    * delete_added_entries - if delete_add_db is False, this will keep the add_db_file \
+                             but remove the entries from it which were added to the \
+                             main_db_file. \
+                             This is useful if parallel processes are writing to the \
+                             databases.  It does nothing if delete_add_db is True.
     '''
 
     # read what we want to add in:
@@ -164,7 +178,6 @@ def merge_db_files(main_db_file, add_db_file, delete_add_db=False, delete_added_
     elif delete_added_entries:
         del_plots_from_dbfile(add_db_file, add_filelist, do_vacuum=False,
                               allow_retries=True, skip_warning=True)
-
 
 def open_or_create_db_file(db_file, img_info, restart_db=False, timeout=DEFAULT_DB_TIMEOUT):
     '''
@@ -308,9 +321,11 @@ def process_select_star_from(db_contents, dbcr, required_tags=None, tag_strings=
      * tag_strings - an input list that will be populated with the unique values of the image tags
 
     Returns:
-    as :func:`ImageMetaTag.db.read_img_info_from_dbfile`, but filtered accord to the select.
+     * as :func:`ImageMetaTag.db.read_img_info_from_dbfile`, but filtered \
+       according to the select.
      * a list of filenames (payloads for the :class:`ImageMetaTag.ImageDict`)
-     * a dictionary, by filename, containing a dictionary of the image metadata as *tagname: value*
+     * a dictionary, by filename, containing a dictionary of the image metadata \
+       as tagname: value
     '''
     # get the name of the fields from the cursor descripton:
     out_dict = {}

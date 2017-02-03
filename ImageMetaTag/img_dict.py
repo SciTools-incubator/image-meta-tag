@@ -426,7 +426,7 @@ class ImageDict():
         Sorts the keys of a plot dictionary, according to a particular sort method
         (or a list of sort methods that matches the number of keys).
 
-        Valid sort methods so far are mostly focused on meterological terms, and include:
+        Valid sort methods so far are mostly focused on meteorological terms, and include:
          * 'sort' - just an ordinary sort
          * 'level' or 'numeric' - starting with the surface and working upwards, then \
                                   'special' levels like cross sections etc.

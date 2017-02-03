@@ -103,15 +103,18 @@
 <span class="sd">    Writes image metadata to a database.</span>
 
 <span class="sd">    Arguments:</span>
-<span class="sd">     * db_file - the database file to write to. If it does not exist, it will be created.</span>
-<span class="sd">     * img_filename - the filename of the image to which the metadata applies. Usually this</span>
-<span class="sd">                      is either the absolute path, or it is useful to make this the relative path,</span>
-<span class="sd">                      from the location of the database file.</span>
-<span class="sd">     * img_info - a dictionary containing any number of  {tag_name: value}  pairs to be stored.</span>
+
+<span class="sd">    * db_file - the database file to write to. If it does not exist, it will be created.</span>
+<span class="sd">    * img_filename - the filename of the image to which the metadata applies. Usually \</span>
+<span class="sd">                     this is either the absolute path, or it is useful to make this \</span>
+<span class="sd">                     the relative path, from the location of the database file.</span>
+<span class="sd">    * img_info - a dictionary containing any number of  {tag_name: value}  pairs to be \</span>
+<span class="sd">                 stored.</span>
 
 <span class="sd">    Options:</span>
-<span class="sd">     * add_strict - passed into :func:`ImageMetaTag.db.write_img_to_open_db`</span>
-<span class="sd">     * timeout - default timeout to try and write to the database.</span>
+
+<span class="sd">    * add_strict - passed into :func:`ImageMetaTag.db.write_img_to_open_db`</span>
+<span class="sd">    * timeout - default timeout to try and write to the database.</span>
 
 <span class="sd">    This is commonly used in :func:`ImageMetaTag.savefig`</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -129,28 +132,34 @@
         <span class="n">dbcn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
         <span class="n">dbcn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </div>
-<div class="viewcode-block" id="read_img_info_from_dbfile"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.read_img_info_from_dbfile">[docs]</a><span class="k">def</span> <span class="nf">read_img_info_from_dbfile</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">required_tags</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tag_strings</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                              <span class="n">db_timeout</span><span class="o">=</span><span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">,</span>
-                              <span class="n">db_attempts</span><span class="o">=</span><span class="n">DEFAULT_DB_ATTEMPTS</span><span class="p">):</span>
+<div class="viewcode-block" id="read"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.read">[docs]</a><span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">required_tags</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tag_strings</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+         <span class="n">db_timeout</span><span class="o">=</span><span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">,</span>
+         <span class="n">db_attempts</span><span class="o">=</span><span class="n">DEFAULT_DB_ATTEMPTS</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    reads in the database written by write_img_to_dbfile</span>
 
 <span class="sd">    Options:</span>
-<span class="sd">     * required_tags - a list of image tags to return, and to fail if not all are present</span>
-<span class="sd">     * tag_strings - an input list that will be populated with the unique values of the image tags.</span>
+<span class="sd">     * required_tags - a list of image tags to return, and to fail if not all are \</span>
+<span class="sd">                       present</span>
+<span class="sd">     * tag_strings - an input list that will be populated with the unique values of \</span>
+<span class="sd">                     the image tags.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">     * a list of filenames (payloads for the :class:`ImageMetaTag.ImageDict` class )</span>
-<span class="sd">     * a dictionary, by filename, containing a dictionary of the image metadata as *tagname: value*</span>
+<span class="sd">     * a dictionary, by filename, containing a dictionary of the image metadata \</span>
+<span class="sd">       as *tagname: value*</span>
 
-<span class="sd">    If tag_strings is not supplied, then the returned dictionary will contain a large number of</span>
-<span class="sd">    duplicated strings, which can be an inefficient use of memory with large databases.</span>
-<span class="sd">    If tag_strings is supplied, it will be populated with a unique list of strings used as tags</span>
-<span class="sd">    and the dictionary will only contain references to this list. This can reduce memory usage</span>
-<span class="sd">    considerably, both for the dictionary itself but also of an :class:`ImageMetaTag.ImageDict`</span>
-<span class="sd">    produced with the dictionary.</span>
+<span class="sd">    If tag_strings is not supplied, then the returned dictionary will contain a</span>
+<span class="sd">    large number of duplicated strings, which can be an inefficient use of memory</span>
+<span class="sd">    with large databases. If tag_strings is supplied, it will be populated with a</span>
+<span class="sd">    unique list of strings used as tags and the dictionary will only contain </span>
+<span class="sd">    references to this list. This can reduce memory usage considerably, both for </span>
+<span class="sd">    the dictionary itself but also of an :class:`ImageMetaTag.ImageDict` produced </span>
+<span class="sd">    with the dictionary.</span>
 
 <span class="sd">    Will return None, None if there is a problem.</span>
+
+<span class="sd">    In older versions, this was named read_img_info_from_dbfile which will still work.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">if</span> <span class="n">db_file</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
@@ -184,19 +193,24 @@
             <span class="n">dbcn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
             <span class="k">return</span> <span class="n">filename_list</span><span class="p">,</span> <span class="n">out_dict</span>
 </div>
-<span class="k">def</span> <span class="nf">merge_db_files</span><span class="p">(</span><span class="n">main_db_file</span><span class="p">,</span> <span class="n">add_db_file</span><span class="p">,</span> <span class="n">delete_add_db</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">delete_added_entries</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+<span class="n">read_img_info_from_dbfile</span> <span class="o">=</span> <span class="n">read</span>
+
+<div class="viewcode-block" id="merge_db_files"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.merge_db_files">[docs]</a><span class="k">def</span> <span class="nf">merge_db_files</span><span class="p">(</span><span class="n">main_db_file</span><span class="p">,</span> <span class="n">add_db_file</span><span class="p">,</span> <span class="n">delete_add_db</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                   <span class="n">delete_added_entries</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
                    <span class="n">db_timeout</span><span class="o">=</span><span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">,</span> <span class="n">db_attempts</span><span class="o">=</span><span class="n">DEFAULT_DB_ATTEMPTS</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Merges two ImageMetaTag database files, with the contents of add_db_file added</span>
-<span class="sd">    to the main_db_file.</span>
-<span class="sd">    The databases should have the same tags within them for the merge to work.</span>
+<span class="sd">    to the main_db_file. The databases should have the same tags within them for the</span>
+<span class="sd">    merge to work.</span>
 
 <span class="sd">    Options:</span>
-<span class="sd">     * delete_add_db - if True, the added database file will be deleted afterwards</span>
-<span class="sd">     * delete_added_entries - if delete_add_db is False, this will keep the add_db_file</span>
-<span class="sd">                             but remove the entries from it which were added to the main_db_file.</span>
-<span class="sd">                             This is useful if parallel processes are writing to the databases.</span>
-<span class="sd">                             It does nothing if delete_add_db is True.</span>
+
+<span class="sd">    * delete_add_db - if True, the added database file will be deleted afterwards</span>
+<span class="sd">    * delete_added_entries - if delete_add_db is False, this will keep the add_db_file \</span>
+<span class="sd">                             but remove the entries from it which were added to the \</span>
+<span class="sd">                             main_db_file. \</span>
+<span class="sd">                             This is useful if parallel processes are writing to the \</span>
+<span class="sd">                             databases.  It does nothing if delete_add_db is True.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="c"># read what we want to add in:</span>
@@ -234,8 +248,7 @@
     <span class="k">elif</span> <span class="n">delete_added_entries</span><span class="p">:</span>
         <span class="n">del_plots_from_dbfile</span><span class="p">(</span><span class="n">add_db_file</span><span class="p">,</span> <span class="n">add_filelist</span><span class="p">,</span> <span class="n">do_vacuum</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
                               <span class="n">allow_retries</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">skip_warning</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-
-
+</div>
 <div class="viewcode-block" id="open_or_create_db_file"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.open_or_create_db_file">[docs]</a><span class="k">def</span> <span class="nf">open_or_create_db_file</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">img_info</span><span class="p">,</span> <span class="n">restart_db</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Opens a database file and sets up initial tables, then returns the connection and cursor.</span>
@@ -378,9 +391,11 @@
 <span class="sd">     * tag_strings - an input list that will be populated with the unique values of the image tags</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">    as :func:`ImageMetaTag.db.read_img_info_from_dbfile`, but filtered accord to the select.</span>
+<span class="sd">     * as :func:`ImageMetaTag.db.read_img_info_from_dbfile`, but filtered \</span>
+<span class="sd">       according to the select.</span>
 <span class="sd">     * a list of filenames (payloads for the :class:`ImageMetaTag.ImageDict`)</span>
-<span class="sd">     * a dictionary, by filename, containing a dictionary of the image metadata as *tagname: value*</span>
+<span class="sd">     * a dictionary, by filename, containing a dictionary of the image metadata \</span>
+<span class="sd">       as tagname: value</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="c"># get the name of the fields from the cursor descripton:</span>
     <span class="n">out_dict</span> <span class="o">=</span> <span class="p">{}</span>
