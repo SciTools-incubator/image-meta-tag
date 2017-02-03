@@ -11,9 +11,10 @@ Commonly used functions
 For most use cases, the following functions provide the required functionality to use the database:
 
 .. autofunction:: ImageMetaTag.db.write_img_to_dbfile
-.. autofunction:: read_img_info_from_dbfile
+.. autofunction:: ImageMetaTag.db.read
 .. autofunction:: ImageMetaTag.db.del_plots_from_dbfile
 .. autofunction:: ImageMetaTag.db.select_dbfile_by_tags
+.. autofunction:: ImageMetaTag.db.merge_db_files
 
 Functions for opening/creating db files
 ---------------------------------------
