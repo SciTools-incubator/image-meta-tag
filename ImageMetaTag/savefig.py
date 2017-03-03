@@ -122,9 +122,14 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
                 db.write_img_to_dbfile(db_file, filename, img_tags, timeout=db_timeout)
                 wrote_db = True
             except sqlite3.OperationalError as OpErr:
-                print '%s database timeout for image "%s", writing to file "%s", %s s' \
-                            % (db.dt_now_str(), db_file, write_file, n_tries * db_timeout)
-                n_tries += 1
+                if 'database is locked' in OpErr.message:
+                    # database being locked is what the retries and timeouts are for:
+                    print '%s database timeout for image "%s", writing to file "%s", %s s' \
+                                % (db.dt_now_str(), db_file, write_file, n_tries * db_timeout)
+                    n_tries += 1
+                else:
+                    # everything else needs to be reported and raised immediately:
+                    raise sqlite3.OperationalError(OpErr.message)
             except:
                 raise
         if n_tries > db_attempts:

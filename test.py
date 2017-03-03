@@ -25,7 +25,7 @@ from multiprocessing import Pool
 # (this would normally be added already, by installation, but for testing, we
 #  need to be testing the version we are making changes too!)
 sys.path.insert(0, os.sep.join(os.path.abspath(sys.argv[0]).split(os.sep)[0:-1]))
- 
+
 LOGO_FILE = os.sep.join(os.path.abspath(sys.argv[0]).split(os.sep)[0:-1]) + '/logo.png'
 LOGO_SIZE = 60
 LOGO_PADDING = 5
@@ -149,6 +149,7 @@ def plot_random_data(random_data, i_rand, plot_col, col_name, trims, borders,
                 img_tags['plot owner'] = plot_owner
                 img_tags['plot created by'] = this_routine
                 img_tags['ImageMetaTag version'] = imt.__version__
+                img_tags['SQL-char-name:in_tag'] = 'testing SQL chars'
 
                 imt.savefig(outfile, do_trim=trim, trim_border=border, do_thumb=True,
                             img_converter=compression,
@@ -201,6 +202,7 @@ def plot_random_data(random_data, i_rand, plot_col, col_name, trims, borders,
                 img_tags['plot owner'] = plot_owner
                 img_tags['plot created by'] = this_routine
                 img_tags['ImageMetaTag version'] = imt.__version__
+                img_tags['SQL-char-name:in_tag'] = 'testing SQL chars'
 
                 imt.savefig(outfile, do_trim=trim, trim_border=border, do_thumb=True,
                             img_converter=compression,
@@ -296,20 +298,20 @@ def __main__():
                         help='Skip making plots, if test plot metadata is available', default=False)
     parser.add_argument('--no-big-dict', action='store_true', dest='no_biggus_dictus',
                         help='Skip the big dictionary test.', default=False)
-    parser.add_argument('--no-db-rebuild', action='store_true', dest='no_db_rebuild', 
+    parser.add_argument('--no-db-rebuild', action='store_true', dest='no_db_rebuild',
                         help='Skip rebuilding an image database from images on disk', default=False)
     args = parser.parse_args()
 
     n_random_data = 5
     random_data = make_random_data(n_random_data)
-    
+
     # working directory to create images and webpage etc.
     webdir = get_webdir()
     os.chdir(webdir)
     # img_savedir is now relative to webdir:
     img_savedir = 'images'
     mkdir_p(img_savedir)
-    
+
     # a database to store the image metadata, as we write them:
     imt_db = define_imt_db()
 
@@ -414,7 +416,7 @@ def __main__():
     # than the list and metadata built up by the plotting. Read in by:
     #
     # this simply loads ALL of the image metadata:
-    db_img_list, db_images_and_tags = imt.db.read_img_info_from_dbfile(imt_db)
+    db_img_list, db_images_and_tags = imt.db.read(imt_db)
     #
     # now verfiy the integrity of the database, relative to the plotting/pickling process:
     img_list = sorted(images_and_tags.keys())
@@ -429,20 +431,24 @@ def __main__():
     #
     # these are the tags that we actually need to work with for the web page:
     required_tags = ['number of rolls', 'plot type', 'plot color',
-                     'image trim', 'border', 'image compression']
-    db_img_list, db_images_and_tags = imt.db.read_img_info_from_dbfile(imt_db,
-                                                                       required_tags=required_tags)
+                     'image trim', 'border', 'image compression', 'SQL-char-name:in_tag']
+    db_img_list, db_images_and_tags = imt.db.read(imt_db, required_tags=required_tags)
     # and this will return a list of all of the unique metadata strings,
     # as there is a lot of duplication, and the returned db_images_and_tags will
     # reference the strings witin that list, rahter than contain the duplicated strings:
     tag_strings = []
-    db_img_list, db_images_and_tags = imt.db.read_img_info_from_dbfile(imt_db,
-                                                                       tag_strings=tag_strings)
+    db_img_list, db_images_and_tags = imt.db.read(imt_db, tag_strings=tag_strings)
     # and this both filters out un-needed tags and uses the tag_strings list as a reference
     tag_strings = []
-    db_img_list, db_images_and_tags = imt.db.read_img_info_from_dbfile(imt_db,
-                                                                       required_tags=required_tags,
-                                                                       tag_strings=tag_strings)
+    db_img_list, db_images_and_tags = imt.db.read(imt_db, required_tags=required_tags,
+                                                  tag_strings=tag_strings)
+
+    # test deleting a single image from the db file, and then add it back in:
+    del_img = db_img_list[0]
+    del_tags = db_images_and_tags[del_img]
+    imt.db.del_plots_from_dbfile(imt_db, del_img)
+    # now put it back in:
+    imt.db.write_img_to_dbfile(imt_db, del_img, del_tags)
 
     # now make the next page:
     n_proc = 4
@@ -861,7 +867,7 @@ def __main__():
         tagorder = ['l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'l8', 'l9']
         print '  input dictionary complete, with %s elements' % len(biggus_dictus)
 
-        db_img_list, db_images_and_tags = imt.db.read_img_info_from_dbfile(bigdb)
+        db_img_list, db_images_and_tags = imt.db.read(bigdb)
         # verfiy the integrity of the database, relative to the plotting/pickling process:
         img_list = sorted(biggus_dictus.keys())
         db_img_list.sort()
@@ -909,18 +915,17 @@ def __main__():
 
     if not args.no_db_rebuild:
         print 'Testing imt.db.scan_dir_for_db'
-        # rebuilding an image database from files on disk can be slow, but it can be 
+        # rebuilding an image database from files on disk can be slow, but it can be
         # very useulf:
         rebuild_db = '{}/imt_rebuild.db'.format(webdir)
         # rebuild the img_savedir, makging sure we don't scan the thumbnail directory:
         imt.db.scan_dir_for_db(webdir, rebuild_db, restart_db=True, img_tag_req=required_tags,
                                subdir_excl_list=['thumbnail'], known_file_tags=None, verbose=True)
         # now load that db and test it:
-        imgs_r, imgs_tags_r = imt.db.read_img_info_from_dbfile(rebuild_db,
-                                                               required_tags=required_tags,
-                                                               tag_strings=tag_strings)
+        imgs_r, imgs_tags_r = imt.db.read(rebuild_db, required_tags=required_tags,
+                                          tag_strings=tag_strings)
         # reload the standard db:
-        db_img_list, db_images_and_tags = imt.db.read_img_info_from_dbfile(imt_db)
+        db_img_list, db_images_and_tags = imt.db.read(imt_db)
         # now validate the rebuild against the standard db:
         db_img_list.sort()
         imgs_r.sort()
