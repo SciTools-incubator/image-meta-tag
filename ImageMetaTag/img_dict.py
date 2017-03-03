@@ -20,7 +20,7 @@ from copy import deepcopy
 from itertools import islice, compress
 from math import ceil
 
-class ImageDict():
+class ImageDict(object):
     '''
     A class which holds a heirachical dictionary of dictionaries, and the associated
     methods for appending/removing dictionaries from it.
@@ -844,7 +844,7 @@ def simple_dict_filter(simple_dict, tests, raise_key_mismatch=False):
                             # and is this the first element in the tuple:
                             if simple_dict[test] == tuple_test[1][0]:
                                 first_tuple_passes = True
-                                
+
                         # if none of the tuple tests pass, then make a note of that:
                         if not any_tuple_passes:
                             passes[i_test] = False
@@ -888,4 +888,3 @@ def check_for_required_keys(img_info, req_keys):
         if key not in img_info.keys():
             return False
     return True
-

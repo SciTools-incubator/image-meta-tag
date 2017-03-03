@@ -25,7 +25,7 @@ from multiprocessing import Pool
 # (this would normally be added already, by installation, but for testing, we
 #  need to be testing the version we are making changes too!)
 sys.path.insert(0, os.sep.join(os.path.abspath(sys.argv[0]).split(os.sep)[0:-1]))
- 
+
 LOGO_FILE = os.sep.join(os.path.abspath(sys.argv[0]).split(os.sep)[0:-1]) + '/logo.png'
 LOGO_SIZE = 60
 LOGO_PADDING = 5
@@ -298,20 +298,20 @@ def __main__():
                         help='Skip making plots, if test plot metadata is available', default=False)
     parser.add_argument('--no-big-dict', action='store_true', dest='no_biggus_dictus',
                         help='Skip the big dictionary test.', default=False)
-    parser.add_argument('--no-db-rebuild', action='store_true', dest='no_db_rebuild', 
+    parser.add_argument('--no-db-rebuild', action='store_true', dest='no_db_rebuild',
                         help='Skip rebuilding an image database from images on disk', default=False)
     args = parser.parse_args()
 
     n_random_data = 5
     random_data = make_random_data(n_random_data)
-    
+
     # working directory to create images and webpage etc.
     webdir = get_webdir()
     os.chdir(webdir)
     # img_savedir is now relative to webdir:
     img_savedir = 'images'
     mkdir_p(img_savedir)
-    
+
     # a database to store the image metadata, as we write them:
     imt_db = define_imt_db()
 
@@ -915,7 +915,7 @@ def __main__():
 
     if not args.no_db_rebuild:
         print 'Testing imt.db.scan_dir_for_db'
-        # rebuilding an image database from files on disk can be slow, but it can be 
+        # rebuilding an image database from files on disk can be slow, but it can be
         # very useulf:
         rebuild_db = '{}/imt_rebuild.db'.format(webdir)
         # rebuild the img_savedir, makging sure we don't scan the thumbnail directory:

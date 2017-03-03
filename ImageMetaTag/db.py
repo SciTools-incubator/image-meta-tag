@@ -82,9 +82,9 @@ def read(db_file, required_tags=None, tag_strings=None,
     If tag_strings is not supplied, then the returned dictionary will contain a
     large number of duplicated strings, which can be an inefficient use of memory
     with large databases. If tag_strings is supplied, it will be populated with a
-    unique list of strings used as tags and the dictionary will only contain 
-    references to this list. This can reduce memory usage considerably, both for 
-    the dictionary itself but also of an :class:`ImageMetaTag.ImageDict` produced 
+    unique list of strings used as tags and the dictionary will only contain
+    references to this list. This can reduce memory usage considerably, both for
+    the dictionary itself but also of an :class:`ImageMetaTag.ImageDict` produced
     with the dictionary.
 
     Will return None, None if there is a problem.
@@ -178,7 +178,7 @@ def merge_db_files(main_db_file, add_db_file, delete_add_db=False,
                     else:
                         # everything else needs to be reported and raised immediately:
                         raise sqlite3.OperationalError(OpErr.message)
-                        
+
             # if we went through all the attempts then it is time to raise the error:
             if n_tries > db_attempts:
                 raise sqlite3.OperationalError(OpErr.message)
@@ -494,7 +494,7 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
                                         if not skip_warning:
                                             # if this fails, print a warning...
                                             # need to figure out why this happens
-                                            msg = 'WARNING: unable to delete file entry: "{}", type "{}" from database' 
+                                            msg = 'WARNING: unable to delete file entry: "{}", type "{}" from database'
                                             print msg.format(fname, type(fname))
                             dbcn.commit()
                             # if we got here, then we're good!
