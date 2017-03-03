@@ -423,8 +423,12 @@ def __main__():
     db_img_list.sort()
     if not img_list == db_img_list:
         raise ValueError('List of plots differ between database and plotting/pickle versions')
-    if not images_and_tags == db_images_and_tags:
-        raise ValueError('images_and_tags differ between database and plotting/pickle versions')
+    if not args.skip_plotting:
+        # if we have done the plotting then these should match. If not, then the
+        # database delete test later on will mess this up:
+        if not images_and_tags == db_images_and_tags:
+            raise ValueError('images_and_tags differ between database and plotting/pickle versions')
+
     #
     # For memory optimisation of large image databases, we want to make sure the dictionary
     # we get back is as small as possible in memory:
