@@ -101,7 +101,7 @@
 and maintain an sqlite3 database of image files and their associated metadata.</p>
 <p>In normal usage it is primarily used by  <a class="reference internal" href="savefig.html#ImageMetaTag.savefig" title="ImageMetaTag.savefig"><tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.savefig()</span></tt></a> to create the database
 as figures are saved. Once the metadata database has been built up then the metadata can be
-loaded with <tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.db.read_img_info_from_dbfile()</span></tt>.</p>
+loaded with <a class="reference internal" href="#ImageMetaTag.db.read" title="ImageMetaTag.db.read"><tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.db.read()</span></tt></a>.</p>
 <div class="section" id="commonly-used-functions">
 <h2>Commonly used functions<a class="headerlink" href="#commonly-used-functions" title="Permalink to this headline">¶</a></h2>
 <p>For most use cases, the following functions provide the required functionality to use the database:</p>
@@ -144,9 +144,9 @@ loaded with <tt class="xref py py-func docutils literal"><span class="pre">Image
 <p>If tag_strings is not supplied, then the returned dictionary will contain a
 large number of duplicated strings, which can be an inefficient use of memory
 with large databases. If tag_strings is supplied, it will be populated with a
-unique list of strings used as tags and the dictionary will only contain 
-references to this list. This can reduce memory usage considerably, both for 
-the dictionary itself but also of an <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a> produced 
+unique list of strings used as tags and the dictionary will only contain
+references to this list. This can reduce memory usage considerably, both for
+the dictionary itself but also of an <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a> produced
 with the dictionary.</p>
 <p>Will return None, None if there is a problem.</p>
 <p>In older versions, this was named read_img_info_from_dbfile which will still work.</p>
@@ -243,7 +243,7 @@ for &gt; 100 selects.</p>
 <dl class="function">
 <dt id="ImageMetaTag.db.read_img_info_from_dbcursor">
 <tt class="descclassname">ImageMetaTag.db.</tt><tt class="descname">read_img_info_from_dbcursor</tt><big>(</big><em>dbcr</em>, <em>required_tags=None</em>, <em>tag_strings=None</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/db.html#read_img_info_from_dbcursor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.read_img_info_from_dbcursor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reads from an open database cursor (dbcr) for read_img_info_from_dbfile and other routines.</p>
+<dd><p>Reads from an open database cursor (dbcr) for <a class="reference internal" href="#ImageMetaTag.db.read" title="ImageMetaTag.db.read"><tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.db.read()</span></tt></a> and other routines.</p>
 <dl class="docutils">
 <dt>Options</dt>
 <dd><ul class="first last simple">
@@ -291,7 +291,7 @@ Requires a database cursor (dbcr) to identify the field names.</p>
 </dd>
 <dt>Returns:</dt>
 <dd><ul class="first last simple">
-<li>as <tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.db.read_img_info_from_dbfile()</span></tt>, but filtered        according to the select.</li>
+<li>as <a class="reference internal" href="#ImageMetaTag.db.read" title="ImageMetaTag.db.read"><tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.db.read()</span></tt></a>, but filtered according to the select.</li>
 <li>a list of filenames (payloads for the <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a>)</li>
 <li>a dictionary, by filename, containing a dictionary of the image metadata        as tagname: value</li>
 </ul>

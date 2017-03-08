@@ -4,7 +4,7 @@ and maintain an sqlite3 database of image files and their associated metadata.
 
 In normal usage it is primarily used by  :func:`ImageMetaTag.savefig` to create the database
 as figures are saved. Once the metadata database has been built up then the metadata can be
-loaded with :func:`ImageMetaTag.db.read_img_info_from_dbfile`.
+loaded with :func:`ImageMetaTag.db.read`.
 '''
 
 import os, sqlite3, fnmatch, time, errno, pdb
@@ -308,7 +308,7 @@ def write_img_to_open_db(dbcr, filename, img_info, add_strict=False, attempt_rep
 
 def read_img_info_from_dbcursor(dbcr, required_tags=None, tag_strings=None):
     '''
-    Reads from an open database cursor (dbcr) for read_img_info_from_dbfile and other routines.
+    Reads from an open database cursor (dbcr) for :func:`ImageMetaTag.db.read` and other routines.
 
     Options
      * required_tags - a list of image tags to return, and to fail if not all are present
@@ -332,8 +332,7 @@ def process_select_star_from(db_contents, dbcr, required_tags=None, tag_strings=
      * tag_strings - an input list that will be populated with the unique values of the image tags
 
     Returns:
-     * as :func:`ImageMetaTag.db.read_img_info_from_dbfile`, but filtered \
-       according to the select.
+     * as :func:`ImageMetaTag.db.read`, but filtered according to the select.
      * a list of filenames (payloads for the :class:`ImageMetaTag.ImageDict`)
      * a dictionary, by filename, containing a dictionary of the image metadata \
        as tagname: value
