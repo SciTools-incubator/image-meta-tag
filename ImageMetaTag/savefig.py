@@ -129,7 +129,8 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
                     n_tries += 1
                 else:
                     # everything else needs to be reported and raised immediately:
-                    raise sqlite3.OperationalError(OpErr.message)
+                    msg = '{} for file {}'.format(OpErr.message, db_file)
+                    raise sqlite3.OperationalError(msg)
             except:
                 raise
         if n_tries > db_attempts:
