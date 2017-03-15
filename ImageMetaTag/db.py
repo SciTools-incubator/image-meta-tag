@@ -121,11 +121,13 @@ def read(db_file, required_tags=None, tag_strings=None,
                         return None, None
                     else:
                         # everything else needs to be reported and raised immediately:
-                        raise sqlite3.OperationalError(OpErr.message)
+                        msg = '{} for file {}'.format(OpErr.message, db_file)
+                        raise sqlite3.OperationalError(msg)
 
             # if we went through all the attempts then it is time to raise the error:
             if n_tries > db_attempts:
-                raise sqlite3.OperationalError(OpErr.message)
+                msg = '{} for file {}'.format(OpErr.message, db_file)
+                raise sqlite3.OperationalError(msg)
 
             # close connection:
             dbcn.close()
@@ -177,11 +179,13 @@ def merge_db_files(main_db_file, add_db_file, delete_add_db=False,
                         n_tries += 1
                     else:
                         # everything else needs to be reported and raised immediately:
-                        raise sqlite3.OperationalError(OpErr.message)
+                        msg = '{} for file {}'.format(OpErr.message, main_db_file)
+                        raise sqlite3.OperationalError(msg)
 
             # if we went through all the attempts then it is time to raise the error:
             if n_tries > db_attempts:
-                raise sqlite3.OperationalError(OpErr.message)
+                msg = '{} for file {}'.format(OpErr.message, main_db_file)
+                raise sqlite3.OperationalError(msg)
 
     # delete or tidy:
     if delete_add_db:
@@ -512,7 +516,10 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
 
                     # if we went through all the attempts then it is time to raise the error:
                     if n_tries > db_attempts:
-                        raise sqlite3.OperationalError(OpErr.message)
+                        msg = '{} for file {}'.format(OpErr.message, db_file)
+                        raise sqlite3.OperationalError(msg)
+                    
+                    
             else:
                 # just open the database:
                 dbcn, dbcr = open_db_file(db_file)
