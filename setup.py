@@ -1,6 +1,7 @@
 import os
 import os.path
 from setuptools import setup
+from glob import glob
 
 here = os.path.abspath(os.path.dirname(__file__))
 packages = []
@@ -20,6 +21,7 @@ setup_args = dict(
     classifiers      = [
         'Programming Language :: Python :: 2.7',
     ],
+    data_files=[('ImageMetaTag/javascript/', glob('ImageMetaTag/javascript/*'))],         
 )
 
 if __name__ == '__main__':
