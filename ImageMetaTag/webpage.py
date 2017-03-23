@@ -570,7 +570,7 @@ def copy_required_javascript(file_dir, style, overwrite=True):
     if style == 'horiz dropdowns':
         file_to_copy = 'imt_dropdown.js'
         # get this from the installed ImageMetaTag directory:
-        file_src_dir = imt.__path__[0].replace('ImageMetaTag', 'javascript')
+        file_src_dir = os.path.join(imt.__path__[0], 'javascript')
         first_line = '// ImageMetaTag dropdown menu scripting - vn0.4\n'
     else:
         raise ValueError('Javascript library not set up for style: {}'.format(style))
