@@ -191,11 +191,13 @@
                         <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="c"># everything else needs to be reported and raised immediately:</span>
-                        <span class="k">raise</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span><span class="p">(</span><span class="n">OpErr</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;{} for file {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">OpErr</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="n">db_file</span><span class="p">)</span>
+                        <span class="k">raise</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
             <span class="c"># if we went through all the attempts then it is time to raise the error:</span>
             <span class="k">if</span> <span class="n">n_tries</span> <span class="o">&gt;</span> <span class="n">db_attempts</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span><span class="p">(</span><span class="n">OpErr</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;{} for file {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">OpErr</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="n">db_file</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
             <span class="c"># close connection:</span>
             <span class="n">dbcn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -247,11 +249,13 @@
                         <span class="n">n_tries</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="c"># everything else needs to be reported and raised immediately:</span>
-                        <span class="k">raise</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span><span class="p">(</span><span class="n">OpErr</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;{} for file {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">OpErr</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="n">main_db_file</span><span class="p">)</span>
+                        <span class="k">raise</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
             <span class="c"># if we went through all the attempts then it is time to raise the error:</span>
             <span class="k">if</span> <span class="n">n_tries</span> <span class="o">&gt;</span> <span class="n">db_attempts</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span><span class="p">(</span><span class="n">OpErr</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;{} for file {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">OpErr</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="n">main_db_file</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
     <span class="c"># delete or tidy:</span>
     <span class="k">if</span> <span class="n">delete_add_db</span><span class="p">:</span>
@@ -582,7 +586,10 @@
 
                     <span class="c"># if we went through all the attempts then it is time to raise the error:</span>
                     <span class="k">if</span> <span class="n">n_tries</span> <span class="o">&gt;</span> <span class="n">db_attempts</span><span class="p">:</span>
-                        <span class="k">raise</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span><span class="p">(</span><span class="n">OpErr</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;{} for file {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">OpErr</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="n">db_file</span><span class="p">)</span>
+                        <span class="k">raise</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                    
+                    
             <span class="k">else</span><span class="p">:</span>
                 <span class="c"># just open the database:</span>
                 <span class="n">dbcn</span><span class="p">,</span> <span class="n">dbcr</span> <span class="o">=</span> <span class="n">open_db_file</span><span class="p">(</span><span class="n">db_file</span><span class="p">)</span>
