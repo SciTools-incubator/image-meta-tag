@@ -18,6 +18,7 @@ colour palette manipulation to reduce filesizes.
 '''
 
 __version__ = '0.4'
+__documentation__ = 'http://scitools-incubator.github.io/image-meta-tag/build/html/'
 
 # list fo file formats which are valid for saving metadata to:
 META_IMG_FORMATS = ['png']
