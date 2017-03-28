@@ -5,6 +5,9 @@ Each plot is tagged with appropriate metadata, and an ImageDict produced which d
 them and creates a web page.
 
 .. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks
+
+(C) Crown copyright Met Office. All rights reserved.
+Released under BSD 3-Clause License. See LICENSE for more details.
 '''
 
 from datetime import datetime
@@ -32,6 +35,7 @@ LOGO_PADDING = 5
 
 # Now, import ImageMetaTag to do things:
 import ImageMetaTag as imt
+print 'ImageMetaTag from "{}"'.format(imt.__path__[0])
 
 def get_webdir():
     'Works out the location to use as webdir'
@@ -217,6 +221,9 @@ def plot_random_data(random_data, i_rand, plot_col, col_name, trims, borders,
                 check_img_tags(outfile, img_tags)
     plt.close()
 
+    # NOTE: in actual usage, it's easier to refer to the database when you need to get image
+    # metadata. In this test script we need to test the integrity of the database, so we
+    # need to pass back the images and tags we expect:
     return images_and_tags
 
 def mkdir_p(path):
@@ -307,9 +314,9 @@ def __main__():
 
     # working directory to create images and webpage etc.
     webdir = get_webdir()
-    os.chdir(webdir)
+    #os.chdir(webdir)
     # img_savedir is now relative to webdir:
-    img_savedir = 'images'
+    img_savedir = os.path.join(webdir, 'images')
     mkdir_p(img_savedir)
 
     # a database to store the image metadata, as we write them:
@@ -394,9 +401,22 @@ def __main__():
         with open(metadata_pickle, "rb") as open_pickle:
             images_and_tags = pickle.load(open_pickle)
 
-    img_dict = None
 
-    # now assemble the ImageDict:
+    # the metadata saved in images_and_tags is references to absolute filepaths
+    # but it is much easier to work with a path that is relative to the webdir, where
+    # the database is stored. The database also does this automatically.
+    # 
+    # In actual usage, the database would be the place to get the metadata, but in this test
+    # we also want to test the integrity of the database.
+    rel_images_and_tags = {}
+    for img_file, img_info in images_and_tags.iteritems():
+        if img_file.startswith(webdir):
+            img_file = img_file[len(webdir)+1:]
+        rel_images_and_tags[img_file] = img_info
+    images_and_tags = rel_images_and_tags
+
+    # now assemble the ImageDict using the image metadata:
+    img_dict = None
     # This is the simple way, but it is possible to parallelise this step as done below:
     for img_file, img_info in images_and_tags.iteritems():
         tmp_dict = imt.dict_heirachy_from_list(img_info, img_file, tagorder)
@@ -428,12 +448,11 @@ def __main__():
         # database delete test later on will mess this up:
         if not images_and_tags == db_images_and_tags:
             raise ValueError('images_and_tags differ between database and plotting/pickle versions')
-
     #
     # For memory optimisation of large image databases, we want to make sure the dictionary
     # we get back is as small as possible in memory:
     #
-    # these are the tags that we actually need to work with for the web page:
+    # these are the tags that we actually need to work with for the web page. Others are ignored:
     required_tags = ['number of rolls', 'plot type', 'plot color',
                      'image trim', 'border', 'image compression', 'SQL-char-name:in_tag']
     db_img_list, db_images_and_tags = imt.db.read(imt_db, required_tags=required_tags)
@@ -790,7 +809,8 @@ def __main__():
                                                     initial_selectors=initial_selectors,
                                                     verbose=True, only_show_rel_url=True,
                                                     write_intmed_tmpfile=True,
-                                                    show_selector_names=True)
+                                                    show_selector_names=True,
+                                                    compression='lz', n_proc=n_proc)
     web_out[out_page_para] = imt.webpage.write_full_page(img_dict, out_page_para,
                                                          'Test ImageDict webpage (Parallel)',
                                                          preamble=webpage_preamble,
@@ -914,7 +934,8 @@ def __main__():
         date_start_web = datetime.now()
         out_page_big = '%s/biggus_pageus.html' % webdir
         web_out[out_page_big] = imt.webpage.write_full_page(biggus_dictus_imigus, out_page_big,
-                                                            'Test ImageDict webpage')
+                                                            'Test ImageDict webpage',
+                                                            compression='lz', n_proc=n_proc)
         print_simple_timer(date_start_web, datetime.now(), 'Large parallel dict webpage')
 
     if not args.no_db_rebuild:

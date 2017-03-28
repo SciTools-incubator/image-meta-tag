@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>ImageMetaTag.webpage &mdash; ImageMetaTag 0.4 documentation</title>
+    <title>ImageMetaTag.webpage &mdash; ImageMetaTag 0.5.0 documentation</title>
     
     <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.4',
+        VERSION:     '0.5.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <link rel="top" title="ImageMetaTag 0.4 documentation" href="../../index.html" />
+    <link rel="top" title="ImageMetaTag 0.5.0 documentation" href="../../index.html" />
     <link rel="up" title="ImageMetaTag" href="../ImageMetaTag.html" /> 
   </head>
   <body>
@@ -36,7 +36,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">ImageMetaTag 0.4 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">ImageMetaTag 0.5.0 documentation</a> &raquo;</li>
           <li><a href="../index.html" >Module code</a> &raquo;</li>
           <li><a href="../ImageMetaTag.html" accesskey="U">ImageMetaTag</a> &raquo;</li> 
       </ul>
@@ -69,430 +69,144 @@
             
   <h1>Source code for ImageMetaTag.webpage</h1><div class="highlight"><pre>
 <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">This sub-module contains functions to write out an :class:`ImageMetaTag.ImageDict` to a webpage.</span>
+<span class="sd">Sub-module containing functions to write out an ImageDict to a webpage.</span>
 
-<span class="sd">The webpages are made up of a single .html file, which is the page to be loaded to view the images.</span>
-<span class="sd">Alongside this is a short ImageMetaTag javascript library held in a &#39;.js&#39; file</span>
-<span class="sd">(currently held in a single file) and a .json file contain the :class:`ImageMetaTag.ImageDict`</span>
-<span class="sd">tree strcuture as a JSON data strcuture.</span>
-
-<span class="sd">This can either be done using write_full_page, to produce a page with just a set of</span>
-<span class="sd">selectors to browse the ImageDict, or the different components can be added to a</span>
+<span class="sd">This can either be done using write_full_page, to produce a page with just a set of </span>
+<span class="sd">selectors to browse the ImageDict, or the different components can be added to a </span>
 <span class="sd">page as it is being constructed (reading in an html template, for instance).</span>
 
 <span class="sd">To write out a full page, use :func:`ImageMetaTag.webpage.write_full_page`.</span>
 
 <span class="sd">If the latter, then the following sections are needed:</span>
+<span class="sd">   </span>
+<span class="sd">   :func:`ImageMetaTag.webpage.write_js_setup` - writes out the scripting required on a page</span>
+<span class="sd">   :func:`ImageMetaTag.webpage.write_js` - writes out the contents of the ImageDict as a javascript array</span>
+<span class="sd">   :func:`ImageMetaTag.webpage.write_js_placeholders` - writes out the placeholders that thje javascript will write images to.</span>
 
-<span class="sd">    * :func:`ImageMetaTag.webpage.write_js_to_header` - writes out the javascript information\</span>
-<span class="sd">                                                to the html header</span>
-<span class="sd">    * :func:`ImageMetaTag.webpage.write_js_placeholders` - writes out the placeholders that\</span>
-<span class="sd">                                                        the javascript will write images to.</span>
-<span class="sd">    * :func:`ImageMetaTag.webpage.write_json` - writes out the :class:`ImageMetaTag.ImageDict`\</span>
-<span class="sd">                                                as a json.dump to a json file</span>
-<span class="sd">    * :func:`ImageMetaTag.webpage.copy_required_javascript` - copies required javascript library \</span>
-<span class="sd">                                                          to the required location.</span>
+<span class="sd">TODO: set up the dojo scripts/resources in a section for template type files</span>
 
-<span class="sd">An easy example of creating a webpage, using an :class:`ImageMetaTag.ImageDict` is shown in</span>
-<span class="sd">`simplest_image_dict.py &lt;simple.html&gt;`_</span>
+<span class="sd">.. warning::</span>
+<span class="sd">   The Javascript code written by these routines works well up to ~250,000 to 500,000 images, depending </span>
+<span class="sd">   on the ImageDict branching. Pages larger than this can be quite slow, and the Javascript needs refactoring</span>
+<span class="sd">   to cope with this.</span>
+<span class="sd">   </span>
 
-<span class="sd">.. TIP:: At present, the only webpage style that can be produced is a set of horizontal dropdown\</span>
-<span class="sd">menus, but more will hopefully be added soon.</span>
-
-<span class="sd">.. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks</span>
+<span class="sd">.. moduleauthor:: Malcolm Brooks &lt;malcolm.e.brooks@metoffice.gov.uk&gt;</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
-<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">json</span><span class="o">,</span> <span class="nn">pdb</span><span class="o">,</span> <span class="nn">shutil</span><span class="o">,</span> <span class="nn">tempfile</span><span class="o">,</span> <span class="nn">re</span>
-<span class="kn">import</span> <span class="nn">ImageMetaTag</span> <span class="kn">as</span> <span class="nn">imt</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">pdb</span>
+<span class="kn">from</span> <span class="nn">ImageMetaTag</span> <span class="kn">import</span> <span class="n">ImageDict</span>
 
-<span class="c"># single indent to be used on the output webpage</span>
-<span class="n">INDENT</span> <span class="o">=</span> <span class="s">&#39;  &#39;</span>
-<span class="n">LEN_INDENT</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">INDENT</span><span class="p">)</span>
 
-<div class="viewcode-block" id="write_full_page"><a class="viewcode-back" href="../../webpage.html#ImageMetaTag.webpage.write_full_page">[docs]</a><span class="k">def</span> <span class="nf">write_full_page</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">page_filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tab_s_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                    <span class="n">preamble</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">postamble</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                    <span class="n">initial_selectors</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">show_selector_names</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                    <span class="n">url_type</span><span class="o">=</span><span class="s">&#39;int&#39;</span><span class="p">,</span> <span class="n">only_show_rel_url</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                    <span class="n">style</span><span class="o">=</span><span class="s">&#39;horiz dropdowns&#39;</span><span class="p">,</span> <span class="n">write_intmed_tmpfile</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                    <span class="n">description</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="write_full_page"><a class="viewcode-back" href="../../webpage.html#ImageMetaTag.webpage.write_full_page">[docs]</a><span class="k">def</span> <span class="nf">write_full_page</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">page_longname</span><span class="p">,</span> <span class="n">page_filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tab_s_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                    <span class="n">preamble</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">postamble</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">internal</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> 
+                    <span class="n">initial_selectors</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                    <span class="n">url_type</span><span class="o">=</span><span class="s">&#39;int&#39;</span><span class="p">,</span> <span class="n">only_show_rel_url</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Writes out an :class:`ImageMetaTag.ImageDict` as a webpage, to a given file location.</span>
+<span class="sd">    Writes out an ImageDict as a webpage, to a given filepath.</span>
 <span class="sd">    The file is overwritten.</span>
-
-<span class="sd">    If the img_dict supplied is None, rather than the appropriate class, then a page will</span>
-<span class="sd">    be produced with the image selectors missing, and a message saying no images are available.</span>
-
+<span class="sd">    </span>
 <span class="sd">    Currently only able to write out a page with horizontal dropdown menus, but other</span>
 <span class="sd">    webpage styles could be added.</span>
-
-<span class="sd">    * page_filename - the file name, within the directory (defaults to the name of the file) \</span>
-<span class="sd">                      but can be set if tab_s_name is also used.</span>
-<span class="sd">    * tab_s_name : used to denote the name of the page, when it is used as a frame \</span>
-<span class="sd">                   of a larger page.</span>
-<span class="sd">    * preamble : html text added at the top of the &lt;body&gt; text, but before the ImageMetaTag \</span>
-<span class="sd">                 section. Can be quite extensive.</span>
-<span class="sd">    * postable : html text added after the ImageMetaTag section.</span>
-<span class="sd">    * initial_selectors - A list of initial values for the selectors, to be passed into \</span>
-<span class="sd">                          :func:`ImageMetaTag.webpage.write_js_setup`.</span>
-<span class="sd">    * show_selector_names - switches on displaying the selector full names defined by the \</span>
-<span class="sd">                            :class:`ImageMetaTag.ImageDict`.full_name_mapping</span>
-<span class="sd">    * url_type - determines the type of URL at the bottom of the ImageMetaTag section. Can be \</span>
-<span class="sd">                 &#39;int&#39; or &#39;str&#39;.</span>
-<span class="sd">    * only_show_rel_url - If True, the wepage will only show relative urls in is link section.</span>
-<span class="sd">    * verbose - If True, stdout will be more verbose</span>
-<span class="sd">    * style - the style of output page to write, currently only &#39;horiz dropdowns&#39; is valid</span>
-<span class="sd">    * write_intmed_tmpfile - If True, files are written out to temporary filenames and then \</span>
-<span class="sd">                             moved when completed.</span>
-<span class="sd">    * description - html description metadata</span>
-<span class="sd">    * keywords - html keyword metadata</span>
-
-<span class="sd">    Returns a list of files that the the created webpage is dependent upon</span>
+<span class="sd">    </span>
+<span class="sd">    Options:</span>
+<span class="sd">        verbose: If True, stdout will be more verbose</span>
+<span class="sd">        internal: If True, internal copies of the dojo Javascript API and css files will be used.</span>
+<span class="sd">        only_show_rel_url: If True, the wepage will only show relative urls in is link section. </span>
+<span class="sd">        initial_selectors: A list of initial values for the selectors, to be passed into write_js_setup</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-
-    <span class="n">page_dependencies</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">imt</span><span class="o">.</span><span class="n">ImageDict</span><span class="p">)</span> <span class="ow">or</span> <span class="n">img_dict</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;write_full_page works on an ImageMetaTag ImageDict.&#39;</span><span class="p">)</span>
-
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">ImageDict</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;write_full_page work on an ImageMetaTag ImageDict.&#39;</span><span class="p">)</span>
+    
     <span class="k">if</span> <span class="n">page_filename</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">page_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
-
-    <span class="c"># other files involved:</span>
-    <span class="n">file_dir</span><span class="p">,</span> <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
-    <span class="n">page_dependencies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">img_dict</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="k">pass</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c"># we have real data to work with:</span>
-        <span class="n">dict_depth</span> <span class="o">=</span> <span class="n">img_dict</span><span class="o">.</span><span class="n">dict_depth</span><span class="p">(</span><span class="n">uniform_depth</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-        <span class="c"># work out what files we need to create:</span>
-        <span class="n">file_name_no_ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="c"># json file to hold the image_dict branching data etc:</span>
-        <span class="n">json_file</span> <span class="o">=</span> <span class="n">file_name_no_ext</span> <span class="o">+</span> <span class="s">&#39;.json&#39;</span>
-        <span class="n">page_dependencies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">json_file</span><span class="p">)</span>
-        <span class="n">json_filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_dir</span><span class="p">,</span> <span class="n">json_file</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">write_intmed_tmpfile</span><span class="p">:</span>
-            <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="s">&#39;w&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s">&#39;.json&#39;</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s">&#39;imt_&#39;</span><span class="p">,</span>
-                                             <span class="nb">dir</span><span class="o">=</span><span class="n">file_dir</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">json_file_obj</span><span class="p">:</span>
-                <span class="c"># now write out a json file:</span>
-                <span class="n">write_json</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">json_file_obj</span><span class="p">)</span>
-                <span class="n">tmp_json_filepath</span> <span class="o">=</span> <span class="n">json_file_obj</span><span class="o">.</span><span class="n">name</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">write_json</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">json_filepath</span><span class="p">)</span>
-
-        <span class="c"># now make sure the required javascript library is copied over to the file_dir:</span>
-        <span class="n">js_file</span> <span class="o">=</span> <span class="n">copy_required_javascript</span><span class="p">(</span><span class="n">file_dir</span><span class="p">,</span> <span class="n">style</span><span class="p">)</span>
-        <span class="n">page_dependencies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">js_file</span><span class="p">)</span>
-
-        <span class="c"># this is the internal name the different selectors, associated lists for the selectors, and</span>
-        <span class="c"># the list of files (all with a numbered suffix):</span>
-        <span class="n">selector_prefix</span> <span class="o">=</span> <span class="s">&#39;sel&#39;</span>
-        <span class="n">url_separator</span> <span class="o">=</span> <span class="s">&#39;|&#39;</span>
-
-    <span class="c"># now write the actual output file:</span>
-    <span class="k">if</span> <span class="n">write_intmed_tmpfile</span><span class="p">:</span>
-        <span class="c"># get a temporary file:</span>
-        <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="s">&#39;w&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s">&#39;.html&#39;</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s">&#39;imt_&#39;</span><span class="p">,</span>
-                                         <span class="nb">dir</span><span class="o">=</span><span class="n">file_dir</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">html_file_obj</span><span class="p">:</span>
-            <span class="n">tmp_html_filepath</span> <span class="o">=</span> <span class="n">html_file_obj</span><span class="o">.</span><span class="n">name</span>
-        <span class="n">filepath_to_write</span> <span class="o">=</span> <span class="n">tmp_html_filepath</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">filepath_to_write</span> <span class="o">=</span> <span class="n">filepath</span>
-    <span class="c"># start the indent:</span>
-    <span class="n">ind</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
-
+    
+    <span class="c"># this is the internal name the different selectors, associated lists for the selectors, and the</span>
+    <span class="c"># list of files (all with a numbered suffix):</span>
+    <span class="n">selector_prefix</span> <span class="o">=</span> <span class="s">&#39;sel&#39;</span>
+    <span class="n">list_prefix</span> <span class="o">=</span> <span class="s">&#39;list&#39;</span>
+    <span class="n">file_list_name</span> <span class="o">=</span> <span class="s">&#39;file_list&#39;</span>
+    
     <span class="c"># open the file - this is a nice and simple file so just use the with open...</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath_to_write</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">out_file</span><span class="p">:</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">out_file</span><span class="p">:</span>
         <span class="c"># write out the start of the file:</span>
-        <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;&lt;html&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-        <span class="c"># increase the indent level:</span>
-        <span class="n">ind</span> <span class="o">=</span> <span class="n">_indent_up_one</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
-        <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;&lt;head&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-        <span class="n">ind</span> <span class="o">=</span> <span class="n">_indent_up_one</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">title</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;{}&lt;title&gt;{}&lt;/title&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">title</span><span class="p">))</span>
-        <span class="n">out_str</span> <span class="o">=</span> <span class="n">ind</span><span class="o">+</span><span class="s">&#39;&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=iso-8859-1&quot;&gt;</span><span class="se">\n</span><span class="s">&#39;</span>
-        <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">out_str</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">style</span> <span class="o">==</span> <span class="s">&#39;horiz dropdowns&#39;</span><span class="p">:</span>
-            <span class="c"># write out a little css at the top:</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;&lt;style&gt;&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;body, div, dl, dt, dd, li, h1, h2, h3, h4, h5, h6, pre, form,&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;            fieldset, input, textarea, p, blockquote, th, td {&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    margin: 0;&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    padding: 0;&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;}&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;fieldset, img {&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    border: 0 none;&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;}&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;body { &#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    font: 12px Myriad,Helvetica,Tahoma,Arial,clean,sans-serif;&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    *font-size: 75%;&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;}&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;h1 {&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    font-size: 1.5em; &#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    font-weight: normal;&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    line-height: 1em; &#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    margin-top: 1em;&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    margin-bottom:0;&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;}&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;h2 { &#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    font-size: 1.1667em; &#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    font-weight: bold; &#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    line-height: 1.286em; &#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    margin-top: 1.929em; &#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    margin-bottom:0.643em;&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;}&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;h3, h4, h5, h6 {&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    font-size: 1em; &#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    font-weight: bold; &#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    line-height: 1.5em; &#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    margin-top: 1.5em; &#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    margin-bottom: 0;&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;}&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;p { &#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    font-size: 1em; &#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    margin-top: 1.5em; &#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    margin-bottom: 1.5em; &#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    line-height: 1.5em;&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;}&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;pre, code { &#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    font-size:115%;&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    *font-size:100%;&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    font-family: Courier, &quot;Courier New&quot;; &#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    background-color: #efefef; &#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    border: 1px solid #ccc;&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;}&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;pre { &#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    border-width: 1px 0; &#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;    padding: 1.5em;&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;}&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;table {  font-size:100%; }&#39;</span><span class="p">)</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;&lt;/style&gt;&#39;</span><span class="p">)</span>
-
-
-        <span class="c"># now write out the specific stuff to the html header:</span>
-        <span class="k">if</span> <span class="n">img_dict</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="c"># an empty img_dict needs very little:</span>
-            <span class="n">write_js_to_header</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span>
-                               <span class="n">file_obj</span><span class="o">=</span><span class="n">out_file</span><span class="p">,</span>
-                               <span class="n">pagename</span><span class="o">=</span><span class="n">page_filename</span><span class="p">,</span> <span class="n">tabname</span><span class="o">=</span><span class="n">tab_s_name</span><span class="p">,</span>
-                               <span class="n">ind</span><span class="o">=</span><span class="n">ind</span><span class="p">,</span>
-                               <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="n">keywords</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">write_js_to_header</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">initial_selectors</span><span class="o">=</span><span class="n">initial_selectors</span><span class="p">,</span>
-                               <span class="n">file_obj</span><span class="o">=</span><span class="n">out_file</span><span class="p">,</span> <span class="n">json_file</span><span class="o">=</span><span class="n">json_file</span><span class="p">,</span> <span class="n">js_file</span><span class="o">=</span><span class="n">js_file</span><span class="p">,</span>
-                               <span class="n">pagename</span><span class="o">=</span><span class="n">page_filename</span><span class="p">,</span> <span class="n">tabname</span><span class="o">=</span><span class="n">tab_s_name</span><span class="p">,</span>
-                               <span class="n">selector_prefix</span><span class="o">=</span><span class="n">selector_prefix</span><span class="p">,</span> <span class="n">url_separator</span><span class="o">=</span><span class="n">url_separator</span><span class="p">,</span>
-                               <span class="n">url_type</span><span class="o">=</span><span class="n">url_type</span><span class="p">,</span> <span class="n">only_show_rel_url</span><span class="o">=</span><span class="n">only_show_rel_url</span><span class="p">,</span>
-                               <span class="n">style</span><span class="o">=</span><span class="n">style</span><span class="p">,</span> <span class="n">ind</span><span class="o">=</span><span class="n">ind</span><span class="p">,</span>
-                               <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="n">keywords</span><span class="p">)</span>
-        <span class="c"># now close the script and head:</span>
-        <span class="n">ind</span> <span class="o">=</span> <span class="n">_indent_down_one</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
-        <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;&lt;/script&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-        <span class="n">ind</span> <span class="o">=</span> <span class="n">_indent_down_one</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
-        <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;&lt;/head&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-
-        <span class="c"># now start the body:</span>
-        <span class="n">margins</span> <span class="o">=</span> <span class="s">&#39;leftmargin=&quot;0&quot; topmargin=&quot;0&quot; marginwidth=&quot;0&quot; marginheight=&quot;0&quot;&#39;</span>
-        <span class="n">bgcolor</span> <span class="o">=</span> <span class="s">&#39;bcolor=&quot;#FFFFFF&quot;&#39;</span>
-        <span class="n">text_color</span> <span class="o">=</span> <span class="s">&#39;text=&quot;#000000&quot;&#39;</span>
-        <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;{}&lt;body {} {} {}&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">bgcolor</span><span class="p">,</span> <span class="n">text_color</span><span class="p">,</span> <span class="n">margins</span><span class="p">))</span>
-
-        <span class="c"># the preamble is the first thing to go in the body:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">preamble</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">preamble</span><span class="p">)</span>
-        <span class="c"># now the img_dict content:</span>
-        <span class="k">if</span> <span class="n">img_dict</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&lt;p&gt;&lt;h1&gt;No images are available for this page.&lt;/h1&gt;&lt;/p&gt;&#39;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c"># now write out the end, which includes the placeholders for the actual</span>
-            <span class="c"># stuff that appears on the page:</span>
-            <span class="k">if</span> <span class="n">show_selector_names</span><span class="p">:</span>
-                <span class="n">level_names</span> <span class="o">=</span> <span class="n">img_dict</span><span class="o">.</span><span class="n">level_names</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">level_names</span> <span class="o">=</span> <span class="bp">False</span>
-            <span class="c"># if we&#39;re labelling selectors, and we have an animator button, label that too:</span>
-            <span class="k">if</span> <span class="n">img_dict</span><span class="o">.</span><span class="n">selector_animated</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">show_selector_names</span><span class="p">:</span>
-                <span class="n">anim_level</span> <span class="o">=</span> <span class="n">level_names</span><span class="p">[</span><span class="n">img_dict</span><span class="o">.</span><span class="n">selector_animated</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">anim_level</span> <span class="o">=</span> <span class="bp">None</span>
-            <span class="n">write_js_placeholders</span><span class="p">(</span><span class="n">file_obj</span><span class="o">=</span><span class="n">out_file</span><span class="p">,</span> <span class="n">dict_depth</span><span class="o">=</span><span class="n">img_dict</span><span class="o">.</span><span class="n">dict_depth</span><span class="p">(),</span>
-                                  <span class="n">style</span><span class="o">=</span><span class="n">style</span><span class="p">,</span> <span class="n">level_names</span><span class="o">=</span><span class="n">level_names</span><span class="p">,</span>
-                                  <span class="n">animated_level</span><span class="o">=</span><span class="n">anim_level</span><span class="p">)</span>
-        <span class="c"># the body is done, so the postamble comes in:</span>
+        <span class="n">write_page_head_and_start_body</span><span class="p">(</span><span class="n">file_obj</span><span class="o">=</span><span class="n">out_file</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">page_longname</span><span class="p">,</span> <span class="n">preamble</span><span class="o">=</span><span class="n">preamble</span><span class="p">,</span> 
+                                       <span class="n">description</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">internal</span><span class="o">=</span><span class="n">internal</span><span class="p">)</span>
+<span class="c">#       # write out the plot dictionary as a set of javascript variables, to be read into the scripts below: </span>
+        <span class="n">write_js</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">file_obj</span><span class="o">=</span><span class="n">out_file</span><span class="p">,</span> <span class="n">selector_prefix</span><span class="o">=</span><span class="n">selector_prefix</span><span class="p">,</span> <span class="n">list_prefix</span><span class="o">=</span><span class="n">list_prefix</span><span class="p">,</span> \
+                 <span class="n">file_list_name</span><span class="o">=</span><span class="n">file_list_name</span><span class="p">,</span> <span class="n">only_show_rel_url</span><span class="o">=</span><span class="n">only_show_rel_url</span><span class="p">)</span>
+<span class="c">#        # write out the scripts/setup:</span>
+        <span class="n">write_js_setup</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">file_obj</span><span class="o">=</span><span class="n">out_file</span><span class="p">,</span> <span class="n">tab_s_name</span><span class="o">=</span><span class="n">tab_s_name</span><span class="p">,</span> \
+                       <span class="n">selector_prefix</span><span class="o">=</span><span class="n">selector_prefix</span><span class="p">,</span> <span class="n">list_prefix</span><span class="o">=</span><span class="n">list_prefix</span><span class="p">,</span> <span class="n">file_list_name</span><span class="o">=</span><span class="n">file_list_name</span><span class="p">,</span> 
+                       <span class="n">initial_selectors</span><span class="o">=</span><span class="n">initial_selectors</span><span class="p">,</span> <span class="n">pagename</span><span class="o">=</span><span class="n">page_filename</span><span class="p">,</span> 
+                       <span class="n">url_separator</span><span class="o">=</span><span class="s">&#39;|&#39;</span><span class="p">,</span> <span class="n">url_type</span><span class="o">=</span><span class="n">url_type</span><span class="p">)</span>
+<span class="c">#        # now write out the end, which includes the placeholders for the actual stuff that appears on the page:</span>
+        <span class="n">write_js_placeholders</span><span class="p">(</span><span class="n">file_obj</span><span class="o">=</span><span class="n">out_file</span><span class="p">,</span> <span class="n">dict_depth</span><span class="o">=</span><span class="n">img_dict</span><span class="o">.</span><span class="n">dict_depth</span><span class="p">(),</span> <span class="n">style</span><span class="o">=</span><span class="s">&#39;horiz dropdowns&#39;</span><span class="p">)</span>           
+    
         <span class="k">if</span> <span class="ow">not</span> <span class="n">postamble</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">postamble</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-        <span class="c"># finish the body, and html:</span>
-        <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;&lt;/body&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-        <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&lt;/html&gt;&#39;</span><span class="p">)</span>
-
-        <span class="k">if</span>  <span class="n">write_intmed_tmpfile</span><span class="p">:</span>
-            <span class="c"># now move the json, then the html files:</span>
-            <span class="k">if</span> <span class="n">img_dict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">tmp_json_filepath</span><span class="p">,</span> <span class="mo">0644</span><span class="p">)</span>
-                <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">tmp_json_filepath</span><span class="p">,</span> <span class="n">json_filepath</span><span class="p">)</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">tmp_html_filepath</span><span class="p">,</span> <span class="mo">0644</span><span class="p">)</span>
-            <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">tmp_html_filepath</span><span class="p">,</span> <span class="n">filepath</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-            <span class="k">print</span> <span class="s">&#39;File &quot;</span><span class="si">%s</span><span class="s">&quot; complete.&#39;</span> <span class="o">%</span> <span class="n">filepath</span>
-
-    <span class="k">return</span> <span class="n">page_dependencies</span>
-</div>
-<div class="viewcode-block" id="write_js_to_header"><a class="viewcode-back" href="../../webpage.html#ImageMetaTag.webpage.write_js_to_header">[docs]</a><span class="k">def</span> <span class="nf">write_js_to_header</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">initial_selectors</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                       <span class="n">file_obj</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">json_file</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">js_file</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                       <span class="n">pagename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tabname</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">selector_prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                       <span class="n">url_separator</span><span class="o">=</span><span class="s">&#39;|&#39;</span><span class="p">,</span> <span class="n">url_type</span><span class="o">=</span><span class="s">&#39;str&#39;</span><span class="p">,</span> <span class="n">only_show_rel_url</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                       <span class="n">ind</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                       <span class="n">description</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Writes out the required ImageMetaTag config and data paths into a html header section</span>
-<span class="sd">    for an input :class:`ImageMetaTag.ImageDict`.</span>
-
-<span class="sd">    Currently only able to write out a page with horizontal dropdown menus, but other</span>
-<span class="sd">    webpage styles could be added.</span>
-
-<span class="sd">    * initial_selectors - A list of initial values for the selectors.</span>
-<span class="sd">    * style - the style of the output webpage, currently only &#39;horiz dropdowns&#39; is available</span>
-<span class="sd">    * file_obj - the open file object to write the header to.</span>
-<span class="sd">    * json_file - the json (or other similar object) containing the representation of \</span>
-<span class="sd">                  the ImageDict data.</span>
-<span class="sd">    * js_file - the javascript file containing the actual scripting for the selected style.</span>
-<span class="sd">    * pagename - the file name, within the directory (defaults to the name of the file) \</span>
-<span class="sd">                 but can be set if tab_s_name is also used.</span>
-<span class="sd">    * tabname : used to denote the name of the page, when it is used as a frame \</span>
-<span class="sd">                of a larger page.</span>
-<span class="sd">    * url_type - determines the type of URL at the bottom of the ImageMetaTag section. Can be \</span>
-<span class="sd">                 &#39;int&#39; or &#39;str&#39;.</span>
-<span class="sd">    * only_show_rel_url - If True, the wepage will only show relative urls in is link section.</span>
-<span class="sd">    * ind - indentation going into the header section.</span>
-<span class="sd">    * description - html description metadata7</span>
-<span class="sd">    * keywords - html keyword metadata</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">imt</span><span class="o">.</span><span class="n">ImageDict</span><span class="p">)</span> <span class="ow">or</span> <span class="n">img_dict</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Input img_dict is not an ImageMetaTag ImageDict&#39;</span><span class="p">)</span>
-
+            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">postamble</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&#39;File &quot;</span><span class="si">%s</span><span class="s">&quot; complete.&#39;</span> <span class="o">%</span> <span class="n">filepath</span>        
+   </div>
+<span class="k">def</span> <span class="nf">write_page_head_and_start_body</span><span class="p">(</span><span class="n">file_obj</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">internal</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                                   <span class="n">preamble</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="s">&#39;writes out header information for a html page, including the locations of dojo scripts and resources&#39;</span>
+    
+    <span class="c"># locations of the dojo javascript framework resources and api:</span>
+    <span class="n">dojo_local_css</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;http://www-nwp/~frtr/dojo-release-1.9.1/dojo/resources/dojo.css&quot;</span><span class="p">,</span>
+                      <span class="s">&quot;http://www-nwp/~frtr/dojo-release-1.9.1/dijit/themes/soria/soria.css&quot;</span><span class="p">]</span>
+    <span class="n">dojo_remote_css</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;http://ajax.googleapis.com/ajax/libs/dojo/1.9.1/dojo/resources/dojo.css&quot;</span><span class="p">,</span> 
+                       <span class="s">&quot;http://ajax.googleapis.com/ajax/libs/dojo/1.9.1/dijit/themes/soria/soria.css&quot;</span><span class="p">]</span>
+    <span class="n">dojo_local_script</span> <span class="o">=</span> <span class="s">&quot;http://www-nwp/~frtr/dojo-release-1.9.1/dojo/dojo.js&quot;</span>
+    <span class="n">dojo_remote_script</span> <span class="o">=</span> <span class="s">&#39;http://ajax.googleapis.com/ajax/libs/dojo/1.9.1/dojo/dojo.js&#39;</span>
+    
+    <span class="c"># start the page, with a appropriate headers/css resources:</span>
+    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;&lt;html&gt;</span>
+<span class="s">    &lt;head&gt;</span>
+<span class="s">    &#39;&#39;&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">title</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&lt;title&gt;</span><span class="si">%s</span><span class="s">&lt;/title&gt;</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">title</span><span class="p">)</span>
+    
+    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=iso-8859-1&quot;&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">description</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;{}&lt;meta name=&quot;description&quot; content=&quot;{}&quot;&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">description</span><span class="p">))</span>
+        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&lt;meta name=&quot;description&quot; content=&quot;</span><span class="si">%s</span><span class="s">&quot;&gt;</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">description</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">keywords</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;{}&lt;meta name=&quot;keywords&quot; content=&quot;{}&quot;&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">keywords</span><span class="p">))</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">img_dict</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="c"># add a reference to the data structure:</span>
-        <span class="n">out_str</span> <span class="o">=</span> <span class="s">&#39;{}&lt;script type=&quot;text/javascript&quot; src=&quot;{}&quot;&gt;&lt;/script&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">json_file</span><span class="p">)</span>
-        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">out_str</span><span class="p">)</span>
-        <span class="c"># now add a reference to the javascript functions to implement the style:</span>
-        <span class="n">out_str</span> <span class="o">=</span> <span class="s">&#39;{}&lt;script type=&quot;text/javascript&quot; src=&quot;{}&quot;&gt;&lt;/script&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">js_file</span><span class="p">)</span>
-        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">out_str</span><span class="p">)</span>
-
-        <span class="c"># now write out the javascript cnfiguration variables:</span>
-        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;&lt;script type=&quot;text/javascript&quot;&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-        <span class="n">ind</span> <span class="o">=</span> <span class="n">_indent_up_one</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
-
-        <span class="c"># in case the page we are writing is embedded as a frame, write out the top</span>
-        <span class="c"># level page here;</span>
-        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;{}var pagename = &quot;{}&quot;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">pagename</span><span class="p">))</span>
-        <span class="c"># the tab name is used in setting up the URL in nested frames:</span>
-        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;{}var tab_name = &quot;{}&quot;;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">tabname</span><span class="p">))</span>
-
-        <span class="n">dict_depth</span> <span class="o">=</span> <span class="n">img_dict</span><span class="o">.</span><span class="n">dict_depth</span><span class="p">()</span>
-        <span class="c"># the key_to_selector variable is what maps each set of keys onto a selector on the page:</span>
-        <span class="n">key_to_selector</span> <span class="o">=</span> <span class="nb">str</span><span class="p">([</span><span class="n">selector_prefix</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dict_depth</span><span class="p">)])</span>
-        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;{}var key_to_selector = {};</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">key_to_selector</span><span class="p">))</span>
-
-        <span class="c"># and the width is what determines how large the selector appears on the page:</span>
-        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;{}var selector_widths = {};</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">img_dict</span><span class="o">.</span><span class="n">selector_widths</span><span class="p">)))</span>
-
-        <span class="c"># this determines whether a selector uses the animation controls on a page:</span>
-        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;{}var anim_sel = {};</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">img_dict</span><span class="o">.</span><span class="n">selector_animated</span><span class="p">))</span>
-        <span class="c"># and the direction the animation runs in:</span>
-        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;{}var anim_dir = {};</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">img_dict</span><span class="o">.</span><span class="n">animation_direction</span><span class="p">))</span>
-        <span class="c"># and the direction the animation runs in:</span>
-
-        <span class="c"># the url_separator is the text character that goes between the variables in the url:</span>
-        <span class="k">if</span> <span class="n">url_separator</span> <span class="o">==</span> <span class="s">&#39;&amp;&#39;</span><span class="p">:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Cannot use &quot;&amp;&quot; as the url_separator, as some strings will &#39;</span>
-            <span class="n">msg</span> <span class="o">+=</span> <span class="s">&#39;become html special characters. For instance &amp;para-global &#39;</span>
-            <span class="n">msg</span> <span class="o">+=</span> <span class="s">&#39;will be treated as a paragraph then -global, not the intended string.&#39;</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;{}var url_separator = &quot;{}&quot;;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">url_separator</span><span class="p">))</span>
-
-        <span class="c"># the url_type determines whether the url is full of integers (int), with meaningful</span>
-        <span class="c"># values internally or text which looks more meaningful to the user:</span>
-        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;{}var url_type = &quot;{}&quot;;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">url_type</span><span class="p">))</span>
-        <span class="c"># the show_rel_url logical (converted to a string to init a javascript bool)</span>
-        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;{}var show_rel_url = {};</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">_py_to_js_bool</span><span class="p">(</span><span class="n">only_show_rel_url</span><span class="p">)))</span>
-
-        <span class="c"># the selected_id needs to be defined here too, as it&#39;s used as a global variable</span>
-        <span class="c"># (it will be overwritten later if the URL changes it, and when selectors change it):</span>
-        <span class="k">if</span> <span class="n">initial_selectors</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="c"># if it&#39;s not set, then set it to something invalid, and the validator</span>
-            <span class="c"># in the javascript will sort it out. It MUST be the right length though:</span>
-            <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;{}var selected_id = {}</span><span class="se">\n</span><span class="s">;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="nb">str</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">dict_depth</span><span class="p">)))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">initial_selectors</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Input initial_selectors must be a list, of length the depth of the ImageDict&#39;</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">initial_selectors</span><span class="p">)</span> <span class="o">!=</span> <span class="n">img_dict</span><span class="o">.</span><span class="n">dict_depth</span><span class="p">():</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Input initial_selectors must be a list, of length the depth of the ImageDict&#39;</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-            <span class="c"># the input can either be a list of integer indices, or strings that match:</span>
-            <span class="n">initial_selectors_as_inds</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">initial_selectors_as_string</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">i_sel</span><span class="p">,</span> <span class="n">sel_value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">initial_selectors</span><span class="p">):</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sel_value</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="n">sel_value</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">sel_value</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">img_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">i_sel</span><span class="p">]):</span>
-                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;initial_selectors are out of range&#39;</span><span class="p">)</span>
-                    <span class="c"># store the initial_selectors_as_inds</span>
-                    <span class="n">initial_selectors_as_inds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sel_value</span><span class="p">)</span>
-                    <span class="c"># and as a string:</span>
-                    <span class="n">initial_selectors_as_string</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">img_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">i_sel</span><span class="p">][</span><span class="n">sel_value</span><span class="p">])</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="c"># get the index of that value:</span>
-                    <span class="n">initial_selectors_as_inds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">img_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">i_sel</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">sel_value</span><span class="p">))</span>
-                    <span class="c"># and simple store the string:</span>
-                    <span class="n">initial_selectors_as_string</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sel_value</span><span class="p">)</span>
-            <span class="c"># check that&#39;s valid:</span>
-            <span class="k">if</span> <span class="n">img_dict</span><span class="o">.</span><span class="n">return_from_list</span><span class="p">(</span><span class="n">initial_selectors_as_string</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Input initial_selectors does not end up at a valid image/payload&#39;</span><span class="p">)</span>
-            <span class="c"># write that out:</span>
-            <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;{}var selected_id = {};</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">initial_selectors_as_inds</span><span class="p">))</span>
-
-        <span class="c"># now write out the lists of keys, to the different levels:</span>
-        <span class="n">keys_to_js</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">img_dict</span><span class="o">.</span><span class="n">keys</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()]</span>
-        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;{}var key_lists = [{},</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">keys_to_js</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-        <span class="n">ind</span> <span class="o">=</span> <span class="n">_indent_up_one</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i_depth</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">dict_depth</span><span class="p">):</span>
-            <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;{}{},</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">keys_to_js</span><span class="p">[</span><span class="n">i_depth</span><span class="p">]))</span>
-        <span class="n">ind</span> <span class="o">=</span> <span class="n">_indent_down_one</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
-        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;];</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-
-        <span class="c"># now some top level things:</span>
-        <span class="k">if</span> <span class="n">style</span> <span class="o">==</span> <span class="s">&#39;horiz dropdowns&#39;</span><span class="p">:</span>
-            <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;</span>
-<span class="s">    {0}// other top level derived variables</span>
-<span class="s">    {0}// the depth of the ImageMetaTag ImageDict (number of selectors):</span>
-<span class="s">    {0}var n_deep = selected_id.length;</span>
-<span class="s">    {0}// a list of the options available to the animator buttons, with the current selectio</span>
-<span class="s">    {0}var anim_options = [];</span>
-<span class="s">    {0}// the index of the current option for the animator:</span>
-<span class="s">    {0}var anim_ind = 0;</span>
-<span class="s">    &#39;&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">))</span>
-
-        <span class="c"># now, the main call:</span>
-        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;window.onload = function() {</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-        <span class="n">ind</span> <span class="o">=</span> <span class="n">_indent_up_one</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
-        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;// redefine onload, so it does this:</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;imt_main();</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-        <span class="n">ind</span> <span class="o">=</span> <span class="n">_indent_down_one</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
-        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;};</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-        <span class="c"># END of the imt specifc header content:</span>
-</div>
+        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&lt;meta name=&quot;keywords&quot; content=&quot;</span><span class="si">%s</span><span class="s">&quot;&gt;</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">keywords</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">internal</span><span class="p">:</span>
+        <span class="n">dojo_css</span> <span class="o">=</span> <span class="n">dojo_local_css</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dojo_css</span> <span class="o">=</span> <span class="n">dojo_remote_css</span>
+        
+    <span class="k">for</span> <span class="n">css</span> <span class="ow">in</span> <span class="n">dojo_css</span><span class="p">:</span>
+        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&lt;link rel=&quot;stylesheet&quot; href=&quot;</span><span class="si">%s</span><span class="s">&quot; media=&quot;screen&quot; /&gt;</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">css</span><span class="p">)</span>
+    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&lt;/head&gt;&#39;</span><span class="p">)</span>
+    
+    <span class="c"># now start the body:</span>
+    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">    &lt;body class=&quot;soria&quot; bgcolor=&quot;#FFFFFF&quot; text=&quot;#000000&quot; leftmargin=&quot;0&quot; topmargin=&quot;0&quot; marginwidth=&quot;0&quot; marginheight=&quot;0&quot;&gt;</span>
+<span class="s">    &#39;&#39;&#39;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">preamble</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">preamble</span><span class="p">)</span>
+    
+    <span class="c"># and, crucially, declare the location of the javascript api:</span>
+    <span class="n">dojo_script_str</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s">&lt;!-- access the dojo javascript library --&gt;</span>
+<span class="s">&lt;script type=&quot;text/javascript&quot; src=&quot;&#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">internal</span><span class="p">:</span>
+        <span class="n">dojo_script_str</span> <span class="o">+=</span> <span class="n">dojo_local_script</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dojo_script_str</span> <span class="o">+=</span> <span class="n">dojo_remote_script</span>
+    <span class="n">dojo_script_str</span> <span class="o">+=</span> <span class="s">&#39;&quot; djConfig=&quot;isDebug:true, parseOnLoad:true&quot;&gt;&lt;/script&gt;</span><span class="se">\n\n</span><span class="s">&#39;</span>
+    
+    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">dojo_script_str</span><span class="p">)</span>
+    
 <span class="k">def</span> <span class="nf">write_js_setup_defaults</span><span class="p">(</span><span class="n">selector_prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">list_prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">file_list_name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    this specifies defaults for the internal names the different selectors, associated lists for</span>
+<span class="sd">    this specifies defaults for the internal names the different selectors, associated lists for </span>
 <span class="sd">    the selectors, and the list of files (all with a numbered suffix)</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">if</span> <span class="n">selector_prefix</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
@@ -503,120 +217,769 @@
         <span class="n">file_list_name</span> <span class="o">=</span> <span class="s">&#39;file_list&#39;</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">selector_prefix</span><span class="p">,</span> <span class="n">list_prefix</span><span class="p">,</span> <span class="n">file_list_name</span><span class="p">)</span>
 
-<div class="viewcode-block" id="write_json"><a class="viewcode-back" href="../../webpage.html#ImageMetaTag.webpage.write_json">[docs]</a><span class="k">def</span> <span class="nf">write_json</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">json_file</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Writes a json dump of the :class:`ImageMetaTag.ImageDict` tree strucuture to a target file path</span>
+<span class="k">def</span> <span class="nf">write_js</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">file_obj</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">selector_prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">list_prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">file_list_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+             <span class="n">only_show_rel_url</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">devmode</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;writes an ImageDict to a file object, as a set of javascript variables. The keys within </span>
+<span class="sd">    the plot dictionary are listed, with name specified by the list_prefix, and the file list (with the name</span>
+<span class="sd">    from file_list_name) gives the files, and their indices, for all elements of the plot dictonary.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">imt</span><span class="o">.</span><span class="n">ImageDict</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;input img_dict is not an ImageMetaTag.ImageDict&#39;</span><span class="p">)</span>
-    <span class="c"># TODO: ivestigate using zblib to compress this, and pako.js to decompress, client side:</span>
-    <span class="n">dict_as_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">img_dict</span><span class="o">.</span><span class="n">dict</span><span class="p">,</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">,</span> <span class="s">&#39;:&#39;</span><span class="p">))</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">ImageDict</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;write_js works on an ImageMetaTag ImageDict.&#39;</span><span class="p">)</span>
 
-    <span class="c"># if we&#39;re not doing any fancy compression, then use subdirectories to reduce the string size:</span>
-    <span class="k">for</span> <span class="n">i_sd</span><span class="p">,</span> <span class="n">subdir</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">img_dict</span><span class="o">.</span><span class="n">subdirs</span><span class="p">):</span>
-        <span class="n">dict_as_json</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&#39;&quot;{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">subdir</span><span class="p">),</span> <span class="s">&#39;sd[{}]+&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i_sd</span><span class="p">),</span> <span class="n">dict_as_json</span><span class="p">)</span>
+    <span class="c">#if not isinstance(file_obj, file):</span>
+    <span class="c">#    print type(file_obj)</span>
+    <span class="c">#    raise ValueError(&#39;The file_obj passed into PlotDictionary.write_js must be an open file object.&#39;)</span>
+     
+    <span class="c"># this is the internal name the different selectors, associated lists for the selectors, and the</span>
+    <span class="c"># list of files (all with a numbered suffix):</span>
+    <span class="k">if</span> <span class="n">selector_prefix</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">selector_prefix</span><span class="p">,</span> <span class="n">junk1</span><span class="p">,</span> <span class="n">junk2</span> <span class="o">=</span> <span class="n">write_js_setup_defaults</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">list_prefix</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">junk1</span><span class="p">,</span> <span class="n">list_prefix</span><span class="p">,</span> <span class="n">junk2</span> <span class="o">=</span> <span class="n">write_js_setup_defaults</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">file_list_name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">junk1</span><span class="p">,</span> <span class="n">junk2</span><span class="p">,</span> <span class="n">file_list_name</span> <span class="o">=</span> <span class="n">write_js_setup_defaults</span><span class="p">()</span>
+    
+    <span class="c"># the number of selectors/lists depends on the depth of the dictionary:</span>
+    <span class="n">dict_depth</span> <span class="o">=</span> <span class="n">img_dict</span><span class="o">.</span><span class="n">dict_depth</span><span class="p">(</span><span class="n">uniform_depth</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    
+    <span class="c"># and the keys at each level of the dictionary, and the index (of the keys) of each</span>
+    <span class="c"># element at the bottom level of the dict:</span>
+    <span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">key_ind</span><span class="p">)</span> <span class="o">=</span> <span class="n">img_dict</span><span class="o">.</span><span class="n">dict_index_array</span><span class="p">(</span><span class="n">devmode</span><span class="o">=</span><span class="n">devmode</span><span class="p">)</span>
 
-    <span class="n">out_str</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
-<span class="s">var sd = {};</span>
-<span class="s">var imt = {};</span>
-<span class="s">&#39;&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">img_dict</span><span class="o">.</span><span class="n">subdirs</span><span class="p">,</span> <span class="n">dict_as_json</span><span class="p">)</span>
+    <span class="c"># and need to know how many there are at each level:</span>
+    <span class="n">n_keys_per_level</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dict_depth</span><span class="p">):</span>
+        <span class="n">n_keys_per_level</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">[</span><span class="n">level</span><span class="p">]))</span>
+    
+    
+    <span class="c"># initialise the javascript section:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;&lt;!--ImageDict listing:--&gt;</span>
+<span class="s">&lt;script type=&quot;text/javascript&quot;&gt;</span>
+<span class="s">&#39;&#39;&#39;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">,</span> <span class="s">&#39;Cannot write to given file object&#39;</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">json_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="c"># input is a string, assume it&#39;s the file path to write to:</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">json_file</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_obj</span><span class="p">:</span>
-            <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">out_str</span><span class="p">)</span>
+    <span class="c"># the show_rel_url logical (converted to a string to init a javascript bool)</span>
+    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;var show_rel_url = </span><span class="si">%s</span><span class="s">;</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">py_to_js_bool</span><span class="p">(</span><span class="n">only_show_rel_url</span><span class="p">))</span>
+    <span class="c"># start the plot dictionary var:</span>
+    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;var key_lists = [</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dict_depth</span><span class="p">):</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">key_id</span><span class="p">,</span> <span class="n">key_name</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">keys</span><span class="p">[</span><span class="n">level</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">[</span><span class="n">level</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c"># this key list only has one thing in it!</span>
+                <span class="k">if</span> <span class="n">level</span> <span class="o">&lt;</span> <span class="n">dict_depth</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="c"># and it&#39;s not the last key;</span>
+                    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;  {id: </span><span class="si">%s</span><span class="s">, list: [{id: 0, label: &quot;</span><span class="si">%s</span><span class="s">&quot;}]},</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">key_name</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># it&#39;s also the last key (so not comma!)</span>
+                    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;  {id: </span><span class="si">%s</span><span class="s">, list: [{id: 0, label: &quot;</span><span class="si">%s</span><span class="s">&quot;}]}</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">key_name</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">key_id</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c"># the start of a key list:</span>
+                <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;  {id: </span><span class="si">%s</span><span class="s">, list: [{id: 0, label: &quot;</span><span class="si">%s</span><span class="s">&quot;},</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">key_name</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">key_id</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">[</span><span class="n">level</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c"># not the last item for this key list:</span>
+                <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;        {id: </span><span class="si">%s</span><span class="s">, label: &quot;</span><span class="si">%s</span><span class="s">&quot;},</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span><span class="p">(</span><span class="n">key_id</span><span class="p">,</span> <span class="n">key_name</span><span class="p">)</span> <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">level</span> <span class="o">&lt;</span> <span class="n">dict_depth</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c"># the last item for this key list, but it&#39;s not the last one:</span>
+                <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;        {id: </span><span class="si">%s</span><span class="s">, label: &quot;</span><span class="si">%s</span><span class="s">&quot;}]},</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span><span class="p">(</span><span class="n">key_id</span><span class="p">,</span> <span class="n">key_name</span><span class="p">)</span> <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># the last item of the last key list (so no comma!)</span>
+                <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;        {id: </span><span class="si">%s</span><span class="s">, label: &quot;</span><span class="si">%s</span><span class="s">&quot;}]}</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span><span class="p">(</span><span class="n">key_id</span><span class="p">,</span> <span class="n">key_name</span><span class="p">)</span> <span class="p">)</span>
+                
+    <span class="c"># and close the plot dictionary var:</span>
+    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;];</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+    <span class="c">## test accessing these: </span>
+    <span class="c">#file_obj.write(&#39;\nalert(key_lists[0].list[54].label)&#39;)</span>
+    <span class="c">#file_obj.write(&#39;\nalert(key_lists[1].list[2].label)&#39;)</span>
+    <span class="c">#file_obj.write(&#39;\nalert(key_lists[2].list[1].label)&#39;)</span>
+    
+    <span class="c"># now write out all of the elements at the bottom level of the plot dictionary, and report </span>
+    <span class="c"># their final details, and the id values of the key lists that refer to them: </span>
+
+            
+    <span class="c"># write out the file names:</span>
+    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;var file_list = [</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>            
+    <span class="k">for</span> <span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">ind_of_item</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">key_ind</span><span class="p">):</span>
+        <span class="n">tmp_dict</span> <span class="o">=</span> <span class="n">img_dict</span><span class="o">.</span><span class="n">dict</span>
+        <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)):</span>
+            <span class="n">tmp_dict</span> <span class="o">=</span> <span class="n">tmp_dict</span><span class="p">[</span> <span class="n">keys</span><span class="p">[</span><span class="n">level</span><span class="p">][</span> <span class="n">ind_of_item</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="p">]</span> <span class="p">]</span>
+        
+        <span class="c"># at the bottom level, the result must not be a dict:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tmp_dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="s">&#39;Bottom level of plot dictionary contains more dictionaries!&#39;</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tmp_dict</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="c"># a string - this content is the plot it&#39;s referring to:</span>
+            <span class="k">if</span> <span class="n">item</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">key_ind</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;  &quot;</span><span class="si">%s</span><span class="s">&quot;,</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tmp_dict</span><span class="p">)</span> <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;  &quot;</span><span class="si">%s</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tmp_dict</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tmp_dict</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="c"># a list of plots:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tmp_dict</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">out_list_str</span> <span class="o">=</span> <span class="s">&#39;  [&#39;</span>
+                <span class="k">for</span> <span class="n">list_content</span> <span class="ow">in</span> <span class="n">tmp_dict</span><span class="p">:</span> 
+                    <span class="n">out_list_str</span> <span class="o">+=</span> <span class="s">&#39;&quot;</span><span class="si">%s</span><span class="s">&quot;, &#39;</span> <span class="o">%</span> <span class="n">list_content</span>
+                <span class="n">out_list_str</span> <span class="o">=</span> <span class="n">out_list_str</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;]&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&#39;Webpage not prepared to handle empty lists - not sure what that means in this case!&#39;</span><span class="p">)</span>
+                <span class="c"># write out an empty list... not sure how the javascript would interpret that!</span>
+                <span class="n">out_list_str</span> <span class="o">=</span> <span class="s">&#39;  []&#39;</span>
+            <span class="k">if</span> <span class="n">item</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">key_ind</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">,</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">out_list_str</span><span class="p">)</span> <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">out_list_str</span><span class="p">)</span> <span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="s">&#39;Wrong type of thing at bottom of the plot dictionary.... </span><span class="se">\n</span><span class="s">  </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">tmp_dict</span>
+    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;]</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+    <span class="c"># now the indices/ids:</span>
+    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;var file_ids = [</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>            
+    <span class="k">for</span> <span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">ind_of_item</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">key_ind</span><span class="p">):</span>
+        <span class="n">tmp_dict</span> <span class="o">=</span> <span class="n">img_dict</span><span class="o">.</span><span class="n">dict</span>
+        <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)):</span>
+            <span class="n">tmp_dict</span> <span class="o">=</span> <span class="n">tmp_dict</span><span class="p">[</span> <span class="n">keys</span><span class="p">[</span><span class="n">level</span><span class="p">][</span> <span class="n">ind_of_item</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="p">]</span> <span class="p">]</span>
+        
+        <span class="c"># at the bottom level, the result must not be a dict:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tmp_dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="s">&#39;Bottom level of plot dictionary contains more dictionaries!&#39;</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tmp_dict</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+            <span class="c"># a string, or list of strings - this content is the plot it&#39;s referring to:</span>
+            <span class="k">if</span> <span class="n">item</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">key_ind</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;  </span><span class="si">%s</span><span class="s">,</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ind_of_item</span><span class="p">)</span> <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;  </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ind_of_item</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="s">&#39;Wrong type of thing at bottom of the plot dictionary.... </span><span class="se">\n</span><span class="s">  </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">tmp_dict</span>
+    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;]</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+    
+    <span class="c"># close the javascript section:</span>
+    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">&lt;/script&gt;</span>
+
+<span class="s">&#39;&#39;&#39;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">write_js_setup</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">file_obj</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">pagename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tab_s_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                   <span class="n">initial_selectors</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                   <span class="n">selector_prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">list_prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">file_list_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                   <span class="n">url_separator</span><span class="o">=</span><span class="s">&#39;|&#39;</span><span class="p">,</span> <span class="n">url_type</span><span class="o">=</span><span class="s">&#39;int&#39;</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    writes out the scripting reqruied to use an ImageDict to a file object.</span>
+<span class="sd">    </span>
+<span class="sd">    </span>
+<span class="sd">    pagename : this is the filename of the output page. Defaults to: &#39;page.html&#39;</span>
+<span class="sd">    tab_s_name : used to denote the name of the page, when it is used as a frame of a larger page.</span>
+<span class="sd">    selector_prefix, list_prefix, file_list_prefix: overide default javascript variables </span>
+<span class="sd">        names of the selectors, lists and file lists.</span>
+<span class="sd">    url_separator: overide the separator used in the url to an image selection. Defaults to &#39;|&#39;</span>
+<span class="sd">    url_type: Controls the appearance of the url to an image selection. Can either be &#39;int&#39; or &#39;str&#39;.</span>
+<span class="sd">    </span>
+<span class="sd">    initial_selectors : this is a list giving the initial selection of the webpage when it first loads. </span>
+<span class="sd">                       It&#39;s length should be the depth of the ImageDict. It can either be a list of strings</span>
+<span class="sd">                       giving the selected values, or a list of Integers giving their indicies in the ImageDict.keys </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="c"># TODO: the actual Javascript is contained in strings in the function below. That&#39;s not very nice.</span>
+
+    <span class="k">if</span> <span class="n">url_separator</span> <span class="o">==</span> <span class="s">&#39;&amp;&#39;</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Cannot use &quot;&amp;&quot; as the url_separator, as some strings will become html special characters.&#39;</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s">&#39; For instance &amp;para-global will be treated as a paragraph then -global, not the intended string.&#39;</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        
+    <span class="c">#if not isinstance(file_obj, file):</span>
+    <span class="c">#    print type(file_obj)</span>
+    <span class="c">#    raise ValueError(&#39;The file_obj passed into PlotDictionary.write_js_setup must be an open file object.&#39;)</span>
+    
+    <span class="k">if</span> <span class="n">pagename</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">pagename</span> <span class="o">=</span> <span class="s">&#39;page.html&#39;</span>
+
+    <span class="c"># this is the internal name the different selectors, associated lists for the selectors, and the</span>
+    <span class="c"># list of files (all with a numbered suffix):</span>
+    <span class="k">if</span> <span class="n">selector_prefix</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">selector_prefix</span><span class="p">,</span> <span class="n">junk1</span><span class="p">,</span> <span class="n">junk2</span> <span class="o">=</span> <span class="n">write_js_setup_defaults</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">list_prefix</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">junk1</span><span class="p">,</span> <span class="n">list_prefix</span><span class="p">,</span> <span class="n">junk2</span> <span class="o">=</span> <span class="n">write_js_setup_defaults</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">file_list_name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">junk1</span><span class="p">,</span> <span class="n">junk2</span><span class="p">,</span> <span class="n">file_list_name</span> <span class="o">=</span> <span class="n">write_js_setup_defaults</span><span class="p">()</span>
+
+    <span class="c"># get the depth of the plot dictionary (and demand it is of uniform depth):</span>
+    <span class="n">dict_depth</span> <span class="o">=</span> <span class="n">img_dict</span><span class="o">.</span><span class="n">dict_depth</span><span class="p">(</span><span class="n">uniform_depth</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">&lt;!-- now define the functions that do things on the page: --&gt;</span>
+<span class="s">&lt;script type=&quot;text/javascript&quot;&gt;</span>
+<span class="s">&#39;&#39;&#39;</span><span class="p">)</span>
+        
+    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">var pagename = &quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span> <span class="o">%</span> <span class="n">pagename</span><span class="p">)</span>
+    
+    <span class="c"># the key_to_selector variable is what maps each set of keys onto a selector on the page:</span>
+    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n\n</span><span class="s">var key_to_selector = [&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">lev</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dict_depth</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">lev</span> <span class="o">==</span> <span class="n">dict_depth</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">var_separator</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">var_separator</span> <span class="o">=</span> <span class="s">&#39;,&#39;</span>
+
+        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;&quot;</span><span class="si">%s%s</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">&#39;&#39;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">selector_prefix</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">var_separator</span><span class="p">))</span>
+    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;];&#39;</span><span class="p">)</span>
+    
+    <span class="c"># and the width is what determines how large the selector appears on the page:</span>
+    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">var selector_widths = [&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">lev</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dict_depth</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">lev</span> <span class="o">==</span> <span class="n">dict_depth</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">var_separator</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">var_separator</span> <span class="o">=</span> <span class="s">&#39;,&#39;</span>
+        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;&quot;</span><span class="si">%s</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">&#39;&#39;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">img_dict</span><span class="o">.</span><span class="n">selector_widths</span><span class="p">[</span><span class="n">lev</span><span class="p">],</span> <span class="n">var_separator</span><span class="p">))</span>
+    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;];&#39;</span><span class="p">)</span>
+    
+    <span class="c"># this determines whether a selector uses the animation controls on a page:</span>
+    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">var anim_sel = </span><span class="si">%s</span><span class="s">;&#39;</span> <span class="o">%</span> <span class="n">img_dict</span><span class="o">.</span><span class="n">selector_animated</span><span class="p">)</span>
+    <span class="c"># and the direction the animation runs in:</span>
+    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">var anim_dir = </span><span class="si">%s</span><span class="s">;&#39;</span> <span class="o">%</span> <span class="n">img_dict</span><span class="o">.</span><span class="n">animation_direction</span><span class="p">)</span>
+    <span class="c"># and the direction the animation runs in:</span>
+    
+    <span class="c"># the url_separator is the text character that goes between the variables in the url:</span>
+    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">var url_separator = &quot;</span><span class="si">%s</span><span class="s">&quot;;&#39;</span> <span class="o">%</span> <span class="n">url_separator</span><span class="p">)</span>
+    <span class="c"># the url_type determines whether the url is full of integers (int), with meaningful values internally</span>
+    <span class="c"># or text which looks more meaningful to the user:</span>
+    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">var url_type = &quot;</span><span class="si">%s</span><span class="s">&quot;;&#39;</span>  <span class="o">%</span> <span class="n">url_type</span><span class="p">)</span>
+    
+    
+    <span class="c"># the tab name is used in setting up the URL in nested frames:</span>
+    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">var tab_name = &quot;</span><span class="si">%s</span><span class="s">&quot;;</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">tab_s_name</span><span class="p">)</span>
+    
+    <span class="c"># the selected_id needs to be defined here too, as it&#39;s used as a global variable</span>
+    <span class="c"># (it will be overwritten later if the URL changes it, and when selectors/stepping change it):</span>
+ 
+    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">// start off with this initial selected id (and define it at this level, so it&#39;s always available):</span>
+<span class="s">// (slice, so it&#39;s a copy, not a reference!)</span>
+<span class="s">&#39;&#39;&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">initial_selectors</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;var selected_id = file_ids[0].slice();</span><span class="se">\n\n</span><span class="s">&#39;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="c"># input is a file object:</span>
-        <span class="n">json_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">out_str</span><span class="p">)</span>
-</div>
-<div class="viewcode-block" id="write_js_placeholders"><a class="viewcode-back" href="../../webpage.html#ImageMetaTag.webpage.write_js_placeholders">[docs]</a><span class="k">def</span> <span class="nf">write_js_placeholders</span><span class="p">(</span><span class="n">file_obj</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">dict_depth</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">selector_prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                          <span class="n">style</span><span class="o">=</span><span class="s">&#39;horiz dropdowns&#39;</span><span class="p">,</span> <span class="n">level_names</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                          <span class="n">animated_level</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Writes the placeholders into the page body, for the javascript to manipulate</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">initial_selectors</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Input initial_selectors must be a list, length the depth of the ImageDict&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">initial_selectors</span><span class="p">)</span> <span class="o">!=</span> <span class="n">img_dict</span><span class="o">.</span><span class="n">dict_depth</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Input initial_selectors must be a list, length the depth of the ImageDict&#39;</span><span class="p">)</span>
+        <span class="c"># the input can either be a list of integer indices, or strings that match:</span>
+        <span class="n">initial_selectors_as_inds</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">initial_selectors_as_string</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i_sel</span><span class="p">,</span> <span class="n">sel_value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">initial_selectors</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sel_value</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">sel_value</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">sel_value</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">img_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">i_sel</span><span class="p">]):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;initial_selectors contains indices which are out of range&#39;</span><span class="p">)</span>
+                <span class="c"># store the initial_selectors_as_inds</span>
+                <span class="n">initial_selectors_as_inds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sel_value</span><span class="p">)</span>
+                <span class="c"># and as a string:</span>
+                <span class="n">initial_selectors_as_string</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">img_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">i_sel</span><span class="p">][</span><span class="n">sel_value</span><span class="p">]</span> <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># get the index of that value:</span>
+                <span class="n">initial_selectors_as_inds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">img_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">i_sel</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">sel_value</span><span class="p">)</span> <span class="p">)</span>
+                <span class="c"># and simple store the string:</span>
+                <span class="n">initial_selectors_as_string</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sel_value</span><span class="p">)</span>
+        
+        <span class="c"># check that&#39;s valid:        </span>
+        <span class="k">if</span> <span class="n">img_dict</span><span class="o">.</span><span class="n">return_from_list</span><span class="p">(</span> <span class="n">initial_selectors_as_string</span> <span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Input initial_selectors does not end up at a valid image/payload&#39;</span><span class="p">)</span>
+        <span class="c"># write that out:</span>
+        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;var selected_id = </span><span class="si">%s</span><span class="s">;</span><span class="se">\n\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">initial_selectors_as_inds</span><span class="p">))</span>
+        
+    
+    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">// and this stores if a selector is valid for the selected_id</span>
+<span class="s">//var valid_selector = new Array(file_ids.length).fill( new Array(file_ids[0].length).fill(true) );</span>
+<span class="s">// IE 8 doesn&#39;t have fill!</span>
+<span class="s">var valid_selector = new Array(file_ids.length);//.fill( new Array(file_ids[0].length).fill(true) );</span>
+<span class="s">for (var i_file=0, l_files=file_list.length; i_file &lt; l_files; i_file++){</span>
+<span class="s">  valid_selector[i_file] = new Array(file_ids[0].length);</span>
+<span class="s">  for (i_id=0, l_ids=file_ids[0].length; i_id &lt; l_ids; i_id++){</span>
+<span class="s">    valid_selector[i_file][i_id] = true;</span>
+<span class="s">  };  </span>
+<span class="s">};</span>
+<span class="s">&#39;&#39;&#39;</span><span class="p">)</span>
+    
+    <span class="c"># now write out the javascript functions that actuall build the page:</span>
+    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">r&#39;&#39;&#39;</span>
+<span class="s">// we need to compare the contents of arrays, so add a compare method to the Array&#39;s prototype:</span>
+<span class="s">Array.prototype.compares = function (array) {</span>
+<span class="s">  // written, using the example here http://stackoverflow.com/questions/7837456/comparing-two-arrays-in-javascript</span>
+<span class="s">  // as an aid to understanding...</span>
 
-<span class="sd">    * file_obj - an open file object to write to</span>
-<span class="sd">    * dict_dept - the depth of the :class:`ImageMetaTag.ImageDict` being written</span>
-<span class="sd">    * selector_prefix - prefix for the variable names of the selectors (these are visible to \</span>
-<span class="sd">                        those people viewing the webpage!)</span>
-<span class="sd">    * style - In future, it would be great to write out different types of webpages. For now \</span>
-<span class="sd">              they are always horizontal dropdown menus: &#39;horiz dropdowns&#39;.</span>
-<span class="sd">    * level_names - if supplied, this need to be a list of full names, for the selectors, of \</span>
-<span class="sd">                    length dict_depth.</span>
-<span class="sd">    * animated_level - if supplied, as a string, this will be used to label the animator buttons.</span>
+<span class="s">  // if the comparator is not an array, then false:</span>
+<span class="s">  if (! array instanceof Array){</span>
+<span class="s">    return false;</span>
+<span class="s">  }  </span>
+<span class="s">  // if the input array is false, then return false:</span>
+<span class="s">  if (!array) {</span>
+<span class="s">    return false;</span>
+<span class="s">  }</span>
+<span class="s">  // compare the lengths - if not equal length, then false:</span>
+<span class="s">  if (this.length != array.length){</span>
+<span class="s">    return false;</span>
+<span class="s">  }</span>
+
+<span class="s">  // now loop through the elements of the list:</span>
+<span class="s">  // (optimisation: taking the length only once, to save doing it on each time through the loop)</span>
+<span class="s">  for (var ind = 0, len=this.length; ind &lt; len; ind++){</span>
+<span class="s">    // check both elements are arrays:</span>
+<span class="s">    if ( this[ind] instanceof Array &amp;&amp; array[ind] instanceof Array ){</span>
+<span class="s">      // recursively check the nested array:</span>
+<span class="s">      if (!this[ind].compares(array[ind]) ){</span>
+<span class="s">        return false;</span>
+<span class="s">      }</span>
+<span class="s">    } else if (this[ind] != array[ind]) {</span>
+<span class="s">      // this will also catch objects, which look equal, but won&#39;t compare: {x:y} != {x:y}</span>
+<span class="s">      return false;</span>
+<span class="s">    }</span>
+<span class="s">  }</span>
+<span class="s">  // if we&#39;ve got to here, then the arrays compare!</span>
+<span class="s">  return true;</span>
+<span class="s">}</span>
+<span class="s">// and add the indexOf if it&#39;s not included:</span>
+<span class="s">if (!Array.prototype.indexOf) {</span>
+<span class="s">  Array.prototype.indexOf = function(obj, start) {</span>
+<span class="s">    for (var i = (start || 0), j = this.length; i &lt; j; i++) {</span>
+<span class="s">      if (this[i] === obj) { return i; }</span>
+<span class="s">    }</span>
+<span class="s">    return -1;</span>
+<span class="s">  }</span>
+<span class="s">}</span>
+
+<span class="s">//////////////////////////////////////////////////////////////////////</span>
+<span class="s">// the following scripts are run, when everything is read in (domReady!)</span>
+<span class="s">require([&quot;dojo/parser&quot;, </span>
+<span class="s">  &quot;dojo/_base/array&quot;, </span>
+<span class="s">  &quot;dijit/form/Select&quot;, </span>
+<span class="s">  &quot;dojo/data/ObjectStore&quot;, &quot;dojo/store/Memory&quot;, &quot;dojo/domReady!&quot;], </span>
+
+<span class="s">  //////////////////////////////////////////////////////////////////////</span>
+<span class="s">  // this is the script that is run, when domReady!:</span>
+<span class="s">  function (parser, array, Select, ObjectStore, Memory){</span>
+<span class="s">    // get the initial selected id, from default, or input on the URL</span>
+<span class="s">    get_selected_id();</span>
+<span class="s">    // display the URL to this page:</span>
+<span class="s">    write_url_to_div()</span>
+<span class="s">    // display the image that relates to the initial selected_id:</span>
+<span class="s">    set_img_from_id()</span>
+<span class="s">    // now write out the different selectors, from number/level 0:</span>
+<span class="s">    write_selectors(0)</span>
+<span class="s">    </span>
+<span class="s">  //////////////////////////////////////////////////////////////////////</span>
+<span class="s">  // Subroutines used in the script:</span>
+<span class="s">  //</span>
+<span class="s">  //////////////////////////////////////////////////////////////////////</span>
+<span class="s">  // get the initial id to present, from the input URL::</span>
+<span class="s">  function get_selected_id() {</span>
+
+<span class="s">    // get inputs from the URL passed in:</span>
+<span class="s">    var in_url = window.location.search;</span>
+<span class="s">    // if there are inputs, on the url, read them:</span>
+<span class="s">    if (in_url.length &gt; 0) {</span>
+<span class="s">      var parms = in_url.split(url_separator);</span>
+<span class="s">      parms[0]=parms[0].substring(1); // strip of beginning &#39;?&#39;</span>
+<span class="s">      // if there are the right number of &amp; separated inputs, then use them:</span>
+<span class="s">      if (parms.length == selected_id.length + 1){</span>
+<span class="s">        if (url_type == &#39;int&#39;){</span>
+<span class="s">          // the url has integers which directly set the selected_id:</span>
+<span class="s">          for (var i_ind=0, l_ind=selected_id.length; i_ind &lt; l_ind; i_ind++){</span>
+<span class="s">            // when the id integer is passed in the url:</span>
+<span class="s">            selected_id[i_ind] = parseInt(parms[i_ind]);</span>
+<span class="s">          }</span>
+<span class="s">        } else {</span>
+<span class="s">          // the url has text which needs decoding:</span>
+<span class="s">          for (var i_ind=0, l_ind=selected_id.length; i_ind &lt; l_ind; i_ind++){</span>
+<span class="s">            for (i_val=0, l_val=key_lists[i_ind].list.length; i_val &lt; l_val; i_val++){</span>
+<span class="s">              if (parms[i_ind] == convertToSlug(key_lists[i_ind].list[i_val].label) ){</span>
+<span class="s">                selected_id[i_ind] = i_val;</span>
+<span class="s">                break</span>
+<span class="s">              }</span>
+<span class="s">            }</span>
+<span class="s">          }</span>
+<span class="s">        }</span>
+<span class="s">      }</span>
+<span class="s">    }</span>
+<span class="s">  }</span>
+
+<span class="s">  //////////////////////////////////////////////////////////////////////</span>
+<span class="s">  // writes all of the selectors, to change the selected_id, filtering the available </span>
+<span class="s">  // options so that options in the lower level lists are only presented if they</span>
+<span class="s">  // are consistent with the selection at a higher level:</span>
+<span class="s">  function write_selectors(level){</span>
+<span class="s">    // loop over the selectors needed for the page:</span>
+<span class="s">    for (var i_sel=level, l_sel=key_to_selector.length; i_sel &lt; l_sel; i_sel++){</span>
+<span class="s">      // firstly, wipe it:</span>
+<span class="s">      wipe_dijits_by_div( key_to_selector[i_sel] )</span>
+<span class="s">      // then write it:</span>
+<span class="s">      write_a_selector(key_lists[i_sel].list, key_to_selector[i_sel], selector_widths[i_sel], selected_id[i_sel], i_sel)</span>
+<span class="s">      // if the selector is animated, then set up the animator to point to it:</span>
+<span class="s">      if (i_sel == anim_sel){</span>
+<span class="s">        write_animator(i_sel);</span>
+<span class="s">      }</span>
+<span class="s">    }</span>
+<span class="s">//    console.log(&#39;ALL SELECTORS WRITTEN&#39;)</span>
+<span class="s">//    console.log(&#39;//////////////////////////////////////////////////////////////////////&#39;)</span>
+<span class="s">  }</span>
+
+<span class="s">  /////////////////////////////////////////////////////////////////////</span>
+<span class="s">  // function to destroy dijits on a div...</span>
+<span class="s">  function wipe_dijits_by_div(div) {</span>
+<span class="s">    //dijit.byId(div).destroyRecursive(true); // not quite right.. ends up with a garbled first element left over from the original...</span>
+<span class="s">    dojo.empty(div)// kills it, but still leaves it registered...</span>
+<span class="s">    dijit.registry.remove(div)// this unregisters it...</span>
+<span class="s">    dijit.registry.remove(div + &quot;_menu&quot;) // and this is needed too...</span>
+<span class="s">  };</span>
+
+<span class="s">  //////////////////////////////////////////////////////////////////////</span>
+<span class="s">  // writes a specific selector, given a list of keys and a target div/span:</span>
+<span class="s">  function write_a_selector(list, target, input_width, value, level){</span>
+<span class="s">    var _ = document.getElementById(target)</span>
+
+<span class="s">    if (level == 0){</span>
+<span class="s">      tmp_list = list;</span>
+<span class="s">    } else {</span>
+<span class="s">      var filtered = filter_list_by_id(list, level);</span>
+<span class="s">      tmp_list = filtered[0];</span>
+<span class="s">      tmp_inds = filtered[1];</span>
+
+<span class="s">      // if the selected_id for this level isn&#39;t in tmp_inds, then it needs resetting:</span>
+<span class="s">      if (tmp_inds.indexOf(selected_id[level]) == -1){</span>
+<span class="s">        selected_id[level] = tmp_inds[0]</span>
+<span class="s">      }</span>
+<span class="s">    }</span>
+
+<span class="s">    // is the width input valid?</span>
+<span class="s">    if (input_width === &#39;&#39;){</span>
+<span class="s">      sel_width=&quot;350px&quot;;</span>
+<span class="s">    } else {</span>
+<span class="s">      sel_width=input_width;</span>
+<span class="s">    }</span>
+
+<span class="s">    // set up as Memory</span>
+<span class="s">    var key_store = new Memory({</span>
+<span class="s">      data : tmp_list</span>
+<span class="s">    });</span>
+<span class="s"> </span>
+<span class="s">    // now as an ObjectStore</span>
+<span class="s">    var key_os = new ObjectStore({</span>
+<span class="s">      objectStore : key_store</span>
+<span class="s">    });</span>
+
+<span class="s">    // now set up the dijit:</span>
+<span class="s">    var key_dij = new Select({</span>
+<span class="s">      store : key_os,</span>
+<span class="s">      value : value,</span>
+<span class="s">      title : target,</span>
+<span class="s">      width : sel_width,</span>
+<span class="s">      height : &quot;30px&quot;,</span>
+<span class="s">      sortByLabel : false}, target);</span>
+<span class="s">    key_dij.startup();</span>
+
+<span class="s">    // and setup what happens when it&#39;s changed:</span>
+<span class="s">    key_dij.on(&quot;change&quot;, function() {</span>
+<span class="s">      // pick up on the new value for the selected id (but dont show the image):</span>
+<span class="s">      change_selected_image(level, this.get(&quot;value&quot;), false)</span>
+<span class="s">      // and need to reset the other dijits, filtering appropriately, which may change the image we end up with:</span>
+<span class="s">      write_selectors(level)</span>
+<span class="s">      // now finally, show the image:</span>
+<span class="s">      change_selected_image(level, this.get(&quot;value&quot;), true)</span>
+
+<span class="s">    });</span>
+
+<span class="s">  }</span>
+
+<span class="s">  //////////////////////////////////////////////////////////////////////</span>
+<span class="s">  // writes a set of animation controls to the animator div, which controls stepping</span>
+<span class="s">  // through a particular selector:</span>
+<span class="s">  function write_animator(i_sel){</span>
+<span class="s">    // a pair of buttons that each call a stepping function:</span>
+<span class="s">    animator_content1 = &quot;&lt;button onclick=&#39;animator_step_back()&#39;&gt;Step back&lt;/button&gt;&quot;</span>
+<span class="s">    animator_content2 = &quot;&lt;button onclick=&#39;animator_step_forward()&#39;&gt;Step forward&lt;/button&gt;&quot;;</span>
+<span class="s">    // and set the content of the div that holds the URL:</span>
+<span class="s">    var _1 = document.getElementById(&quot;animator1&quot;)</span>
+<span class="s">    _1.innerHTML = animator_content1;</span>
+<span class="s">    var _2 = document.getElementById(&quot;animator2&quot;)</span>
+<span class="s">    _2.innerHTML = animator_content2;</span>
+<span class="s">  }</span>
+
+<span class="s">  //////////////////////////////////////////////////////////////////////</span>
+<span class="s">  // changes the selected id, at a given level, to the new value (and displays the selected image):</span>
+<span class="s">  function change_selected_image(level, value, show){</span>
+<span class="s">    // change the value:</span>
+<span class="s">    selected_id[level] = value;</span>
+<span class="s">    // and show if required:</span>
+<span class="s">    if (show){</span>
+<span class="s">      set_img_from_id();</span>
+<span class="s">    }</span>
+<span class="s">  }</span>
+
+<span class="s">  //////////////////////////////////////////////////////////////////////</span>
+<span class="s">  // filters an input list, to remove elements that are not possible due to selections at</span>
+<span class="s">  // lower levels in the select_id. This routine is the actual workhorse that makes the page work,</span>
+<span class="s">  // and is where optimisations are probably needed most.</span>
+<span class="s">  function filter_list_by_id(list, level){</span>
+
+<span class="s">    var out_list = new Array;</span>
+<span class="s">    var out_inds = new Array;</span>
+
+<span class="s">    // loop over the items we need to check:</span>
+<span class="s">    //var item_matches = new Array(list.length).fill(false);</span>
+<span class="s">    var item_matches = new Array(list.length);</span>
+<span class="s">    for (var i_item=0, l_items=list.length; i_item &lt; l_items; i_item++){item_matches[i_item] = false;}</span>
+
+
+<span class="s">    // check to see if the selected_id, up to but not including level, matches file&#39;s ids, to that level:</span>
+<span class="s">    sel_slice = selected_id.slice(0,level);</span>
+
+<span class="s">    // loop through the ids in file_list, to see if any match the current item (up to the level we are at)</span>
+<span class="s">    for (var i_file=0, l_files=file_list.length; i_file &lt; l_files; i_file++){</span>
+
+<span class="s">      file_slice = file_ids[i_file].slice(0,level);</span>
+<span class="s">      //console.log(selected_id, &#39;:&#39;, sel_slice);</span>
+<span class="s">      //console.log(file_ids[i_file], &#39;:&#39;, file_slice);</span>
+<span class="s">      //console.log(file_ids[i_file][level], list[i_item].id )</span>
+
+<span class="s">      // the item in question for this list is:</span>
+<span class="s">      var i_item = file_ids[i_file][level];</span>
+<span class="s">      // only check items that haven&#39;t already been matched:</span>
+<span class="s">      if (! item_matches[i_item] ){</span>
+<span class="s">        if ( sel_slice.compares(file_slice) ){</span>
+<span class="s">           //console.log(&#39;selected id: &#39;, selected_id, &#39;matched file_id:&#39;, file_ids[i_file], &#39; at level&#39;, level, sel_slice, file_slice)</span>
+<span class="s">           item_matches[i_item]=true;</span>
+<span class="s">        }</span>
+<span class="s">      }</span>
+<span class="s">    }</span>
+
+<span class="s">    for (var i_item=0, l_items=list.length; i_item &lt; l_items; i_item++){</span>
+<span class="s">      if (item_matches[i_item]){</span>
+<span class="s">         out_list = out_list.concat(list[i_item]);</span>
+<span class="s">         out_inds = out_inds.concat(i_item);</span>
+<span class="s">      }</span>
+<span class="s">    }</span>
+
+<span class="s">    //console.log([&#39;level:&#39;, level, &#39;item_matches:&#39;, item_matches])</span>
+<span class="s">    //console.log([&#39;list:&#39;, list])</span>
+<span class="s">    //console.log([&#39;out_list:&#39;, out_list])</span>
+
+<span class="s">    return [out_list, out_inds]</span>
+<span class="s">  }</span>
+
+
+<span class="s">}) // ends the require([...]{})</span>
+
+<span class="s">// All functions for the animator buttons, and routines these call, need to be outside the require()</span>
+<span class="s">//</span>
+
+<span class="s">//////////////////////////////////////////////////////////////////////</span>
+<span class="s">// sets the image to the URL, according to the selected_id:</span>
+<span class="s">function set_img_from_id() {</span>
+<span class="s">  // set the string to use the the_image div:</span>
+<span class="s">  var the_file = &#39;&lt;p&gt;Sorry, there is no image for that selection.&lt;/p&gt;&#39;</span>
+<span class="s">  //</span>
+<span class="s">  for(var file_ind=0, len=file_list.length;  file_ind &lt; len; file_ind++) {</span>
+<span class="s">    // compare the arrays, using the array compare method we added earlier:</span>
+<span class="s">    if ( selected_id.compares( file_ids[file_ind]) ){</span>
+<span class="s">      // set the file, and break the loop:</span>
+<span class="s">      if ( Array.isArray(file_list[file_ind]) ){</span>
+<span class="s">        // the right number of rows for a squarish box is the floor of the square root of the number of images:</span>
+<span class="s">        var n_imgs = file_list[file_ind].length;</span>
+<span class="s">        if (n_imgs &lt;= 3){ </span>
+<span class="s">          var n_cols = n_imgs;</span>
+<span class="s">          //var n_rows = 1;</span>
+<span class="s">        } else {</span>
+<span class="s">          var n_cols = Math.ceil( Math.sqrt( n_imgs ) );</span>
+<span class="s">          //var n_rows = Math.ceil( n_imgs / n_cols );</span>
+<span class="s">        } </span>
+<span class="s">        //the_file = &quot;An array of &quot; + n_imgs.toString() + &quot; files goes here&quot;;</span>
+<span class="s">        //the_file += &quot;, in &quot; + n_rows.toString() + &quot; rows&quot;;</span>
+<span class="s">        //the_file += &quot; and &quot; + n_cols.toString() + &quot; columns&quot;;</span>
+<span class="s">// TODO: sort out the screen width and set the image widths appropriately, so itfits the screensize:</span>
+<span class="s">        the_file = &quot;&lt;p&gt;&lt;table cellspacing=2&gt;&quot;;</span>
+<span class="s">        for (var i_img=0; i_img &lt; n_imgs; i_img++){</span>
+<span class="s">          if ( i_img % n_cols == 0){ the_file += &quot;&lt;tr&gt;&quot;}</span>
+<span class="s">          the_file += &quot;&lt;td&gt;&lt;img src=&quot; + file_list[file_ind][i_img] + &quot;&gt;&lt;/td&gt;&quot;</span>
+<span class="s">        }</span>
+<span class="s">        the_file += &quot;&lt;/table&gt;&lt;/p&gt;&quot;;</span>
+<span class="s">      } else {</span>
+<span class="s">        the_file = &quot;&lt;p&gt;&lt;img src=&quot; + file_list[file_ind] + &quot;&gt;&lt;/p&gt;&quot;;</span>
+<span class="s">      }</span>
+<span class="s">      break; // break the for loop as we have a file</span>
+<span class="s">    }</span>
+<span class="s">  }</span>
+<span class="s">  // now set the_image div:</span>
+<span class="s">  var _ = document.getElementById(&quot;the_image&quot;)</span>
+<span class="s">  _.innerHTML = the_file;</span>
+<span class="s">  // display the URL to this page:</span>
+<span class="s">  write_url_to_div()</span>
+<span class="s">}</span>
+
+<span class="s">///////////////////////////////////////////////////////////////////////</span>
+<span class="s">// converts text to text suitable to be used in a URL (a slug):</span>
+<span class="s">function convertToSlug(Text){</span>
+<span class="s">  return Text</span>
+<span class="s">      .toLowerCase()</span>
+<span class="s">      .replace(/[^\w ]+/g,&#39;&#39;)</span>
+<span class="s">      .replace(/ +/g,&#39;-&#39;)</span>
+<span class="s">      ;</span>
+<span class="s">}</span>
+
+<span class="s">/////////////////////////////////////////////////////////////////////</span>
+<span class="s">// sets the URL to the page in the div:</span>
+<span class="s">function write_url_to_div() {</span>
+<span class="s">  // split on question mark: stuff after this is a javascript input:</span>
+<span class="s">  qm_split = document.location.toString().split(&#39;?&#39;);</span>
+<span class="s">   // split up the frame url, with &#39;/&#39;</span>
+<span class="s">  frame_slashes = qm_split[0].split(&#39;/&#39;)</span>
+<span class="s">  //alert(frame_slashes);</span>
+<span class="s">   // construct the output url:</span>
+<span class="s">  if (tab_name.localeCompare(&#39;None&#39;)){out_url = pagename +&#39;?&#39;+ tab_name + url_separator}</span>
+<span class="s">  else {out_url = pagename +&#39;?&#39;}</span>
+<span class="s">      </span>
+<span class="s">  // add the new page&#39;s script inputs onto the end, according to the required format:</span>
+<span class="s">  if (url_type == &#39;int&#39;){</span>
+<span class="s">    // output url just has integers, directly setting the selected_id:</span>
+<span class="s">    for (var i_ind=0; i_ind&lt;selected_id.length; i_ind++){</span>
+<span class="s">      out_url = out_url + selected_id[i_ind].toString() + url_separator ;</span>
+<span class="s">    }</span>
+<span class="s">  } else {</span>
+<span class="s">    for (var i_ind=0; i_ind&lt;selected_id.length; i_ind++){</span>
+<span class="s">      // outputs the url as text:</span>
+<span class="s">      out_url = out_url + convertToSlug(key_lists[i_ind].list[selected_id[i_ind]].label) + url_separator;</span>
+<span class="s">    }</span>
+<span class="s">  }</span>
+
+<span class="s">  if ( !show_rel_url){</span>
+<span class="s">    // and pre-pending the actual address:</span>
+<span class="s">    for (var i_slash=frame_slashes.length-2; i_slash&gt;=0; i_slash--){</span>
+<span class="s">    out_url = frame_slashes[i_slash]+&quot;/&quot;+out_url;</span>
+<span class="s">    }</span>
+<span class="s">  }</span>
+<span class="s">  // and set the content of the div that holds the URL:</span>
+<span class="s">  var _ = document.getElementById(&quot;the_url&quot;)</span>
+<span class="s">  _.innerHTML = &quot;&lt;p&gt;To link to this page use this URL: &lt;a href=&quot;+out_url+&quot; target=_top&gt;&quot;+out_url+&quot;&lt;/a&gt;&lt;/p&gt;&quot;;</span>
+<span class="s">}</span>
+
+<span class="s">//////////////////////////////////////////////////////////////////////</span>
+<span class="s">// function called by the animator stepping backwards one:</span>
+<span class="s">function animator_step_back(){</span>
+<span class="s">  // look for the next selected id:</span>
+<span class="s">  step_selected_id(-1 * anim_dir)</span>
+<span class="s">  // now we have a new selected_id, refresh the selectors, image and url:</span>
+<span class="s">  // display the URL to this page:</span>
+<span class="s">  write_url_to_div()</span>
+<span class="s">  // display the image that relates to the initial selected_id:</span>
+<span class="s">  set_img_from_id()</span>
+<span class="s">  // now write out the different selectors, from number/level 0:</span>
+<span class="s">  // At present, this is not done, as the write_selectors need to be in the </span>
+<span class="s">  // require section, so are done at the start... perhaps </span>
+<span class="s">  // I can refresh their values instead? Look into that another time!</span>
+<span class="s">  //write_selectors(0)</span>
+<span class="s">}</span>
+<span class="s">//////////////////////////////////////////////////////////////////////</span>
+<span class="s">// function called by the animator stepping backwards one:</span>
+<span class="s">function animator_step_forward(){</span>
+<span class="s">  // look for the next selected id:</span>
+<span class="s">  step_selected_id(1 * anim_dir)</span>
+<span class="s">  // now we have a new selected_id, refresh the selectors, image and url:</span>
+<span class="s">  // display the URL to this page:</span>
+<span class="s">  write_url_to_div()</span>
+<span class="s">  // display the image that relates to the initial selected_id:</span>
+<span class="s">  set_img_from_id()</span>
+<span class="s">  // now write out the different selectors, from number/level 0:</span>
+<span class="s">  // At present, this is not done, as the write_selectors need to be in the </span>
+<span class="s">  // require section, so are done at the start... perhaps </span>
+<span class="s">  // I can refresh their values instead? Look into that another time!</span>
+<span class="s">  //write_selectors(0)</span>
+<span class="s">}</span>
+
+<span class="s">//////////////////////////////////////////////////////////////////////</span>
+<span class="s">// function to step through to the next selected_id</span>
+<span class="s">function step_selected_id(incr){</span>
+
+<span class="s">  // how many values are there in the selector in question?</span>
+<span class="s">  // when we get to this number, the value needs to go to zero:</span>
+<span class="s">  max_val_for_sel = key_lists[anim_sel].list.length -1;</span>
+<span class="s">  // the min_val is zero, of course...</span>
+
+<span class="s">  // going to try differnt &#39;id&#39; arrays, varying</span>
+<span class="s">  // the element in anim_sel:</span>
+<span class="s">  starting_val = selected_id[anim_sel];</span>
+<span class="s">  test_id = selected_id;</span>
+<span class="s">  test_id[anim_sel] = starting_val + incr;</span>
+<span class="s">  if (test_id[anim_sel] &lt; 0){test_id[anim_sel]=max_val_for_sel;}</span>
+<span class="s">  if (test_id[anim_sel] &gt; max_val_for_sel){test_id[anim_sel]=0;}</span>
+
+<span class="s">  var got_new_id = false;</span>
+<span class="s">  while (test_id[anim_sel] != starting_val){</span>
+<span class="s">    // test to see if this value if valid for the other selectors...</span>
+<span class="s">    for(var file_ind=0, len=file_list.length;  file_ind &lt; len-1; file_ind++) {</span>
+<span class="s">      // now compare the arrays test_id and file_list[file_ind].id</span>
+<span class="s">      if (test_id.compares(file_ids[file_ind])){</span>
+<span class="s">        // we have a winner! (do a slice, so it takes a copy, rather than moving it through in the loop)</span>
+<span class="s">        selected_id = file_ids[file_ind].slice()</span>
+<span class="s">        // set the test_val so that, after incrementing, it stops the loop:</span>
+<span class="s">        test_id[anim_sel] = starting_val - incr;</span>
+<span class="s">        got_new_id = true;</span>
+<span class="s">        break</span>
+<span class="s">      }</span>
+<span class="s">    }</span>
+<span class="s">    // increment the test_val</span>
+<span class="s">    test_id[anim_sel] += incr;</span>
+<span class="s">    if (test_id[anim_sel] &lt; 0){test_id[anim_sel]=max_val_for_sel;}</span>
+<span class="s">    if (test_id[anim_sel] &gt; max_val_for_sel){test_id[anim_sel]=0;}</span>
+<span class="s">  }</span>
+<span class="s">  </span>
+<span class="s">  // if we didn&#39;t get an exact match, then we need to look again and try to find a close-ish one:</span>
+<span class="s">  //if (!got_new_id){</span>
+<span class="s">  //  console.log(&#39;failed to find an exact match&#39;);</span>
+<span class="s">  //}</span>
+<span class="s">}</span>
+
+<span class="s">&lt;/script&gt;</span>
+<span class="s">&#39;&#39;&#39;</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="write_js_placeholders"><a class="viewcode-back" href="../../webpage.html#ImageMetaTag.webpage.write_js_placeholders">[docs]</a><span class="k">def</span> <span class="nf">write_js_placeholders</span><span class="p">(</span><span class="n">file_obj</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">dict_depth</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">selector_prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s">&#39;horiz dropdowns&#39;</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    write the final details (which is the stuff that actually gets read!) at the end of a tab</span>
+<span class="sd">    containing stdout stuff to a file object</span>
 <span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="c">#if not isinstance(file_obj, file):</span>
+    <span class="c">#    print type(file_obj)</span>
+    <span class="c">#    raise ValueError(&#39;The file_obj passed into PlotDictionary.write_js must be an open file object.&#39;)</span>
 
     <span class="k">if</span> <span class="n">selector_prefix</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="n">selector_prefix</span><span class="p">,</span> <span class="n">_junk1</span><span class="p">,</span> <span class="n">_junk2</span> <span class="o">=</span> <span class="n">write_js_setup_defaults</span><span class="p">()</span>
-
-    <span class="n">apply_level_names</span> <span class="o">=</span> <span class="bp">False</span>
-    <span class="k">if</span> <span class="n">level_names</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">level_names</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;level_names needs to be a list of length dict_depth&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">level_names</span><span class="p">)</span> <span class="o">!=</span> <span class="n">dict_depth</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;level_names needs to be a list, of length dict_depth&#39;</span><span class="p">)</span>
-        <span class="n">apply_level_names</span> <span class="o">=</span> <span class="bp">True</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">apply_level_names</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">selector_prefix</span><span class="p">,</span> <span class="n">junk1</span><span class="p">,</span> <span class="n">junk2</span> <span class="o">=</span> <span class="n">write_js_setup_defaults</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">style</span> <span class="o">==</span> <span class="s">&#39;horiz dropdowns&#39;</span><span class="p">:</span>
         <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;</span>
-<span class="s">&lt;!-- Now for some placeholders for the scripts to put content --&gt;</span>
+<span class="s">&lt;!-- Now f&quot;or some placeholders for the scripts to put content --&gt;</span>
 <span class="s">&lt;table border=0 cellspacing=0 cellpadding=0 width=99% align=center&gt;</span>
 <span class="s"> &lt;tr&gt;</span>
 <span class="s">  &lt;td&gt;</span>
-<span class="s">   &lt;font size=3&gt;&#39;&#39;&#39;</span><span class="p">)</span>
-        <span class="c"># a text label for the animator buttons:</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">animated_level</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">anim_label</span> <span class="o">=</span> <span class="s">&#39;{}: &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">animated_level</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">anim_label</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
-
+<span class="s">   &lt;font size=3&gt;</span>
+<span class="s">   &lt;br&gt;&#39;&#39;&#39;</span><span class="p">)</span>
+        
         <span class="c"># for each level of depth in the plot dictionary, add a span to hold the selector:</span>
-        <span class="k">if</span> <span class="n">apply_level_names</span><span class="p">:</span>
-            <span class="c"># if we want labelled selectors, then write out</span>
-            <span class="c"># a table, with pairs of label, selector, in columns:</span>
+        <span class="c"># TODO: include the selector full_name_mapping</span>
+        <span class="k">for</span> <span class="n">lev</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dict_depth</span><span class="p">):</span>
             <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;</span>
-<span class="s">   &lt;table border=0 cellspacing=0 cellpadding=0 style=&#39;border-spacing: 3px 0;&#39;&gt;</span>
-<span class="s">     &lt;tr&gt;</span>
-<span class="s">&#39;&#39;&#39;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dict_depth</span><span class="p">):</span>
-                <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;       &lt;td&gt;{}&amp;nbsp;&amp;nbsp;&lt;/td&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">level_names</span><span class="p">[</span><span class="n">level</span><span class="p">]))</span>
-            <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;     &lt;/tr&gt;</span>
-<span class="s">     &lt;tr&gt;</span>
-<span class="s">&#39;&#39;&#39;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dict_depth</span><span class="p">):</span>
-                <span class="n">selp</span> <span class="o">=</span> <span class="n">selector_prefix</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
-                <span class="n">out_str</span> <span class="o">=</span> <span class="s">&#39;       &lt;td&gt;&lt;span id=&quot;{}&quot;&gt;&amp;nbsp;&lt;/span&gt;&lt;/td&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">selp</span><span class="p">)</span>
-                <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">out_str</span><span class="p">)</span>
-            <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;     &lt;/tr&gt;</span>
-<span class="s">&#39;&#39;&#39;</span><span class="p">)</span>
-            <span class="c"># add the placeholder for animators buttons:</span>
-            <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;     &lt;tr&gt;</span>
-<span class="s">      &lt;td colspan={}&gt;</span>
-<span class="s">        {}&lt;span id=&quot;animator1&quot;&gt;&amp;nbsp;&lt;/span&gt;</span>
-<span class="s">        &lt;span id=&quot;animator2&quot;&gt;&amp;nbsp;&lt;/span&gt;</span>
-<span class="s">      &lt;/td&gt;</span>
-<span class="s">    &lt;/tr&gt;</span>
-<span class="s">   &lt;/table&gt;</span>
-<span class="s">&#39;&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dict_depth</span><span class="p">,</span> <span class="n">anim_label</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c"># simply a set of spans, in a line:</span>
-            <span class="k">for</span> <span class="n">lev</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dict_depth</span><span class="p">):</span>
-                <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;</span>
 <span class="s">   &lt;span id=&quot;</span><span class="si">%s%s</span><span class="s">&quot;&gt;&amp;nbsp;&lt;/span&gt;&#39;&#39;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">selector_prefix</span><span class="p">,</span> <span class="n">lev</span><span class="p">))</span>
-            <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">   &lt;br&gt;&#39;</span><span class="p">)</span>
-            <span class="c"># add the placeholder for animators buttons:</span>
-            <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;</span>
-<span class="s">   {}&lt;span id=&quot;animator1&quot;&gt;&amp;nbsp;&lt;/span&gt;</span>
-<span class="s">   &lt;span id=&quot;animator2&quot;&gt;&amp;nbsp;&lt;/span&gt;</span>
-<span class="s">       &lt;br&gt;</span>
-<span class="s">    &#39;&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">anim_label</span><span class="p">))</span>
-
+        
         <span class="c"># now add somewhere for the image to go:</span>
-        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;   &lt;div id=&quot;the_image&quot;&gt;Please wait while the page is loading&lt;/div&gt;</span>
+        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">   &lt;br&gt;</span>
+<span class="s">   &lt;span id=&quot;animator1&quot;&gt;&amp;nbsp;&lt;/span&gt;</span>
+<span class="s">   &lt;span id=&quot;animator2&quot;&gt;&amp;nbsp;&lt;/span&gt;</span>
+<span class="s">   &lt;br&gt;</span>
+<span class="s">   &lt;div id=&quot;the_image&quot;&gt;Please wait while the page is loading&lt;/div&gt;</span>
+<span class="s">   &lt;br&gt;</span>
 <span class="s">   &lt;div id=&quot;the_url&quot;&gt;....&lt;/div&gt;&#39;&#39;&#39;</span><span class="p">)</span>
-        <span class="c"># and finish off the placeholders:</span>
+        
         <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;</span>
 <span class="s">   &lt;/font&gt;</span>
 <span class="s">  &lt;/td&gt;</span>
@@ -624,66 +987,19 @@
 <span class="s">&lt;/table&gt;</span>
 
 <span class="s">&#39;&#39;&#39;</span><span class="p">)</span>
-
+        
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;&quot;</span><span class="si">%s</span><span class="s">&quot; tyle of content placeholder not defined&#39;</span> <span class="o">%</span> <span class="n">style</span><span class="p">)</span>
+    
 </div>
-<div class="viewcode-block" id="copy_required_javascript"><a class="viewcode-back" href="../../webpage.html#ImageMetaTag.webpage.copy_required_javascript">[docs]</a><span class="k">def</span> <span class="nf">copy_required_javascript</span><span class="p">(</span><span class="n">file_dir</span><span class="p">,</span> <span class="n">style</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Copies the required javascript library to the directory</span>
-<span class="sd">    containing the required page (file_dir) for a given webpage style.</span>
-
-<span class="sd">    If a file is already present it will be checked based it&#39;s first line.</span>
-<span class="sd">    If the file is different, it will be overwritten if overwrite is True.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-
-    <span class="k">if</span> <span class="n">style</span> <span class="o">==</span> <span class="s">&#39;horiz dropdowns&#39;</span><span class="p">:</span>
-        <span class="n">file_to_copy</span> <span class="o">=</span> <span class="s">&#39;imt_dropdown.js&#39;</span>
-        <span class="c"># get this from the installed ImageMetaTag directory:</span>
-        <span class="n">file_src_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">imt</span><span class="o">.</span><span class="n">__path__</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s">&#39;javascript&#39;</span><span class="p">)</span>
-        <span class="n">first_line</span> <span class="o">=</span> <span class="s">&#39;// ImageMetaTag dropdown menu scripting - vn0.4</span><span class="se">\n</span><span class="s">&#39;</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Javascript library not set up for style: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">style</span><span class="p">))</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_dir</span><span class="p">,</span> <span class="n">file_to_copy</span><span class="p">)):</span>
-        <span class="c"># file isn&#39;t in target dir, so copy it:</span>
-        <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_src_dir</span><span class="p">,</span> <span class="n">file_to_copy</span><span class="p">),</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_dir</span><span class="p">,</span> <span class="n">file_to_copy</span><span class="p">))</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c"># the file is there, check it&#39;s right:</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_dir</span><span class="p">,</span> <span class="n">file_to_copy</span><span class="p">))</span> <span class="k">as</span> <span class="n">file_obj</span><span class="p">:</span>
-            <span class="n">this_first_line</span> <span class="o">=</span> <span class="n">file_obj</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">first_line</span> <span class="o">==</span> <span class="n">this_first_line</span><span class="p">:</span>
-            <span class="c"># the file is good, move on:</span>
-            <span class="k">pass</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">overwrite</span><span class="p">:</span>
-                <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_src_dir</span><span class="p">,</span> <span class="n">file_to_copy</span><span class="p">),</span>
-                            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_dir</span><span class="p">,</span> <span class="n">file_to_copy</span><span class="p">))</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">print</span> <span class="s">&#39;&#39;&#39;File: {}/{} differs to the expected contents, but is</span>
-<span class="s">not being overwritten. Your webpage may be broken!&#39;&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">file_dir</span><span class="p">,</span> <span class="n">file_to_copy</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">file_to_copy</span>
-</div>
-<span class="k">def</span> <span class="nf">_indent_up_one</span><span class="p">(</span><span class="n">ind</span><span class="p">):</span>
-    <span class="s">&#39;increases the indent level of an input ind by one&#39;</span>
-    <span class="n">n_indents</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span> <span class="o">/</span> <span class="n">LEN_INDENT</span>
-    <span class="k">return</span> <span class="n">INDENT</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_indents</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-
-<span class="k">def</span> <span class="nf">_indent_down_one</span><span class="p">(</span><span class="n">ind</span><span class="p">):</span>
-    <span class="s">&#39;decreases the indent level of an input ind by one&#39;</span>
-    <span class="n">n_indents</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span> <span class="o">/</span> <span class="n">LEN_INDENT</span>
-    <span class="k">return</span> <span class="n">INDENT</span> <span class="o">*</span> <span class="nb">max</span><span class="p">(</span><span class="n">n_indents</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-
-<span class="k">def</span> <span class="nf">_py_to_js_bool</span><span class="p">(</span><span class="n">py_bool</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">py_to_js_bool</span><span class="p">(</span><span class="n">py_bool</span><span class="p">):</span>
     <span class="s">&#39;Converts a python boolean to a string, in javascript bool format (all lower case)&#39;</span>
     <span class="k">if</span> <span class="n">py_bool</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
         <span class="k">return</span> <span class="s">&#39;true&#39;</span>
     <span class="k">elif</span> <span class="n">py_bool</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
         <span class="k">return</span> <span class="s">&#39;false&#39;</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;input to _py_to_js_bool is not a boolean, it is: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">py_bool</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;input to py_to_js_bool is not a boolean, it is: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">py_bool</span><span class="p">)</span>
 </pre></div>
 
           </div>
@@ -700,7 +1016,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">ImageMetaTag 0.4 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">ImageMetaTag 0.5.0 documentation</a> &raquo;</li>
           <li><a href="../index.html" >Module code</a> &raquo;</li>
           <li><a href="../ImageMetaTag.html" >ImageMetaTag</a> &raquo;</li> 
       </ul>

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>ImageMetaTag - simplest_img_dict.py &mdash; ImageMetaTag 0.4 documentation</title>
+    <title>ImageMetaTag - simplest_img_dict.py &mdash; ImageMetaTag 0.5.0 documentation</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.4',
+        VERSION:     '0.5.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="ImageMetaTag 0.4 documentation" href="index.html" />
+    <link rel="top" title="ImageMetaTag 0.5.0 documentation" href="index.html" />
     <link rel="next" title="Versions of Python" href="versions.html" />
     <link rel="prev" title="ImageMetaTag - test.py" href="test.html" /> 
   </head>
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="test.html" title="ImageMetaTag - test.py"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">ImageMetaTag 0.4 documentation</a> &raquo;</li> 
+        <li><a href="index.html">ImageMetaTag 0.5.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -118,9 +118,8 @@
 
     <span class="c"># Now load in the database:</span>
     <span class="n">tag_strings</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">img_list</span><span class="p">,</span> <span class="n">images_and_tags</span> <span class="o">=</span> <span class="n">imt</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">read_img_info_from_dbfile</span><span class="p">(</span><span class="n">imt_db</span><span class="p">,</span>
-                                                                 <span class="n">required_tags</span><span class="o">=</span><span class="n">img_tags</span><span class="p">,</span>
-                                                                 <span class="n">tag_strings</span><span class="o">=</span><span class="n">tag_strings</span><span class="p">)</span>
+    <span class="n">img_list</span><span class="p">,</span> <span class="n">images_and_tags</span> <span class="o">=</span> <span class="n">imt</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">imt_db</span><span class="p">,</span> <span class="n">required_tags</span><span class="o">=</span><span class="n">img_tags</span><span class="p">,</span>
+                                            <span class="n">tag_strings</span><span class="o">=</span><span class="n">tag_strings</span><span class="p">)</span>
     <span class="c"># we have supplied the database read with the image tags we expect, and an empty list of values</span>
     <span class="c"># so that we can construct what is returned (and therefore the ImageDict) in a memory</span>
     <span class="c"># efficient way.</span>
@@ -186,7 +185,7 @@
         <li class="right" >
           <a href="test.html" title="ImageMetaTag - test.py"
              >previous</a> |</li>
-        <li><a href="index.html">ImageMetaTag 0.4 documentation</a> &raquo;</li> 
+        <li><a href="index.html">ImageMetaTag 0.5.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

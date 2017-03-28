@@ -26,6 +26,7 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
             do_thumb=False, img_tags=None, keep_open=False, dpi=None,
             logo_file=None, logo_width=40, logo_padding=0, logo_pos=0,
             db_file=None, db_timeout=DEFAULT_DB_TIMEOUT, db_attempts=DEFAULT_DB_ATTEMPTS,
+            db_full_paths=False,
             verbose=False, ):
     '''
     A wrapper around matplotlib.pyplot.savefig, to include file size optimisation and
@@ -44,6 +45,8 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
     * img_tags - a dictionary of {tag_name : value} pairs to be added to the image metadata.
     * db_file - a database file to be used by :func:`ImageMetaTag.db.write_img_to_dbfile` to \
                 store all image metadata so they can be quickly accessed.
+    * db_full_paths - by default, if the images can be expressed as relative path to the database \
+                      file then the database will contain only relative links, unless this is True. 
     * db_timeout - change the database timeout (in seconds).
     * db_attempts - change the number of attempts to write to the database.
     * dpi - change the image resolution passed into matplotlib.savefig.
@@ -115,11 +118,22 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
     if not (db_file is None or img_tags is None):
         if verbose:
             db_st = datetime.now()
+            
+        # if the image path can be expressed as a relative path compared
+        # to the database file, then do so (unless told otherwise).
+        
+        db_dir = os.path.split(db_file)[0]
+        if filename.startswith(db_dir) and not db_full_paths:
+            db_filename = filename[len(db_dir)+1:]
+        else:
+            db_filename = filename
+        
+        
         wrote_db = False
         n_tries = 1
         while not wrote_db and n_tries <= db_attempts:
             try:
-                db.write_img_to_dbfile(db_file, filename, img_tags, timeout=db_timeout)
+                db.write_img_to_dbfile(db_file, db_filename, img_tags, timeout=db_timeout)
                 wrote_db = True
             except sqlite3.OperationalError as OpErr:
                 if 'database is locked' in OpErr.message:

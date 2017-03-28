@@ -1,4 +1,34 @@
-// ImageMetaTag dropdown menu scripting - vn0.4
+// ImageMetaTag dropdown menu scripting - vn0.5
+// (C) Crown copyright Met Office. All rights reserved.
+// Released under BSD 3-Clause License.
+
+function read_parse_json_files(json_files, lzunpack){
+    // reads a list of files that contain the json 
+    // data structure. The files can be compressed
+    // using lzstring compression, in which case they
+    // might also be split into sections.
+    var json_str = '';
+    for (var i_js=0; i_js < json_files.length; i_js++){
+	var this_str = readTextFile(json_files[i_js]);
+	if (lzunpack){
+	    json_str += LZString.decompressFromUTF16(this_str);
+	} else {
+	    json_str += this_str;
+	};
+    };
+    json = JSON.parse(json_str);
+    return json
+}
+
+function readTextFile(filepath){
+    // reads a text file and returns the content:
+    var request = new XMLHttpRequest();
+    request.open("GET", filepath, false);
+    request.send(null);
+    var returnValue = request.responseText;
+    return returnValue;
+}
+
 function imt_main () {
     // main function, run on load:
     // parse the input url to see if it overides the default selection above

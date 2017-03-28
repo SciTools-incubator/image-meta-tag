@@ -39,9 +39,8 @@ While the code in test.py aims to test as much of the ImageMetaTag functionality
     
         # Now load in the database:
         tag_strings = []
-        img_list, images_and_tags = imt.db.read_img_info_from_dbfile(imt_db,
-                                                                     required_tags=img_tags,
-                                                                     tag_strings=tag_strings)
+        img_list, images_and_tags = imt.db.read(imt_db, required_tags=img_tags,
+                                                tag_strings=tag_strings)
         # we have supplied the database read with the image tags we expect, and an empty list of values
         # so that we can construct what is returned (and therefore the ImageDict) in a memory
         # efficient way.
