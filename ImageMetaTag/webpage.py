@@ -32,7 +32,7 @@ menus, but more will hopefully be added soon.
 .. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks
 '''
 
-import os, json, pdb, shutil, tempfile, re, zlib
+import os, json, pdb, shutil, tempfile
 import numpy as np
 import ImageMetaTag as imt
 
@@ -40,8 +40,9 @@ from multiprocessing import Pool
 
 try:
     import lzstring
+    LZSTRING_AVAILABLE = True
 except:
-    print 'warning lz compression not available'
+    LZSTRING_AVAILABLE = False
 
 # single indent to be used on the output webpage
 INDENT = '  '
@@ -99,6 +100,13 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
 
     if page_filename is None:
         page_filename = os.path.basename(filepath)
+
+    if compression == 'lz':
+        if not LZSTRING_AVAILABLE:
+            # lzstring wasn't available, so report, then re-import to get the error
+            print 'lzstring module unavailable. Try again without compression=''lz'''
+            import lzstring
+
 
     # other files involved:
     file_dir, file_name = os.path.split(filepath)
@@ -229,7 +237,7 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
                                ind=ind,
                                description=description, keywords=keywords)
         else:
-            # the json_files is a list of (tmp_file, final_file) tuples. Here we want the final one: 
+            # the json_files is a list of (tmp_file, final_file) tuples. Here we want the final one:
             final_json_files = [os.path.split(x[1])[1] for x in json_files]
             write_js_to_header(img_dict, initial_selectors=initial_selectors,
                                file_obj=out_file, json_files=final_json_files, js_files=js_files,
@@ -335,12 +343,12 @@ def write_js_to_header(img_dict, initial_selectors=None, style=None,
         ## add a reference to the data structure:
         #out_str = '{}<script type="text/javascript" src="{}"></script>\n'.format(ind, json_files)
         #file_obj.write(out_str)
-        
+
         # now add a reference to the javascript functions to implement the style:
         for js_file in js_files:
             out_str = '{}<script type="text/javascript" src="{}"></script>\n'.format(ind, js_file)
             file_obj.write(out_str)
-        
+
         # now write out the javascript cnfiguration variables:
         file_obj.write(ind + '<script type="text/javascript">\n')
         ind = _indent_up_one(ind)
@@ -350,7 +358,7 @@ def write_js_to_header(img_dict, initial_selectors=None, style=None,
 {0}imt = read_parse_json_files(json_files, lz_unpack);
 '''.format(ind, json_files, int(compression == 'lz'))
         file_obj.write(out_str)
-            
+
         # in case the page we are writing is embedded as a frame, write out the top
         # level page here;
         file_obj.write('{}var pagename = "{}"\n'.format(ind, pagename))
@@ -467,30 +475,34 @@ def write_json(img_dict, json_file, compression=None, n_proc=1):
     '''
     Writes a json dump of the :class:`ImageMetaTag.ImageDict` tree strucuture
     to a target file path.
-    
+
     Can be compressed using lzstring compresion (compression='lz'). If this is
     the case and the string is very long, then it will be split into mutliple files.
     Because of the split, the compression/decompression time scales linearly with
     string size. This is not the case with large strings in a single call.
-    
+
     Returns a list of json files.
     '''
-    
+
     if isinstance(img_dict, imt.ImageDict):
         dict_as_json = json.dumps(img_dict.dict, separators=(',', ':'))
     elif isinstance(img_dict, str):
         dict_as_json = img_dict
     else:
         raise ValueError('input img_dict is not an ImageMetaTag.ImageDict or string')
-    
+
     if compression == 'lz':
         #out_str = zlib.compress(dict_as_json)
-        
-        # this is the number of characters at which we start splitting 
+
+        if not LZSTRING_AVAILABLE:
+            # lzstring wasn't available, so report, then re-import to get the error
+            raise ValueError('lzstring module unavailable. Try again without compression=''lz''')
+
+        # this is the number of characters at which we start splitting
         # the json text into sections. It's roughly the point
-        # at which the lz compression starts to take a lot longer. 
+        # at which the lz compression starts to take a lot longer.
         split_size = 2500000
-                
+
         # if the sting to compress is very large, then we must break it up:
         n_splits = max(len(dict_as_json) / split_size, 1)
         # now make the lz compressed strings on the split strings:
@@ -512,7 +524,7 @@ def write_json(img_dict, json_file, compression=None, n_proc=1):
                 # now write out a json file:
                 file_obj.write(lz_split_str)
                 tmp_file_paths.append(file_obj.name)
-        
+
         # now return a list of temp files and where they should end up:
         if len(tmp_file_paths) == 1:
             return [(tmp_file_paths[0], json_file)]
@@ -530,7 +542,7 @@ def write_json(img_dict, json_file, compression=None, n_proc=1):
             # now write out a json file:
             file_obj.write(dict_as_json)
             tmp_file_path = file_obj.name
-        
+
         return [(tmp_file_path, json_file)]
 
 def __str_split_gen(in_str, n_split):
@@ -548,12 +560,15 @@ def __str_split_gen(in_str, n_split):
     for _ in range(n_split):
         accumulator = list()
         for _ in range(len_split):
-            try: accumulator.append(next(iterator))
-            except StopIteration: break
+            try:
+                accumulator.append(next(iterator))
+            except StopIteration:
+                break
         yield ''.join(accumulator)
 
 def __lz_compress_str(in_str):
     'does lz string compression on a single chunk of string, with input from __str_split_gen'
+    import lzstring
     lz_obj = lzstring.LZString()
     out_str = lz_obj.compressToUTF16(in_str)
     return out_str
@@ -664,7 +679,7 @@ def copy_required_javascript(file_dir, style, compression=None, overwrite=True):
 
     If a file is already present it will be checked based it's first line.
     If the file is different, it will be overwritten if overwrite is True.
-    
+
     Also copies/obtains required javascript for compression:
     '''
 
@@ -694,14 +709,14 @@ def copy_required_javascript(file_dir, style, compression=None, overwrite=True):
             else:
                 print '''File: {}/{} differs to the expected contents, but is
 not being overwritten. Your webpage may be broken!'''.format(file_dir, imt_js_to_copy)
-    
+
     js_files = [imt_js_to_copy]
 
 
     if compression == 'lz':
         # the lz javascript library is shipped with the code in the javascript dir
         # as that makes this bit really easy. That's OK as it is released under the
-        # WTFPL: 
+        # WTFPL:
         lz_js_to_copy = 'lz-string.js'
         lz_src = os.path.join(file_src_dir, lz_js_to_copy)
         lz_dest = os.path.join(file_dir, lz_js_to_copy)
@@ -716,10 +731,10 @@ not being overwritten. Your webpage may be broken!'''.format(file_dir, imt_js_to
             shutil.copy(lz_src, lz_dest)
         # finally, make a note:
         js_files.append(lz_js_to_copy)
-        
+
         # get this from the installed ImageMetaTag directory:
-        
-        
+
+
 
 
     return js_files

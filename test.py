@@ -405,7 +405,7 @@ def __main__():
     # the metadata saved in images_and_tags is references to absolute filepaths
     # but it is much easier to work with a path that is relative to the webdir, where
     # the database is stored. The database also does this automatically.
-    # 
+    #
     # In actual usage, the database would be the place to get the metadata, but in this test
     # we also want to test the integrity of the database.
     rel_images_and_tags = {}
@@ -567,20 +567,20 @@ def __main__():
                         # lookup to see if this combination has already been
                         # added to img_dict_multi. do this by creating a list of keys to
                         # lookup within the ImageDict:
-                        img_dict_key_lookup = [img_info[x] for x in tagorder]
-                        img_dict_key_lookup[multi_depth] = group_name
+                        key_lookup = [img_info[x] for x in tagorder]
+                        key_lookup[multi_depth] = group_name
 
                         if len(img_dict_multi.dict) == 0:
                             already_in_img_dict_multi = False
                         else:
-                            if img_dict_multi.return_from_list(img_dict_key_lookup) is None:
+                            if img_dict_multi.return_from_list(key_lookup) is None:
                                 already_in_img_dict_multi = False
                             else:
                                 already_in_img_dict_multi = True
 
                         if already_in_img_dict_multi:
                             print 'multi image already added!'
-                            print img_dict_key_lookup
+                            print key_lookup
                             #msg = 'Adding a multi-image that has already been added.'
                             #msg += ' Checks on first_image_multi should prevent that.'
                             #raise ValueError(msg)
@@ -597,12 +597,12 @@ def __main__():
                             all_img_relpaths = []
 
                             for this_value in group_values:
-                                # now use the img_dict_key_lookup again,
+                                # now use the key_lookup again,
                                 # only this time looking for this_value
-                                img_dict_key_lookup[multi_depth] = this_value
+                                key_lookup[multi_depth] = this_value
                                 # and look in the main img_dict as that already has all the images,
                                 # sorted and easily accessible:
-                                all_img_relpaths.append(img_dict.return_from_list(img_dict_key_lookup))
+                                all_img_relpaths.append(img_dict.return_from_list(key_lookup))
                                 #
                                 # If more complicated processing is required, substitutions or
                                 # fudging values, then this could be done here.
@@ -682,13 +682,13 @@ def __main__():
                         # first of all, lookup to see if this combination has already been
                         # added to img_dict_multi. do this by creating a list of keys to
                         # lookup within the ImageDict:
-                        img_dict_key_lookup = [img_info[x] for x in tagorder]
-                        img_dict_key_lookup[multi_depth] = group_name
+                        key_lookup = [img_info[x] for x in tagorder]
+                        key_lookup[multi_depth] = group_name
 
                         if len(img_dict_multi.dict) == 0:
                             already_in_img_dict_multi = False
                         else:
-                            if img_dict_multi.return_from_list(img_dict_key_lookup) is None:
+                            if img_dict_multi.return_from_list(key_lookup) is None:
                                 already_in_img_dict_multi = False
                             else:
                                 already_in_img_dict_multi = True
@@ -760,7 +760,8 @@ def __main__():
     # end timer:
     print_simple_timer(date_start_reorg_multi2, datetime.now(), 'reorg_multi from database')
 
-    # delete the pre-exising javascript, to make sure it's copied over at least once afresh, for testing:
+    # delete the pre-exising javascript, to make sure it's copied over at
+    # least once afresh, for testing:
     if os.path.isfile(os.path.join(webdir, 'imt_dropdown.js')):
         os.remove(os.path.join(webdir, 'imt_dropdown.js'))
 
@@ -836,6 +837,7 @@ def __main__():
 
         # store this in a database:
         bigdb = '%s/big.db' % webdir
+        
         first_img = True
         date_start_bigdb = datetime.now()
         biggus_dictus = {}
@@ -843,6 +845,7 @@ def __main__():
         n_to_do = np.math.factorial(9)
         n_to_do_flt = float(np.math.factorial(9))
         dt_prev = datetime.now()
+        pcents = range(5,101, 5) # write out every 5% completed
         for i_1 in xrange(1):
             for i_2 in xrange(2):
                 for i_3 in xrange(3):
@@ -870,29 +873,26 @@ def __main__():
                                                 first_img = False
                                             imt.db.write_img_to_open_db(bigdb_cr, img_name, img_info)
                                             i_count += 1
-                                            if i_count % 1000 == 0:
+                                            pcent_done = 100 * i_count / n_to_do_flt
+                                            if pcent_done > pcents[0]:
                                                 dt_now = datetime.now()
-                                                print '%s out of %s (%s%%) %s' % (i_count, n_to_do, 100 * i_count / n_to_do_flt,
-                                                                                  dt_now - dt_prev)
+                                                msg = '{} out of {} ({:.2f}%) {}'
+                                                print msg.format(i_count,
+                                                                 n_to_do,
+                                                                 pcent_done,
+                                                                 dt_now - dt_prev)
                                                 dt_prev = dt_now
+                                                # remove the current percentage:
+                                                pcents.pop(0)
+        print '  input dictionary complete, with %s elements' % len(biggus_dictus)
+        
         bigdb_cn.commit()
         bigdb_cn.close()
         print_simple_timer(date_start_bigdb, datetime.now(),
                            'Producing large dictionary and database')
-
-        # TODO: run through the big dict, and delete 1 in 10 images from the database
-        # a) all as one list
-        # b) all as one list, but commit after each
-        # c) one at a time, committing and closing
-        #
-        # expect c to be much slower, but how different is b), also how much better
-        # is b than a at having a database lock/unlock...
-
-        tagorder = ['l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'l8', 'l9']
-        print '  input dictionary complete, with %s elements' % len(biggus_dictus)
-
+        
+        # verfiy the integrity of the database, relative to biggus_dictus:
         db_img_list, db_images_and_tags = imt.db.read(bigdb)
-        # verfiy the integrity of the database, relative to the plotting/pickling process:
         img_list = sorted(biggus_dictus.keys())
         db_img_list.sort()
         if not img_list == db_img_list:
@@ -902,9 +902,25 @@ def __main__():
             msg = 'images_and_tags differ between memory and database versions of big dict'
             raise ValueError(msg)
 
-        # now process that big dict in parallel:
+        
+        # run through the big dict, and delete a smallish subset of 'images' from the big database
+        db_img_list, db_images_and_tags = imt.db.read(bigdb)
+        len_b4_del = len(db_img_list)
+        print 'Length of large database before deleting subset {}'.format(len_b4_del)
+        del_list = db_img_list[500::1000]
+        imt.db.del_plots_from_dbfile(bigdb, del_list)
+
+        db_img_list, db_images_and_tags = imt.db.read(bigdb)
+        len_aft_del = len(db_img_list)
+        print 'Length of large database after deleting subset {}'.format(len_aft_del)
+        # and check it's the right length, to see if some data is actually gone:
+        if len_b4_del != len_aft_del + len(del_list):
+            raise ValueError('Inconsistent database size after deleting subset.')
+
+        # now process that big dict in parallel to an ImageDict, with this tag order:
+        tagorder = ['l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'l8', 'l9']
         date_start_big = datetime.now()
-        n_proc = 8
+        n_proc = 4
         # for large dictionaries, we really do want this skip_key_relist set to True,
         # as it saves a lot of time:
         skip_key_relist = True
@@ -936,7 +952,7 @@ def __main__():
         web_out[out_page_big] = imt.webpage.write_full_page(biggus_dictus_imigus, out_page_big,
                                                             'Test ImageDict webpage',
                                                             compression='lz', n_proc=n_proc)
-        print_simple_timer(date_start_web, datetime.now(), 'Large parallel dict webpage')
+        print_simple_timer(date_start_web, datetime.now(), 'Large dict webpage')
 
     if not args.no_db_rebuild:
         print 'Testing imt.db.scan_dir_for_db'
