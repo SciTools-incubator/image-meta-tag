@@ -2,17 +2,21 @@
 // (C) Crown copyright Met Office. All rights reserved.
 // Released under BSD 3-Clause License.
 
-function read_parse_json_files(json_files, lzunpack){
+function read_parse_json_files(json_files, zlib_comp){
     // reads a list of files that contain the json 
     // data structure. The files can be compressed
-    // using lzstring compression, in which case they
-    // might also be split into sections.
+    // using zlib compression. Very large files can
+    // be split into chunks to be appended.
     var json_str = '';
     for (var i_js=0; i_js < json_files.length; i_js++){
-	var this_str = readTextFile(json_files[i_js]);
-	if (lzunpack){
-	    json_str += LZString.decompressFromUTF16(this_str);
+	if (zlib_comp){
+	    // binary compressed string
+	    //this_blob = readBinaryFile(json_files[i_js]);
+	    this_blob = load_binary_resource(json_files[i_js]);
+	    json_str += pako.inflate(this_blob, {to: 'string'})
 	} else {
+	    // string based compression, or direct string read:
+	    var this_str = readTextFile(json_files[i_js]);
 	    json_str += this_str;
 	};
     };
@@ -27,6 +31,16 @@ function readTextFile(filepath){
     request.send(null);
     var returnValue = request.responseText;
     return returnValue;
+}
+
+function load_binary_resource(url) {
+  var req = new XMLHttpRequest();
+  req.open('GET', url, false);
+  //XHR binary charset opt by Marcus Granado 2006 [http://mgran.blogspot.com]
+  req.overrideMimeType('text\/plain; charset=x-user-defined');
+  req.send(null);
+  if (req.status != 200) return '';
+  return req.responseText;
 }
 
 function imt_main () {

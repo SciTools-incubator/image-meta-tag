@@ -339,6 +339,9 @@ def __main__():
 
     img_format = 'png'
 
+    # compression method for the json file:
+    json_comp = 'zlib'
+
     # this defines the order of the different tags in
     # the ImageDict, and so how they are displayed on the webpage:
     tagorder = ['number of rolls',
@@ -811,7 +814,7 @@ def __main__():
                                                     verbose=True, only_show_rel_url=True,
                                                     write_intmed_tmpfile=True,
                                                     show_selector_names=True,
-                                                    compression='lz', n_proc=n_proc)
+                                                    compression=json_comp, n_proc=n_proc)
     web_out[out_page_para] = imt.webpage.write_full_page(img_dict, out_page_para,
                                                          'Test ImageDict webpage (Parallel)',
                                                          preamble=webpage_preamble,
@@ -837,7 +840,7 @@ def __main__():
 
         # store this in a database:
         bigdb = '%s/big.db' % webdir
-        
+
         first_img = True
         date_start_bigdb = datetime.now()
         biggus_dictus = {}
@@ -845,7 +848,7 @@ def __main__():
         n_to_do = np.math.factorial(9)
         n_to_do_flt = float(np.math.factorial(9))
         dt_prev = datetime.now()
-        pcents = range(5,101, 5) # write out every 5% completed
+        pcents = range(5, 101, 5) # write out every 5% completed
         for i_1 in xrange(1):
             for i_2 in xrange(2):
                 for i_3 in xrange(3):
@@ -885,12 +888,12 @@ def __main__():
                                                 # remove the current percentage:
                                                 pcents.pop(0)
         print '  input dictionary complete, with %s elements' % len(biggus_dictus)
-        
+
         bigdb_cn.commit()
         bigdb_cn.close()
         print_simple_timer(date_start_bigdb, datetime.now(),
                            'Producing large dictionary and database')
-        
+
         # verfiy the integrity of the database, relative to biggus_dictus:
         db_img_list, db_images_and_tags = imt.db.read(bigdb)
         img_list = sorted(biggus_dictus.keys())
@@ -902,7 +905,7 @@ def __main__():
             msg = 'images_and_tags differ between memory and database versions of big dict'
             raise ValueError(msg)
 
-        
+
         # run through the big dict, and delete a smallish subset of 'images' from the big database
         db_img_list, db_images_and_tags = imt.db.read(bigdb)
         len_b4_del = len(db_img_list)
@@ -951,7 +954,7 @@ def __main__():
         out_page_big = '%s/biggus_pageus.html' % webdir
         web_out[out_page_big] = imt.webpage.write_full_page(biggus_dictus_imigus, out_page_big,
                                                             'Test ImageDict webpage',
-                                                            compression='lz', n_proc=n_proc)
+                                                            compression=json_comp, n_proc=n_proc)
         print_simple_timer(date_start_web, datetime.now(), 'Large dict webpage')
 
     if not args.no_db_rebuild:
