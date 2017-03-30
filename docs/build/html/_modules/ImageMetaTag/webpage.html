@@ -76,6 +76,10 @@
 <span class="sd">(currently held in a single file) and a .json file contain the :class:`ImageMetaTag.ImageDict`</span>
 <span class="sd">tree strcuture as a JSON data strcuture.</span>
 
+<span class="sd">To reduce file size, the JSON data structure can be compressed using zlib. If this is the case,</span>
+<span class="sd">then the `pako javascript library &lt;https://github.com/nodeca/pako&gt;`_ is used restore the JSON</span>
+<span class="sd">data in the browser.</span>
+
 <span class="sd">This can either be done using write_full_page, to produce a page with just a set of</span>
 <span class="sd">selectors to browse the ImageDict, or the different components can be added to a</span>
 <span class="sd">page as it is being constructed (reading in an html template, for instance).</span>
@@ -102,28 +106,29 @@
 <span class="sd">.. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
-<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">json</span><span class="o">,</span> <span class="nn">pdb</span><span class="o">,</span> <span class="nn">shutil</span><span class="o">,</span> <span class="nn">tempfile</span><span class="o">,</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">zlib</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">json</span><span class="o">,</span> <span class="nn">pdb</span><span class="o">,</span> <span class="nn">shutil</span><span class="o">,</span> <span class="nn">tempfile</span><span class="o">,</span> <span class="nn">zlib</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">ImageMetaTag</span> <span class="kn">as</span> <span class="nn">imt</span>
 
 <span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Pool</span>
 
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">lzstring</span>
-    <span class="n">LZSTRING_AVAILABLE</span> <span class="o">=</span> <span class="bp">True</span>
-<span class="k">except</span><span class="p">:</span>
-    <span class="n">LZSTRING_AVAILABLE</span> <span class="o">=</span> <span class="bp">False</span>
-
 <span class="c"># single indent to be used on the output webpage</span>
 <span class="n">INDENT</span> <span class="o">=</span> <span class="s">&#39;  &#39;</span>
 <span class="n">LEN_INDENT</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">INDENT</span><span class="p">)</span>
 
+
+<span class="c"># for compressed json files, we use pako to inflate the data back to full size:</span>
+<span class="n">PAKO_JS_FILE</span> <span class="o">=</span> <span class="s">&#39;pako_inflate.js&#39;</span>
+<span class="n">PAKO_RELEASE</span> <span class="o">=</span> <span class="s">&#39;1.0.5&#39;</span>
+<span class="n">PAKO_SOURE_TAR</span> <span class="o">=</span> <span class="s">&#39;https://github.com/nodeca/pako/archive/{}.tar.gz&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">PAKO_RELEASE</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="write_full_page"><a class="viewcode-back" href="../../webpage.html#ImageMetaTag.webpage.write_full_page">[docs]</a><span class="k">def</span> <span class="nf">write_full_page</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">page_filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tab_s_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                    <span class="n">preamble</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">postamble</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                    <span class="n">preamble</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">postamble</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
                     <span class="n">initial_selectors</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">show_selector_names</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
                     <span class="n">url_type</span><span class="o">=</span><span class="s">&#39;int&#39;</span><span class="p">,</span> <span class="n">only_show_rel_url</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
                     <span class="n">style</span><span class="o">=</span><span class="s">&#39;horiz dropdowns&#39;</span><span class="p">,</span> <span class="n">write_intmed_tmpfile</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                    <span class="n">description</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">n_proc</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">description</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Writes out an :class:`ImageMetaTag.ImageDict` as a webpage, to a given file location.</span>
 <span class="sd">    The file is overwritten.</span>
@@ -154,12 +159,10 @@
 <span class="sd">                             moved when completed.</span>
 <span class="sd">    * description - html description metadata</span>
 <span class="sd">    * keywords - html keyword metadata</span>
-<span class="sd">    * compression - default None. If set to &#39;lz&#39; then the json data object will be compressed \</span>
-<span class="sd">                    using lz string compression. Using https://github.com/gkovacs/lz-string-python</span>
-<span class="sd">    * n_proc - for very large strings, the lz string compression does not scale well. To avoid \</span>
-<span class="sd">               problems the strings are broken into chunks. These can be compressed in parallel \</span>
-<span class="sd">               if n_proc &gt; 1.</span>
-
+<span class="sd">    * compression - default False. If True, then the json data object will be compressed \</span>
+<span class="sd">                    using zlib string compression. When read into the browser, we will use \</span>
+<span class="sd">                    pako to inflate it (https://github.com/nodeca/pako)</span>
+<span class="sd">                    </span>
 <span class="sd">    Returns a list of files that the the created webpage is dependent upon</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
@@ -171,13 +174,6 @@
     <span class="k">if</span> <span class="n">page_filename</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">page_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">compression</span> <span class="o">==</span> <span class="s">&#39;lz&#39;</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">LZSTRING_AVAILABLE</span><span class="p">:</span>
-            <span class="c"># lzstring wasn&#39;t available, so report, then re-import to get the error</span>
-            <span class="k">print</span> <span class="s">&#39;lzstring module unavailable. Try again without compression=&#39;&#39;lz&#39;&#39;&#39;</span>
-            <span class="kn">import</span> <span class="nn">lzstring</span>
-
-
     <span class="c"># other files involved:</span>
     <span class="n">file_dir</span><span class="p">,</span> <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
     <span class="n">page_dependencies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
@@ -185,21 +181,22 @@
     <span class="k">if</span> <span class="n">img_dict</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">json_files</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">else</span><span class="p">:</span>
+        <span class="c"># now make sure the required javascript library is copied over to the file_dir:</span>
+        <span class="n">js_files</span> <span class="o">=</span> <span class="n">copy_required_javascript</span><span class="p">(</span><span class="n">file_dir</span><span class="p">,</span> <span class="n">style</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="n">compression</span><span class="p">)</span>
+        <span class="n">page_dependencies</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">js_files</span><span class="p">)</span>
+        
         <span class="c"># we have real data to work with:</span>
         <span class="n">dict_depth</span> <span class="o">=</span> <span class="n">img_dict</span><span class="o">.</span><span class="n">dict_depth</span><span class="p">(</span><span class="n">uniform_depth</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
         <span class="c"># work out what files we need to create:</span>
         <span class="n">file_name_no_ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="c"># json file to hold the image_dict branching data etc:</span>
         <span class="n">json_file</span> <span class="o">=</span> <span class="n">file_name_no_ext</span> <span class="o">+</span> <span class="s">&#39;.json&#39;</span>
-        <span class="k">if</span> <span class="n">compression</span> <span class="o">==</span> <span class="s">&#39;lz&#39;</span><span class="p">:</span>
-            <span class="n">json_file</span> <span class="o">+=</span> <span class="s">&#39;.lz&#39;</span>
+        <span class="k">if</span> <span class="n">compression</span><span class="p">:</span>
+            <span class="n">json_file</span> <span class="o">+=</span> <span class="s">&#39;.zlib&#39;</span>
         <span class="n">page_dependencies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">json_file</span><span class="p">)</span>
         <span class="n">json_filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_dir</span><span class="p">,</span> <span class="n">json_file</span><span class="p">)</span>
-        <span class="n">json_files</span> <span class="o">=</span> <span class="n">write_json</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">json_filepath</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="n">compression</span><span class="p">,</span> <span class="n">n_proc</span><span class="o">=</span><span class="n">n_proc</span><span class="p">)</span>
+        <span class="n">json_files</span> <span class="o">=</span> <span class="n">write_json</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">json_filepath</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="n">compression</span><span class="p">)</span>
 
-        <span class="c"># now make sure the required javascript library is copied over to the file_dir:</span>
-        <span class="n">js_files</span> <span class="o">=</span> <span class="n">copy_required_javascript</span><span class="p">(</span><span class="n">file_dir</span><span class="p">,</span> <span class="n">style</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="n">compression</span><span class="p">)</span>
-        <span class="n">page_dependencies</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">js_files</span><span class="p">)</span>
         <span class="c"># this is the internal name the different selectors, associated lists for the selectors, and</span>
         <span class="c"># the list of files (all with a numbered suffix):</span>
         <span class="n">selector_prefix</span> <span class="o">=</span> <span class="s">&#39;sel&#39;</span>
@@ -307,7 +304,7 @@
                                <span class="n">ind</span><span class="o">=</span><span class="n">ind</span><span class="p">,</span>
                                <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="n">keywords</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c"># the json_files is a list of (tmp_file, final_file) tuples. Here we want the final one: </span>
+            <span class="c"># the json_files is a list of (tmp_file, final_file) tuples. Here we want the final one:</span>
             <span class="n">final_json_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">json_files</span><span class="p">]</span>
             <span class="n">write_js_to_header</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">initial_selectors</span><span class="o">=</span><span class="n">initial_selectors</span><span class="p">,</span>
                                <span class="n">file_obj</span><span class="o">=</span><span class="n">out_file</span><span class="p">,</span> <span class="n">json_files</span><span class="o">=</span><span class="n">final_json_files</span><span class="p">,</span> <span class="n">js_files</span><span class="o">=</span><span class="n">js_files</span><span class="p">,</span>
@@ -375,7 +372,7 @@
                        <span class="n">file_obj</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">json_files</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">js_files</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                        <span class="n">pagename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tabname</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">selector_prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                        <span class="n">url_separator</span><span class="o">=</span><span class="s">&#39;|&#39;</span><span class="p">,</span> <span class="n">url_type</span><span class="o">=</span><span class="s">&#39;str&#39;</span><span class="p">,</span> <span class="n">only_show_rel_url</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                       <span class="n">ind</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                       <span class="n">ind</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
                        <span class="n">description</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Writes out the required ImageMetaTag config and data paths into a html header section</span>
@@ -398,6 +395,7 @@
 <span class="sd">                 &#39;int&#39; or &#39;str&#39;.</span>
 <span class="sd">    * only_show_rel_url - If True, the wepage will only show relative urls in is link section.</span>
 <span class="sd">    * ind - indentation going into the header section.</span>
+<span class="sd">    * compression - Indicates the json file is compressed using zlib.</span>
 <span class="sd">    * description - html description metadata7</span>
 <span class="sd">    * keywords - html keyword metadata</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -413,22 +411,22 @@
         <span class="c">## add a reference to the data structure:</span>
         <span class="c">#out_str = &#39;{}&lt;script type=&quot;text/javascript&quot; src=&quot;{}&quot;&gt;&lt;/script&gt;\n&#39;.format(ind, json_files)</span>
         <span class="c">#file_obj.write(out_str)</span>
-        
+
         <span class="c"># now add a reference to the javascript functions to implement the style:</span>
         <span class="k">for</span> <span class="n">js_file</span> <span class="ow">in</span> <span class="n">js_files</span><span class="p">:</span>
             <span class="n">out_str</span> <span class="o">=</span> <span class="s">&#39;{}&lt;script type=&quot;text/javascript&quot; src=&quot;{}&quot;&gt;&lt;/script&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">js_file</span><span class="p">)</span>
             <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">out_str</span><span class="p">)</span>
-        
+
         <span class="c"># now write out the javascript cnfiguration variables:</span>
         <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;&lt;script type=&quot;text/javascript&quot;&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
         <span class="n">ind</span> <span class="o">=</span> <span class="n">_indent_up_one</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
         <span class="c"># define, read in and parse the json file:</span>
         <span class="n">out_str</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;{0}var json_files = {1};</span>
-<span class="s">{0}var lz_unpack = Boolean({2});</span>
-<span class="s">{0}imt = read_parse_json_files(json_files, lz_unpack);</span>
-<span class="s">&#39;&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">json_files</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">compression</span> <span class="o">==</span> <span class="s">&#39;lz&#39;</span><span class="p">))</span>
-        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">out_str</span><span class="p">)</span>
-            
+<span class="s">{0}var zl_unpack = {2};</span>
+<span class="s">{0}imt = read_parse_json_files(json_files, zl_unpack);</span>
+<span class="s">&#39;&#39;&#39;</span>
+        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">out_str</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">json_files</span><span class="p">,</span><span class="n">_py_to_js_bool</span><span class="p">(</span><span class="nb">bool</span><span class="p">(</span><span class="n">compression</span><span class="p">))))</span>
+
         <span class="c"># in case the page we are writing is embedded as a frame, write out the top</span>
         <span class="c"># level page here;</span>
         <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;{}var pagename = &quot;{}&quot;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">pagename</span><span class="p">))</span>
@@ -541,106 +539,36 @@
         <span class="n">file_list_name</span> <span class="o">=</span> <span class="s">&#39;file_list&#39;</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">selector_prefix</span><span class="p">,</span> <span class="n">list_prefix</span><span class="p">,</span> <span class="n">file_list_name</span><span class="p">)</span>
 
-<div class="viewcode-block" id="write_json"><a class="viewcode-back" href="../../webpage.html#ImageMetaTag.webpage.write_json">[docs]</a><span class="k">def</span> <span class="nf">write_json</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">json_file</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">n_proc</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="write_json"><a class="viewcode-back" href="../../webpage.html#ImageMetaTag.webpage.write_json">[docs]</a><span class="k">def</span> <span class="nf">write_json</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">json_file</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Writes a json dump of the :class:`ImageMetaTag.ImageDict` tree strucuture</span>
 <span class="sd">    to a target file path.</span>
-<span class="sd">    </span>
-<span class="sd">    Can be compressed using lzstring compresion (compression=&#39;lz&#39;). If this is</span>
-<span class="sd">    the case and the string is very long, then it will be split into mutliple files.</span>
-<span class="sd">    Because of the split, the compression/decompression time scales linearly with</span>
-<span class="sd">    string size. This is not the case with large strings in a single call.</span>
-<span class="sd">    </span>
-<span class="sd">    Returns a list of json files.</span>
+
+<span class="sd">    Options:</span>
+<span class="sd">     * compression : If True, json is compressed using zlib compresion</span>
+
+<span class="sd">    Returns a list of json files as (tempfile, final_file) tuples.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    
+
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">imt</span><span class="o">.</span><span class="n">ImageDict</span><span class="p">):</span>
         <span class="n">dict_as_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">img_dict</span><span class="o">.</span><span class="n">dict</span><span class="p">,</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">,</span> <span class="s">&#39;:&#39;</span><span class="p">))</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">dict_as_json</span> <span class="o">=</span> <span class="n">img_dict</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;input img_dict is not an ImageMetaTag.ImageDict or string&#39;</span><span class="p">)</span>
-    
-    <span class="k">if</span> <span class="n">compression</span> <span class="o">==</span> <span class="s">&#39;lz&#39;</span><span class="p">:</span>
-        <span class="c">#out_str = zlib.compress(dict_as_json)</span>
-        
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">LZSTRING_AVAILABLE</span><span class="p">:</span>
-            <span class="c"># lzstring wasn&#39;t available, so report, then re-import to get the error</span>
-            <span class="k">print</span> <span class="s">&#39;lzstring module unavailable. Try again without compression=&#39;&#39;lz&#39;&#39;&#39;</span>
-            <span class="kn">import</span> <span class="nn">lzstring</span>
-        
-        <span class="c"># this is the number of characters at which we start splitting </span>
-        <span class="c"># the json text into sections. It&#39;s roughly the point</span>
-        <span class="c"># at which the lz compression starts to take a lot longer. </span>
-        <span class="n">split_size</span> <span class="o">=</span> <span class="mi">2500000</span>
-                
-        <span class="c"># if the sting to compress is very large, then we must break it up:</span>
-        <span class="n">n_splits</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dict_as_json</span><span class="p">)</span> <span class="o">/</span> <span class="n">split_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="c"># now make the lz compressed strings on the split strings:</span>
-        <span class="n">split_gen</span> <span class="o">=</span> <span class="n">__str_split_gen</span><span class="p">(</span><span class="n">dict_as_json</span><span class="p">,</span> <span class="n">n_splits</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">n_proc</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">n_splits</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="c"># run as a single process, withuot pool, for simplicity/debugging:</span>
-            <span class="n">lz_split_strs</span> <span class="o">=</span> <span class="p">[</span><span class="n">__lz_compress_str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">split_gen</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">proc_pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="n">n_proc</span><span class="p">)</span>
-            <span class="n">lz_split_strs</span> <span class="o">=</span> <span class="n">proc_pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">__lz_compress_str</span><span class="p">,</span> <span class="n">split_gen</span><span class="p">)</span>
-            <span class="n">proc_pool</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-            <span class="n">proc_pool</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
-        <span class="c"># now write out those as tempry files:</span>
-        <span class="n">tmp_file_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">json_file</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">tmp_file_paths</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">lz_split_str</span> <span class="ow">in</span> <span class="n">lz_split_strs</span><span class="p">:</span>
-            <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="s">&#39;w&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s">&#39;.json&#39;</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s">&#39;imt_&#39;</span><span class="p">,</span>
-                                             <span class="nb">dir</span><span class="o">=</span><span class="n">tmp_file_dir</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_obj</span><span class="p">:</span>
-                <span class="c"># now write out a json file:</span>
-                <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">lz_split_str</span><span class="p">)</span>
-                <span class="n">tmp_file_paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file_obj</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-        
-        <span class="c"># now return a list of temp files and where they should end up:</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tmp_file_paths</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[(</span><span class="n">tmp_file_paths</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">json_file</span><span class="p">)]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">out_file_mapping</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">i_file</span><span class="p">,</span> <span class="n">tmp_file_path</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tmp_file_paths</span><span class="p">):</span>
-                <span class="n">out_file_mapping</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">tmp_file_path</span><span class="p">,</span> <span class="n">json_file</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i_file</span><span class="p">)))</span>
-            <span class="k">return</span> <span class="n">out_file_mapping</span>
 
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c"># uncompressed, to a single file:</span>
-        <span class="n">tmp_file_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">json_file</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="s">&#39;w&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s">&#39;.json&#39;</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s">&#39;imt_&#39;</span><span class="p">,</span>
-                                         <span class="nb">dir</span><span class="o">=</span><span class="n">tmp_file_dir</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_obj</span><span class="p">:</span>
-            <span class="c"># now write out a json file:</span>
+    <span class="c"># uncompressed, or zlib, write to to a single file:</span>
+    <span class="n">tmp_file_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">json_file</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="s">&#39;w&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s">&#39;.json&#39;</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s">&#39;imt_&#39;</span><span class="p">,</span>
+                                     <span class="nb">dir</span><span class="o">=</span><span class="n">tmp_file_dir</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_obj</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">compression</span><span class="p">:</span>
+            <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">zlib</span><span class="o">.</span><span class="n">compress</span><span class="p">(</span><span class="n">dict_as_json</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
             <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">dict_as_json</span><span class="p">)</span>
-            <span class="n">tmp_file_path</span> <span class="o">=</span> <span class="n">file_obj</span><span class="o">.</span><span class="n">name</span>
-        
-        <span class="k">return</span> <span class="p">[(</span><span class="n">tmp_file_path</span><span class="p">,</span> <span class="n">json_file</span><span class="p">)]</span>
+        <span class="n">tmp_file_path</span> <span class="o">=</span> <span class="n">file_obj</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="k">return</span> <span class="p">[(</span><span class="n">tmp_file_path</span><span class="p">,</span> <span class="n">json_file</span><span class="p">)]</span>
 </div>
-<span class="k">def</span> <span class="nf">__str_split_gen</span><span class="p">(</span><span class="n">in_str</span><span class="p">,</span> <span class="n">n_split</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    generator that splits an input string into n_split roughly equal parts</span>
-<span class="sd">    for __lz_compress_str</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n_split</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;must split string into an integer number of splits&#39;</span><span class="p">)</span>
-    <span class="c"># make absolutely sure that the chunk size is right, and will include</span>
-    <span class="c"># all the srting, by using ceil:</span>
-    <span class="n">len_split</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">in_str</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">n_split</span><span class="p">)))</span>
-    <span class="c"># use this iterator to go over the sting:</span>
-    <span class="n">iterator</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">in_str</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_split</span><span class="p">):</span>
-        <span class="n">accumulator</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">len_split</span><span class="p">):</span>
-            <span class="k">try</span><span class="p">:</span> <span class="n">accumulator</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">iterator</span><span class="p">))</span>
-            <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span> <span class="k">break</span>
-        <span class="k">yield</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">accumulator</span><span class="p">)</span>
-
-<span class="k">def</span> <span class="nf">__lz_compress_str</span><span class="p">(</span><span class="n">in_str</span><span class="p">):</span>
-    <span class="s">&#39;does lz string compression on a single chunk of string, with input from __str_split_gen&#39;</span>
-    <span class="n">lz_obj</span> <span class="o">=</span> <span class="n">lzstring</span><span class="o">.</span><span class="n">LZString</span><span class="p">()</span>
-    <span class="n">out_str</span> <span class="o">=</span> <span class="n">lz_obj</span><span class="o">.</span><span class="n">compressToUTF16</span><span class="p">(</span><span class="n">in_str</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">out_str</span>
-
 <div class="viewcode-block" id="write_js_placeholders"><a class="viewcode-back" href="../../webpage.html#ImageMetaTag.webpage.write_js_placeholders">[docs]</a><span class="k">def</span> <span class="nf">write_js_placeholders</span><span class="p">(</span><span class="n">file_obj</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">dict_depth</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">selector_prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                           <span class="n">style</span><span class="o">=</span><span class="s">&#39;horiz dropdowns&#39;</span><span class="p">,</span> <span class="n">level_names</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
                           <span class="n">animated_level</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -740,15 +668,16 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;&quot;</span><span class="si">%s</span><span class="s">&quot; tyle of content placeholder not defined&#39;</span> <span class="o">%</span> <span class="n">style</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="copy_required_javascript"><a class="viewcode-back" href="../../webpage.html#ImageMetaTag.webpage.copy_required_javascript">[docs]</a><span class="k">def</span> <span class="nf">copy_required_javascript</span><span class="p">(</span><span class="n">file_dir</span><span class="p">,</span> <span class="n">style</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<div class="viewcode-block" id="copy_required_javascript"><a class="viewcode-back" href="../../webpage.html#ImageMetaTag.webpage.copy_required_javascript">[docs]</a><span class="k">def</span> <span class="nf">copy_required_javascript</span><span class="p">(</span><span class="n">file_dir</span><span class="p">,</span> <span class="n">style</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Copies the required javascript library to the directory</span>
 <span class="sd">    containing the required page (file_dir) for a given webpage style.</span>
 
 <span class="sd">    If a file is already present it will be checked based it&#39;s first line.</span>
 <span class="sd">    If the file is different, it will be overwritten if overwrite is True.</span>
-<span class="sd">    </span>
-<span class="sd">    Also copies/obtains required javascript for compression:</span>
+
+<span class="sd">    Also copies/obtains required javascript for reading files compressed</span>
+<span class="sd">    with zlib, if compression=True.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">if</span> <span class="n">style</span> <span class="o">==</span> <span class="s">&#39;horiz dropdowns&#39;</span><span class="p">:</span>
@@ -777,36 +706,74 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">print</span> <span class="s">&#39;&#39;&#39;File: {}/{} differs to the expected contents, but is</span>
 <span class="s">not being overwritten. Your webpage may be broken!&#39;&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">file_dir</span><span class="p">,</span> <span class="n">imt_js_to_copy</span><span class="p">)</span>
-    
+
+    <span class="c"># make a list of all the required javascript files</span>
     <span class="n">js_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">imt_js_to_copy</span><span class="p">]</span>
 
+    <span class="c"># now move on to javascript dependencies from the compression:</span>
+    <span class="k">if</span> <span class="n">compression</span><span class="p">:</span>
+        <span class="n">js_to_copy</span> <span class="o">=</span> <span class="n">PAKO_JS_FILE</span>
 
-    <span class="k">if</span> <span class="n">compression</span> <span class="o">==</span> <span class="s">&#39;lz&#39;</span><span class="p">:</span>
-        <span class="c"># the lz javascript library is shipped with the code in the javascript dir</span>
-        <span class="c"># as that makes this bit really easy. That&#39;s OK as it is released under the</span>
-        <span class="c"># WTFPL: </span>
-        <span class="n">lz_js_to_copy</span> <span class="o">=</span> <span class="s">&#39;lz-string.js&#39;</span>
-        <span class="n">lz_src</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_src_dir</span><span class="p">,</span> <span class="n">lz_js_to_copy</span><span class="p">)</span>
-        <span class="n">lz_dest</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_dir</span><span class="p">,</span> <span class="n">lz_js_to_copy</span><span class="p">)</span>
-        <span class="c"># first of all, is the required file in the javascript source directory:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">lz_src</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Unable to locate file &quot;{}&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">lz_src</span><span class="p">))</span>
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">lz_dest</span><span class="p">):</span>
-            <span class="c"># do nothing, assume the file is correct</span>
+        <span class="n">js_src</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_src_dir</span><span class="p">,</span> <span class="n">js_to_copy</span><span class="p">)</span>
+        <span class="n">js_dest</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_dir</span><span class="p">,</span> <span class="n">js_to_copy</span><span class="p">)</span>
+        <span class="c"># if the file is already at destination, we&#39;re good:</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">js_dest</span><span class="p">):</span>
             <span class="k">pass</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c"># copy the file:</span>
-            <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">lz_src</span><span class="p">,</span> <span class="n">lz_dest</span><span class="p">)</span>
+            <span class="c"># is the required file in the javascript source directory:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">js_src</span><span class="p">):</span>
+                <span class="c"># we need to get the required javascript from source.</span>
+                <span class="c">#</span>
+                <span class="c"># if we have permission to write to teh file_src_dir then </span>
+                <span class="c"># try to do so. This means it&#39;s installed for all uses from this</span>
+                <span class="c"># install of ImageMetaTag:</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">access</span><span class="p">(</span><span class="n">file_src_dir</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">W_OK</span><span class="p">):</span>
+                    <span class="n">pako_to_dir</span> <span class="o">=</span> <span class="n">file_src_dir</span>
+                    <span class="c"># now get pako:</span>
+                    <span class="n">get_pako</span><span class="p">(</span><span class="n">pako_to_dir</span><span class="p">)</span>
+                    <span class="c"># and copy it to where it&#39;s needed for this call:</span>
+                    <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">js_src</span><span class="p">,</span> <span class="n">js_dest</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># put pako js file into the target dir. At least it will</span>
+                    <span class="c"># be available for subsequent writes to that dir:</span>
+                    <span class="n">pako_to_dir</span> <span class="o">=</span> <span class="n">file_dir</span>
+                    <span class="c"># now get pako to that dir:</span>
+                    <span class="n">get_pako</span><span class="p">(</span><span class="n">pako_to_dir</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># copy the file:</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">js_src</span><span class="p">,</span> <span class="n">js_dest</span><span class="p">)</span>
         <span class="c"># finally, make a note:</span>
-        <span class="n">js_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lz_js_to_copy</span><span class="p">)</span>
-        
-        <span class="c"># get this from the installed ImageMetaTag directory:</span>
-        
-        
-
-
+        <span class="n">js_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">js_to_copy</span><span class="p">)</span>
+    
     <span class="k">return</span> <span class="n">js_files</span>
 </div>
+<span class="k">def</span> <span class="nf">get_pako</span><span class="p">(</span><span class="n">pako_to_dir</span><span class="p">):</span>
+    <span class="s">&#39;Obtains the required pako javascript code from remote host&#39;</span>
+    <span class="kn">import</span> <span class="nn">tarfile</span>
+    <span class="kn">from</span> <span class="nn">urllib2</span> <span class="kn">import</span> <span class="n">urlopen</span>
+
+    <span class="c"># Open the url</span>
+    <span class="n">pako_urlopen</span> <span class="o">=</span> <span class="n">urlopen</span><span class="p">(</span><span class="n">PAKO_SOURE_TAR</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s">&quot;downloading &quot;</span> <span class="o">+</span> <span class="n">PAKO_SOURE_TAR</span>
+    <span class="c"># Open our local file for writing</span>
+    <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="s">&#39;w&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s">&#39;.tar.gz&#39;</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s">&#39;pako_&#39;</span><span class="p">,</span>
+                                     <span class="n">delete</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">local_file</span><span class="p">:</span>
+        <span class="n">local_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pako_urlopen</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+        <span class="n">targz_file</span> <span class="o">=</span> <span class="n">local_file</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">pako_urlopen</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="c"># now extract the file we need:</span>
+    <span class="k">with</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">targz_file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;r:gz&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tgz</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">is_tarfile</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Downloaded pako tar.gz file cannot be read.&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="s">&#39;pako-{}/dist/{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">PAKO_RELEASE</span><span class="p">,</span> <span class="n">PAKO_JS_FILE</span><span class="p">)</span>
+            <span class="n">target_file</span> <span class="o">=</span> <span class="n">tgz</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">target_file</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pako_to_dir</span><span class="p">,</span> <span class="n">PAKO_JS_FILE</span><span class="p">),</span> <span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">final_file</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">target_file</span><span class="p">:</span>
+                        <span class="n">final_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">targz_file</span><span class="p">)</span>
+
 <span class="k">def</span> <span class="nf">_indent_up_one</span><span class="p">(</span><span class="n">ind</span><span class="p">):</span>
     <span class="s">&#39;increases the indent level of an input ind by one&#39;</span>
     <span class="n">n_indents</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span> <span class="o">/</span> <span class="n">LEN_INDENT</span>

@@ -98,7 +98,8 @@
     <span class="c"># convert to string, to remove unicode string</span>
     <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">in_str</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;__&#39;</span><span class="p">,</span> <span class="s">&#39; &#39;</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="write_img_to_dbfile"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.write_img_to_dbfile">[docs]</a><span class="k">def</span> <span class="nf">write_img_to_dbfile</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">img_filename</span><span class="p">,</span> <span class="n">img_info</span><span class="p">,</span> <span class="n">add_strict</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">):</span>
+<div class="viewcode-block" id="write_img_to_dbfile"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.write_img_to_dbfile">[docs]</a><span class="k">def</span> <span class="nf">write_img_to_dbfile</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">img_filename</span><span class="p">,</span> <span class="n">img_info</span><span class="p">,</span> <span class="n">add_strict</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                        <span class="n">timeout</span><span class="o">=</span><span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Writes image metadata to a database.</span>
 
@@ -174,9 +175,9 @@
                     <span class="c"># open the connection and the cursor:</span>
                     <span class="n">dbcn</span><span class="p">,</span> <span class="n">dbcr</span> <span class="o">=</span> <span class="n">open_db_file</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">db_timeout</span><span class="p">)</span>
                     <span class="c"># read it:</span>
-                    <span class="n">filename_list</span><span class="p">,</span> <span class="n">out_dict</span> <span class="o">=</span> <span class="n">read_img_info_from_dbcursor</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span>
-                                                                <span class="n">required_tags</span><span class="o">=</span><span class="n">required_tags</span><span class="p">,</span>
-                                                                <span class="n">tag_strings</span><span class="o">=</span><span class="n">tag_strings</span><span class="p">)</span>
+                    <span class="n">f_list</span><span class="p">,</span> <span class="n">out_dict</span> <span class="o">=</span> <span class="n">read_img_info_from_dbcursor</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span>
+                                                <span class="n">required_tags</span><span class="o">=</span><span class="n">required_tags</span><span class="p">,</span>
+                                                <span class="n">tag_strings</span><span class="o">=</span><span class="n">tag_strings</span><span class="p">)</span>
                     <span class="c"># close connection:</span>
                     <span class="n">dbcn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
                     <span class="n">read_db</span> <span class="o">=</span> <span class="bp">True</span>
@@ -201,7 +202,7 @@
 
             <span class="c"># close connection:</span>
             <span class="n">dbcn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-            <span class="k">return</span> <span class="n">filename_list</span><span class="p">,</span> <span class="n">out_dict</span>
+            <span class="k">return</span> <span class="n">f_list</span><span class="p">,</span> <span class="n">out_dict</span>
 </div>
 <span class="n">read_img_info_from_dbfile</span> <span class="o">=</span> <span class="n">read</span>
 
@@ -544,7 +545,8 @@
                 <span class="c"># delete commands each have a chance to complete:</span>
                 <span class="c"># 200 is arbriatily chosen, but seems to work</span>
                 <span class="n">chunk_size</span> <span class="o">=</span> <span class="mi">200</span>
-                <span class="k">for</span> <span class="n">chunk_o_filenames</span> <span class="ow">in</span> <span class="p">[</span><span class="n">fn_list</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">chunk_size</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">fn_list</span><span class="p">),</span> <span class="n">chunk_size</span><span class="p">)]:</span>
+                <span class="n">chunks</span> <span class="o">=</span> <span class="n">__gen_chunk_of_list</span><span class="p">(</span><span class="n">fn_list</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">chunk_o_filenames</span> <span class="ow">in</span> <span class="n">chunks</span><span class="p">:</span>
                     <span class="c"># within each chunk of files, need to open the db, with time out retries etc:</span>
                     <span class="n">n_tries</span> <span class="o">=</span> <span class="mi">1</span>
                     <span class="n">wrote_db</span> <span class="o">=</span> <span class="bp">False</span>
@@ -560,14 +562,16 @@
                                     <span class="k">if</span> <span class="n">OpErr_file</span><span class="o">.</span><span class="n">message</span> <span class="o">==</span> <span class="s">&#39;no such table: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">SQLITE_IMG_INFO_TABLE</span><span class="p">):</span>
                                         <span class="c"># the db file exists, but it doesn&#39;t have anything in it:</span>
                                         <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_warning</span><span class="p">:</span>
-                                            <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;WARNING: Unable to delte file entry &quot;{}&quot; from database &quot;{}&quot; as database table is missing&#39;</span>
+                                            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;WARNING: Unable to delete file entry &quot;{}&quot; from&#39;</span>
+                                                   <span class="s">&#39; database &quot;{}&quot; as database table is missing&#39;</span><span class="p">)</span>
                                             <span class="k">print</span> <span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">db_file</span><span class="p">)</span>
                                         <span class="k">return</span>
                                     <span class="k">else</span><span class="p">:</span>
                                         <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_warning</span><span class="p">:</span>
                                             <span class="c"># if this fails, print a warning...</span>
                                             <span class="c"># need to figure out why this happens</span>
-                                            <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;WARNING: unable to delete file entry: &quot;{}&quot;, type &quot;{}&quot; from database&#39;</span>
+                                            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;WARNING: unable to delete file entry:&#39;</span>
+                                                   <span class="s">&#39; &quot;{}&quot;, type &quot;{}&quot; from database&#39;</span><span class="p">)</span>
                                             <span class="k">print</span> <span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">fname</span><span class="p">))</span>
                             <span class="n">dbcn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
                             <span class="c"># if we got here, then we&#39;re good!</span>
@@ -588,8 +592,7 @@
                     <span class="k">if</span> <span class="n">n_tries</span> <span class="o">&gt;</span> <span class="n">db_attempts</span><span class="p">:</span>
                         <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;{} for file {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">OpErr</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="n">db_file</span><span class="p">)</span>
                         <span class="k">raise</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-                    
-                    
+
             <span class="k">else</span><span class="p">:</span>
                 <span class="c"># just open the database:</span>
                 <span class="n">dbcn</span><span class="p">,</span> <span class="n">dbcr</span> <span class="o">=</span> <span class="n">open_db_file</span><span class="p">(</span><span class="n">db_file</span><span class="p">)</span>
@@ -601,8 +604,9 @@
                         <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_warning</span><span class="p">:</span>
                             <span class="c"># if this fails, print a warning...</span>
                             <span class="c"># need to figure out why this happens</span>
-                            <span class="k">print</span> <span class="s">&#39;WARNING: unable to delete file entry: &quot;</span><span class="si">%s</span><span class="s">&quot;, type &quot;</span><span class="si">%s</span><span class="s">&quot; from database&#39;</span> \
-                                        <span class="o">%</span> <span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">fname</span><span class="p">))</span>
+                            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;WARNING: unable to delete file entry:&#39;</span>
+                                   <span class="s">&#39; &quot;{}&quot;, type &quot;{}&quot; from database&#39;</span><span class="p">)</span>
+                            <span class="k">print</span> <span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">fname</span><span class="p">))</span>
                     <span class="c"># commit every 100 to give other processes a chance:</span>
                     <span class="k">if</span> <span class="n">i_fn</span> <span class="o">%</span> <span class="mi">100</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="n">dbcn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
@@ -619,6 +623,11 @@
             <span class="k">elif</span> <span class="ow">not</span> <span class="n">allow_retries</span><span class="p">:</span>
                 <span class="n">dbcn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </div>
+<span class="k">def</span> <span class="nf">__gen_chunk_of_list</span><span class="p">(</span><span class="n">in_list</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">):</span>
+    <span class="s">&#39;gnerator that yields a chunk of list, of length chunk size&#39;</span>
+    <span class="k">for</span> <span class="n">ndx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">in_list</span><span class="p">),</span> <span class="n">chunk_size</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="n">in_list</span><span class="p">[</span><span class="n">ndx</span><span class="p">:</span><span class="nb">min</span><span class="p">(</span><span class="n">ndx</span> <span class="o">+</span> <span class="n">chunk_size</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">in_list</span><span class="p">))]</span>
+
 <div class="viewcode-block" id="select_dbfile_by_tags"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.select_dbfile_by_tags">[docs]</a><span class="k">def</span> <span class="nf">select_dbfile_by_tags</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">select_tags</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Selects from a database file the entries that match a dict of field names/acceptable values.</span>
@@ -680,8 +689,9 @@
 
     <span class="k">return</span> <span class="n">filename_list</span><span class="p">,</span> <span class="n">out_dict</span>
 </div>
-<div class="viewcode-block" id="scan_dir_for_db"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.scan_dir_for_db">[docs]</a><span class="k">def</span> <span class="nf">scan_dir_for_db</span><span class="p">(</span><span class="n">basedir</span><span class="p">,</span> <span class="n">db_file</span><span class="p">,</span> <span class="n">img_tag_req</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">subdir_excl_list</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">known_file_tags</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                    <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">no_file_ext</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">return_timings</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">restart_db</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="scan_dir_for_db"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.scan_dir_for_db">[docs]</a><span class="k">def</span> <span class="nf">scan_dir_for_db</span><span class="p">(</span><span class="n">basedir</span><span class="p">,</span> <span class="n">db_file</span><span class="p">,</span> <span class="n">img_tag_req</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">subdir_excl_list</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                    <span class="n">known_file_tags</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">no_file_ext</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                    <span class="n">return_timings</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">restart_db</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    A useful utility that scans a directory on disk for images that can go into a database.</span>
 <span class="sd">    This should only be used to build a database from a directory of tagged images that</span>

@@ -12,7 +12,7 @@ function read_parse_json_files(json_files, zlib_comp){
 	if (zlib_comp){
 	    // binary compressed string
 	    //this_blob = readBinaryFile(json_files[i_js]);
-	    this_blob = load_binary_resource(json_files[i_js]);
+	    this_blob = readBinaryFile(json_files[i_js]);
 	    json_str += pako.inflate(this_blob, {to: 'string'})
 	} else {
 	    // string based compression, or direct string read:
@@ -33,7 +33,7 @@ function readTextFile(filepath){
     return returnValue;
 }
 
-function load_binary_resource(url) {
+function readBinaryFile(url) {
   var req = new XMLHttpRequest();
   req.open('GET', url, false);
   //XHR binary charset opt by Marcus Granado 2006 [http://mgran.blogspot.com]

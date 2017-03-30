@@ -38,8 +38,12 @@ import ImageMetaTag as imt
 print 'ImageMetaTag from "{}"'.format(imt.__path__[0])
 
 def get_webdir():
-    'Works out the location to use as webdir'
-
+    '''
+    Works out the location to use as webdir in this test run. This is done in a
+    function only because it can be imported into simplest_img_dict.py to keep
+    it consistent. In a real application you can just specify a location on your
+    file system that is web-accessible.
+    '''
     home = os.getenv('HOME')
     webdir = None
 
@@ -338,9 +342,6 @@ def __main__():
                ('g', 'Plotted in Green')]
 
     img_format = 'png'
-
-    # compression method for the json file:
-    json_comp = 'zlib'
 
     # this defines the order of the different tags in
     # the ImageDict, and so how they are displayed on the webpage:
@@ -814,7 +815,7 @@ def __main__():
                                                     verbose=True, only_show_rel_url=True,
                                                     write_intmed_tmpfile=True,
                                                     show_selector_names=True,
-                                                    compression=json_comp, n_proc=n_proc)
+                                                    compression=True)
     web_out[out_page_para] = imt.webpage.write_full_page(img_dict, out_page_para,
                                                          'Test ImageDict webpage (Parallel)',
                                                          preamble=webpage_preamble,
@@ -954,7 +955,7 @@ def __main__():
         out_page_big = '%s/biggus_pageus.html' % webdir
         web_out[out_page_big] = imt.webpage.write_full_page(biggus_dictus_imigus, out_page_big,
                                                             'Test ImageDict webpage',
-                                                            compression=json_comp, n_proc=n_proc)
+                                                            compression=True)
         print_simple_timer(date_start_web, datetime.now(), 'Large dict webpage')
 
     if not args.no_db_rebuild:

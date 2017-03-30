@@ -6,6 +6,10 @@ Alongside this is a short ImageMetaTag javascript library held in a '.js' file
 (currently held in a single file) and a .json file contain the :class:`ImageMetaTag.ImageDict`
 tree strcuture as a JSON data strcuture.
 
+To reduce file size, the JSON data structure can be compressed using zlib. If this is the case,
+then the `pako javascript library <https://github.com/nodeca/pako>`_ is used restore the JSON
+data in the browser.
+
 This can either be done using write_full_page, to produce a page with just a set of
 selectors to browse the ImageDict, or the different components can be added to a
 page as it is being constructed (reading in an html template, for instance).
@@ -42,12 +46,19 @@ from multiprocessing import Pool
 INDENT = '  '
 LEN_INDENT = len(INDENT)
 
+
+# for compressed json files, we use pako to inflate the data back to full size:
+PAKO_JS_FILE = 'pako_inflate.js'
+PAKO_RELEASE = '1.0.5'
+PAKO_SOURE_TAR = 'https://github.com/nodeca/pako/archive/{}.tar.gz'.format(PAKO_RELEASE)
+
+
 def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=None,
-                    preamble=None, postamble=None, compression=None,
+                    preamble=None, postamble=None, compression=False,
                     initial_selectors=None, show_selector_names=False,
                     url_type='int', only_show_rel_url=False, verbose=False,
                     style='horiz dropdowns', write_intmed_tmpfile=False,
-                    description=None, keywords=None, n_proc=1):
+                    description=None, keywords=None):
     '''
     Writes out an :class:`ImageMetaTag.ImageDict` as a webpage, to a given file location.
     The file is overwritten.
@@ -78,13 +89,10 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
                              moved when completed.
     * description - html description metadata
     * keywords - html keyword metadata
-    * compression - default None. If set to 'zlib' then the json data object will be compressed \
+    * compression - default False. If True, then the json data object will be compressed \
                     using zlib string compression. When read into the browser, we will use \
                     pako to inflate it (https://github.com/nodeca/pako)
-    * n_proc - for very large strings, the lz string compression does not scale well. To avoid \
-               problems the strings are broken into chunks. These can be compressed in parallel \
-               if n_proc > 1.
-
+                    
     Returns a list of files that the the created webpage is dependent upon
     '''
 
@@ -103,25 +111,22 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
     if img_dict is None:
         json_files = []
     else:
+        # now make sure the required javascript library is copied over to the file_dir:
+        js_files = copy_required_javascript(file_dir, style, compression=compression)
+        page_dependencies.extend(js_files)
+        
         # we have real data to work with:
         dict_depth = img_dict.dict_depth(uniform_depth=True)
         # work out what files we need to create:
         file_name_no_ext = os.path.splitext(file_name)[0]
         # json file to hold the image_dict branching data etc:
         json_file = file_name_no_ext + '.json'
-        if compression is None:
-            pass
-        elif compression == 'zlib':
+        if compression:
             json_file += '.zlib'
-        else:
-            raise ValueError('Compression "{}" is not set up'.format(compression))
         page_dependencies.append(json_file)
         json_filepath = os.path.join(file_dir, json_file)
-        json_files = write_json(img_dict, json_filepath, compression=compression, n_proc=n_proc)
+        json_files = write_json(img_dict, json_filepath, compression=compression)
 
-        # now make sure the required javascript library is copied over to the file_dir:
-        js_files = copy_required_javascript(file_dir, style, compression=compression)
-        page_dependencies.extend(js_files)
         # this is the internal name the different selectors, associated lists for the selectors, and
         # the list of files (all with a numbered suffix):
         selector_prefix = 'sel'
@@ -297,7 +302,7 @@ def write_js_to_header(img_dict, initial_selectors=None, style=None,
                        file_obj=None, json_files=None, js_files=None,
                        pagename=None, tabname=None, selector_prefix=None,
                        url_separator='|', url_type='str', only_show_rel_url=False,
-                       ind=None, compression=None,
+                       ind=None, compression=False,
                        description=None, keywords=None):
     '''
     Writes out the required ImageMetaTag config and data paths into a html header section
@@ -320,6 +325,7 @@ def write_js_to_header(img_dict, initial_selectors=None, style=None,
                  'int' or 'str'.
     * only_show_rel_url - If True, the wepage will only show relative urls in is link section.
     * ind - indentation going into the header section.
+    * compression - Indicates the json file is compressed using zlib.
     * description - html description metadata7
     * keywords - html keyword metadata
     '''
@@ -349,9 +355,7 @@ def write_js_to_header(img_dict, initial_selectors=None, style=None,
 {0}var zl_unpack = {2};
 {0}imt = read_parse_json_files(json_files, zl_unpack);
 '''
-        file_obj.write(out_str.format(ind,
-                                      json_files,
-                                      _py_to_js_bool(compression == 'zlib')))
+        file_obj.write(out_str.format(ind, json_files,_py_to_js_bool(bool(compression))))
 
         # in case the page we are writing is embedded as a frame, write out the top
         # level page here;
@@ -465,14 +469,15 @@ def write_js_setup_defaults(selector_prefix=None, list_prefix=None, file_list_na
         file_list_name = 'file_list'
     return (selector_prefix, list_prefix, file_list_name)
 
-def write_json(img_dict, json_file, compression=None, n_proc=1):
+def write_json(img_dict, json_file, compression=False):
     '''
     Writes a json dump of the :class:`ImageMetaTag.ImageDict` tree strucuture
     to a target file path.
 
-    Can be compressed using zlib compresion (compression='zlib').
+    Options:
+     * compression : If True, json is compressed using zlib compresion
 
-    Returns a list of json files.
+    Returns a list of json files as (tempfile, final_file) tuples.
     '''
 
     if isinstance(img_dict, imt.ImageDict):
@@ -482,29 +487,17 @@ def write_json(img_dict, json_file, compression=None, n_proc=1):
     else:
         raise ValueError('input img_dict is not an ImageMetaTag.ImageDict or string')
 
-    if compression is None:
-        # uncompressed, to a single file:
-        tmp_file_dir = os.path.split(json_file)[0]
-        with tempfile.NamedTemporaryFile('w', suffix='.json', prefix='imt_',
-                                         dir=tmp_file_dir, delete=False) as file_obj:
-            # now write out a json file:
+    # uncompressed, or zlib, write to to a single file:
+    tmp_file_dir = os.path.split(json_file)[0]
+    with tempfile.NamedTemporaryFile('w', suffix='.json', prefix='imt_',
+                                     dir=tmp_file_dir, delete=False) as file_obj:
+        if compression:
+            file_obj.write(zlib.compress(dict_as_json))
+        else:
             file_obj.write(dict_as_json)
-            tmp_file_path = file_obj.name
+        tmp_file_path = file_obj.name
 
-        return [(tmp_file_path, json_file)]
-    elif compression == 'zlib':
-        # zlib compressed, to a single file:
-        out_str = zlib.compress(dict_as_json)
-        tmp_file_dir = os.path.split(json_file)[0]
-        with tempfile.NamedTemporaryFile('w', suffix='.json', prefix='imt_',
-                                         dir=tmp_file_dir, delete=False) as file_obj:
-            # now write out a json file:
-            file_obj.write(out_str)
-            tmp_file_path = file_obj.name
-
-        return [(tmp_file_path, json_file)]
-    else:
-        raise ValueError('Compression {} is not set up'.format(compression))
+    return [(tmp_file_path, json_file)]
 
 def write_js_placeholders(file_obj=None, dict_depth=None, selector_prefix=None,
                           style='horiz dropdowns', level_names=False,
@@ -605,7 +598,7 @@ def write_js_placeholders(file_obj=None, dict_depth=None, selector_prefix=None,
     else:
         raise ValueError('"%s" tyle of content placeholder not defined' % style)
 
-def copy_required_javascript(file_dir, style, compression=None, overwrite=True):
+def copy_required_javascript(file_dir, style, compression=False, overwrite=True):
     '''
     Copies the required javascript library to the directory
     containing the required page (file_dir) for a given webpage style.
@@ -613,7 +606,8 @@ def copy_required_javascript(file_dir, style, compression=None, overwrite=True):
     If a file is already present it will be checked based it's first line.
     If the file is different, it will be overwritten if overwrite is True.
 
-    Also copies/obtains required javascript for compression:
+    Also copies/obtains required javascript for reading files compressed
+    with zlib, if compression=True.
     '''
 
     if style == 'horiz dropdowns':
@@ -643,33 +637,73 @@ def copy_required_javascript(file_dir, style, compression=None, overwrite=True):
                 print '''File: {}/{} differs to the expected contents, but is
 not being overwritten. Your webpage may be broken!'''.format(file_dir, imt_js_to_copy)
 
+    # make a list of all the required javascript files
     js_files = [imt_js_to_copy]
 
-    if compression is None:
-        js_to_copy = None
-    elif compression == 'zlib':
-        js_to_copy = 'pako_inflate.js'
-    else:
-        raise ValueError('Compression {} not set up'.format(compression))
+    # now move on to javascript dependencies from the compression:
+    if compression:
+        js_to_copy = PAKO_JS_FILE
 
-    if js_to_copy:
-        lz_src = os.path.join(file_src_dir, js_to_copy)
-        lz_dest = os.path.join(file_dir, js_to_copy)
+        js_src = os.path.join(file_src_dir, js_to_copy)
+        js_dest = os.path.join(file_dir, js_to_copy)
         # if the file is already at destination, we're good:
-        if os.path.isfile(lz_dest):
+        if os.path.isfile(js_dest):
             pass
         else:
             # is the required file in the javascript source directory:
-            if not os.path.isfile(lz_src):
-                raise ValueError('Unable to locate file "{}"'.format(lz_src))
+            if not os.path.isfile(js_src):
+                # we need to get the required javascript from source.
+                #
+                # if we have permission to write to teh file_src_dir then 
+                # try to do so. This means it's installed for all uses from this
+                # install of ImageMetaTag:
+                if os.access(file_src_dir, os.W_OK):
+                    pako_to_dir = file_src_dir
+                    # now get pako:
+                    get_pako(pako_to_dir)
+                    # and copy it to where it's needed for this call:
+                    shutil.copy(js_src, js_dest)
+                else:
+                    # put pako js file into the target dir. At least it will
+                    # be available for subsequent writes to that dir:
+                    pako_to_dir = file_dir
+                    # now get pako to that dir:
+                    get_pako(pako_to_dir)
             else:
                 # copy the file:
-                shutil.copy(lz_src, lz_dest)
+                shutil.copy(js_src, js_dest)
         # finally, make a note:
         js_files.append(js_to_copy)
     
     return js_files
-    
+
+def get_pako(pako_to_dir):
+    'Obtains the required pako javascript code from remote host'
+    import tarfile
+    from urllib2 import urlopen
+
+    # Open the url
+    pako_urlopen = urlopen(PAKO_SOURE_TAR)
+    print "downloading " + PAKO_SOURE_TAR
+    # Open our local file for writing
+    with tempfile.NamedTemporaryFile('w', suffix='.tar.gz', prefix='pako_',
+                                     delete=False) as local_file:
+        local_file.write(pako_urlopen.read())
+        targz_file = local_file.name
+    pako_urlopen.close()
+    # now extract the file we need:
+    with tarfile.open(name=targz_file, mode='r:gz') as tgz:
+        if not tarfile.is_tarfile:
+            raise ValueError('Downloaded pako tar.gz file cannot be read.')
+        else:
+            target = 'pako-{}/dist/{}'.format(PAKO_RELEASE, PAKO_JS_FILE)
+            target_file = tgz.extractfile(target)
+            if target_file:
+                with open(os.path.join(pako_to_dir, PAKO_JS_FILE), 'w') as final_file:
+                    for line in target_file:
+                        final_file.write(line)
+    os.remove(targz_file)
+
 def _indent_up_one(ind):
     'increases the indent level of an input ind by one'
     n_indents = len(ind) / LEN_INDENT

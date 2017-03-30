@@ -46,7 +46,8 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
     * db_file - a database file to be used by :func:`ImageMetaTag.db.write_img_to_dbfile` to \
                 store all image metadata so they can be quickly accessed.
     * db_full_paths - by default, if the images can be expressed as relative path to the database \
-                      file then the database will contain only relative links, unless this is True.
+                      file then the database will contain only relative links, unless \
+                      db_full_paths is True.
     * db_timeout - change the database timeout (in seconds).
     * db_attempts - change the number of attempts to write to the database.
     * dpi - change the image resolution passed into matplotlib.savefig.

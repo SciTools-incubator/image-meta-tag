@@ -99,6 +99,9 @@
 Alongside this is a short ImageMetaTag javascript library held in a &#8216;.js&#8217; file
 (currently held in a single file) and a .json file contain the <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a>
 tree strcuture as a JSON data strcuture.</p>
+<p>To reduce file size, the JSON data structure can be compressed using zlib. If this is the case,
+then the <a class="reference external" href="https://github.com/nodeca/pako">pako javascript library</a> is used restore the JSON
+data in the browser.</p>
 <p>This can either be done using write_full_page, to produce a page with just a set of
 selectors to browse the ImageDict, or the different components can be added to a
 page as it is being constructed (reading in an html template, for instance).</p>
@@ -122,7 +125,7 @@ page as it is being constructed (reading in an html template, for instance).</p>
 <h2>Writing a whole page<a class="headerlink" href="#writing-a-whole-page" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="ImageMetaTag.webpage.write_full_page">
-<tt class="descclassname">ImageMetaTag.webpage.</tt><tt class="descname">write_full_page</tt><big>(</big><em>img_dict</em>, <em>filepath</em>, <em>title</em>, <em>page_filename=None</em>, <em>tab_s_name=None</em>, <em>preamble=None</em>, <em>postamble=None</em>, <em>compression=None</em>, <em>initial_selectors=None</em>, <em>show_selector_names=False</em>, <em>url_type='int'</em>, <em>only_show_rel_url=False</em>, <em>verbose=False</em>, <em>style='horiz dropdowns'</em>, <em>write_intmed_tmpfile=False</em>, <em>description=None</em>, <em>keywords=None</em>, <em>n_proc=1</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/webpage.html#write_full_page"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.webpage.write_full_page" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">ImageMetaTag.webpage.</tt><tt class="descname">write_full_page</tt><big>(</big><em>img_dict</em>, <em>filepath</em>, <em>title</em>, <em>page_filename=None</em>, <em>tab_s_name=None</em>, <em>preamble=None</em>, <em>postamble=None</em>, <em>compression=False</em>, <em>initial_selectors=None</em>, <em>show_selector_names=False</em>, <em>url_type='int'</em>, <em>only_show_rel_url=False</em>, <em>verbose=False</em>, <em>style='horiz dropdowns'</em>, <em>write_intmed_tmpfile=False</em>, <em>description=None</em>, <em>keywords=None</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/webpage.html#write_full_page"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.webpage.write_full_page" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes out an <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a> as a webpage, to a given file location.
 The file is overwritten.</p>
 <p>If the img_dict supplied is None, rather than the appropriate class, then a page will
@@ -143,8 +146,7 @@ webpage styles could be added.</p>
 <li>write_intmed_tmpfile - If True, files are written out to temporary filenames and then                              moved when completed.</li>
 <li>description - html description metadata</li>
 <li>keywords - html keyword metadata</li>
-<li>compression - default None. If set to &#8216;lz&#8217; then the json data object will be compressed                     using lz string compression. Using <a class="reference external" href="https://github.com/gkovacs/lz-string-python">https://github.com/gkovacs/lz-string-python</a></li>
-<li>n_proc - for very large strings, the lz string compression does not scale well. To avoid                problems the strings are broken into chunks. These can be compressed in parallel                if n_proc &gt; 1.</li>
+<li>compression - default False. If True, then the json data object will be compressed                     using zlib string compression. When read into the browser, we will use                     pako to inflate it (<a class="reference external" href="https://github.com/nodeca/pako">https://github.com/nodeca/pako</a>)</li>
 </ul>
 <p>Returns a list of files that the the created webpage is dependent upon</p>
 </dd></dl>
@@ -154,7 +156,7 @@ webpage styles could be added.</p>
 <h2>As indidividual components<a class="headerlink" href="#as-indidividual-components" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="ImageMetaTag.webpage.write_js_to_header">
-<tt class="descclassname">ImageMetaTag.webpage.</tt><tt class="descname">write_js_to_header</tt><big>(</big><em>img_dict</em>, <em>initial_selectors=None</em>, <em>style=None</em>, <em>file_obj=None</em>, <em>json_files=None</em>, <em>js_files=None</em>, <em>pagename=None</em>, <em>tabname=None</em>, <em>selector_prefix=None</em>, <em>url_separator='|'</em>, <em>url_type='str'</em>, <em>only_show_rel_url=False</em>, <em>ind=None</em>, <em>compression=None</em>, <em>description=None</em>, <em>keywords=None</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/webpage.html#write_js_to_header"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.webpage.write_js_to_header" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">ImageMetaTag.webpage.</tt><tt class="descname">write_js_to_header</tt><big>(</big><em>img_dict</em>, <em>initial_selectors=None</em>, <em>style=None</em>, <em>file_obj=None</em>, <em>json_files=None</em>, <em>js_files=None</em>, <em>pagename=None</em>, <em>tabname=None</em>, <em>selector_prefix=None</em>, <em>url_separator='|'</em>, <em>url_type='str'</em>, <em>only_show_rel_url=False</em>, <em>ind=None</em>, <em>compression=False</em>, <em>description=None</em>, <em>keywords=None</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/webpage.html#write_js_to_header"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.webpage.write_js_to_header" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes out the required ImageMetaTag config and data paths into a html header section
 for an input <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a>.</p>
 <p>Currently only able to write out a page with horizontal dropdown menus, but other
@@ -170,6 +172,7 @@ webpage styles could be added.</p>
 <li>url_type - determines the type of URL at the bottom of the ImageMetaTag section. Can be                  &#8216;int&#8217; or &#8216;str&#8217;.</li>
 <li>only_show_rel_url - If True, the wepage will only show relative urls in is link section.</li>
 <li>ind - indentation going into the header section.</li>
+<li>compression - Indicates the json file is compressed using zlib.</li>
 <li>description - html description metadata7</li>
 <li>keywords - html keyword metadata</li>
 </ul>
@@ -191,24 +194,28 @@ webpage styles could be added.</p>
 
 <dl class="function">
 <dt id="ImageMetaTag.webpage.write_json">
-<tt class="descclassname">ImageMetaTag.webpage.</tt><tt class="descname">write_json</tt><big>(</big><em>img_dict</em>, <em>json_file</em>, <em>compression=None</em>, <em>n_proc=1</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/webpage.html#write_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.webpage.write_json" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">ImageMetaTag.webpage.</tt><tt class="descname">write_json</tt><big>(</big><em>img_dict</em>, <em>json_file</em>, <em>compression=False</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/webpage.html#write_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.webpage.write_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes a json dump of the <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a> tree strucuture
 to a target file path.</p>
-<p>Can be compressed using lzstring compresion (compression=&#8217;lz&#8217;). If this is
-the case and the string is very long, then it will be split into mutliple files.
-Because of the split, the compression/decompression time scales linearly with
-string size. This is not the case with large strings in a single call.</p>
-<p>Returns a list of json files.</p>
+<dl class="docutils">
+<dt>Options:</dt>
+<dd><ul class="first last simple">
+<li>compression : If True, json is compressed using zlib compresion</li>
+</ul>
+</dd>
+</dl>
+<p>Returns a list of json files as (tempfile, final_file) tuples.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ImageMetaTag.webpage.copy_required_javascript">
-<tt class="descclassname">ImageMetaTag.webpage.</tt><tt class="descname">copy_required_javascript</tt><big>(</big><em>file_dir</em>, <em>style</em>, <em>compression=None</em>, <em>overwrite=True</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/webpage.html#copy_required_javascript"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.webpage.copy_required_javascript" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">ImageMetaTag.webpage.</tt><tt class="descname">copy_required_javascript</tt><big>(</big><em>file_dir</em>, <em>style</em>, <em>compression=False</em>, <em>overwrite=True</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/webpage.html#copy_required_javascript"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.webpage.copy_required_javascript" title="Permalink to this definition">¶</a></dt>
 <dd><p>Copies the required javascript library to the directory
 containing the required page (file_dir) for a given webpage style.</p>
 <p>If a file is already present it will be checked based it&#8217;s first line.
 If the file is different, it will be overwritten if overwrite is True.</p>
-<p>Also copies/obtains required javascript for compression:</p>
+<p>Also copies/obtains required javascript for reading files compressed
+with zlib, if compression=True.</p>
 </dd></dl>
 
 </div>
