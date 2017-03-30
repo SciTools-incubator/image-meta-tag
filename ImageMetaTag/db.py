@@ -28,7 +28,8 @@ def db_name_to_info_key(in_str):
     # convert to string, to remove unicode string
     return str(in_str).replace('__', ' ')
 
-def write_img_to_dbfile(db_file, img_filename, img_info, add_strict=False, timeout=DEFAULT_DB_TIMEOUT):
+def write_img_to_dbfile(db_file, img_filename, img_info, add_strict=False,
+                        timeout=DEFAULT_DB_TIMEOUT):
     '''
     Writes image metadata to a database.
 
@@ -104,9 +105,9 @@ def read(db_file, required_tags=None, tag_strings=None,
                     # open the connection and the cursor:
                     dbcn, dbcr = open_db_file(db_file, timeout=db_timeout)
                     # read it:
-                    filename_list, out_dict = read_img_info_from_dbcursor(dbcr,
-                                                                required_tags=required_tags,
-                                                                tag_strings=tag_strings)
+                    f_list, out_dict = read_img_info_from_dbcursor(dbcr,
+                                                required_tags=required_tags,
+                                                tag_strings=tag_strings)
                     # close connection:
                     dbcn.close()
                     read_db = True
@@ -131,7 +132,7 @@ def read(db_file, required_tags=None, tag_strings=None,
 
             # close connection:
             dbcn.close()
-            return filename_list, out_dict
+            return f_list, out_dict
 
 read_img_info_from_dbfile = read
 
@@ -474,7 +475,8 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
                 # delete commands each have a chance to complete:
                 # 200 is arbriatily chosen, but seems to work
                 chunk_size = 200
-                for chunk_o_filenames in [fn_list[i:i+chunk_size] for i in xrange(0, len(fn_list), chunk_size)]:
+                chunks = __gen_chunk_of_list(fn_list, chunk_size)
+                for chunk_o_filenames in chunks:
                     # within each chunk of files, need to open the db, with time out retries etc:
                     n_tries = 1
                     wrote_db = False
@@ -490,14 +492,16 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
                                     if OpErr_file.message == 'no such table: {}'.format(SQLITE_IMG_INFO_TABLE):
                                         # the db file exists, but it doesn't have anything in it:
                                         if not skip_warning:
-                                            msg = 'WARNING: Unable to delte file entry "{}" from database "{}" as database table is missing'
+                                            msg = ('WARNING: Unable to delete file entry "{}" from'
+                                                   ' database "{}" as database table is missing')
                                             print msg.format(fname, db_file)
                                         return
                                     else:
                                         if not skip_warning:
                                             # if this fails, print a warning...
                                             # need to figure out why this happens
-                                            msg = 'WARNING: unable to delete file entry: "{}", type "{}" from database'
+                                            msg = ('WARNING: unable to delete file entry:'
+                                                   ' "{}", type "{}" from database')
                                             print msg.format(fname, type(fname))
                             dbcn.commit()
                             # if we got here, then we're good!
@@ -518,8 +522,7 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
                     if n_tries > db_attempts:
                         msg = '{} for file {}'.format(OpErr.message, db_file)
                         raise sqlite3.OperationalError(msg)
-                    
-                    
+
             else:
                 # just open the database:
                 dbcn, dbcr = open_db_file(db_file)
@@ -531,8 +534,9 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
                         if not skip_warning:
                             # if this fails, print a warning...
                             # need to figure out why this happens
-                            print 'WARNING: unable to delete file entry: "%s", type "%s" from database' \
-                                        % (fname, type(fname))
+                            msg = ('WARNING: unable to delete file entry:'
+                                   ' "{}", type "{}" from database')
+                            print msg.format(fname, type(fname))
                     # commit every 100 to give other processes a chance:
                     if i_fn % 100 == 0:
                         dbcn.commit()
@@ -548,6 +552,11 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
                 dbcn.close()
             elif not allow_retries:
                 dbcn.close()
+
+def __gen_chunk_of_list(in_list, chunk_size):
+    'gnerator that yields a chunk of list, of length chunk size'
+    for ndx in range(0, len(in_list), chunk_size):
+        yield in_list[ndx:min(ndx + chunk_size, len(in_list))]
 
 def select_dbfile_by_tags(db_file, select_tags):
     '''
@@ -610,8 +619,9 @@ def select_dbcr_by_tags(dbcr, select_tags):
 
     return filename_list, out_dict
 
-def scan_dir_for_db(basedir, db_file, img_tag_req=None, subdir_excl_list=None, known_file_tags=None,
-                    verbose=False, no_file_ext=False, return_timings=False, restart_db=False):
+def scan_dir_for_db(basedir, db_file, img_tag_req=None, subdir_excl_list=None,
+                    known_file_tags=None, verbose=False, no_file_ext=False,
+                    return_timings=False, restart_db=False):
     '''
     A useful utility that scans a directory on disk for images that can go into a database.
     This should only be used to build a database from a directory of tagged images that

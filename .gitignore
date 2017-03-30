@@ -2,3 +2,4 @@
 .pydevproject
 *.pyc
 *~
+ImageMetaTag/javascript/pako_inflate.js

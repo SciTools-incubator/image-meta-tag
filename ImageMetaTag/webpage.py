@@ -6,6 +6,10 @@ Alongside this is a short ImageMetaTag javascript library held in a '.js' file
 (currently held in a single file) and a .json file contain the :class:`ImageMetaTag.ImageDict`
 tree strcuture as a JSON data strcuture.
 
+To reduce file size, the JSON data structure can be compressed using zlib. If this is the case,
+then the `pako javascript library <https://github.com/nodeca/pako>`_ is used restore the JSON
+data in the browser.
+
 This can either be done using write_full_page, to produce a page with just a set of
 selectors to browse the ImageDict, or the different components can be added to a
 page as it is being constructed (reading in an html template, for instance).
@@ -32,15 +36,25 @@ menus, but more will hopefully be added soon.
 .. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks
 '''
 
-import os, json, pdb, shutil, tempfile, re
+import os, json, pdb, shutil, tempfile, zlib
+import numpy as np
 import ImageMetaTag as imt
+
+from multiprocessing import Pool
 
 # single indent to be used on the output webpage
 INDENT = '  '
 LEN_INDENT = len(INDENT)
 
+
+# for compressed json files, we use pako to inflate the data back to full size:
+PAKO_JS_FILE = 'pako_inflate.js'
+PAKO_RELEASE = '1.0.5'
+PAKO_SOURE_TAR = 'https://github.com/nodeca/pako/archive/{}.tar.gz'.format(PAKO_RELEASE)
+
+
 def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=None,
-                    preamble=None, postamble=None,
+                    preamble=None, postamble=None, compression=False,
                     initial_selectors=None, show_selector_names=False,
                     url_type='int', only_show_rel_url=False, verbose=False,
                     style='horiz dropdowns', write_intmed_tmpfile=False,
@@ -75,7 +89,10 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
                              moved when completed.
     * description - html description metadata
     * keywords - html keyword metadata
-
+    * compression - default False. If True, then the json data object will be compressed \
+                    using zlib string compression. When read into the browser, we will use \
+                    pako to inflate it (https://github.com/nodeca/pako)
+                    
     Returns a list of files that the the created webpage is dependent upon
     '''
 
@@ -92,28 +109,23 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
     page_dependencies.append(file_name)
 
     if img_dict is None:
-        pass
+        json_files = []
     else:
+        # now make sure the required javascript library is copied over to the file_dir:
+        js_files = copy_required_javascript(file_dir, style, compression=compression)
+        page_dependencies.extend(js_files)
+        
         # we have real data to work with:
         dict_depth = img_dict.dict_depth(uniform_depth=True)
         # work out what files we need to create:
         file_name_no_ext = os.path.splitext(file_name)[0]
         # json file to hold the image_dict branching data etc:
         json_file = file_name_no_ext + '.json'
+        if compression:
+            json_file += '.zlib'
         page_dependencies.append(json_file)
         json_filepath = os.path.join(file_dir, json_file)
-        if write_intmed_tmpfile:
-            with tempfile.NamedTemporaryFile('w', suffix='.json', prefix='imt_',
-                                             dir=file_dir, delete=False) as json_file_obj:
-                # now write out a json file:
-                write_json(img_dict, json_file_obj)
-                tmp_json_filepath = json_file_obj.name
-        else:
-            write_json(img_dict, json_filepath)
-
-        # now make sure the required javascript library is copied over to the file_dir:
-        js_file = copy_required_javascript(file_dir, style)
-        page_dependencies.append(js_file)
+        json_files = write_json(img_dict, json_filepath, compression=compression)
 
         # this is the internal name the different selectors, associated lists for the selectors, and
         # the list of files (all with a numbered suffix):
@@ -135,6 +147,7 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
     # open the file - this is a nice and simple file so just use the with open...
     with open(filepath_to_write, 'w') as out_file:
         # write out the start of the file:
+        out_file.write('<!DOCTYPE html>\n')
         out_file.write(ind + '<html>\n')
         # increase the indent level:
         ind = _indent_up_one(ind)
@@ -147,60 +160,70 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
 
         if style == 'horiz dropdowns':
             # write out a little css at the top:
-            out_file.write(ind + '<style>')
-            out_file.write(ind + 'body, div, dl, dt, dd, li, h1, h2, h3, h4, h5, h6, pre, form,')
-            out_file.write(ind + '            fieldset, input, textarea, p, blockquote, th, td {')
-            out_file.write(ind + '    margin: 0;')
-            out_file.write(ind + '    padding: 0;')
-            out_file.write(ind + '}')
-            out_file.write(ind + 'fieldset, img {')
-            out_file.write(ind + '    border: 0 none;')
-            out_file.write(ind + '}')
-            out_file.write(ind + 'body { ')
-            out_file.write(ind + '    font: 12px Myriad,Helvetica,Tahoma,Arial,clean,sans-serif;')
-            out_file.write(ind + '    *font-size: 75%;')
-            out_file.write(ind + '}')
-            out_file.write(ind + 'h1 {')
-            out_file.write(ind + '    font-size: 1.5em; ')
-            out_file.write(ind + '    font-weight: normal;')
-            out_file.write(ind + '    line-height: 1em; ')
-            out_file.write(ind + '    margin-top: 1em;')
-            out_file.write(ind + '    margin-bottom:0;')
-            out_file.write(ind + '}')
-            out_file.write(ind + 'h2 { ')
-            out_file.write(ind + '    font-size: 1.1667em; ')
-            out_file.write(ind + '    font-weight: bold; ')
-            out_file.write(ind + '    line-height: 1.286em; ')
-            out_file.write(ind + '    margin-top: 1.929em; ')
-            out_file.write(ind + '    margin-bottom:0.643em;')
-            out_file.write(ind + '}')
-            out_file.write(ind + 'h3, h4, h5, h6 {')
-            out_file.write(ind + '    font-size: 1em; ')
-            out_file.write(ind + '    font-weight: bold; ')
-            out_file.write(ind + '    line-height: 1.5em; ')
-            out_file.write(ind + '    margin-top: 1.5em; ')
-            out_file.write(ind + '    margin-bottom: 0;')
-            out_file.write(ind + '}')
-            out_file.write(ind + 'p { ')
-            out_file.write(ind + '    font-size: 1em; ')
-            out_file.write(ind + '    margin-top: 1.5em; ')
-            out_file.write(ind + '    margin-bottom: 1.5em; ')
-            out_file.write(ind + '    line-height: 1.5em;')
-            out_file.write(ind + '}')
-            out_file.write(ind + 'pre, code { ')
-            out_file.write(ind + '    font-size:115%;')
-            out_file.write(ind + '    *font-size:100%;')
-            out_file.write(ind + '    font-family: Courier, "Courier New"; ')
-            out_file.write(ind + '    background-color: #efefef; ')
-            out_file.write(ind + '    border: 1px solid #ccc;')
-            out_file.write(ind + '}')
-            out_file.write(ind + 'pre { ')
-            out_file.write(ind + '    border-width: 1px 0; ')
-            out_file.write(ind + '    padding: 1.5em;')
-            out_file.write(ind + '}')
-            out_file.write(ind + 'table {  font-size:100%; }')
-            out_file.write(ind + '</style>')
-
+            css = '''{0}<style>
+{0}  body, div, dl, dt, dd, li, h1, h2 {{
+{0}    margin: 0;
+{0}    padding: 0;
+{0}  }}
+{0}  h3, h4, h5, h6, pre, form, fieldset, input {{'
+{0}    margin: 0;
+{0}    padding: 0;
+{0}  }}
+{0}  textarea, p, blockquote, th, td {{
+{0}    margin: 0;
+{0}    padding: 0;
+{0}  }}
+{0}  fieldset, img {{
+{0}    border: 0 none;
+{0}  }}
+{0}  body {{
+{0}    font: 12px Myriad,Helvetica,Tahoma,Arial,clean,sans-serif;
+{0}    *font-size: 75%;
+{0}  }}
+{0}  h1 {{
+{0}    font-size: 1.5em;
+{0}    font-weight: normal;
+{0}    line-height: 1em;
+{0}    margin-top: 1em;
+{0}    margin-bottom:0;
+{0}  }}
+{0}  h2 {{
+{0}    font-size: 1.1667em;
+{0}    font-weight: bold;
+{0}    line-height: 1.286em;
+{0}    margin-top: 1.929em;
+{0}    margin-bottom:0.643em;
+{0}  }}
+{0}  h3, h4, h5, h6 {{
+{0}    font-size: 1em;
+{0}    font-weight: bold;
+{0}    line-height: 1.5em;
+{0}    margin-top: 1.5em;
+{0}    margin-bottom: 0;
+{0}  }}
+{0}  p {{
+{0}    font-size: 1em;
+{0}    margin-top: 1.5em;
+{0}    margin-bottom: 1.5em;
+{0}    line-height: 1.5em;
+{0}  }}
+{0}  pre, code {{
+{0}    font-size:115%;
+{0}    *font-size:100%;
+{0}    font-family: Courier, "Courier New";
+{0}    background-color: #efefef;
+{0}    border: 1px solid #ccc;
+{0}  }}
+{0}  pre {{
+{0}    border-width: 1px 0;
+{0}    padding: 1.5em;
+{0}  }}
+{0}  table {{
+{0}    font-size:100%;
+{0}  }}
+{0}</style>
+'''
+            out_file.write(css.format(ind))
 
         # now write out the specific stuff to the html header:
         if img_dict is None:
@@ -211,12 +234,14 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
                                ind=ind,
                                description=description, keywords=keywords)
         else:
+            # the json_files is a list of (tmp_file, final_file) tuples. Here we want the final one:
+            final_json_files = [os.path.split(x[1])[1] for x in json_files]
             write_js_to_header(img_dict, initial_selectors=initial_selectors,
-                               file_obj=out_file, json_file=json_file, js_file=js_file,
+                               file_obj=out_file, json_files=final_json_files, js_files=js_files,
                                pagename=page_filename, tabname=tab_s_name,
                                selector_prefix=selector_prefix, url_separator=url_separator,
                                url_type=url_type, only_show_rel_url=only_show_rel_url,
-                               style=style, ind=ind,
+                               style=style, ind=ind, compression=compression,
                                description=description, keywords=keywords)
         # now close the script and head:
         ind = _indent_down_one(ind)
@@ -258,13 +283,15 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
         out_file.write(ind + '</body>\n')
         out_file.write('\n</html>')
 
+
         if  write_intmed_tmpfile:
+            tmp_files_to_mv = json_files + [(tmp_html_filepath, filepath)]
+        else:
+            tmp_files_to_mv = json_files
+        for tmp_file_mv in tmp_files_to_mv:
             # now move the json, then the html files:
-            if img_dict is not None:
-                os.chmod(tmp_json_filepath, 0644)
-                shutil.move(tmp_json_filepath, json_filepath)
-            os.chmod(tmp_html_filepath, 0644)
-            shutil.move(tmp_html_filepath, filepath)
+            os.chmod(tmp_file_mv[0], 0644)
+            shutil.move(tmp_file_mv[0], tmp_file_mv[1])
 
         if verbose:
             print 'File "%s" complete.' % filepath
@@ -272,10 +299,10 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
     return page_dependencies
 
 def write_js_to_header(img_dict, initial_selectors=None, style=None,
-                       file_obj=None, json_file=None, js_file=None,
+                       file_obj=None, json_files=None, js_files=None,
                        pagename=None, tabname=None, selector_prefix=None,
                        url_separator='|', url_type='str', only_show_rel_url=False,
-                       ind=None,
+                       ind=None, compression=False,
                        description=None, keywords=None):
     '''
     Writes out the required ImageMetaTag config and data paths into a html header section
@@ -287,7 +314,7 @@ def write_js_to_header(img_dict, initial_selectors=None, style=None,
     * initial_selectors - A list of initial values for the selectors.
     * style - the style of the output webpage, currently only 'horiz dropdowns' is available
     * file_obj - the open file object to write the header to.
-    * json_file - the json (or other similar object) containing the representation of \
+    * json_files - a list of the json (or other similar object) containing the representation of \
                   the ImageDict data.
     * js_file - the javascript file containing the actual scripting for the selected style.
     * pagename - the file name, within the directory (defaults to the name of the file) \
@@ -298,6 +325,7 @@ def write_js_to_header(img_dict, initial_selectors=None, style=None,
                  'int' or 'str'.
     * only_show_rel_url - If True, the wepage will only show relative urls in is link section.
     * ind - indentation going into the header section.
+    * compression - Indicates the json file is compressed using zlib.
     * description - html description metadata7
     * keywords - html keyword metadata
     '''
@@ -310,16 +338,24 @@ def write_js_to_header(img_dict, initial_selectors=None, style=None,
         file_obj.write('{}<meta name="keywords" content="{}">\n'.format(ind, keywords))
 
     if not img_dict is None:
-        # add a reference to the data structure:
-        out_str = '{}<script type="text/javascript" src="{}"></script>\n'.format(ind, json_file)
-        file_obj.write(out_str)
+        ## add a reference to the data structure:
+        #out_str = '{}<script type="text/javascript" src="{}"></script>\n'.format(ind, json_files)
+        #file_obj.write(out_str)
+
         # now add a reference to the javascript functions to implement the style:
-        out_str = '{}<script type="text/javascript" src="{}"></script>\n'.format(ind, js_file)
-        file_obj.write(out_str)
+        for js_file in js_files:
+            out_str = '{}<script type="text/javascript" src="{}"></script>\n'.format(ind, js_file)
+            file_obj.write(out_str)
 
         # now write out the javascript cnfiguration variables:
         file_obj.write(ind + '<script type="text/javascript">\n')
         ind = _indent_up_one(ind)
+        # define, read in and parse the json file:
+        out_str = '''{0}var json_files = {1};
+{0}var zl_unpack = {2};
+{0}imt = read_parse_json_files(json_files, zl_unpack);
+'''
+        file_obj.write(out_str.format(ind, json_files,_py_to_js_bool(bool(compression))))
 
         # in case the page we are writing is embedded as a frame, write out the top
         # level page here;
@@ -433,31 +469,35 @@ def write_js_setup_defaults(selector_prefix=None, list_prefix=None, file_list_na
         file_list_name = 'file_list'
     return (selector_prefix, list_prefix, file_list_name)
 
-def write_json(img_dict, json_file):
+def write_json(img_dict, json_file, compression=False):
     '''
-    Writes a json dump of the :class:`ImageMetaTag.ImageDict` tree strucuture to a target file path
+    Writes a json dump of the :class:`ImageMetaTag.ImageDict` tree strucuture
+    to a target file path.
+
+    Options:
+     * compression : If True, json is compressed using zlib compresion
+
+    Returns a list of json files as (tempfile, final_file) tuples.
     '''
-    if not isinstance(img_dict, imt.ImageDict):
-        raise ValueError('input img_dict is not an ImageMetaTag.ImageDict')
-    # TODO: ivestigate using zblib to compress this, and pako.js to decompress, client side:
-    dict_as_json = json.dumps(img_dict.dict, separators=(',', ':'))
 
-    # if we're not doing any fancy compression, then use subdirectories to reduce the string size:
-    for i_sd, subdir in enumerate(img_dict.subdirs):
-        dict_as_json = re.sub('"{}'.format(subdir), 'sd[{}]+"'.format(i_sd), dict_as_json)
-
-    out_str = '''
-var sd = {};
-var imt = {};
-'''.format(img_dict.subdirs, dict_as_json)
-
-    if isinstance(json_file, str):
-        # input is a string, assume it's the file path to write to:
-        with open(json_file, 'w') as file_obj:
-            file_obj.write(out_str)
+    if isinstance(img_dict, imt.ImageDict):
+        dict_as_json = json.dumps(img_dict.dict, separators=(',', ':'))
+    elif isinstance(img_dict, str):
+        dict_as_json = img_dict
     else:
-        # input is a file object:
-        json_file.write(out_str)
+        raise ValueError('input img_dict is not an ImageMetaTag.ImageDict or string')
+
+    # uncompressed, or zlib, write to to a single file:
+    tmp_file_dir = os.path.split(json_file)[0]
+    with tempfile.NamedTemporaryFile('w', suffix='.json', prefix='imt_',
+                                     dir=tmp_file_dir, delete=False) as file_obj:
+        if compression:
+            file_obj.write(zlib.compress(dict_as_json))
+        else:
+            file_obj.write(dict_as_json)
+        tmp_file_path = file_obj.name
+
+    return [(tmp_file_path, json_file)]
 
 def write_js_placeholders(file_obj=None, dict_depth=None, selector_prefix=None,
                           style='horiz dropdowns', level_names=False,
@@ -558,43 +598,119 @@ def write_js_placeholders(file_obj=None, dict_depth=None, selector_prefix=None,
     else:
         raise ValueError('"%s" tyle of content placeholder not defined' % style)
 
-def copy_required_javascript(file_dir, style, overwrite=True):
+def copy_required_javascript(file_dir, style, compression=False, overwrite=True):
     '''
     Copies the required javascript library to the directory
     containing the required page (file_dir) for a given webpage style.
 
     If a file is already present it will be checked based it's first line.
     If the file is different, it will be overwritten if overwrite is True.
+
+    Also copies/obtains required javascript for reading files compressed
+    with zlib, if compression=True.
     '''
 
     if style == 'horiz dropdowns':
-        file_to_copy = 'imt_dropdown.js'
+        imt_js_to_copy = 'imt_dropdown.js'
         # get this from the installed ImageMetaTag directory:
         file_src_dir = os.path.join(imt.__path__[0], 'javascript')
-        first_line = '// ImageMetaTag dropdown menu scripting - vn0.4\n'
+        first_line = '// ImageMetaTag dropdown menu scripting - vn0.5\n'
     else:
         raise ValueError('Javascript library not set up for style: {}'.format(style))
 
-    if not os.path.isfile(os.path.join(file_dir, file_to_copy)):
+    if not os.path.isfile(os.path.join(file_dir, imt_js_to_copy)):
         # file isn't in target dir, so copy it:
-        shutil.copy(os.path.join(file_src_dir, file_to_copy),
-                    os.path.join(file_dir, file_to_copy))
+        shutil.copy(os.path.join(file_src_dir, imt_js_to_copy),
+                    os.path.join(file_dir, imt_js_to_copy))
     else:
         # the file is there, check it's right:
-        with open(os.path.join(file_dir, file_to_copy)) as file_obj:
+        with open(os.path.join(file_dir, imt_js_to_copy)) as file_obj:
             this_first_line = file_obj.readline()
         if first_line == this_first_line:
             # the file is good, move on:
             pass
         else:
             if overwrite:
-                shutil.copy(os.path.join(file_src_dir, file_to_copy),
-                            os.path.join(file_dir, file_to_copy))
+                shutil.copy(os.path.join(file_src_dir, imt_js_to_copy),
+                            os.path.join(file_dir, imt_js_to_copy))
             else:
                 print '''File: {}/{} differs to the expected contents, but is
-not being overwritten. Your webpage may be broken!'''.format(file_dir, file_to_copy)
+not being overwritten. Your webpage may be broken!'''.format(file_dir, imt_js_to_copy)
 
-    return file_to_copy
+    # make a list of all the required javascript files
+    js_files = [imt_js_to_copy]
+
+    # now move on to javascript dependencies from the compression:
+    if compression:
+        js_to_copy = PAKO_JS_FILE
+
+        js_src = os.path.join(file_src_dir, js_to_copy)
+        js_dest = os.path.join(file_dir, js_to_copy)
+        # if the file is already at destination, we're good:
+        if os.path.isfile(js_dest):
+            pass
+        else:
+            # is the required file in the javascript source directory:
+            if not os.path.isfile(js_src):
+                # we need to get the required javascript from source.
+                #
+                # if we have permission to write to teh file_src_dir then 
+                # try to do so. This means it's installed for all uses from this
+                # install of ImageMetaTag:
+                if os.access(file_src_dir, os.W_OK):
+                    pako_to_dir = file_src_dir
+                    # now get pako:
+                    get_pako(pako_to_dir=pako_to_dir)
+                    # and copy it to where it's needed for this call:
+                    shutil.copy(js_src, js_dest)
+                else:
+                    # put pako js file into the target dir. At least it will
+                    # be available for subsequent writes to that dir:
+                    pako_to_dir = file_dir
+                    # now get pako to that dir:
+                    get_pako(pako_to_dir=pako_to_dir)
+            else:
+                # copy the file:
+                shutil.copy(js_src, js_dest)
+        # finally, make a note:
+        js_files.append(js_to_copy)
+    
+    return js_files
+
+def get_pako(pako_to_dir=None):
+    '''
+    Obtains the required pako javascript code from remote host, to a given 
+    javascript directory. If the javascript dir is not supplied, then 
+    the 'javascript' directory alongside the ImageMetaTag python code is used.
+    '''
+    import tarfile
+    from urllib2 import urlopen
+    
+    # set up pako into the current imt_dir:
+    if pako_to_dir is None:
+        pako_to_dir = os.path.join(imt.__path__[0], 'javascript')
+
+    # Open the url
+    pako_urlopen = urlopen(PAKO_SOURE_TAR)
+    print "downloading " + PAKO_SOURE_TAR
+    # Open our local file for writing
+    with tempfile.NamedTemporaryFile('w', suffix='.tar.gz', prefix='pako_',
+                                     delete=False) as local_file:
+        local_file.write(pako_urlopen.read())
+        targz_file = local_file.name
+    pako_urlopen.close()
+    # now extract the file we need:
+    with tarfile.open(name=targz_file, mode='r:gz') as tgz:
+        if not tarfile.is_tarfile:
+            raise ValueError('Downloaded pako tar.gz file cannot be read.')
+        else:
+            target = 'pako-{}/dist/{}'.format(PAKO_RELEASE, PAKO_JS_FILE)
+            target_file = tgz.extractfile(target)
+            if target_file:
+                with open(os.path.join(pako_to_dir, PAKO_JS_FILE), 'w') as final_file:
+                    for line in target_file:
+                        final_file.write(line)
+    os.remove(targz_file)
 
 def _indent_up_one(ind):
     'increases the indent level of an input ind by one'

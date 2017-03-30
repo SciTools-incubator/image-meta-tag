@@ -15,9 +15,12 @@ a few common image post-processing options are included such as cropping, logo a
 colour palette manipulation to reduce filesizes.
 
 .. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks
+
+(C) Crown copyright Met Office. All rights reserved.
+Released under BSD 3-Clause License. See LICENSE for more details.
 '''
 
-__version__ = '0.4'
+__version__ = '0.5.0'
 __documentation__ = 'http://scitools-incubator.github.io/image-meta-tag/build/html/'
 
 # list fo file formats which are valid for saving metadata to:

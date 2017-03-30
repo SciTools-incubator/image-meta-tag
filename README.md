@@ -4,7 +4,7 @@ Once the images have been tagged, it can also be used to manage an SQL database 
 
 As the image metadata tagging process involves reading the image using the Image library, a few common image post-processing options are included such as cropping, logo addition and colour palette manipulation to reduce filesizes.
 
-All ImageMetaTag source code, unless explicitly stated, is © British Crown copyright, 2015-2016 and is released under a [BSD 3-Clause License](LICENSE). Details on how to contribute to ImageMetaTag are given [here](CONTRIBUTING.md).
+All ImageMetaTag source code, unless explicitly stated, is © British Crown copyright, 2015-2017 and is released under a [BSD 3-Clause License](LICENSE). Details on how to contribute to ImageMetaTag are given [here](CONTRIBUTING.md).
 
 Supported image file formats: png
 

@@ -1,4 +1,48 @@
-// ImageMetaTag dropdown menu scripting - vn0.4
+// ImageMetaTag dropdown menu scripting - vn0.5
+// (C) Crown copyright Met Office. All rights reserved.
+// Released under BSD 3-Clause License.
+
+function read_parse_json_files(json_files, zlib_comp){
+    // reads a list of files that contain the json 
+    // data structure. The files can be compressed
+    // using zlib compression. Very large files can
+    // be split into chunks to be appended.
+    var json_str = '';
+    for (var i_js=0; i_js < json_files.length; i_js++){
+	if (zlib_comp){
+	    // binary compressed string
+	    //this_blob = readBinaryFile(json_files[i_js]);
+	    this_blob = readBinaryFile(json_files[i_js]);
+	    json_str += pako.inflate(this_blob, {to: 'string'})
+	} else {
+	    // string based compression, or direct string read:
+	    var this_str = readTextFile(json_files[i_js]);
+	    json_str += this_str;
+	};
+    };
+    json = JSON.parse(json_str);
+    return json
+}
+
+function readTextFile(filepath){
+    // reads a text file and returns the content:
+    var request = new XMLHttpRequest();
+    request.open("GET", filepath, false);
+    request.send(null);
+    var returnValue = request.responseText;
+    return returnValue;
+}
+
+function readBinaryFile(url) {
+  var req = new XMLHttpRequest();
+  req.open('GET', url, false);
+  //XHR binary charset opt by Marcus Granado 2006 [http://mgran.blogspot.com]
+  req.overrideMimeType('text\/plain; charset=x-user-defined');
+  req.send(null);
+  if (req.status != 200) return '';
+  return req.responseText;
+}
+
 function imt_main () {
     // main function, run on load:
     // parse the input url to see if it overides the default selection above
