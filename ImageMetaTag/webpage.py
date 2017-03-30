@@ -660,7 +660,7 @@ not being overwritten. Your webpage may be broken!'''.format(file_dir, imt_js_to
                 if os.access(file_src_dir, os.W_OK):
                     pako_to_dir = file_src_dir
                     # now get pako:
-                    get_pako(pako_to_dir)
+                    get_pako(pako_to_dir=pako_to_dir)
                     # and copy it to where it's needed for this call:
                     shutil.copy(js_src, js_dest)
                 else:
@@ -668,7 +668,7 @@ not being overwritten. Your webpage may be broken!'''.format(file_dir, imt_js_to
                     # be available for subsequent writes to that dir:
                     pako_to_dir = file_dir
                     # now get pako to that dir:
-                    get_pako(pako_to_dir)
+                    get_pako(pako_to_dir=pako_to_dir)
             else:
                 # copy the file:
                 shutil.copy(js_src, js_dest)
@@ -677,10 +677,18 @@ not being overwritten. Your webpage may be broken!'''.format(file_dir, imt_js_to
     
     return js_files
 
-def get_pako(pako_to_dir):
-    'Obtains the required pako javascript code from remote host'
+def get_pako(pako_to_dir=None):
+    '''
+    Obtains the required pako javascript code from remote host, to a given 
+    javascript directory. If the javascript dir is not supplied, then 
+    the 'javascript' directory alongside the ImageMetaTag python code is used.
+    '''
     import tarfile
     from urllib2 import urlopen
+    
+    # set up pako into the current imt_dir:
+    if pako_to_dir is None:
+        pako_to_dir = os.path.join(imt.__path__[0], 'javascript')
 
     # Open the url
     pako_urlopen = urlopen(PAKO_SOURE_TAR)
