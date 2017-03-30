@@ -5,9 +5,12 @@ from glob import glob
 
 # get the pako javascript library to the local version before we proceed:
 # import the version of ImageMetaTag that's been downloaded:
-import ImageMetaTag as imt
-# now get pako into that directory:
-imt.webpage.get_pako()
+try:
+    import ImageMetaTag as imt
+    # now get pako into that directory:
+    imt.webpage.get_pako()
+except:
+    pass
 
 here = os.path.abspath(os.path.dirname(__file__))
 packages = []
