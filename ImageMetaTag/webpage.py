@@ -120,13 +120,12 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
         # work out what files we need to create:
         file_name_no_ext = os.path.splitext(file_name)[0]
         # json file to hold the image_dict branching data etc:
-        json_file = file_name_no_ext + '.json'
-        if compression:
-            json_file += '.zlib'
-        page_dependencies.append(json_file)
-        json_filepath = os.path.join(file_dir, json_file)
-        json_files = write_json(img_dict, json_filepath, compression=compression)
-
+        json_file_no_ext = os.path.join(file_dir, file_name_no_ext)
+        json_files = write_json(img_dict, json_file_no_ext, compression=compression)
+        # the final page is dependent on the final locations of the json files,
+        # relative to the html:
+        page_dependencies.extend([os.path.split(x[1])[1] for x in json_files])
+        
         # this is the internal name the different selectors, associated lists for the selectors, and
         # the list of files (all with a numbered suffix):
         selector_prefix = 'sel'
@@ -469,13 +468,17 @@ def write_js_setup_defaults(selector_prefix=None, list_prefix=None, file_list_na
         file_list_name = 'file_list'
     return (selector_prefix, list_prefix, file_list_name)
 
-def write_json(img_dict, json_file, compression=False):
+def write_json(img_dict, file_name_no_ext, compression=False,
+               chunk_char_limit=1e7, test_chunking=False):
     '''
     Writes a json dump of the :class:`ImageMetaTag.ImageDict` tree strucuture
     to a target file path.
 
     Options:
      * compression : If True, json is compressed using zlib compresion
+     * chunk_char_limit : large strings are split into chunks for memory efficency \
+                          in the browser. The default limit is 1e7 characters long.
+     * test_chunking : If True, thje integrity of the chunking is tested.
 
     Returns a list of json files as (tempfile, final_file) tuples.
     '''
@@ -487,17 +490,49 @@ def write_json(img_dict, json_file, compression=False):
     else:
         raise ValueError('input img_dict is not an ImageMetaTag.ImageDict or string')
 
-    # uncompressed, or zlib, write to to a single file:
-    tmp_file_dir = os.path.split(json_file)[0]
-    with tempfile.NamedTemporaryFile('w', suffix='.json', prefix='imt_',
-                                     dir=tmp_file_dir, delete=False) as file_obj:
-        if compression:
-            file_obj.write(zlib.compress(dict_as_json))
-        else:
-            file_obj.write(dict_as_json)
-        tmp_file_path = file_obj.name
+    # use the maximum length of a single string per file:
+    n_chunks = np.ceil(len(dict_as_json) / chunk_char_limit)
+    chunk_size = int(np.ceil(len(dict_as_json) / n_chunks))
+    n_chunks = int(n_chunks)
+    
+    # work out what the output files are going to be:
+    suffix = '.json'
+    if compression:
+        suffix += '.zlib'
+    if n_chunks == 1:
+        json_files = [file_name_no_ext + suffix]
+    else:
+        json_files = ['{}_{}{}'.format(file_name_no_ext, x, suffix) for x in range(n_chunks)]
 
-    return [(tmp_file_path, json_file)]
+    def str_chunks(long_str, chunk_size):
+        'Yield successive chunk_size chunks from a long_str'
+        for i in xrange(0, len(long_str), chunk_size):
+            yield long_str[i:i + chunk_size]
+    
+    # now loop through and make those files:
+    out_files = []
+    test_str = ''
+    for i_chunk, text_chunk in enumerate(str_chunks(dict_as_json, chunk_size)):    
+        json_file = json_files[i_chunk]
+        tmp_file_dir = os.path.split(json_file)[0]
+        with tempfile.NamedTemporaryFile('w', suffix='.json', prefix='imt_',
+                                         dir=tmp_file_dir, delete=False) as file_obj:
+            if compression:
+                file_obj.write(zlib.compress(text_chunk))
+            else:
+                file_obj.write(text_chunk)
+            tmp_file_path = file_obj.name
+        # make a note of the outputs:
+        out_files.append((tmp_file_path, json_file))
+        
+        if test_chunking:
+            test_str += text_chunk
+    
+    if test_chunking:  
+        if test_str != dict_as_json:
+            raise ValueError('String chunking error!')
+        
+    return out_files
 
 def write_js_placeholders(file_obj=None, dict_depth=None, selector_prefix=None,
                           style='horiz dropdowns', level_names=False,
