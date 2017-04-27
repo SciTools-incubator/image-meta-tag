@@ -122,10 +122,9 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
 
         # if the image path can be expressed as a relative path compared
         # to the database file, then do so (unless told otherwise).
-
         db_dir = os.path.split(db_file)[0]
         if filename.startswith(db_dir) and not db_full_paths:
-            db_filename = filename[len(db_dir)+1:]
+            db_filename = os.path.relpath(filename, db_dir)
         else:
             db_filename = filename
 

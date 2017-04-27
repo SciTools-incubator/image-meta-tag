@@ -828,8 +828,6 @@ def __main__():
                                                           postamble=webpage_postamble,
                                                           verbose=True, url_type='str')
 
-    print 'Web page outputs\n', web_out
-
     # now, finally, produce a large ImageDict:
     if not args.no_biggus_dictus:
         print 'Producing a very large ImageDict, as a scalability and speed test'
@@ -986,6 +984,9 @@ Has the directory got other images/old tests in it?'''.format(webdir))
                 raise ValueError('Tag values mistmatch between plotted and rebuilt database!')
 
         print 'Testing of database rebuild functionality complete.'
+    
+    print 'Web page outputs\n', web_out
+
 
 if __name__ == '__main__':
     __main__()

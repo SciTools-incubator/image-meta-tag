@@ -1,4 +1,4 @@
-// ImageMetaTag dropdown menu scripting - vn0.5
+// ImageMetaTag dropdown menu scripting - vn0.6
 // (C) Crown copyright Met Office. All rights reserved.
 // Released under BSD 3-Clause License.
 
@@ -90,7 +90,14 @@ function get_selection () {
     }
 }
 
-function apply_selection (start_depth) {
+function apply_selection (start_depth, only_cache) {
+    // applies a selection, from a starting depth.
+    // If supplied, only_cache of true means it will only cache the selected images
+    // rather than display etc.
+
+    // set default value of only_cache:
+    only_cache = only_cache || false;
+
     // function to run when a selection has been made
     //console.log("at start of apply_selection, selectid_id:", selected_id)
     //console.log("apply_selection:", selected_id)
@@ -137,12 +144,32 @@ function apply_selection (start_depth) {
             }
         }
     }
-    // if we have got here then we actually have the payload
-    apply_payload(imt_subset);
-    // write the selectors, to change the next page
-    update_selectors(options_at_depth, selected_at_depth, start_depth);
-    // write out the url
-    write_url_to_div();
+    if (only_cache){
+	// if we only want to cache/pre-load the current selection then:
+	cache_payload(imt_subset);
+    } else {
+	// if we have got here then we actually have the payload
+	apply_payload(imt_subset);
+	// write the selectors, to change the next page
+	update_selectors(options_at_depth, selected_at_depth, start_depth);
+	// write out the url
+	write_url_to_div();
+    
+	// now the the_image div is updated, the user should be happy, so we can
+	// go backwards and forwards on the animator buttons to preload images:
+	if (anim_sel >= 0) {
+	    // store the selected_id at this stage. This is the image the user wants, so mustn't be lost!
+	    var stored_id = selected_id.slice();
+	    // step the animator forward, but only_cache=true as we only want to cache the image:
+	    animator_step_forward(true);
+	    // reset the selected_id:
+	    selected_id = stored_id.slice();
+	    // now step back:
+	    animator_step_back(true);
+	    // and reset the selected_id once more:
+	    selected_id = stored_id.slice();
+	};
+    };
 }
 
 function apply_payload( payload ) {
@@ -177,6 +204,24 @@ function apply_payload( payload ) {
     var _ = document.getElementById("the_image");
     _.innerHTML = the_file;
 }
+
+function cache_payload( payload ){
+    // given the same input as apply_payload, this simply caches the image(s) instead:
+    //
+    if (Array.isArray(payload)){
+	var img_list = payload;
+    } else {
+	var img_list = [ payload ];
+    };
+    var n_imgs = img_list.length;
+    // now loop through the images and cache them:
+    for (var i_img=0; i_img < n_imgs; i_img++){
+	// just create an Image instance, with the src set, and it will be fetched
+	// in the background for when it's needed.
+	var cache_image = new Image();
+	cache_image.src = img_list[i_img];
+    };
+};
 
 function update_selectors(options_at_depth, selected_at_depth, start_depth) {
     // updates the selectors with the choices valid for the current selection
@@ -354,23 +399,31 @@ function add_animators() {
     _2.innerHTML = animator_content2;
 }
 
-function animator_step_back(){
+function animator_step_back(only_cache){
     // animator, stepping backwards:
+
+    // set default value of only_cache:
+    only_cache = only_cache || false;
+
     // look for the next selected id:
     step_selected_id(-1 * anim_dir);
     // validate from the change:
     validate_selected_id(anim_sel+1);
     // use that selection:
-    apply_selection(0);
+    apply_selection(0, only_cache);
 }
-function animator_step_forward(){
+function animator_step_forward(only_cache){
     // animator, stepping forwards:
+
+    // set default value of only_cache:
+    only_cache = only_cache || false;
+
     // look for the next selected id:
     step_selected_id(1 * anim_dir);
     // validate from the change:
     validate_selected_id(anim_sel+1);
     // use that selection:
-    apply_selection(0);
+    apply_selection(0, only_cache);
 }
 function step_selected_id(incr){
     // function to step through to the next selected_id
