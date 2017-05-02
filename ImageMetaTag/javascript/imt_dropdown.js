@@ -1,4 +1,8 @@
-// ImageMetaTag dropdown menu scripting - vn0.6
+// ImageMetaTag dropdown menu scripting - vn0.6.1
+// ImageMetaTag is a python package built around a wrapper for savefig in 
+// matplotlib, which adds metadata tags to supported image file formats.
+// See https://github.com/SciTools-incubator/image-meta-tag for details.
+//
 // (C) Crown copyright Met Office. All rights reserved.
 // Released under BSD 3-Clause License.
 
@@ -6,22 +10,34 @@ function read_parse_json_files(json_files, zlib_comp){
     // reads a list of files that contain the json 
     // data structure. The files can be compressed
     // using zlib compression. Very large files can
-    // be split into chunks to be appended.
-    var json_str = '';
-    for (var i_js=0; i_js < json_files.length; i_js++){
-	if (zlib_comp){
-	    // binary compressed string
-	    //this_blob = readBinaryFile(json_files[i_js]);
-	    this_blob = readBinaryFile(json_files[i_js]);
-	    json_str += pako.inflate(this_blob, {to: 'string'})
-	} else {
-	    // string based compression, or direct string read:
-	    var this_str = readTextFile(json_files[i_js]);
-	    json_str += this_str;
+    // be split into chunks to be consolidated back into
+    // a single structure.
+    if ( json_files.length == 1 ){
+	json = read_parse_json_file(json_files[0], zlib_comp);
+    } else {
+	var json_arr = new Array(json_files.length);
+	for (var i_js=0; i_js < json_files.length; i_js++){
+	    json_arr[i_js] = read_parse_json_file(json_files[i_js], zlib_comp);
 	};
+	var json = json_arr[json_arr.length-1];
+	consolidate_json(json, json_arr);
+    };
+    return json;
+}
+
+function read_parse_json_file(json_file, zlib_comp){
+    // reads and parses a single json file
+    if (zlib_comp){
+	// binary compressed string
+	//this_blob = readBinaryFile(json_files[i_js]);
+	this_blob = readBinaryFile(json_file);
+	var json_str = pako.inflate(this_blob, {to: 'string'});
+    } else {
+	// string based compression, or direct string read:
+	var json_str = readTextFile(json_file);
     };
     json = JSON.parse(json_str);
-    return json
+    return json;    
 }
 
 function readTextFile(filepath){
@@ -42,6 +58,32 @@ function readBinaryFile(url) {
   if (req.status != 200) return '';
   return req.responseText;
 }
+
+function consolidate_json(obj, others) {
+    // iteratively moves through a top-level json tree structure, locating
+    // strings that match '**FILE[num]**', where the num is the index of
+    // the other json files to use for that object.
+    for (var property in obj) {
+        if (obj.hasOwnProperty(property)) {
+            if (typeof obj[property] == "object") {
+		// iterate onwards!
+                consolidate_json(obj[property], others );
+	    } else if (typeof obj[property] == "string"){
+		var re = new RegExp("^[*]{2}FILE");
+		if (re.test(obj[property])){
+		    // now get the number, as string:
+		    var thenum = obj[property].replace( /^\D+/g, '');
+		    // and then Int:
+		    var file_ind = parseInt(thenum, 10);
+		    // now replace the object in question with the json object
+		    // from the referenced file:
+		    obj[property] = others[file_ind];
+		    //console.log(property, obj[property], others[file_ind]);
+		};
+	    };
+        };
+    };
+};
 
 function imt_main () {
     // main function, run on load:
