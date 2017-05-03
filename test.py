@@ -17,6 +17,10 @@ DATE_FORMAT = "%Y-%m-%dT%H:%M:%S"
 # and a more friendly format for the output webpages:
 DATE_FORMAT_WWW = "%Y-%m-%d"
 
+import matplotlib
+#matplotlib.use('GTKAgg')
+matplotlib.use('Agg')
+
 import os, shutil, sys, errno, argparse, copy, random, pdb
 
 import numpy as np
@@ -513,6 +517,22 @@ def __main__():
     print img_dict
     print img_dict_para
 
+    # quick test of dict_index_array:
+    # first to a particular depth:
+    test_depth = 4
+    array_inds = img_dict.dict_index_array(maxdepth=test_depth)
+    # now work out how many keys there should be. This can apply in this test because
+    # we have made an image for every combination of keys. If that wasn't the case then
+    # the test would break. It's in those cases when the img_dict.dict_index_array is useful!
+    n_test_depth = 1
+    for depth in range(test_depth):
+        n_test_depth *= len(img_dict.keys[depth])
+    if len(array_inds[1]) != n_test_depth:
+        raise ValueError('Mismatch between indices to depth and keys')
+    # and in full:
+    array_indsf = img_dict.dict_index_array()
+    if len(array_indsf[1]) != len(db_images_and_tags):
+        raise ValueError('Mismatched indices and image array lengths')
 
     # now reorganise the img_dict to merge some of the images together (to display multiple images)
     #
@@ -984,7 +1004,7 @@ Has the directory got other images/old tests in it?'''.format(webdir))
                 raise ValueError('Tag values mistmatch between plotted and rebuilt database!')
 
         print 'Testing of database rebuild functionality complete.'
-    
+
     print 'Web page outputs\n', web_out
 
 

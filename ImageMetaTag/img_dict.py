@@ -11,7 +11,7 @@ An easy example of creating a webpage, using an ImageDict is shown in
 .. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks
 '''
 # required imports
-import os, re, collections, inspect
+import os, re, collections, inspect, copy
 from PIL import Image
 # useful for debugging
 import pdb
@@ -39,11 +39,20 @@ class ImageDict(object):
      * level_names - a list of the tagnames, in full, giving a name/description of what \
                      the metadata item means. Ordered by level of the input dict.
      * selector_widths - a list of html strings giving the widths of each selector in the \
-                         output webpage.
+                         output webpage. CURRENTLY UNUSED!
      * selector_animated - an integer indicating which selector on the output webpage is \
                            to be animated.
      * animation_dicrection - +1 indicates the animation moves forwards, -1 indicates it \
                               moves backwards.
+
+    Objects:
+     * dict - the heirachical dictionary of dictionaries containing the image structure.
+     * keys - a list of keys for each level of the dict, within a dictionary using the level \
+              number as the keys.
+     * level_names - If supplied, this stores the full names of the items in keys.
+     * selector_animated - the level index which will be animated on the output webpage.
+     * animation_direction - the direction of animation (+1 for forward, -1 for backward).
+     * selector_widths - a list of desired widths on the output web page (CURRENTLY UNUSED).
     '''
     def __init__(self, input_dict, level_names=None,
                  selector_widths=None, selector_animated=None,
@@ -281,7 +290,16 @@ class ImageDict(object):
 
     def list_keys_by_depth(self, devmode=False):
         '''
-        Converts the sets, from keys_by_depth to a list (where they can be ordered and indexed).
+        Lists the keys of the dictionary to create a list of keys, for each level of the
+        dictionary, up to its depth.
+
+        It is usually much faster to create an ImageDict by appending images to it,
+        with skip_key_relist=True but this leaves an ImageDict without a list of keys. In this
+        case, list_keys_by_depth needs to be called once at the end of the process to complete
+        the list of keys.
+
+        It works by converting the sets, from keys_by_depth to a list (where they can be ordered
+        and indexed).
         This also produces the unique subdirectory locations of all images.
         '''
         keys, subdirs = self.keys_by_depth(self.dict)
@@ -321,12 +339,12 @@ class ImageDict(object):
                 subdirs.add(os.path.split(in_dict[key])[0])
         return keys, subdirs
 
-    def key_at_depth(self, dct, dpt):
+    def key_at_depth(self, in_dict, depth):
         'returns the keys of a dictionary, at a given depth'
-        if dpt > 0:
-            return [key for subdct in dct.itervalues() for key in self.key_at_depth(subdct, dpt-1)]
+        if depth > 0:
+            return [key for subdict in in_dict.itervalues() for key in self.key_at_depth(subdict, depth-1)]
         else:
-            return dct.keys()
+            return in_dict.keys()
 
     def return_key_inds(self, in_dict, out_array=None, this_set_of_inds=None,
                         depth=None, level=None, verbose=False, devmode=False):
@@ -349,14 +367,18 @@ class ImageDict(object):
                     this_set_of_inds[level] = self.keys[level].index(key)
                     # increment the level, in case the next dict is at the
                     # higher level in the tree structure:
-                    level += 1
-                    if verbose:
-                        print 'new setting: %s' % this_set_of_inds
-                        print 'out_array: %s' % out_array
-                    # and recurse:
-                    self.return_key_inds(value, out_array=out_array,
-                                         this_set_of_inds=this_set_of_inds,
-                                         depth=depth, level=level)
+                    if level+1 < depth:
+                        level += 1
+                        if verbose:
+                            print 'new setting: %s' % this_set_of_inds
+                            print 'out_array: %s' % out_array
+                        # and recurse, to the next level if needed:
+                        self.return_key_inds(value, out_array=out_array,
+                                             this_set_of_inds=this_set_of_inds,
+                                             depth=depth, level=level, devmode=devmode)
+                    else:
+                        out_array.append(deepcopy(this_set_of_inds))
+
                 elif key in self.keys[level-1]:
                     # the dictionary we've now got isn't at a higher level than before, which means
                     # we're traversing the level from the previous call.
@@ -370,16 +392,20 @@ class ImageDict(object):
                     # and recurse:
                     self.return_key_inds(value, out_array=out_array,
                                          this_set_of_inds=branched_set_of_inds,
-                                         depth=depth, level=branched_level)
+                                         depth=depth, level=branched_level,
+                                         devmode=devmode)
 
                 else:
                     # we really shouldn't be here:
                     msg = 'Error recursing through dict: key "%s"' % key
                     msg += ' not found in this level, or one below'
                     raise ValueError(msg)
-
+            #elif isinstance(value, dict) and level == depth:
+            #
+            #    pdb.set_trace()
             else:
-                # we're at the top level of the tree, record the index:
+                # we're at the top level of the tree, as far as we can or want to go,
+                # so record the index:
                 if key in self.keys[level]:
                     # we've moved up a level from the previous one,
                     # make a note of the new value at the new level
@@ -401,20 +427,27 @@ class ImageDict(object):
                 # we're done, so append this to the out_array, and DON'T recurse:
                 out_array.append(deepcopy(this_set_of_inds))
 
-    def dict_index_array(self, devmode=False):
+    def dict_index_array(self, devmode=False, maxdepth=None, verbose=False):
         '''
         Using the list of dictionary keys (at each level of a uniform_depth dictionary
         of dictionaries), this produces a list of the indices that can be used to reference
         the keys to get the result for each element.
+
+        Options:
+         * maxdepth - the maximum desired depth to go to (ie. the number of levels)
         '''
         # want to build up a list of lists, each giving the indices of the keys that get to a plot:
-        depth = self.dict_depth(uniform_depth=True)
         out_array = []
-        this_set_of_inds = [None] * depth
+        if maxdepth is None:
+            depth = self.dict_depth(uniform_depth=True)
+            this_set_of_inds = [None] * depth
+        else:
+            depth=maxdepth
+            this_set_of_inds = [None] * depth
         level = 0
         self.return_key_inds(self.dict, out_array=out_array,
                              this_set_of_inds=this_set_of_inds, depth=depth,
-                             level=level, devmode=devmode)
+                             level=level, devmode=devmode, verbose=verbose)
         # the recursive method comes out sorted as it iterates about the dictionary,
         # not as to how the keys are sorted. Easy to do:
         out_array.sort()
@@ -700,8 +733,8 @@ def dict_heirachy_from_list(in_dict, payload, heirachy):
 
 def dict_split(in_dict, n_split=None, size_split=None, extra_opts=None):
     '''
-    Generator that breaks up a dictionary and yields a set of sub-dictionaries in
-    n_split chunks, or size_split in size.
+    Generator that breaks up a flat dictionary and yields a set of sub-dictionaries in
+    n_split chunks, or size_split in size. It is split on it's first level, not recursively.
 
     It is very useful for splitting large dictionaries of image metadata
     to parallelise processing these into ImageDicts.

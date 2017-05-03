@@ -20,7 +20,7 @@ colour palette manipulation to reduce filesizes.
 Released under BSD 3-Clause License. See LICENSE for more details.
 '''
 
-__version__ = '0.6.0'
+__version__ = '0.6.1'
 __documentation__ = 'http://scitools-incubator.github.io/image-meta-tag/build/html/'
 
 # list fo file formats which are valid for saving metadata to:

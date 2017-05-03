@@ -92,7 +92,7 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
     * compression - default False. If True, then the json data object will be compressed \
                     using zlib string compression. When read into the browser, we will use \
                     pako to inflate it (https://github.com/nodeca/pako)
-                    
+
     Returns a list of files that the the created webpage is dependent upon
     '''
 
@@ -114,8 +114,9 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
         # now make sure the required javascript library is copied over to the file_dir:
         js_files = copy_required_javascript(file_dir, style, compression=compression)
         page_dependencies.extend(js_files)
-        
+
         # we have real data to work with:
+        # this tests the dict has uniform_depth, which is needed for all current webpages.
         dict_depth = img_dict.dict_depth(uniform_depth=True)
         # work out what files we need to create:
         file_name_no_ext = os.path.splitext(file_name)[0]
@@ -125,7 +126,7 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
         # the final page is dependent on the final locations of the json files,
         # relative to the html:
         page_dependencies.extend([os.path.split(x[1])[1] for x in json_files])
-        
+
         # this is the internal name the different selectors, associated lists for the selectors, and
         # the list of files (all with a numbered suffix):
         selector_prefix = 'sel'
@@ -354,7 +355,7 @@ def write_js_to_header(img_dict, initial_selectors=None, style=None,
 {0}var zl_unpack = {2};
 {0}imt = read_parse_json_files(json_files, zl_unpack);
 '''
-        file_obj.write(out_str.format(ind, json_files,_py_to_js_bool(bool(compression))))
+        file_obj.write(out_str.format(ind, json_files, _py_to_js_bool(bool(compression))))
 
         # in case the page we are writing is embedded as a frame, write out the top
         # level page here;
@@ -366,10 +367,6 @@ def write_js_to_header(img_dict, initial_selectors=None, style=None,
         # the key_to_selector variable is what maps each set of keys onto a selector on the page:
         key_to_selector = str([selector_prefix + str(x) for x in range(dict_depth)])
         file_obj.write('{}var key_to_selector = {};\n'.format(ind, key_to_selector))
-
-        # and the width is what determines how large the selector appears on the page:
-        file_obj.write('{}var selector_widths = {};\n'.format(ind, str(img_dict.selector_widths)))
-
         # this determines whether a selector uses the animation controls on a page:
         file_obj.write('{}var anim_sel = {};\n'.format(ind, img_dict.selector_animated))
         # and the direction the animation runs in:
@@ -469,7 +466,7 @@ def write_js_setup_defaults(selector_prefix=None, list_prefix=None, file_list_na
     return (selector_prefix, list_prefix, file_list_name)
 
 def write_json(img_dict, file_name_no_ext, compression=False,
-               chunk_char_limit=1e7, test_chunking=False):
+               chunk_char_limit=1e7):
     '''
     Writes a json dump of the :class:`ImageMetaTag.ImageDict` tree strucuture
     to a target file path.
@@ -477,61 +474,124 @@ def write_json(img_dict, file_name_no_ext, compression=False,
     Options:
      * compression : If True, json is compressed using zlib compresion
      * chunk_char_limit : large strings are split into chunks for memory efficency \
-                          in the browser. The default limit is 1e7 characters long.
-     * test_chunking : If True, thje integrity of the chunking is tested.
+                          in the browser.
 
     Returns a list of json files as (tempfile, final_file) tuples.
     '''
 
+    def json_from_dict(in_dict):
+        'returns a json string from an input dict'
+        return json.dumps(in_dict, separators=(',', ':'))
+
     if isinstance(img_dict, imt.ImageDict):
-        dict_as_json = json.dumps(img_dict.dict, separators=(',', ':'))
+        dict_as_json = json_from_dict(img_dict.dict)
     elif isinstance(img_dict, str):
         dict_as_json = img_dict
     else:
         raise ValueError('input img_dict is not an ImageMetaTag.ImageDict or string')
 
-    # use the maximum length of a single string per file:
-    n_chunks = np.ceil(len(dict_as_json) / chunk_char_limit)
-    chunk_size = int(np.ceil(len(dict_as_json) / n_chunks))
-    n_chunks = int(n_chunks)
-    
-    # work out what the output files are going to be:
+    # file suffix:
     suffix = '.json'
     if compression:
         suffix += '.zlib'
-    if n_chunks == 1:
-        json_files = [file_name_no_ext + suffix]
-    else:
-        json_files = ['{}_{}{}'.format(file_name_no_ext, x, suffix) for x in range(n_chunks)]
 
-    def str_chunks(long_str, chunk_size):
-        'Yield successive chunk_size chunks from a long_str'
-        for i in xrange(0, len(long_str), chunk_size):
-            yield long_str[i:i + chunk_size]
-    
-    # now loop through and make those files:
+    # the output files:
     out_files = []
-    test_str = ''
-    for i_chunk, text_chunk in enumerate(str_chunks(dict_as_json, chunk_size)):    
-        json_file = json_files[i_chunk]
-        tmp_file_dir = os.path.split(json_file)[0]
+
+    tmp_file_dir = os.path.split(file_name_no_ext)[0]
+
+    # use the maximum length of a single string per file:
+    n_chunks = np.ceil(len(dict_as_json) / chunk_char_limit)
+    n_chunks = int(n_chunks)
+
+    if n_chunks == 1:
+        # easy if it fits into a single file:
+        json_file = file_name_no_ext + suffix
         with tempfile.NamedTemporaryFile('w', suffix='.json', prefix='imt_',
                                          dir=tmp_file_dir, delete=False) as file_obj:
             if compression:
-                file_obj.write(zlib.compress(text_chunk))
+                file_obj.write(zlib.compress(dict_as_json))
             else:
-                file_obj.write(text_chunk)
+                file_obj.write(dict_as_json)
             tmp_file_path = file_obj.name
         # make a note of the outputs:
         out_files.append((tmp_file_path, json_file))
-        
-        if test_chunking:
-            test_str += text_chunk
-    
-    if test_chunking:  
-        if test_str != dict_as_json:
-            raise ValueError('String chunking error!')
-        
+    else:
+        # find the appropriate depth at which to split the dict:
+        if not isinstance(img_dict, imt.ImageDict):
+            msg = 'Large data sets need to be supplied as an ImageDict, so they can be split'
+            raise ValueError(msg)
+        dict_depth = img_dict.dict_depth(uniform_depth=True)
+        if len(img_dict.keys) != dict_depth:
+            raise ValueError('Inconsistent depth and keys. Do the keys need relisting?')
+
+        # determine approximately how many splits will be obtained by breaking up the
+        # dictionary at each level, assuming the tree structure branches uniformly.
+        n_by_depth = []
+        for i_depth in range(dict_depth):
+            if i_depth == 0:
+                n_by_depth = [len(img_dict.keys[i_depth])]
+            else:
+                n_by_depth.append(len(img_dict.keys[i_depth]) * n_by_depth[-1])
+            if n_by_depth[-1] >= n_chunks:
+                break
+        # i_depth is an index, but depth is the number of levels, so needs one adding:
+        depth = i_depth + 1
+        # get all the combinations of keys that reach the required depth:
+        keys, array_inds = img_dict.dict_index_array(maxdepth=depth)
+
+        # now loop through the array_inds. Each one contains the indices of a valid path through
+        # the dict, to the required depth. Each subdict will be written to a separate .json file
+        paths = []
+        top_dict = {}
+        for i_json, path_inds in enumerate(array_inds):
+            # traverse to the subdict, given by the current path,
+            # storing the keys of the path along the way
+            subdict = img_dict.dict
+            path = []
+            for level, ind in enumerate(path_inds):
+                subdict = subdict[keys[level][ind]]
+                path.append(keys[level][ind])
+
+            # convert the subdict to .json
+            subdict_as_json = json_from_dict(subdict)
+            # and write this out:
+            json_file = '{}_{}{}'.format(file_name_no_ext, i_json, suffix)
+            with tempfile.NamedTemporaryFile('w', suffix='.json', prefix='imt_',
+                                             dir=tmp_file_dir, delete=False) as file_obj:
+                if compression:
+                    file_obj.write(zlib.compress(subdict_as_json))
+                else:
+                    file_obj.write(subdict_as_json)
+                tmp_file_path = file_obj.name
+            # make a note of the outputs:
+            out_files.append((tmp_file_path, json_file))
+
+            # now add this to the top level dict structure, so the final json file can pull them all togther:
+            path_dict = {path[-1]: '**FILE_{}**'.format(i_json)}
+            # go backwards, from the second from last element of the path, to add more;
+            for key in path[-2::-1]:
+                path_dict = {key: path_dict}
+            img_dict.dict_union(top_dict, path_dict)
+            # add it to the paths, as a cross reference:
+            paths.append(path)
+
+        # now create the final json file that combines the previous ones into a single usable object:
+        i_json += 1
+        # convert the subdict to .json
+        subdict_as_json = json_from_dict(top_dict)
+        # and write this out:
+        json_file = '{}_{}{}'.format(file_name_no_ext, i_json, suffix)
+        with tempfile.NamedTemporaryFile('w', suffix='.json', prefix='imt_',
+                                         dir=tmp_file_dir, delete=False) as file_obj:
+            if compression:
+                file_obj.write(zlib.compress(subdict_as_json))
+            else:
+                file_obj.write(subdict_as_json)
+            tmp_file_path = file_obj.name
+        # make a note of the outputs:
+        out_files.append((tmp_file_path, json_file))
+
     return out_files
 
 def write_js_placeholders(file_obj=None, dict_depth=None, selector_prefix=None,
@@ -649,7 +709,7 @@ def copy_required_javascript(file_dir, style, compression=False, overwrite=True)
         imt_js_to_copy = 'imt_dropdown.js'
         # get this from the installed ImageMetaTag directory:
         file_src_dir = os.path.join(imt.__path__[0], 'javascript')
-        first_line = '// ImageMetaTag dropdown menu scripting - vn0.5\n'
+        first_line = '// ImageMetaTag dropdown menu scripting - vn{}\n'.format(imt.__version__)
     else:
         raise ValueError('Javascript library not set up for style: {}'.format(style))
 
@@ -689,7 +749,7 @@ not being overwritten. Your webpage may be broken!'''.format(file_dir, imt_js_to
             if not os.path.isfile(js_src):
                 # we need to get the required javascript from source.
                 #
-                # if we have permission to write to teh file_src_dir then 
+                # if we have permission to write to teh file_src_dir then
                 # try to do so. This means it's installed for all uses from this
                 # install of ImageMetaTag:
                 if os.access(file_src_dir, os.W_OK):
@@ -709,18 +769,18 @@ not being overwritten. Your webpage may be broken!'''.format(file_dir, imt_js_to
                 shutil.copy(js_src, js_dest)
         # finally, make a note:
         js_files.append(js_to_copy)
-    
+
     return js_files
 
 def get_pako(pako_to_dir=None):
     '''
-    Obtains the required pako javascript code from remote host, to a given 
-    javascript directory. If the javascript dir is not supplied, then 
+    Obtains the required pako javascript code from remote host, to a given
+    javascript directory. If the javascript dir is not supplied, then
     the 'javascript' directory alongside the ImageMetaTag python code is used.
     '''
     import tarfile
     from urllib2 import urlopen
-    
+
     # set up pako into the current imt_dir:
     if pako_to_dir is None:
         pako_to_dir = os.path.join(imt.__path__[0], 'javascript')
