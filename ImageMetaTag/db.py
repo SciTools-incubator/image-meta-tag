@@ -216,16 +216,25 @@ def open_or_create_db_file(db_file, img_info, restart_db=False, timeout=DEFAULT_
         # create a new database file:
         dbcn = sqlite3.connect(db_file)
         dbcr = dbcn.cursor()
-
-        create_command = 'CREATE TABLE {}(fname TEXT PRIMARY KEY,'.format(SQLITE_IMG_INFO_TABLE)
-        for key in img_info.keys():
-            create_command += ' "{}" TEXT,'.format(info_key_to_db_name(key))
-        create_command = create_command[0:-1] + ')'
-        dbcr.execute(create_command)
+        # and create the table:
+        create_table_for_img_info(dbcr, img_info)
     else:
-        # just open the database:
+        # open the database file:
         dbcn, dbcr = open_db_file(db_file, timeout=timeout)
+        # check for the required table:
+        table_names = list_tables(dbcr) 
+        if SQLITE_IMG_INFO_TABLE not in table_names:
+            # create it if required:
+            create_table_for_img_info(dbcr, img_info)
     return dbcn, dbcr
+
+def create_table_for_img_info(dbcr, img_info):
+    'Creates a database table, in a database cursor, to store for the input img_info'
+    create_command = 'CREATE TABLE {}(fname TEXT PRIMARY KEY,'.format(SQLITE_IMG_INFO_TABLE)
+    for key in img_info.keys():
+        create_command += ' "{}" TEXT,'.format(info_key_to_db_name(key))
+    create_command = create_command[0:-1] + ')'
+    dbcr.execute(create_command)
 
 def open_db_file(db_file, timeout=DEFAULT_DB_TIMEOUT):
     '''
@@ -310,6 +319,12 @@ def write_img_to_open_db(dbcr, filename, img_info, add_strict=False, attempt_rep
             pass
     finally:
         pass
+
+def list_tables(dbcr):
+    'lists the tables present, from a database cursor'
+    result = dbcr.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
+    table_names = sorted(zip(*result)[0])        
+    return table_names
 
 def read_img_info_from_dbcursor(dbcr, required_tags=None, tag_strings=None):
     '''
