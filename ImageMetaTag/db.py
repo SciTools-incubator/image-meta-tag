@@ -222,7 +222,7 @@ def open_or_create_db_file(db_file, img_info, restart_db=False, timeout=DEFAULT_
         # open the database file:
         dbcn, dbcr = open_db_file(db_file, timeout=timeout)
         # check for the required table:
-        table_names = list_tables(dbcr) 
+        table_names = list_tables(dbcr)
         if SQLITE_IMG_INFO_TABLE not in table_names:
             # create it if required:
             create_table_for_img_info(dbcr, img_info)
@@ -323,7 +323,7 @@ def write_img_to_open_db(dbcr, filename, img_info, add_strict=False, attempt_rep
 def list_tables(dbcr):
     'lists the tables present, from a database cursor'
     result = dbcr.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
-    table_names = sorted(zip(*result)[0])        
+    table_names = sorted(zip(*result)[0])
     return table_names
 
 def read_img_info_from_dbcursor(dbcr, required_tags=None, tag_strings=None):
