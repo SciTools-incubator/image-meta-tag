@@ -9,11 +9,12 @@ by simplifying their colour palette.
 .. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks
 '''
 
-import os, sqlite3, pdb
+import os, io, sqlite3, pdb
 import matplotlib.pyplot as plt
 from datetime import datetime
 
-from ImageMetaTag import db, META_IMG_FORMATS, DEFAULT_DB_TIMEOUT, DEFAULT_DB_ATTEMPTS
+from ImageMetaTag import db, META_IMG_FORMATS, POSTPROC_IMG_FORMATS
+from ImageMetaTag import DEFAULT_DB_TIMEOUT, DEFAULT_DB_ATTEMPTS
 
 # image manipulations:
 from PIL import Image, ImageChops, PngImagePlugin#, ImageFilter
@@ -85,14 +86,28 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
         write_file = '%s.%s' % (filename, img_format)
 
 
+    # Where to save the figure to? If we're going to postprocess it, save to memory
+    # for speed and to cut down on IO load:
+    do_any_postproc = img_format in META_IMG_FORMATS or img_format in POSTPROC_IMG_FORMATS
+    if do_any_postproc:
+        buf = io.BytesIO()
+        savefig_file = buf
+    else:
+        savefig_file = write_file
+        buf = None
+    
     # should probably add lots of other args, or use **kwargs
     if dpi:
-        plt.savefig(write_file, dpi=dpi)
+        plt.savefig(savefig_file, dpi=dpi)
     else:
-        plt.savefig(write_file)
-
+        plt.savefig(savefig_file)
     if not keep_open:
         plt.close()
+    if not keep_open:
+        plt.close()
+    if buf:
+        # need to go to the start of the buffer, if that's where it went:
+        buf.seek(0)
 
     if img_format in META_IMG_FORMATS:
         use_img_tags = img_tags
@@ -102,8 +117,8 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
     if verbose:
         postproc_st = datetime.now()
 
-    if img_format == 'png':
-        image_file_postproc(write_file, img_converter=img_converter, do_trim=do_trim,
+    if img_format in POSTPROC_IMG_FORMATS:
+        image_file_postproc(write_file, img_buf=buf, img_converter=img_converter, do_trim=do_trim,
                             trim_border=trim_border, logo_file=logo_file, logo_width=logo_width,
                             logo_padding=logo_padding, logo_pos=logo_pos,
                             do_thumb=do_thumb, img_tags=use_img_tags, verbose=verbose)
@@ -111,6 +126,9 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
         msg = 'Currently, ImageMetaTag does not support "%s" format images' % img_format
         raise NotImplementedError(msg)
 
+    # image post-processing completed, so close the buffer if we opened it:
+    if buf:
+        buf.close()
     if verbose:
         print 'Image post-processing took: %s' %(str(datetime.now() - postproc_st))
 
@@ -151,7 +169,7 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
         if verbose:
             print 'Database write took: %s' %(str(datetime.now() - db_st))
 
-def image_file_postproc(filename, outfile=None, img_converter=0, do_trim=False, trim_border=0,
+def image_file_postproc(filename, outfile=None, img_buf=None, img_converter=0, do_trim=False, trim_border=0,
                         logo_file=None, logo_width=40, logo_padding=0, logo_pos=0,
                         do_thumb=False, img_tags=None, verbose=False):
     '''
@@ -163,6 +181,8 @@ def image_file_postproc(filename, outfile=None, img_converter=0, do_trim=False, 
 
     * outfile - If supplied, the processing will be applied to a new file, with this name. \
                 If not supplied, the post processing will overwrite the file given input file.
+    * img_buf - If the image has been saved to an in-memory buffer, then supply the image buffer \
+                here. This will speed up the post-processing.
     * img_converter - an integer switch controlling the level of file size compression
                     * 0 - no compression
                     * 1 - light compression, from RGBA to RGB
@@ -217,9 +237,16 @@ def image_file_postproc(filename, outfile=None, img_converter=0, do_trim=False, 
     # do we do any image modification at all?
     modify = do_trim or do_thumb or img_tags or img_converter > 0 or logo_file is not None
 
-    if modify:
-        # use the image library to open the file:
-        im_obj = Image.open(filename)
+    if img_buf:
+        # if the image is in a buffer, then load it now
+        im_obj = Image.open(img_buf)
+        if not modify:
+            # if we're not doing anyhting, then save it:
+            im_obj.save(outfile, optimize=True)
+    else:
+        if modify:
+            # use the image library to open the file:
+            im_obj = Image.open(filename)
 
     if do_trim:
         # call the _im_trim routine defined above:

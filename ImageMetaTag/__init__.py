@@ -25,6 +25,8 @@ __documentation__ = 'http://scitools-incubator.github.io/image-meta-tag/build/ht
 
 # list fo file formats which are valid for saving metadata to:
 META_IMG_FORMATS = ['png']
+# and which can do image post-processing
+POSTPROC_IMG_FORMATS = ['png']
 
 # default timeout and retries for database access:
 DEFAULT_DB_TIMEOUT = 6
