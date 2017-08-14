@@ -103,8 +103,6 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
         plt.savefig(savefig_file)
     if not keep_open:
         plt.close()
-    if not keep_open:
-        plt.close()
     if buf:
         # need to go to the start of the buffer, if that's where it went:
         buf.seek(0)
