@@ -162,7 +162,9 @@ def plot_random_data(random_data, i_rand, plot_col, col_name, trims, borders,
                 img_tags['plot created by'] = this_routine
                 img_tags['ImageMetaTag version'] = imt.__version__
                 img_tags['SQL-char-name:in_tag'] = 'testing SQL chars'
-
+                # now save the file with imt.savefig (deleting any pre-existing file first):
+                if os.path.isfile(outfile):
+                    os.remove(outfile)
                 imt.savefig(outfile, do_trim=trim, trim_border=border, do_thumb=True,
                             img_converter=compression,
                             img_tags=img_tags,
@@ -215,7 +217,9 @@ def plot_random_data(random_data, i_rand, plot_col, col_name, trims, borders,
                 img_tags['plot created by'] = this_routine
                 img_tags['ImageMetaTag version'] = imt.__version__
                 img_tags['SQL-char-name:in_tag'] = 'testing SQL chars'
-
+                # now save the file with imt.savefig (deleting any pre-existing file first):
+                if os.path.isfile(outfile):
+                    os.remove(outfile)
                 imt.savefig(outfile, do_trim=trim, trim_border=border, do_thumb=True,
                             img_converter=compression,
                             img_tags=img_tags,
