@@ -9,7 +9,7 @@ by simplifying their colour palette.
 .. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks
 '''
 
-import os, io, sqlite3, pdb
+import os, sys, io, sqlite3, pdb
 import matplotlib.pyplot as plt
 from datetime import datetime
 
@@ -214,7 +214,10 @@ def image_file_postproc(filename, outfile=None, img_buf=None, img_converter=0, d
         outfile = filename
 
     if verbose:
-        st_fsize = os.path.getsize(filename)
+        if img_buf:
+            st_fsize = int(sys.getsizeof(img_buf))
+        else:
+            st_fsize = os.path.getsize(filename)
 
     if not (img_tags is None or isinstance(img_tags, dict)):
         raise ValueError('Image tags must be supplied as a dictionary')
@@ -322,7 +325,9 @@ def image_file_postproc(filename, outfile=None, img_buf=None, img_converter=0, d
     if verbose:
         # now report the file size change:
         en_fsize = os.path.getsize(outfile)
-        print 'File: "%s". Size: %s, to %s bytes' % (filename, st_fsize, en_fsize)
+        msg = 'File: "{}". Size: {}, to {} bytes ({}% original size)'
+        relative_size = (100.0 * en_fsize)/st_fsize
+        print msg.format(filename, st_fsize, en_fsize, relative_size)
 
 def _im_trim(im_obj, border=0):
     'Trims an image object using Python Image Library'
