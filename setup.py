@@ -20,7 +20,12 @@ for d, _, _ in os.walk(os.path.join(here, 'ImageMetaTag')):
 
 setup_args = dict(
     name = 'ImageMetaTag',
-    version = '0.5.0',
+    version = '0.6.4',
+    # for consistency, the version here should match:
+    # ImageMetaTag/__init__.py
+    # ImageMetaTag/javascript/imt_dropdown.js
+    # docs/source/conf.py
+    # setup.py
     description = 'Image metadata tagging, database and presentation',
     license = 'BSD3',
     author = 'Malcolm Brooks',

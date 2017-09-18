@@ -20,7 +20,12 @@ colour palette manipulation to reduce filesizes.
 Released under BSD 3-Clause License. See LICENSE for more details.
 '''
 
-__version__ = '0.6.1'
+__version__ = '0.6.4'
+# for consistency, the version here should match:
+# ImageMetaTag/__init__.py
+# ImageMetaTag/javascript/imt_dropdown.js
+# docs/source/conf.py
+# setup.py
 __documentation__ = 'http://scitools-incubator.github.io/image-meta-tag/build/html/'
 
 # list fo file formats which are valid for saving metadata to:
