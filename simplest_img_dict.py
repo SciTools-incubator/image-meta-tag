@@ -19,8 +19,12 @@ import ImageMetaTag as imt
 from test import get_webdir, define_imt_db, DATE_FORMAT_WWW
 
 def __main__():
-    # define the web page directory and image database using the same
-    # functions in test, so they are consistent:
+    # define the web page directory and image database
+    # Any real application of an ImageDict web page would need to
+    # define the locations of the web page and database for its own
+    # requirements.
+    # In this case, we are using the same functions in test, to be sure that
+    # they are consistent.
     webdir = get_webdir()
     imt_db = define_imt_db()
 
