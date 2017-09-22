@@ -1,5 +1,6 @@
 '''
-This submodule contains the :class:`ImageMetaTag.ImageDict` class, and functions for preparing them.
+This submodule contains the :class:`ImageMetaTag.ImageDict` class, and functions for 
+preparing instances of it.
 
 The purpose of an :class:`ImageMetaTag.ImageDict` is to sort the image metadata, supplied to
 :func:`ImageMetaTag.savefig` and usually stored in a database file, into a useful form that
