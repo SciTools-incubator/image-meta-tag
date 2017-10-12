@@ -61,7 +61,7 @@ copyright = u'2015-2017, British Crown Copyright'
 # The short X.Y version.
 version = '0.6'
 # The full version, including alpha/beta/rc tags.
-release = '0.6.5'
+release = '0.6.6'
 # for consistency, the version here should match:
 # ImageMetaTag/__init__.py
 # ImageMetaTag/javascript/imt_dropdown.js

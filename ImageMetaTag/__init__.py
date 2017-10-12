@@ -20,7 +20,7 @@ colour palette manipulation to reduce filesizes.
 Released under BSD 3-Clause License. See LICENSE for more details.
 '''
 
-__version__ = '0.6.5'
+__version__ = '0.6.6'
 # for consistency, the version here should match:
 # ImageMetaTag/__init__.py
 # ImageMetaTag/javascript/imt_dropdown.js

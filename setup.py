@@ -20,7 +20,7 @@ for d, _, _ in os.walk(os.path.join(here, 'ImageMetaTag')):
 
 setup_args = dict(
     name = 'ImageMetaTag',
-    version = '0.6.5',
+    version = '0.6.6',
     # for consistency, the version here should match:
     # ImageMetaTag/__init__.py
     # ImageMetaTag/javascript/imt_dropdown.js
@@ -34,7 +34,7 @@ setup_args = dict(
     test_suite = 'python test.py',
     classifiers = ['Programming Language :: Python :: 2.7',
                   ],
-    data_files = [('ImageMetaTag/javascript', glob('ImageMetaTag/javascript/*'))],
+    package_data = {'ImageMetaTag': ['javascript', 'javascript/*']},
 )
 
 if __name__ == '__main__':
