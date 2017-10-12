@@ -658,8 +658,9 @@ def scan_dir_for_db(basedir, db_file, img_tag_req=None, subdir_excl_list=None,
                          for instance, will prevent the image thumbnails being included.
      * no_file_ext - logical to exclude the file extension in the filenames saved to the database.
      * known_file_tags - if supplied, this is a dict (keyed by filename entry),\
-                         contains a dictionary of {filename: {tag name: value}} already known\
-                         (so you don't need to read them from the files themselves). This is very\
+                         contains a dictionary, structured: {filename: {tag name: value}} \
+                         for the images that are already known (so you don't need to read them \
+                         from the files themselves as that is slow). This can be useful \
                          if you have a old backup of a database file that needs updating.
      * restart_db - if True, the db_file will be restarted from an empty database.
      * verbose - verbose output.
