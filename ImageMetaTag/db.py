@@ -5,6 +5,9 @@ and maintain an sqlite3 database of image files and their associated metadata.
 In normal usage it is primarily used by  :func:`ImageMetaTag.savefig` to create the database
 as figures are saved. Once the metadata database has been built up then the metadata can be
 loaded with :func:`ImageMetaTag.db.read`.
+
+(C) Crown copyright Met Office. All rights reserved.
+Released under BSD 3-Clause License. See LICENSE for more details.
 '''
 
 import os, sqlite3, fnmatch, time, errno, pdb

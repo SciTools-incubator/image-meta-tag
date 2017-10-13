@@ -10,6 +10,9 @@ An easy example of creating a webpage, using an ImageDict is shown in
 `simplest_image_dict.py <simple.html>`_
 
 .. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks
+
+(C) Crown copyright Met Office. All rights reserved.
+Released under BSD 3-Clause License. See LICENSE for more details.
 '''
 # required imports
 import os, re, collections, inspect, copy

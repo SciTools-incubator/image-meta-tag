@@ -1,10 +1,10 @@
-// ImageMetaTag dropdown menu scripting - vn0.6.6
+// ImageMetaTag dropdown menu scripting - vn0.6.7
 // ImageMetaTag is a python package built around a wrapper for savefig in 
 // matplotlib, which adds metadata tags to supported image file formats.
 // See https://github.com/SciTools-incubator/image-meta-tag for details.
 //
 // (C) Crown copyright Met Office. All rights reserved.
-// Released under BSD 3-Clause License.
+// Released under BSD 3-Clause License. See LICENSE for more details.
 
 function read_parse_json_files(json_files, zlib_comp){
     // reads a list of files that contain the json 

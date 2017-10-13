@@ -1,0 +1,31 @@
+This is a short note on the process for creating an ImageMetaTag release
+and making it available via conda
+
+1) Develop, prepare and test your changes as normal, up to the point where
+   the changes warrants a new release.
+
+2) The release number should be changed using the Semantic versioning 
+   convention (http://semver.org/)
+ * The version number should be incemented in the following locations:
+   * ImageMetaTag/__init__.py
+   * ImageMetaTag/javascript/imt_dropdown.js
+   * docs/source/conf.py
+   * setup.py
+
+2) Update the documentation, from the docs directory:
+  cd docs
+ * Clean the documentation build:
+     make html clean
+ * Rebuild the docs, ensuring that the PYTHONPATH refers to the source of the
+   new build:
+     PYTHONPATH=../ make html
+
+3) Commit the version number and documentation changes:
+  git commit -a
+  git push origin {{ branch_name }}
+
+4) Start a pull request for your branch on your github fork and follow the
+   process to merge it to the master branch.
+
+5) 
+
