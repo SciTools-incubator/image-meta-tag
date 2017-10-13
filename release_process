@@ -63,4 +63,4 @@ number at: https://github.com/SciTools-incubator/image-meta-tag/releases
      https://github.com/malcolmbrooks/image-meta-tag-feedstock/branches
  * The pull request will automatically run the tests. These can take a while.
  * When the tests have completed succesfully the change can be merged.
- * Without an hour or so, the new release should be available via conda.
+ * Without an hour or so the new release should be available via conda.
