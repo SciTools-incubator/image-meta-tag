@@ -2,10 +2,10 @@ This is a short note on the process for creating an ImageMetaTag release
 and making it available via conda
 
 1) Develop, prepare and test your changes as normal, up to the point where
-   the changes warrants a new release.
+the changes warrants a new release.
 
 2) The release number should be changed using the Semantic versioning 
-   convention (http://semver.org/)
+convention (http://semver.org/)
  * The version number should be incemented in the following locations:
    * ImageMetaTag/__init__.py
    * ImageMetaTag/javascript/imt_dropdown.js
@@ -25,7 +25,42 @@ and making it available via conda
   git push origin {{ branch_name }}
 
 4) Start a pull request for your branch on your github fork and follow the
-   process to merge it to the master branch.
+process to merge it to the master branch.
 
-5) 
 
+From this point onwards, admin rights are required to both image-meta-tag and image-meta-tag-feedstock repositories.
+
+
+5) Pulbish a release in the image-meta-tag repository for the new release
+number at: https://github.com/SciTools-incubator/image-meta-tag/releases
+ * Tag version is just the version number e.g. '0.6.7' in the code.
+ * The convention used for the release title adds 'vn' before the number, e.g. 
+   'vn0.6.7'
+ * The release description can be used to give a very brief outline of the
+   changes.
+
+6) Update the recipe on the conda-forge-feedstock:
+ * The main repository is:
+     https://github.com/conda-forge/image-meta-tag-feedstock
+ * The location of admin branches is:
+     https://github.com/malcolmbrooks/image-meta-tag-feedstock
+ * Clone the repository:
+     git clone git@github.com:malcolmbrooks/image-meta-tag-feedstock.git image-meta-tag-feedstock
+ * Add the upstream repository:
+     git remote add upstream git@github.com:conda-forge/image-meta-tag-feedstock.git
+ * Before branching, make sure we have rebased to upstream/master:
+     git rebase upstream/master
+ * Create a branch within that clone, typically named after the release:
+     git checkout -b vn0.6.7
+ * Update the recipe/meta.yaml
+   * The version should point to the new version tag e.g. '0.6.7'
+   * To get the sha256 values, download the tar file for the release, e.g.:
+       https://github.com/SciTools-incubator/image-meta-tag/archive/0.6.7.tar.gz
+     Then get the sha256sum of the tar file.
+ * Commit to change with   git commit -a
+ * Push the change to origin   git push origin vn0.6.7
+ * Open a pull request to merge into upstream on the branches page:
+     https://github.com/malcolmbrooks/image-meta-tag-feedstock/branches
+ * The pull request will automatically run the tests. These can take a while.
+ * When the tests have completed succesfully the change can be merged.
+ * Without an hour or so, the new release should be available via conda.
