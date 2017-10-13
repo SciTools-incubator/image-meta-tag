@@ -3,15 +3,6 @@ import os.path
 from setuptools import setup
 from glob import glob
 
-# get the pako javascript library to the local version before we proceed:
-# import the version of ImageMetaTag that's been downloaded:
-try:
-    import ImageMetaTag as imt
-    # now get pako into that directory:
-    imt.webpage.get_pako()
-except:
-    pass
-
 here = os.path.abspath(os.path.dirname(__file__))
 packages = []
 for d, _, _ in os.walk(os.path.join(here, 'ImageMetaTag')):
@@ -20,12 +11,8 @@ for d, _, _ in os.walk(os.path.join(here, 'ImageMetaTag')):
 
 setup_args = dict(
     name = 'ImageMetaTag',
-    version = '0.6.6',
-    # for consistency, the version here should match:
-    # ImageMetaTag/__init__.py
-    # ImageMetaTag/javascript/imt_dropdown.js
-    # docs/source/conf.py
-    # setup.py
+    # see release_process for details on incrementing the version
+    version = '0.6.7',
     description = 'Image metadata tagging, database and presentation',
     license = 'BSD3',
     author = 'Malcolm Brooks',

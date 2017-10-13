@@ -34,6 +34,9 @@ An easy example of creating a webpage, using an :class:`ImageMetaTag.ImageDict` 
 menus, but more will hopefully be added soon.
 
 .. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks
+
+(C) Crown copyright Met Office. All rights reserved.
+Released under BSD 3-Clause License. See LICENSE for more details.
 '''
 
 import os, json, pdb, shutil, tempfile, zlib
