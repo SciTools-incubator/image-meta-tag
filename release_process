@@ -11,6 +11,9 @@ convention (http://semver.org/)
    * ImageMetaTag/javascript/imt_dropdown.js
    * docs/source/conf.py
    * setup.py
+ * After changing the release numbers, run the test.py script again one last
+   time to make sure it works, as the code at this stage is what will be
+   released.
 
 2) Update the documentation, from the docs directory:
   cd docs
