@@ -21,7 +21,7 @@ setup_args = dict(
     test_suite = 'python test.py',
     classifiers = ['Programming Language :: Python :: 2.7',
                   ],
-    package_data = {'ImageMetaTag': ['javascript', 'javascript/*']},
+    package_data = {'ImageMetaTag': ['javascript/*']},
 )
 
 if __name__ == '__main__':
