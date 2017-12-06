@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>ImageMetaTag.db &mdash; ImageMetaTag 0.6.8 documentation</title>
+    <title>ImageMetaTag.db &mdash; ImageMetaTag 0.6.9 documentation</title>
     
     <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.6.8',
+        VERSION:     '0.6.9',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <link rel="top" title="ImageMetaTag 0.6.8 documentation" href="../../index.html" />
+    <link rel="top" title="ImageMetaTag 0.6.9 documentation" href="../../index.html" />
     <link rel="up" title="ImageMetaTag" href="../ImageMetaTag.html" /> 
   </head>
   <body>
@@ -36,7 +36,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">ImageMetaTag 0.6.8 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">ImageMetaTag 0.6.9 documentation</a> &raquo;</li>
           <li><a href="../index.html" >Module code</a> &raquo;</li>
           <li><a href="../ImageMetaTag.html" accesskey="U">ImageMetaTag</a> &raquo;</li> 
       </ul>
@@ -303,11 +303,28 @@
 </div>
 <span class="k">def</span> <span class="nf">create_table_for_img_info</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span> <span class="n">img_info</span><span class="p">):</span>
     <span class="s">&#39;Creates a database table, in a database cursor, to store for the input img_info&#39;</span>
+    
     <span class="n">create_command</span> <span class="o">=</span> <span class="s">&#39;CREATE TABLE {}(fname TEXT PRIMARY KEY,&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">SQLITE_IMG_INFO_TABLE</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">img_info</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="n">create_command</span> <span class="o">+=</span> <span class="s">&#39; &quot;{}&quot; TEXT,&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">info_key_to_db_name</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
     <span class="n">create_command</span> <span class="o">=</span> <span class="n">create_command</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
-    <span class="n">dbcr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">create_command</span><span class="p">)</span>
+    <span class="c"># Can make a rare race condition if multiple processes try to create the file at the same time;</span>
+    <span class="c"># If that happens, the error is:</span>
+    <span class="c"># sqlite3.OperationalError: table img_info already exists for file .......</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">dbcr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">create_command</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span> <span class="k">as</span> <span class="n">OpErr</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s">&#39;table {} already exists&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">SQLITE_IMG_INFO_TABLE</span><span class="p">)</span> <span class="ow">in</span> <span class="n">OpErr</span><span class="o">.</span><span class="n">message</span><span class="p">:</span>
+            <span class="c"># another process has just created the table, so sleep(1)</span>
+            <span class="c"># This is only when a db file is created so isn&#39;t called often (and the race condition is rare!)</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># everything else needs to be reported and raised immediately:</span>
+            <span class="k">raise</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span><span class="p">(</span><span class="n">OpErr</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Error</span> <span class="k">as</span> <span class="n">SqErr</span><span class="p">:</span>
+        <span class="c"># everything else needs to be reported and raised immediately:</span>
+        <span class="k">raise</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Error</span><span class="p">(</span><span class="n">SqErr</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+
 
 <div class="viewcode-block" id="open_db_file"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.open_db_file">[docs]</a><span class="k">def</span> <span class="nf">open_db_file</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
@@ -857,7 +874,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">ImageMetaTag 0.6.8 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">ImageMetaTag 0.6.9 documentation</a> &raquo;</li>
           <li><a href="../index.html" >Module code</a> &raquo;</li>
           <li><a href="../ImageMetaTag.html" >ImageMetaTag</a> &raquo;</li> 
       </ul>

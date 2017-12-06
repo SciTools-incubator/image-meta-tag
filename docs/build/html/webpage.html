@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>ImageMetaTag.webpage &mdash; ImageMetaTag 0.6.8 documentation</title>
+    <title>ImageMetaTag.webpage &mdash; ImageMetaTag 0.6.9 documentation</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.6.8',
+        VERSION:     '0.6.9',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="ImageMetaTag 0.6.8 documentation" href="index.html" />
+    <link rel="top" title="ImageMetaTag 0.6.9 documentation" href="index.html" />
     <link rel="next" title="ImageMetaTag - test.py" href="test.html" />
     <link rel="prev" title="ImageMetaTag.ImageDict" href="ImageDict.html" /> 
   </head>
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="ImageDict.html" title="ImageMetaTag.ImageDict"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">ImageMetaTag 0.6.8 documentation</a> &raquo;</li> 
+        <li><a href="index.html">ImageMetaTag 0.6.9 documentation</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -127,9 +127,10 @@ Released under BSD 3-Clause License. See LICENSE for more details.</p>
 <h2>Writing a whole page<a class="headerlink" href="#writing-a-whole-page" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="ImageMetaTag.webpage.write_full_page">
-<tt class="descclassname">ImageMetaTag.webpage.</tt><tt class="descname">write_full_page</tt><big>(</big><em>img_dict</em>, <em>filepath</em>, <em>title</em>, <em>page_filename=None</em>, <em>tab_s_name=None</em>, <em>preamble=None</em>, <em>postamble=None</em>, <em>compression=False</em>, <em>initial_selectors=None</em>, <em>show_selector_names=False</em>, <em>url_type='int'</em>, <em>only_show_rel_url=False</em>, <em>verbose=False</em>, <em>style='horiz dropdowns'</em>, <em>write_intmed_tmpfile=False</em>, <em>description=None</em>, <em>keywords=None</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/webpage.html#write_full_page"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.webpage.write_full_page" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">ImageMetaTag.webpage.</tt><tt class="descname">write_full_page</tt><big>(</big><em>img_dict</em>, <em>filepath</em>, <em>title</em>, <em>page_filename=None</em>, <em>tab_s_name=None</em>, <em>preamble=None</em>, <em>postamble=None</em>, <em>compression=False</em>, <em>initial_selectors=None</em>, <em>show_selector_names=False</em>, <em>show_singleton_selectors=True</em>, <em>optgroups=None</em>, <em>url_type='int'</em>, <em>only_show_rel_url=False</em>, <em>verbose=False</em>, <em>style='horiz dropdowns'</em>, <em>write_intmed_tmpfile=False</em>, <em>description=None</em>, <em>keywords=None</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/webpage.html#write_full_page"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.webpage.write_full_page" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes out an <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a> as a webpage, to a given file location.
-The file is overwritten.</p>
+The files are created as temporary files and when complete they replace any files that
+are currently in the specified location.</p>
 <p>If the img_dict supplied is None, rather than the appropriate class, then a page will
 be produced with the image selectors missing, and a message saying no images are available.</p>
 <p>Currently only able to write out a page with horizontal dropdown menus, but other
@@ -141,6 +142,8 @@ webpage styles could be added.</p>
 <li>postable : html text added after the ImageMetaTag section.</li>
 <li>initial_selectors - A list of initial values for the selectors, to be passed into                           <tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.webpage.write_js_setup()</span></tt>.</li>
 <li>show_selector_names - switches on displaying the selector full names defined by the                             <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a>.full_name_mapping</li>
+<li>show_singleton_selectors - When set to False, selectors that have only one element are                                 not displayed (default=True).</li>
+<li>optgroups - The contents of selectors can be grouped together to make large lists                   more readable. This is passed into                   <a class="reference internal" href="#ImageMetaTag.webpage.write_js_to_header" title="ImageMetaTag.webpage.write_js_to_header"><tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.webpage.write_js_to_header()</span></tt></a>.</li>
 <li>url_type - determines the type of URL at the bottom of the ImageMetaTag section. Can be                  &#8216;int&#8217; or &#8216;str&#8217;.</li>
 <li>only_show_rel_url - If True, the wepage will only show relative urls in is link section.</li>
 <li>verbose - If True, stdout will be more verbose</li>
@@ -158,37 +161,62 @@ webpage styles could be added.</p>
 <h2>As indidividual components<a class="headerlink" href="#as-indidividual-components" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="ImageMetaTag.webpage.write_js_to_header">
-<tt class="descclassname">ImageMetaTag.webpage.</tt><tt class="descname">write_js_to_header</tt><big>(</big><em>img_dict</em>, <em>initial_selectors=None</em>, <em>style=None</em>, <em>file_obj=None</em>, <em>json_files=None</em>, <em>js_files=None</em>, <em>pagename=None</em>, <em>tabname=None</em>, <em>selector_prefix=None</em>, <em>url_separator='|'</em>, <em>url_type='str'</em>, <em>only_show_rel_url=False</em>, <em>ind=None</em>, <em>compression=False</em>, <em>description=None</em>, <em>keywords=None</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/webpage.html#write_js_to_header"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.webpage.write_js_to_header" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">ImageMetaTag.webpage.</tt><tt class="descname">write_js_to_header</tt><big>(</big><em>img_dict</em>, <em>initial_selectors=None</em>, <em>optgroups=None</em>, <em>style=None</em>, <em>file_obj=None</em>, <em>json_files=None</em>, <em>js_files=None</em>, <em>pagename=None</em>, <em>tabname=None</em>, <em>selector_prefix=None</em>, <em>show_singleton_selectors=True</em>, <em>url_separator='|'</em>, <em>url_type='str'</em>, <em>only_show_rel_url=False</em>, <em>ind=None</em>, <em>compression=False</em>, <em>description=None</em>, <em>keywords=None</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/webpage.html#write_js_to_header"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.webpage.write_js_to_header" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes out the required ImageMetaTag config and data paths into a html header section
 for an input <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a>.</p>
 <p>Currently only able to write out a page with horizontal dropdown menus, but other
 webpage styles could be added.</p>
-<ul class="simple">
-<li>initial_selectors - A list of initial values for the selectors.</li>
-<li>style - the style of the output webpage, currently only &#8216;horiz dropdowns&#8217; is available</li>
-<li>file_obj - the open file object to write the header to.</li>
-<li>json_files - a list of the json (or other similar object) containing the representation of                   the ImageDict data.</li>
-<li>js_file - the javascript file containing the actual scripting for the selected style.</li>
-<li>pagename - the file name, within the directory (defaults to the name of the file)                  but can be set if tab_s_name is also used.</li>
-<li>tabname : used to denote the name of the page, when it is used as a frame                 of a larger page.</li>
-<li>url_type - determines the type of URL at the bottom of the ImageMetaTag section. Can be                  &#8216;int&#8217; or &#8216;str&#8217;.</li>
-<li>only_show_rel_url - If True, the wepage will only show relative urls in is link section.</li>
-<li>ind - indentation going into the header section.</li>
-<li>compression - Indicates the json file is compressed using zlib.</li>
-<li>description - html description metadata7</li>
-<li>keywords - html keyword metadata</li>
+<ul>
+<li><p class="first">initial_selectors - A list of initial values for the selectors.</p>
+</li>
+<li><dl class="first docutils">
+<dt>optgroups - The contents of selectors can be grouped together to make large lists                   more readable. These groups are specified as a 2-level dictionary where the                   first level is the index of the selectors to have groups.                   The second level contains the {&#8216;group name&#8217;: [contents]}.</dt>
+<dd><p class="first last">By specifying an optgroup, the order of the elements in a selector uses                   the optgroups first. By default the optgroup names are sorted, but the                   order of the optgroups can be specified by including a                      &#8216;imt_optgroup_order&#8217;: [ordered list of opgroup names],
+in a second level dictionary that specifies the &#8216;group name&#8217;: [contents]                   Within each optgroup the order of elements is taken from their order in the                   image dict.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">style - the style of the output webpage, currently only &#8216;horiz dropdowns&#8217; is available</p>
+</li>
+<li><p class="first">file_obj - the open file object to write the header to.</p>
+</li>
+<li><p class="first">json_files - a list of the json (or other similar object) containing the representation of                   the ImageDict data.</p>
+</li>
+<li><p class="first">js_file - the javascript file containing the actual scripting for the selected style.</p>
+</li>
+<li><p class="first">pagename - the file name, within the directory (defaults to the name of the file)                  but can be set if tab_s_name is also used.</p>
+</li>
+<li><p class="first">tabname : used to denote the name of the page, when it is used as a frame                 of a larger page.</p>
+</li>
+<li><p class="first">selector_prefix - prefix to use for javascript selector names (defaults to &#8216;sel&#8217;)</p>
+</li>
+<li><p class="first">show_singleton_selectors - When set to False, selectors that have only one element are                                 not displayed (default=True).</p>
+</li>
+<li><p class="first">url_type - determines the type of URL at the bottom of the ImageMetaTag section. Can be                  &#8216;int&#8217; or &#8216;str&#8217;.</p>
+</li>
+<li><p class="first">only_show_rel_url - If True, the wepage will only show relative urls in is link section.</p>
+</li>
+<li><p class="first">ind - indentation going into the header section.</p>
+</li>
+<li><p class="first">compression - Indicates the json file is compressed using zlib.</p>
+</li>
+<li><p class="first">description - html description metadata7</p>
+</li>
+<li><p class="first">keywords - html keyword metadata</p>
+</li>
 </ul>
 </dd></dl>
 
 <dl class="function">
 <dt id="ImageMetaTag.webpage.write_js_placeholders">
-<tt class="descclassname">ImageMetaTag.webpage.</tt><tt class="descname">write_js_placeholders</tt><big>(</big><em>file_obj=None</em>, <em>dict_depth=None</em>, <em>selector_prefix=None</em>, <em>style='horiz dropdowns'</em>, <em>level_names=False</em>, <em>animated_level=None</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/webpage.html#write_js_placeholders"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.webpage.write_js_placeholders" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">ImageMetaTag.webpage.</tt><tt class="descname">write_js_placeholders</tt><big>(</big><em>img_dict</em>, <em>file_obj=None</em>, <em>dict_depth=None</em>, <em>selector_prefix=None</em>, <em>style='horiz dropdowns'</em>, <em>level_names=False</em>, <em>show_singleton_selectors=True</em>, <em>animated_level=None</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/webpage.html#write_js_placeholders"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.webpage.write_js_placeholders" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes the placeholders into the page body, for the javascript to manipulate</p>
 <ul class="simple">
 <li>file_obj - an open file object to write to</li>
 <li>dict_dept - the depth of the <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a> being written</li>
 <li>selector_prefix - prefix for the variable names of the selectors (these are visible to                         those people viewing the webpage!)</li>
 <li>style - In future, it would be great to write out different types of webpages. For now               they are always horizontal dropdown menus: &#8216;horiz dropdowns&#8217;.</li>
+<li>show_singleton_selectors - When set to False, selectors that have only one element are                                 not displayed (default=True).</li>
 <li>level_names - if supplied, this need to be a list of full names, for the selectors, of                     length dict_depth.</li>
 <li>animated_level - if supplied, as a string, this will be used to label the animator buttons.</li>
 </ul>
@@ -245,7 +273,7 @@ with zlib, if compression=True.</p>
         <li class="right" >
           <a href="ImageDict.html" title="ImageMetaTag.ImageDict"
              >previous</a> |</li>
-        <li><a href="index.html">ImageMetaTag 0.6.8 documentation</a> &raquo;</li> 
+        <li><a href="index.html">ImageMetaTag 0.6.9 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

@@ -1,4 +1,4 @@
-// ImageMetaTag dropdown menu scripting - vn0.6.8
+// ImageMetaTag dropdown menu scripting - vn0.6.9
 // ImageMetaTag is a python package built around a wrapper for savefig in 
 // matplotlib, which adds metadata tags to supported image file formats.
 // See https://github.com/SciTools-incubator/image-meta-tag for details.
@@ -276,35 +276,84 @@ function update_selectors(options_at_depth, selected_at_depth, start_depth) {
 function update_selector(depth, options, selected) {
     // updates a selector at a particular depth, with a set of options
     // and the selected value as the current selection:
-    target_div = key_to_selector[depth];
+
     //console.log("updating sel", depth);
     //console.log("  at div", target_div);
     //console.log("  with options", options);
     //console.log("  and selected val", selected);
-
-    // set up the text to define the selector:
-    sel_text = "<select id='select_"+ depth
-        sel_text += "' onChange='OnSelected("+ depth +")'>\n"
-        for (var i_opt=0, len=options.length; i_opt < len; i_opt++){
-            // loop over the options, and write out a line for each one:
-            for (var j_opt=0, len_j=key_lists[depth].length; j_opt < len_j; j_opt++){
-                // first, get the index in key_lists[depth] to which i_opt refers
-                // as not every option is used in every selection:
-                if (key_lists[depth][j_opt] == options[i_opt]){break};
-            }
-            if (options[i_opt] == selected){
-                sel_text += "  <option value=" + j_opt + " selected=selected>"+options[i_opt]+"</option>\n"
-            } else {
-                sel_text += "  <option value=" + j_opt + ">"+options[i_opt]+"</option>\n"
-            }
-        }
-    // finish it off:
-    sel_text += "</select>"
-
-        // now set the sel div:
-        var _ = document.getElementById("sel"+depth)
-        _.innerHTML = sel_text;
-    //console.log(sel_text)
+    if (show_singleton_selectors == 1 || key_lists[depth].length > 1){
+	target_div = key_to_selector[depth];
+	
+	// set up the text to define the selector:
+	sel_text = "<select id='select_"+ depth;
+	sel_text += "' onChange='OnSelected("+ depth +")'>\n";
+	// find which optgroup is for the current depth:
+	var optgroup_depth = optgroups[depth];
+	// the number of optgroups, minus one to account for 'imt_optgroup_order'
+	n_optgroups = Object.keys(optgroup_depth).length - 1;
+	if ( n_optgroups > 0 ){
+	    // now loop over the actual optgroups:
+	    for (var i_optgrp=0, n_optgroups; i_optgrp<n_optgroups; i_optgrp++){
+		// get the name of this optgroup:
+		var optgrp_name = optgroup_depth['imt_optgroup_order'][i_optgrp];
+		// so we can get the actual optgroup information:
+		var optgroup = optgroup_depth[optgrp_name];
+		// start the optgroup:
+		sel_text += "  <optgroup label='" + optgrp_name + "'>";
+		// now within the optgroup, add the options:
+		for (var i_opt=0, n_opt=optgroup.length; i_opt< n_opt; i_opt++){
+		    // loop over the options, and write out a line for each one:
+		    for (var j_opt=0, len_j=key_lists[depth].length; j_opt < len_j; j_opt++){
+			// first, get the index in key_lists[depth] to which i_opt refers
+			// as not every option is used in every selection:
+			if (key_lists[depth][j_opt] == optgroup[i_opt]){break};
+		    };
+		    if (optgroup[i_opt] == selected){
+			sel_text += "  <option value=" + j_opt + " selected=selected>"+optgroup[i_opt]+"</option>\n";
+		    } else {
+			sel_text += "  <option value=" + j_opt + ">"+optgroup[i_opt]+"</option>\n";
+		    };
+		};
+		// close the optgroup:
+		sel_text += "  </optgroup>";
+	    };
+	    // now add any residuals:
+	    var resids = optgroup_redisual[depth];
+	    for (var i_opt=0, len=resids.length; i_opt < len; i_opt++){
+		// loop over the options, and write out a line for each one:
+		for (var j_opt=0, len_j=key_lists[depth].length; j_opt < len_j; j_opt++){
+		    // first, get the index in key_lists[depth] to which i_opt refers
+		    // as not every option is used in every selection:
+		    if (key_lists[depth][j_opt] == resids[i_opt]){break};
+		}
+		if (resids[i_opt] == selected){
+		    sel_text += "  <option value=" + j_opt + " selected=selected>"+resids[i_opt]+"</option>\n";
+		} else {
+		    sel_text += "  <option value=" + j_opt + ">"+resids[i_opt]+"</option>\n";
+		};
+	    };
+	} else {
+	    for (var i_opt=0, len=options.length; i_opt < len; i_opt++){
+		// loop over the options, and write out a line for each one:
+		for (var j_opt=0, len_j=key_lists[depth].length; j_opt < len_j; j_opt++){
+		    // first, get the index in key_lists[depth] to which i_opt refers
+		    // as not every option is used in every selection:
+		    if (key_lists[depth][j_opt] == options[i_opt]){break};
+		};
+		if (options[i_opt] == selected){
+		    sel_text += "  <option value=" + j_opt + " selected=selected>"+options[i_opt]+"</option>\n";
+		} else {
+		    sel_text += "  <option value=" + j_opt + ">"+options[i_opt]+"</option>\n";
+		};
+	    };
+	};
+	// finish off the selector:
+	sel_text += "</select>"
+	    // now set the sel div:
+	    var _ = document.getElementById("sel"+depth)
+	    _.innerHTML = sel_text;
+	//console.log(sel_text)
+    }; // closes the test on whether this selector is to be displayed
 }
 
 function OnSelected(depth){
