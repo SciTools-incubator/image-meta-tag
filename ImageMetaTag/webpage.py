@@ -39,7 +39,7 @@ menus, but more will hopefully be added soon.
 Released under BSD 3-Clause License. See LICENSE for more details.
 '''
 
-import os, json, pdb, shutil, tempfile, zlib
+import os, json, pdb, shutil, tempfile, copy, zlib
 import numpy as np
 import ImageMetaTag as imt
 
@@ -59,12 +59,14 @@ PAKO_SOURE_TAR = 'https://github.com/nodeca/pako/archive/{}.tar.gz'.format(PAKO_
 def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=None,
                     preamble=None, postamble=None, compression=False,
                     initial_selectors=None, show_selector_names=False,
+                    show_singleton_selectors=True, optgroups=None,
                     url_type='int', only_show_rel_url=False, verbose=False,
                     style='horiz dropdowns', write_intmed_tmpfile=False,
                     description=None, keywords=None):
     '''
     Writes out an :class:`ImageMetaTag.ImageDict` as a webpage, to a given file location.
-    The file is overwritten.
+    The files are created as temporary files and when complete they replace any files that
+    are currently in the specified location.
 
     If the img_dict supplied is None, rather than the appropriate class, then a page will
     be produced with the image selectors missing, and a message saying no images are available.
@@ -83,6 +85,11 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
                           :func:`ImageMetaTag.webpage.write_js_setup`.
     * show_selector_names - switches on displaying the selector full names defined by the \
                             :class:`ImageMetaTag.ImageDict`.full_name_mapping
+    * show_singleton_selectors - When set to False, selectors that have only one element are \
+                                not displayed (default=True).
+    * optgroups - The contents of selectors can be grouped together to make large lists \
+                  more readable. This is passed into \
+                  :func:`ImageMetaTag.webpage.write_js_to_header`.
     * url_type - determines the type of URL at the bottom of the ImageMetaTag section. Can be \
                  'int' or 'str'.
     * only_show_rel_url - If True, the wepage will only show relative urls in is link section.
@@ -106,6 +113,9 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
 
     if page_filename is None:
         page_filename = os.path.basename(filepath)
+    if not page_filename:
+        msg = 'filepath ({})" must specify a file (not a directory'
+        raise ValueError(msg.format(filepath))
 
     # other files involved:
     file_dir, file_name = os.path.split(filepath)
@@ -239,10 +249,11 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
         else:
             # the json_files is a list of (tmp_file, final_file) tuples. Here we want the final one:
             final_json_files = [os.path.split(x[1])[1] for x in json_files]
-            write_js_to_header(img_dict, initial_selectors=initial_selectors,
+            write_js_to_header(img_dict, initial_selectors=initial_selectors, optgroups=optgroups,
                                file_obj=out_file, json_files=final_json_files, js_files=js_files,
                                pagename=page_filename, tabname=tab_s_name,
                                selector_prefix=selector_prefix, url_separator=url_separator,
+                               show_singleton_selectors=show_singleton_selectors,
                                url_type=url_type, only_show_rel_url=only_show_rel_url,
                                style=style, ind=ind, compression=compression,
                                description=description, keywords=keywords)
@@ -276,8 +287,9 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
                 anim_level = level_names[img_dict.selector_animated]
             else:
                 anim_level = None
-            write_js_placeholders(file_obj=out_file, dict_depth=img_dict.dict_depth(),
+            write_js_placeholders(img_dict, file_obj=out_file, dict_depth=img_dict.dict_depth(),
                                   style=style, level_names=level_names,
+                                  show_singleton_selectors=show_singleton_selectors,
                                   animated_level=anim_level)
         # the body is done, so the postamble comes in:
         if not postamble is None:
@@ -301,9 +313,10 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
 
     return page_dependencies
 
-def write_js_to_header(img_dict, initial_selectors=None, style=None,
+def write_js_to_header(img_dict, initial_selectors=None, optgroups=None, style=None,
                        file_obj=None, json_files=None, js_files=None,
                        pagename=None, tabname=None, selector_prefix=None,
+                       show_singleton_selectors=True,
                        url_separator='|', url_type='str', only_show_rel_url=False,
                        ind=None, compression=False,
                        description=None, keywords=None):
@@ -315,6 +328,17 @@ def write_js_to_header(img_dict, initial_selectors=None, style=None,
     webpage styles could be added.
 
     * initial_selectors - A list of initial values for the selectors.
+    * optgroups - The contents of selectors can be grouped together to make large lists \
+                  more readable. These groups are specified as a 2-level dictionary where the \
+                  first level is the index of the selectors to have groups. \
+                  The second level contains the {'group name': [contents]}.
+                  By specifying an optgroup, the order of the elements in a selector uses \
+                  the optgroups first. By default the optgroup names are sorted, but the \
+                  order of the optgroups can be specified by including a \
+                     'imt_optgroup_order': [ordered list of opgroup names],
+                  in a second level dictionary that specifies the 'group name': [contents] \
+                  Within each optgroup the order of elements is taken from their order in the \
+                  image dict.
     * style - the style of the output webpage, currently only 'horiz dropdowns' is available
     * file_obj - the open file object to write the header to.
     * json_files - a list of the json (or other similar object) containing the representation of \
@@ -324,6 +348,9 @@ def write_js_to_header(img_dict, initial_selectors=None, style=None,
                  but can be set if tab_s_name is also used.
     * tabname : used to denote the name of the page, when it is used as a frame \
                 of a larger page.
+    * selector_prefix - prefix to use for javascript selector names (defaults to 'sel')
+    * show_singleton_selectors - When set to False, selectors that have only one element are \
+                                not displayed (default=True).
     * url_type - determines the type of URL at the bottom of the ImageMetaTag section. Can be \
                  'int' or 'str'.
     * only_show_rel_url - If True, the wepage will only show relative urls in is link section.
@@ -334,6 +361,9 @@ def write_js_to_header(img_dict, initial_selectors=None, style=None,
     '''
     if not (isinstance(img_dict, imt.ImageDict) or img_dict is None):
         raise ValueError('Input img_dict is not an ImageMetaTag ImageDict')
+
+    if ind is None:
+        ind = ''
 
     if not description is None:
         file_obj.write('{}<meta name="description" content="{}">\n'.format(ind, description))
@@ -434,25 +464,74 @@ def write_js_to_header(img_dict, initial_selectors=None, style=None,
         ind = _indent_down_one(ind)
         file_obj.write(ind + '];\n')
 
+        # now write out optgroups:
+        non_optgroup_elems = {}
+        if optgroups:
+            # if the optgroup order hasn't been specified, then 
+            # the default is a sort:
+            for group_ind, optgroup in optgroups.iteritems():
+                # keep a note of the elements in the whole list, so we know which ones 
+                # aren't in any optgroup:
+                all_keys = copy.deepcopy(img_dict.keys[group_ind])
+                
+                print optgroups[group_ind].keys(), optgroup.keys()
+                if 'imt_optgroup_order' not in optgroup:
+                    optgroup['imt_optgroup_order'] = sorted(optgroup.keys())
+                # make sure that the elements within the optgroup are a sorted
+                # list, sorted according to the order in the img_dict.keys()
+                for group_name, group_elements in optgroup.iteritems():
+                    if group_name != 'imt_optgroup_order':
+                        # pick up the indices of the elements, in the main list of keys:
+                        elem_inds = [img_dict.keys[group_ind].index(x) for x in group_elements]
+                        # now sort by elem_inds
+                        sorted_elems = sorted(zip(elem_inds, group_elements))
+                        # and pull out the bit we need again:
+                        optgroup[group_name] = [x[1] for x in sorted_elems]
+
+                        # and make a list of those elements that aren't in any optgroup!
+                        for group_element in group_elements:
+                            all_keys.remove(group_element)
+                non_optgroup_elems[group_ind] = all_keys
+
+            # convert the optgroups to a list, in javascript, with each selector having an element within it:
+            optg_str = '['
+            non_optg_str = '['
+            for i_depth in range(dict_depth):
+                if i_depth in optgroups:
+                    optg_str += json.dumps(optgroups[i_depth], separators=(',', ':'))
+                    non_optg_str += str(non_optgroup_elems[i_depth])
+                else:
+                    # no optgroup for this selector:
+                    optg_str += '{}'
+                    non_optg_str += '[]'
+                if i_depth < dict_depth -1:
+                    # the final element mustn't have a comma or internet explorer will complain:
+                    optg_str += ','
+                    non_optg_str += ','
+            # close the javascript list:
+            optg_str += '];'
+            non_optg_str += '];'
+        else:
+            optg_str = '[' + '{},' * (dict_depth-1) + '{}]'
+            non_optg_str = '[' + '[],' * (dict_depth-1) + '[]]'
+        file_obj.write('{}var optgroups = {}\n'.format(ind, optg_str))
+        file_obj.write('{}var optgroup_redisual = {}\n'.format(ind, non_optg_str))
+        file_obj.write('{}var show_singleton_selectors = {};\n'.format(ind, int(show_singleton_selectors)))
+
         # now some top level things:
         if style == 'horiz dropdowns':
-            file_obj.write('''
-    {0}// other top level derived variables
-    {0}// the depth of the ImageMetaTag ImageDict (number of selectors):
-    {0}var n_deep = selected_id.length;
-    {0}// a list of the options available to the animator buttons, with the current selectio
-    {0}var anim_options = [];
-    {0}// the index of the current option for the animator:
-    {0}var anim_ind = 0;
-    '''.format(ind))
+            file_obj.write('''{0}// other top level derived variables
+{0}// the depth of the ImageMetaTag ImageDict (number of selectors):
+{0}var n_deep = selected_id.length;
+{0}// a list of the options available to the animator buttons, with the current selection
+{0}var anim_options = [];
+{0}// the index of the current option for the animator:
+{0}var anim_ind = 0;
+'''.format(ind))
 
         # now, the main call:
-        file_obj.write(ind + 'window.onload = function() {\n')
-        ind = _indent_up_one(ind)
-        file_obj.write(ind + '// redefine onload, so it does this:\n')
-        file_obj.write(ind + 'imt_main();\n')
-        ind = _indent_down_one(ind)
-        file_obj.write(ind + '};\n')
+        file_obj.write(ind + '// redefine onload, so it calls the imt_main to actually write the page:\n')
+        file_obj.write(ind + 'window.onload = function() {imt_main();}\n')
         # END of the imt specifc header content:
 
 def write_js_setup_defaults(selector_prefix=None, list_prefix=None, file_list_name=None):
@@ -597,8 +676,9 @@ def write_json(img_dict, file_name_no_ext, compression=False,
 
     return out_files
 
-def write_js_placeholders(file_obj=None, dict_depth=None, selector_prefix=None,
+def write_js_placeholders(img_dict, file_obj=None, dict_depth=None, selector_prefix=None,
                           style='horiz dropdowns', level_names=False,
+                          show_singleton_selectors=True,
                           animated_level=None):
     '''
     Writes the placeholders into the page body, for the javascript to manipulate
@@ -609,10 +689,23 @@ def write_js_placeholders(file_obj=None, dict_depth=None, selector_prefix=None,
                         those people viewing the webpage!)
     * style - In future, it would be great to write out different types of webpages. For now \
               they are always horizontal dropdown menus: 'horiz dropdowns'.
+    * show_singleton_selectors - When set to False, selectors that have only one element are \
+                                not displayed (default=True).
     * level_names - if supplied, this need to be a list of full names, for the selectors, of \
                     length dict_depth.
     * animated_level - if supplied, as a string, this will be used to label the animator buttons.
     '''
+
+    if not show_singleton_selectors:
+        # work out which selectors we actually want to show:
+        show_sel = [len(img_dict.keys[x]) > 1 for x in range(dict_depth)]
+        if not any(show_sel):
+            # if there aren't any selectors in this way, that's usually a mistake
+            # so show them all:
+            show_sel = [True] * dict_depth
+    else:
+        show_sel = [True] * dict_depth
+    sels_shown = sum(show_sel)
 
     if selector_prefix is None:
         selector_prefix, _junk1, _junk2 = write_js_setup_defaults()
@@ -649,14 +742,16 @@ def write_js_placeholders(file_obj=None, dict_depth=None, selector_prefix=None,
      <tr>
 ''')
             for level in range(dict_depth):
-                file_obj.write('       <td>{}&nbsp;&nbsp;</td>\n'.format(level_names[level]))
+                if show_sel[level]:
+                    file_obj.write('       <td>{}&nbsp;&nbsp;</td>\n'.format(level_names[level]))
             file_obj.write('''     </tr>
      <tr>
 ''')
             for level in range(dict_depth):
-                selp = selector_prefix + str(level)
-                out_str = '       <td><span id="{}">&nbsp;</span></td>\n'.format(selp)
-                file_obj.write(out_str)
+                if show_sel[level]:
+                    selp = selector_prefix + str(level)
+                    out_str = '       <td><span id="{}">&nbsp;</span></td>\n'.format(selp)
+                    file_obj.write(out_str)
             file_obj.write('''     </tr>
 ''')
             # add the placeholder for animators buttons:
@@ -671,7 +766,8 @@ def write_js_placeholders(file_obj=None, dict_depth=None, selector_prefix=None,
         else:
             # simply a set of spans, in a line:
             for lev in range(dict_depth):
-                file_obj.write('''
+                if show_sel[lev]:
+                    file_obj.write('''
    <span id="%s%s">&nbsp;</span>''' % (selector_prefix, lev))
             file_obj.write('\n   <br>')
             # add the placeholder for animators buttons:

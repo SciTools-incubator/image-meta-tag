@@ -99,7 +99,6 @@ def make_random_data(n_random_data):
         if i_rand < 6:
             n_rolls = 6 ** (i_rand + 1)
         else:
-            pdb.set_trace()
             n_rolls = 6 ** (6) + 2 ** (i_rand + 1)
         random_data.append(np.random.random_integers(1, 6, n_rolls) + \
                            np.random.random_integers(1, 6, n_rolls))
@@ -131,6 +130,8 @@ def plot_random_data(random_data, i_rand, plot_col, col_name, trims, borders,
     mkdir_p('{}/rolls'.format(img_savedir))
     mkdir_p('{}/dists'.format(img_savedir))
 
+    data_source = 'Some random data'
+
     # save the figure, using different image-meta-tag options
     # and tag the images.
     for trim in trims:
@@ -157,7 +158,7 @@ def plot_random_data(random_data, i_rand, plot_col, col_name, trims, borders,
                             'plot color': col_name}
 
                 # and other, more general tags showing the sort of thing that might be useful:
-                img_tags['data source'] = 'Some random data'
+                img_tags['data source'] = data_source
                 img_tags['plot owner'] = plot_owner
                 img_tags['plot created by'] = this_routine
                 img_tags['ImageMetaTag version'] = imt.__version__
@@ -212,7 +213,7 @@ def plot_random_data(random_data, i_rand, plot_col, col_name, trims, borders,
                             'border': '%s pixels' % border,
                             'plot color': col_name}
                 # again, more general tags:
-                img_tags['data source'] = 'Some random data'
+                img_tags['data source'] = data_source
                 img_tags['plot owner'] = plot_owner
                 img_tags['plot created by'] = this_routine
                 img_tags['ImageMetaTag version'] = imt.__version__
@@ -321,7 +322,7 @@ def __main__():
                         help='Skip rebuilding an image database from images on disk', default=False)
     args = parser.parse_args()
 
-    n_random_data = 5
+    n_random_data = 3
     random_data = make_random_data(n_random_data)
 
     # working directory to create images and webpage etc.
@@ -353,26 +354,29 @@ def __main__():
 
     # this defines the order of the different tags in
     # the ImageDict, and so how they are displayed on the webpage:
-    tagorder = ['number of rolls',
+    tagorder = ['data source',
+                'number of rolls',
                 'plot type',
                 'plot color',
                 'image trim',
                 'border',
                 'image compression']
-    selector_animated = 4 # animate the image compression
+    selector_animated = 5 # animate the image compression
     animation_direction = +1 # move forwards
-    sort_methods = ['numeric', 'sort', 'sort', 'sort', borders_str, 'sort']
+    sort_methods = ['sort', 'numeric', 'sort', 'sort', 'sort', borders_str, 'sort']
     plot_owner = 'Created by %s' % get_user_and_email()
 
     # what are the full names of those tags:
-    tag_full_names = {'number of rolls': 'Number of rolls',
+    tag_full_names = {'data source': 'Data Source',
+                      'number of rolls': 'Number of rolls',
                       'plot type': 'Plot type',
                       'plot color': 'Plot color',
                       'image trim': 'Image trimmed?',
                       'border': 'Image border',
                       'image compression': 'Image compression',
                      }
-    sel_widths = {'number of rolls': '180px',
+    sel_widths = {'data source': '120px',
+                  'number of rolls': '180px',
                   'plot type': '120px',
                   'plot color': '200px',
                   'image trim': '150px',
@@ -465,7 +469,7 @@ def __main__():
     # we get back is as small as possible in memory:
     #
     # these are the tags that we actually need to work with for the web page. Others are ignored:
-    required_tags = ['number of rolls', 'plot type', 'plot color',
+    required_tags = ['data source', 'number of rolls', 'plot type', 'plot color',
                      'image trim', 'border', 'image compression', 'SQL-char-name:in_tag']
     db_img_list, db_images_and_tags = imt.db.read(imt_db, required_tags=required_tags)
     # and this will return a list of all of the unique metadata strings,
@@ -547,15 +551,16 @@ def __main__():
     # this defines the tag in the tagorder that we are grouping over.
     # It is a single integer, NOT a list as only a single tag is grouped in the code below.
     # In this case it is focusing on the plot color:
-    multi_depth = 2
+    multi_depth = tagorder.index('plot color')
     # the key_filter can be used to filter out images to go on the web page, as well as report is
     # they are part of a special list for multiple images:
     # (a filter value of None means a filter is not applied, not that nothing passes the filter)
-    key_filter = {'number of rolls': img_dict.keys[0][1:4], # subset these, as a test
+    key_filter = {'data source': None,
+                  'number of rolls': img_dict.keys[tagorder.index('number of rolls')][1:], # subset these, as a test
                   'plot type': None,
-                  'plot color': [img_dict.keys[multi_depth][0]] +
-                                [('Primary colors', img_dict.keys[multi_depth][1:])] +
-                                [('All colors', img_dict.keys[multi_depth])],
+                  'plot color': [img_dict.keys[multi_depth][0],
+                                 ('Primary colors', img_dict.keys[multi_depth][1:]),
+                                 ('All colors', img_dict.keys[multi_depth])],
                   'image trim': None,
                   'border': None,
                   'image compression': None}
@@ -829,6 +834,31 @@ def __main__():
             next_sel = random.choice(img_dict.return_from_list(initial_selectors).keys())
             initial_selectors.append(next_sel)
 
+
+    # on one of the pages, we'll test the ability to group selections using <optgroup>:
+    # These groups are specified as a 2-level dictionary where the first level is the index
+    # of the selector. The second level contains the {'group name': [contents]}
+    #
+    # For this test, both the color, and the compression will be grouped:
+    compressions = copy.deepcopy(img_dict.keys[tagorder.index('image compression')])
+    uncompressed_tags = []
+    compressed_tags = []
+    while compressions:
+        if compressions[-1][-1] == '0':
+            uncompressed_tags.append(compressions.pop())
+        else:
+            compressed_tags.append(compressions.pop())
+    
+    groupings = {tagorder.index('plot color'): {'Colours': ['Plotted in Red',
+                                                            'Plotted in Blue',
+                                                            'Plotted in Green',
+                                                            ]},
+                 tagorder.index('image compression'): {'Compressed': set(compressed_tags),
+                                                       'Uncompressed': uncompressed_tags,
+                                                       'imt_optgroup_order': ['Uncompressed',
+                                                                              'Compressed']},
+                 }
+    
     # now write out the webpages:
     web_out = {}
     web_out[out_page] = imt.webpage.write_full_page(img_dict, out_page,
@@ -836,9 +866,11 @@ def __main__():
                                                     preamble=webpage_preamble,
                                                     postamble=webpage_postamble,
                                                     initial_selectors=initial_selectors,
+                                                    optgroups=groupings,
                                                     verbose=True, only_show_rel_url=True,
                                                     write_intmed_tmpfile=True,
                                                     show_selector_names=True,
+                                                    show_singleton_selectors=False,
                                                     compression=True)
     web_out[out_page_para] = imt.webpage.write_full_page(img_dict, out_page_para,
                                                          'Test ImageDict webpage (Parallel)',

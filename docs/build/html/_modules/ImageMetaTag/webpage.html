@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>ImageMetaTag.webpage &mdash; ImageMetaTag 0.6.8 documentation</title>
+    <title>ImageMetaTag.webpage &mdash; ImageMetaTag 0.6.9 documentation</title>
     
     <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.6.8',
+        VERSION:     '0.6.9',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <link rel="top" title="ImageMetaTag 0.6.8 documentation" href="../../index.html" />
+    <link rel="top" title="ImageMetaTag 0.6.9 documentation" href="../../index.html" />
     <link rel="up" title="ImageMetaTag" href="../ImageMetaTag.html" /> 
   </head>
   <body>
@@ -36,7 +36,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">ImageMetaTag 0.6.8 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">ImageMetaTag 0.6.9 documentation</a> &raquo;</li>
           <li><a href="../index.html" >Module code</a> &raquo;</li>
           <li><a href="../ImageMetaTag.html" accesskey="U">ImageMetaTag</a> &raquo;</li> 
       </ul>
@@ -109,7 +109,7 @@
 <span class="sd">Released under BSD 3-Clause License. See LICENSE for more details.</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
-<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">json</span><span class="o">,</span> <span class="nn">pdb</span><span class="o">,</span> <span class="nn">shutil</span><span class="o">,</span> <span class="nn">tempfile</span><span class="o">,</span> <span class="nn">zlib</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">json</span><span class="o">,</span> <span class="nn">pdb</span><span class="o">,</span> <span class="nn">shutil</span><span class="o">,</span> <span class="nn">tempfile</span><span class="o">,</span> <span class="nn">copy</span><span class="o">,</span> <span class="nn">zlib</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">ImageMetaTag</span> <span class="kn">as</span> <span class="nn">imt</span>
 
@@ -129,12 +129,14 @@
 <div class="viewcode-block" id="write_full_page"><a class="viewcode-back" href="../../webpage.html#ImageMetaTag.webpage.write_full_page">[docs]</a><span class="k">def</span> <span class="nf">write_full_page</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">page_filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tab_s_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                     <span class="n">preamble</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">postamble</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
                     <span class="n">initial_selectors</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">show_selector_names</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                    <span class="n">show_singleton_selectors</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">optgroups</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                     <span class="n">url_type</span><span class="o">=</span><span class="s">&#39;int&#39;</span><span class="p">,</span> <span class="n">only_show_rel_url</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
                     <span class="n">style</span><span class="o">=</span><span class="s">&#39;horiz dropdowns&#39;</span><span class="p">,</span> <span class="n">write_intmed_tmpfile</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
                     <span class="n">description</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Writes out an :class:`ImageMetaTag.ImageDict` as a webpage, to a given file location.</span>
-<span class="sd">    The file is overwritten.</span>
+<span class="sd">    The files are created as temporary files and when complete they replace any files that</span>
+<span class="sd">    are currently in the specified location.</span>
 
 <span class="sd">    If the img_dict supplied is None, rather than the appropriate class, then a page will</span>
 <span class="sd">    be produced with the image selectors missing, and a message saying no images are available.</span>
@@ -153,6 +155,11 @@
 <span class="sd">                          :func:`ImageMetaTag.webpage.write_js_setup`.</span>
 <span class="sd">    * show_selector_names - switches on displaying the selector full names defined by the \</span>
 <span class="sd">                            :class:`ImageMetaTag.ImageDict`.full_name_mapping</span>
+<span class="sd">    * show_singleton_selectors - When set to False, selectors that have only one element are \</span>
+<span class="sd">                                not displayed (default=True).</span>
+<span class="sd">    * optgroups - The contents of selectors can be grouped together to make large lists \</span>
+<span class="sd">                  more readable. This is passed into \</span>
+<span class="sd">                  :func:`ImageMetaTag.webpage.write_js_to_header`.</span>
 <span class="sd">    * url_type - determines the type of URL at the bottom of the ImageMetaTag section. Can be \</span>
 <span class="sd">                 &#39;int&#39; or &#39;str&#39;.</span>
 <span class="sd">    * only_show_rel_url - If True, the wepage will only show relative urls in is link section.</span>
@@ -176,6 +183,9 @@
 
     <span class="k">if</span> <span class="n">page_filename</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">page_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">page_filename</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;filepath ({})&quot; must specify a file (not a directory&#39;</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filepath</span><span class="p">))</span>
 
     <span class="c"># other files involved:</span>
     <span class="n">file_dir</span><span class="p">,</span> <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
@@ -309,10 +319,11 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="c"># the json_files is a list of (tmp_file, final_file) tuples. Here we want the final one:</span>
             <span class="n">final_json_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">json_files</span><span class="p">]</span>
-            <span class="n">write_js_to_header</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">initial_selectors</span><span class="o">=</span><span class="n">initial_selectors</span><span class="p">,</span>
+            <span class="n">write_js_to_header</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">initial_selectors</span><span class="o">=</span><span class="n">initial_selectors</span><span class="p">,</span> <span class="n">optgroups</span><span class="o">=</span><span class="n">optgroups</span><span class="p">,</span>
                                <span class="n">file_obj</span><span class="o">=</span><span class="n">out_file</span><span class="p">,</span> <span class="n">json_files</span><span class="o">=</span><span class="n">final_json_files</span><span class="p">,</span> <span class="n">js_files</span><span class="o">=</span><span class="n">js_files</span><span class="p">,</span>
                                <span class="n">pagename</span><span class="o">=</span><span class="n">page_filename</span><span class="p">,</span> <span class="n">tabname</span><span class="o">=</span><span class="n">tab_s_name</span><span class="p">,</span>
                                <span class="n">selector_prefix</span><span class="o">=</span><span class="n">selector_prefix</span><span class="p">,</span> <span class="n">url_separator</span><span class="o">=</span><span class="n">url_separator</span><span class="p">,</span>
+                               <span class="n">show_singleton_selectors</span><span class="o">=</span><span class="n">show_singleton_selectors</span><span class="p">,</span>
                                <span class="n">url_type</span><span class="o">=</span><span class="n">url_type</span><span class="p">,</span> <span class="n">only_show_rel_url</span><span class="o">=</span><span class="n">only_show_rel_url</span><span class="p">,</span>
                                <span class="n">style</span><span class="o">=</span><span class="n">style</span><span class="p">,</span> <span class="n">ind</span><span class="o">=</span><span class="n">ind</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="n">compression</span><span class="p">,</span>
                                <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="n">keywords</span><span class="p">)</span>
@@ -346,8 +357,9 @@
                 <span class="n">anim_level</span> <span class="o">=</span> <span class="n">level_names</span><span class="p">[</span><span class="n">img_dict</span><span class="o">.</span><span class="n">selector_animated</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">anim_level</span> <span class="o">=</span> <span class="bp">None</span>
-            <span class="n">write_js_placeholders</span><span class="p">(</span><span class="n">file_obj</span><span class="o">=</span><span class="n">out_file</span><span class="p">,</span> <span class="n">dict_depth</span><span class="o">=</span><span class="n">img_dict</span><span class="o">.</span><span class="n">dict_depth</span><span class="p">(),</span>
+            <span class="n">write_js_placeholders</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">file_obj</span><span class="o">=</span><span class="n">out_file</span><span class="p">,</span> <span class="n">dict_depth</span><span class="o">=</span><span class="n">img_dict</span><span class="o">.</span><span class="n">dict_depth</span><span class="p">(),</span>
                                   <span class="n">style</span><span class="o">=</span><span class="n">style</span><span class="p">,</span> <span class="n">level_names</span><span class="o">=</span><span class="n">level_names</span><span class="p">,</span>
+                                  <span class="n">show_singleton_selectors</span><span class="o">=</span><span class="n">show_singleton_selectors</span><span class="p">,</span>
                                   <span class="n">animated_level</span><span class="o">=</span><span class="n">anim_level</span><span class="p">)</span>
         <span class="c"># the body is done, so the postamble comes in:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">postamble</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
@@ -371,9 +383,10 @@
 
     <span class="k">return</span> <span class="n">page_dependencies</span>
 </div>
-<div class="viewcode-block" id="write_js_to_header"><a class="viewcode-back" href="../../webpage.html#ImageMetaTag.webpage.write_js_to_header">[docs]</a><span class="k">def</span> <span class="nf">write_js_to_header</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">initial_selectors</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+<div class="viewcode-block" id="write_js_to_header"><a class="viewcode-back" href="../../webpage.html#ImageMetaTag.webpage.write_js_to_header">[docs]</a><span class="k">def</span> <span class="nf">write_js_to_header</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">initial_selectors</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">optgroups</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                        <span class="n">file_obj</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">json_files</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">js_files</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                        <span class="n">pagename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tabname</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">selector_prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                       <span class="n">show_singleton_selectors</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
                        <span class="n">url_separator</span><span class="o">=</span><span class="s">&#39;|&#39;</span><span class="p">,</span> <span class="n">url_type</span><span class="o">=</span><span class="s">&#39;str&#39;</span><span class="p">,</span> <span class="n">only_show_rel_url</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
                        <span class="n">ind</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
                        <span class="n">description</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -385,6 +398,17 @@
 <span class="sd">    webpage styles could be added.</span>
 
 <span class="sd">    * initial_selectors - A list of initial values for the selectors.</span>
+<span class="sd">    * optgroups - The contents of selectors can be grouped together to make large lists \</span>
+<span class="sd">                  more readable. These groups are specified as a 2-level dictionary where the \</span>
+<span class="sd">                  first level is the index of the selectors to have groups. \</span>
+<span class="sd">                  The second level contains the {&#39;group name&#39;: [contents]}.</span>
+<span class="sd">                  By specifying an optgroup, the order of the elements in a selector uses \</span>
+<span class="sd">                  the optgroups first. By default the optgroup names are sorted, but the \</span>
+<span class="sd">                  order of the optgroups can be specified by including a \</span>
+<span class="sd">                     &#39;imt_optgroup_order&#39;: [ordered list of opgroup names],</span>
+<span class="sd">                  in a second level dictionary that specifies the &#39;group name&#39;: [contents] \</span>
+<span class="sd">                  Within each optgroup the order of elements is taken from their order in the \</span>
+<span class="sd">                  image dict.</span>
 <span class="sd">    * style - the style of the output webpage, currently only &#39;horiz dropdowns&#39; is available</span>
 <span class="sd">    * file_obj - the open file object to write the header to.</span>
 <span class="sd">    * json_files - a list of the json (or other similar object) containing the representation of \</span>
@@ -394,6 +418,9 @@
 <span class="sd">                 but can be set if tab_s_name is also used.</span>
 <span class="sd">    * tabname : used to denote the name of the page, when it is used as a frame \</span>
 <span class="sd">                of a larger page.</span>
+<span class="sd">    * selector_prefix - prefix to use for javascript selector names (defaults to &#39;sel&#39;)</span>
+<span class="sd">    * show_singleton_selectors - When set to False, selectors that have only one element are \</span>
+<span class="sd">                                not displayed (default=True).</span>
 <span class="sd">    * url_type - determines the type of URL at the bottom of the ImageMetaTag section. Can be \</span>
 <span class="sd">                 &#39;int&#39; or &#39;str&#39;.</span>
 <span class="sd">    * only_show_rel_url - If True, the wepage will only show relative urls in is link section.</span>
@@ -404,6 +431,9 @@
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">imt</span><span class="o">.</span><span class="n">ImageDict</span><span class="p">)</span> <span class="ow">or</span> <span class="n">img_dict</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Input img_dict is not an ImageMetaTag ImageDict&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">ind</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">description</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;{}&lt;meta name=&quot;description&quot; content=&quot;{}&quot;&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">description</span><span class="p">))</span>
@@ -504,25 +534,74 @@
         <span class="n">ind</span> <span class="o">=</span> <span class="n">_indent_down_one</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
         <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;];</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
 
+        <span class="c"># now write out optgroups:</span>
+        <span class="n">non_optgroup_elems</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">optgroups</span><span class="p">:</span>
+            <span class="c"># if the optgroup order hasn&#39;t been specified, then </span>
+            <span class="c"># the default is a sort:</span>
+            <span class="k">for</span> <span class="n">group_ind</span><span class="p">,</span> <span class="n">optgroup</span> <span class="ow">in</span> <span class="n">optgroups</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                <span class="c"># keep a note of the elements in the whole list, so we know which ones </span>
+                <span class="c"># aren&#39;t in any optgroup:</span>
+                <span class="n">all_keys</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">img_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">group_ind</span><span class="p">])</span>
+                
+                <span class="k">print</span> <span class="n">optgroups</span><span class="p">[</span><span class="n">group_ind</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">optgroup</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+                <span class="k">if</span> <span class="s">&#39;imt_optgroup_order&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">optgroup</span><span class="p">:</span>
+                    <span class="n">optgroup</span><span class="p">[</span><span class="s">&#39;imt_optgroup_order&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">optgroup</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                <span class="c"># make sure that the elements within the optgroup are a sorted</span>
+                <span class="c"># list, sorted according to the order in the img_dict.keys()</span>
+                <span class="k">for</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">group_elements</span> <span class="ow">in</span> <span class="n">optgroup</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">group_name</span> <span class="o">!=</span> <span class="s">&#39;imt_optgroup_order&#39;</span><span class="p">:</span>
+                        <span class="c"># pick up the indices of the elements, in the main list of keys:</span>
+                        <span class="n">elem_inds</span> <span class="o">=</span> <span class="p">[</span><span class="n">img_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">group_ind</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">group_elements</span><span class="p">]</span>
+                        <span class="c"># now sort by elem_inds</span>
+                        <span class="n">sorted_elems</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">elem_inds</span><span class="p">,</span> <span class="n">group_elements</span><span class="p">))</span>
+                        <span class="c"># and pull out the bit we need again:</span>
+                        <span class="n">optgroup</span><span class="p">[</span><span class="n">group_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sorted_elems</span><span class="p">]</span>
+
+                        <span class="c"># and make a list of those elements that aren&#39;t in any optgroup!</span>
+                        <span class="k">for</span> <span class="n">group_element</span> <span class="ow">in</span> <span class="n">group_elements</span><span class="p">:</span>
+                            <span class="n">all_keys</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">group_element</span><span class="p">)</span>
+                <span class="n">non_optgroup_elems</span><span class="p">[</span><span class="n">group_ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_keys</span>
+
+            <span class="c"># convert the optgroups to a list, in javascript, with each selector having an element within it:</span>
+            <span class="n">optg_str</span> <span class="o">=</span> <span class="s">&#39;[&#39;</span>
+            <span class="n">non_optg_str</span> <span class="o">=</span> <span class="s">&#39;[&#39;</span>
+            <span class="k">for</span> <span class="n">i_depth</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dict_depth</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">i_depth</span> <span class="ow">in</span> <span class="n">optgroups</span><span class="p">:</span>
+                    <span class="n">optg_str</span> <span class="o">+=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">optgroups</span><span class="p">[</span><span class="n">i_depth</span><span class="p">],</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">,</span> <span class="s">&#39;:&#39;</span><span class="p">))</span>
+                    <span class="n">non_optg_str</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">non_optgroup_elems</span><span class="p">[</span><span class="n">i_depth</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># no optgroup for this selector:</span>
+                    <span class="n">optg_str</span> <span class="o">+=</span> <span class="s">&#39;{}&#39;</span>
+                    <span class="n">non_optg_str</span> <span class="o">+=</span> <span class="s">&#39;[]&#39;</span>
+                <span class="k">if</span> <span class="n">i_depth</span> <span class="o">&lt;</span> <span class="n">dict_depth</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="c"># the final element mustn&#39;t have a comma or internet explorer will complain:</span>
+                    <span class="n">optg_str</span> <span class="o">+=</span> <span class="s">&#39;,&#39;</span>
+                    <span class="n">non_optg_str</span> <span class="o">+=</span> <span class="s">&#39;,&#39;</span>
+            <span class="c"># close the javascript list:</span>
+            <span class="n">optg_str</span> <span class="o">+=</span> <span class="s">&#39;];&#39;</span>
+            <span class="n">non_optg_str</span> <span class="o">+=</span> <span class="s">&#39;];&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">optg_str</span> <span class="o">=</span> <span class="s">&#39;[&#39;</span> <span class="o">+</span> <span class="s">&#39;{},&#39;</span> <span class="o">*</span> <span class="p">(</span><span class="n">dict_depth</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;{}]&#39;</span>
+            <span class="n">non_optg_str</span> <span class="o">=</span> <span class="s">&#39;[&#39;</span> <span class="o">+</span> <span class="s">&#39;[],&#39;</span> <span class="o">*</span> <span class="p">(</span><span class="n">dict_depth</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;[]]&#39;</span>
+        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;{}var optgroups = {}</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">optg_str</span><span class="p">))</span>
+        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;{}var optgroup_redisual = {}</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">non_optg_str</span><span class="p">))</span>
+        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;{}var show_singleton_selectors = {};</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">show_singleton_selectors</span><span class="p">)))</span>
+
         <span class="c"># now some top level things:</span>
         <span class="k">if</span> <span class="n">style</span> <span class="o">==</span> <span class="s">&#39;horiz dropdowns&#39;</span><span class="p">:</span>
-            <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;</span>
-<span class="s">    {0}// other top level derived variables</span>
-<span class="s">    {0}// the depth of the ImageMetaTag ImageDict (number of selectors):</span>
-<span class="s">    {0}var n_deep = selected_id.length;</span>
-<span class="s">    {0}// a list of the options available to the animator buttons, with the current selectio</span>
-<span class="s">    {0}var anim_options = [];</span>
-<span class="s">    {0}// the index of the current option for the animator:</span>
-<span class="s">    {0}var anim_ind = 0;</span>
-<span class="s">    &#39;&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">))</span>
+            <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;{0}// other top level derived variables</span>
+<span class="s">{0}// the depth of the ImageMetaTag ImageDict (number of selectors):</span>
+<span class="s">{0}var n_deep = selected_id.length;</span>
+<span class="s">{0}// a list of the options available to the animator buttons, with the current selection</span>
+<span class="s">{0}var anim_options = [];</span>
+<span class="s">{0}// the index of the current option for the animator:</span>
+<span class="s">{0}var anim_ind = 0;</span>
+<span class="s">&#39;&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">))</span>
 
         <span class="c"># now, the main call:</span>
-        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;window.onload = function() {</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-        <span class="n">ind</span> <span class="o">=</span> <span class="n">_indent_up_one</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
-        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;// redefine onload, so it does this:</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;imt_main();</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-        <span class="n">ind</span> <span class="o">=</span> <span class="n">_indent_down_one</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
-        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;};</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;// redefine onload, so it calls the imt_main to actually write the page:</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;window.onload = function() {imt_main();}</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
         <span class="c"># END of the imt specifc header content:</span>
 </div>
 <span class="k">def</span> <span class="nf">write_js_setup_defaults</span><span class="p">(</span><span class="n">selector_prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">list_prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">file_list_name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -667,8 +746,9 @@
 
     <span class="k">return</span> <span class="n">out_files</span>
 </div>
-<div class="viewcode-block" id="write_js_placeholders"><a class="viewcode-back" href="../../webpage.html#ImageMetaTag.webpage.write_js_placeholders">[docs]</a><span class="k">def</span> <span class="nf">write_js_placeholders</span><span class="p">(</span><span class="n">file_obj</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">dict_depth</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">selector_prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+<div class="viewcode-block" id="write_js_placeholders"><a class="viewcode-back" href="../../webpage.html#ImageMetaTag.webpage.write_js_placeholders">[docs]</a><span class="k">def</span> <span class="nf">write_js_placeholders</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">file_obj</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">dict_depth</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">selector_prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                           <span class="n">style</span><span class="o">=</span><span class="s">&#39;horiz dropdowns&#39;</span><span class="p">,</span> <span class="n">level_names</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                          <span class="n">show_singleton_selectors</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
                           <span class="n">animated_level</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Writes the placeholders into the page body, for the javascript to manipulate</span>
@@ -679,10 +759,23 @@
 <span class="sd">                        those people viewing the webpage!)</span>
 <span class="sd">    * style - In future, it would be great to write out different types of webpages. For now \</span>
 <span class="sd">              they are always horizontal dropdown menus: &#39;horiz dropdowns&#39;.</span>
+<span class="sd">    * show_singleton_selectors - When set to False, selectors that have only one element are \</span>
+<span class="sd">                                not displayed (default=True).</span>
 <span class="sd">    * level_names - if supplied, this need to be a list of full names, for the selectors, of \</span>
 <span class="sd">                    length dict_depth.</span>
 <span class="sd">    * animated_level - if supplied, as a string, this will be used to label the animator buttons.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">show_singleton_selectors</span><span class="p">:</span>
+        <span class="c"># work out which selectors we actually want to show:</span>
+        <span class="n">show_sel</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">img_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">x</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dict_depth</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">show_sel</span><span class="p">):</span>
+            <span class="c"># if there aren&#39;t any selectors in this way, that&#39;s usually a mistake</span>
+            <span class="c"># so show them all:</span>
+            <span class="n">show_sel</span> <span class="o">=</span> <span class="p">[</span><span class="bp">True</span><span class="p">]</span> <span class="o">*</span> <span class="n">dict_depth</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">show_sel</span> <span class="o">=</span> <span class="p">[</span><span class="bp">True</span><span class="p">]</span> <span class="o">*</span> <span class="n">dict_depth</span>
+    <span class="n">sels_shown</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">show_sel</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">selector_prefix</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">selector_prefix</span><span class="p">,</span> <span class="n">_junk1</span><span class="p">,</span> <span class="n">_junk2</span> <span class="o">=</span> <span class="n">write_js_setup_defaults</span><span class="p">()</span>
@@ -719,14 +812,16 @@
 <span class="s">     &lt;tr&gt;</span>
 <span class="s">&#39;&#39;&#39;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dict_depth</span><span class="p">):</span>
-                <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;       &lt;td&gt;{}&amp;nbsp;&amp;nbsp;&lt;/td&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">level_names</span><span class="p">[</span><span class="n">level</span><span class="p">]))</span>
+                <span class="k">if</span> <span class="n">show_sel</span><span class="p">[</span><span class="n">level</span><span class="p">]:</span>
+                    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;       &lt;td&gt;{}&amp;nbsp;&amp;nbsp;&lt;/td&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">level_names</span><span class="p">[</span><span class="n">level</span><span class="p">]))</span>
             <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;     &lt;/tr&gt;</span>
 <span class="s">     &lt;tr&gt;</span>
 <span class="s">&#39;&#39;&#39;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dict_depth</span><span class="p">):</span>
-                <span class="n">selp</span> <span class="o">=</span> <span class="n">selector_prefix</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
-                <span class="n">out_str</span> <span class="o">=</span> <span class="s">&#39;       &lt;td&gt;&lt;span id=&quot;{}&quot;&gt;&amp;nbsp;&lt;/span&gt;&lt;/td&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">selp</span><span class="p">)</span>
-                <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">out_str</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">show_sel</span><span class="p">[</span><span class="n">level</span><span class="p">]:</span>
+                    <span class="n">selp</span> <span class="o">=</span> <span class="n">selector_prefix</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+                    <span class="n">out_str</span> <span class="o">=</span> <span class="s">&#39;       &lt;td&gt;&lt;span id=&quot;{}&quot;&gt;&amp;nbsp;&lt;/span&gt;&lt;/td&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">selp</span><span class="p">)</span>
+                    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">out_str</span><span class="p">)</span>
             <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;     &lt;/tr&gt;</span>
 <span class="s">&#39;&#39;&#39;</span><span class="p">)</span>
             <span class="c"># add the placeholder for animators buttons:</span>
@@ -741,7 +836,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="c"># simply a set of spans, in a line:</span>
             <span class="k">for</span> <span class="n">lev</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dict_depth</span><span class="p">):</span>
-                <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;</span>
+                <span class="k">if</span> <span class="n">show_sel</span><span class="p">[</span><span class="n">lev</span><span class="p">]:</span>
+                    <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;</span>
 <span class="s">   &lt;span id=&quot;</span><span class="si">%s%s</span><span class="s">&quot;&gt;&amp;nbsp;&lt;/span&gt;&#39;&#39;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">selector_prefix</span><span class="p">,</span> <span class="n">lev</span><span class="p">))</span>
             <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">   &lt;br&gt;&#39;</span><span class="p">)</span>
             <span class="c"># add the placeholder for animators buttons:</span>
@@ -914,7 +1010,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">ImageMetaTag 0.6.8 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">ImageMetaTag 0.6.9 documentation</a> &raquo;</li>
           <li><a href="../index.html" >Module code</a> &raquo;</li>
           <li><a href="../ImageMetaTag.html" >ImageMetaTag</a> &raquo;</li> 
       </ul>

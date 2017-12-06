@@ -233,11 +233,28 @@ def open_or_create_db_file(db_file, img_info, restart_db=False, timeout=DEFAULT_
 
 def create_table_for_img_info(dbcr, img_info):
     'Creates a database table, in a database cursor, to store for the input img_info'
+    
     create_command = 'CREATE TABLE {}(fname TEXT PRIMARY KEY,'.format(SQLITE_IMG_INFO_TABLE)
     for key in img_info.keys():
         create_command += ' "{}" TEXT,'.format(info_key_to_db_name(key))
     create_command = create_command[0:-1] + ')'
-    dbcr.execute(create_command)
+    # Can make a rare race condition if multiple processes try to create the file at the same time;
+    # If that happens, the error is:
+    # sqlite3.OperationalError: table img_info already exists for file .......
+    try:
+        dbcr.execute(create_command)
+    except sqlite3.OperationalError as OpErr:
+        if 'table {} already exists'.format(SQLITE_IMG_INFO_TABLE) in OpErr.message:
+            # another process has just created the table, so sleep(1)
+            # This is only when a db file is created so isn't called often (and the race condition is rare!)
+            time.sleep(1)
+        else:
+            # everything else needs to be reported and raised immediately:
+            raise sqlite3.OperationalError(OpErr.message)
+    except sqlite3.Error as SqErr:
+        # everything else needs to be reported and raised immediately:
+        raise sqlite3.Error(SqErr.message)
+
 
 def open_db_file(db_file, timeout=DEFAULT_DB_TIMEOUT):
     '''

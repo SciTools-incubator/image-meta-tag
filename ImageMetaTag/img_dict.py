@@ -846,19 +846,18 @@ def simple_dict_filter(simple_dict, tests, raise_key_mismatch=False):
     # the input tests can also contain a tuple that define how multiple
     # images can be grouped together:
     has_complex_test = False
-    if not tests is None:
+    if tests is not None:
         for i_test, test in enumerate(tests.keys()):
             if tests[test] is None:
                 # None here means no filter is applied:
                 pass
             else:
-                if not test in simple_dict.keys():
-                    msg = 'Specified filter test "%s" not a property of the input dict "%s"' \
-                                %(test, simple_dict)
+                if test not in simple_dict.keys():
+                    msg = 'Specified filter test "{}" not a property of the input dict "{}"'
                     if raise_key_mismatch:
-                        raise ValueError(msg)
+                        raise ValueError(msg.format(test, simple_dict))
                     else:
-                        print msg
+                        print msg.format(test, simple_dict)
                         return (False, False, False)
                 if isinstance(tests[test], list):
                     # simple test, does it meet the normal criteria:
