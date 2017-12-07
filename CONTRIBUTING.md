@@ -14,7 +14,6 @@ should add their details to the [Code Contributors](#code-contributors) section 
 The following people have contributed to this code under the terms of the Contributor Licence Agreement and Certificate of Origin detailed below:
 
 * Malcolm Brooks (Met Office, UK)
-* Paul Earnshaw (Met Office, UK)
 
 
 ## Contributor Licence Agreement and Certificate of Origin
