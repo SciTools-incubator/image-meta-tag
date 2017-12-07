@@ -802,6 +802,7 @@ def __main__():
     out_page = '%s/page.html' % webdir
     out_page_para = '%s/page_para.html' % webdir
     out_page_multi = '%s/page_multi.html' % webdir
+    out_page_css = '%s/page_css.html' % webdir
 
     shutil.copy(LOGO_FILE, '%s/logo.png' % webdir)
 
@@ -883,6 +884,18 @@ def __main__():
                                                           preamble=webpage_preamble,
                                                           postamble=webpage_postamble,
                                                           verbose=True, url_type='str')
+    web_out[out_page_css] = imt.webpage.write_full_page(img_dict, out_page_css,
+                                                        'Test ImageDict webpage with CSS',
+                                                        preamble=webpage_preamble,
+                                                        postamble=webpage_postamble,
+                                                        initial_selectors=initial_selectors,
+                                                        optgroups=groupings,
+                                                        verbose=True, only_show_rel_url=True,
+                                                        write_intmed_tmpfile=True,
+                                                        show_selector_names=True,
+                                                        show_singleton_selectors=False,
+                                                        compression=True,
+                                                        css='test.css')
 
     # now, finally, produce a large ImageDict:
     if not args.no_biggus_dictus:
