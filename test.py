@@ -556,7 +556,7 @@ def __main__():
     # they are part of a special list for multiple images:
     # (a filter value of None means a filter is not applied, not that nothing passes the filter)
     key_filter = {'data source': None,
-                  'number of rolls': img_dict.keys[tagorder.index('number of rolls')][1:], # subset these, as a test
+                  'number of rolls': img_dict.keys[tagorder.index('number of rolls')][1:],
                   'plot type': None,
                   'plot color': [img_dict.keys[multi_depth][0],
                                  ('Primary colors', img_dict.keys[multi_depth][1:]),
@@ -812,9 +812,9 @@ def __main__():
 </div>
 <div id='preamble'>
     <p>&nbsp;</p>
-    <h1>This is a test page for the ImageMetaTag module.</h1>
+    <h1>This is a test page for the ImageMetaTag module at vn{}.</h1>
 </div>
-'''
+'''.format(imt.__version__)
 
     # add a post-amble, including some server side
     #includes for last-modified, and a disk usage string.
@@ -849,17 +849,17 @@ def __main__():
             uncompressed_tags.append(compressions.pop())
         else:
             compressed_tags.append(compressions.pop())
-    
+
     groupings = {tagorder.index('plot color'): {'Colours': ['Plotted in Red',
                                                             'Plotted in Blue',
                                                             'Plotted in Green',
-                                                            ]},
+                                                           ]},
                  tagorder.index('image compression'): {'Compressed': set(compressed_tags),
                                                        'Uncompressed': uncompressed_tags,
                                                        'imt_optgroup_order': ['Uncompressed',
                                                                               'Compressed']},
-                 }
-    
+                }
+
     # now write out the webpages:
     web_out = {}
     web_out[out_page] = imt.webpage.write_full_page(img_dict, out_page,

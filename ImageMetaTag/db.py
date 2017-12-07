@@ -233,7 +233,7 @@ def open_or_create_db_file(db_file, img_info, restart_db=False, timeout=DEFAULT_
 
 def create_table_for_img_info(dbcr, img_info):
     'Creates a database table, in a database cursor, to store for the input img_info'
-    
+
     create_command = 'CREATE TABLE {}(fname TEXT PRIMARY KEY,'.format(SQLITE_IMG_INFO_TABLE)
     for key in img_info.keys():
         create_command += ' "{}" TEXT,'.format(info_key_to_db_name(key))
@@ -246,7 +246,8 @@ def create_table_for_img_info(dbcr, img_info):
     except sqlite3.OperationalError as OpErr:
         if 'table {} already exists'.format(SQLITE_IMG_INFO_TABLE) in OpErr.message:
             # another process has just created the table, so sleep(1)
-            # This is only when a db file is created so isn't called often (and the race condition is rare!)
+            # This is only when a db file is created so isn't called often
+            # (and the race condition is rare!)
             time.sleep(1)
         else:
             # everything else needs to be reported and raised immediately:
@@ -506,8 +507,8 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
             pass
         else:
             if allow_retries:
-                # split the list of filenames up into appropciately sized chunks, so that concurrent
-                # delete commands each have a chance to complete:
+                # split the list of filenames up into appropciately sized chunks, so that
+                # concurrent delete commands each have a chance to complete:
                 # 200 is arbriatily chosen, but seems to work
                 chunk_size = 200
                 chunks = __gen_chunk_of_list(fn_list, chunk_size)
@@ -521,10 +522,12 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
                             dbcn, dbcr = open_db_file(db_file, timeout=db_timeout)
                             # go through the file chunk, one by one, and delete:
                             for fname in chunk_o_filenames:
+                                del_cmd = "DELETE FROM {} WHERE fname=?"
                                 try:
-                                    dbcr.execute("DELETE FROM %s WHERE fname=?" % SQLITE_IMG_INFO_TABLE, (fname,))
+                                    dbcr.execute(del_cmd.format(SQLITE_IMG_INFO_TABLE), (fname,))
                                 except sqlite3.OperationalError as OpErr_file:
-                                    if OpErr_file.message == 'no such table: {}'.format(SQLITE_IMG_INFO_TABLE):
+                                    err_check = 'no such table: {}'.format(SQLITE_IMG_INFO_TABLE)
+                                    if OpErr_file.message == err_check:
                                         # the db file exists, but it doesn't have anything in it:
                                         if not skip_warning:
                                             msg = ('WARNING: Unable to delete file entry "{}" from'
