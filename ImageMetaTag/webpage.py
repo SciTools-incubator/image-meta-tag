@@ -62,7 +62,7 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
                     show_singleton_selectors=True, optgroups=None,
                     url_type='int', only_show_rel_url=False, verbose=False,
                     style='horiz dropdowns', write_intmed_tmpfile=False,
-                    description=None, keywords=None):
+                    description=None, keywords=None, css=None):
     '''
     Writes out an :class:`ImageMetaTag.ImageDict` as a webpage, to a given file location.
     The files are created as temporary files and when complete they replace any files that
@@ -102,6 +102,7 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
     * compression - default False. If True, then the json data object will be compressed \
                     using zlib string compression. When read into the browser, we will use \
                     pako to inflate it (https://github.com/nodeca/pako)
+    * css - CSS file used to style webpage
 
     Returns a list of files that the the created webpage is dependent upon
     '''
@@ -166,14 +167,26 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
         ind = _indent_up_one(ind)
         out_file.write(ind + '<head>\n')
         ind = _indent_up_one(ind)
-        if not title is None:
+        if title is not None:
             out_file.write('{}<title>{}</title>\n'.format(ind, title))
         out_str = ind+'<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">\n'
         out_file.write(out_str)
 
-        if style == 'horiz dropdowns':
-            # write out a little css at the top:
-            css = '''{0}<style>
+        if css:
+            shutil.copy(css, file_dir)
+            base_css = os.path.basename(css)
+            page_dependencies.append(base_css)
+            out_str = ind+'<link rel="stylesheet" type="text/css" href="{0}">\n'
+            out_file.write(out_str.format(base_css))
+
+        else:
+            if style == 'horiz dropdowns':
+                # write out a little css at the top:
+                css = '''{0}<style>
+{0}  body {{
+{0}    background-color: #ffffff;
+{0}    color: #000000;
+{0}  }}
 {0}  body, div, dl, dt, dd, li, h1, h2 {{
 {0}    margin: 0;
 {0}    padding: 0;
@@ -236,7 +249,7 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
 {0}  }}
 {0}</style>
 '''
-            out_file.write(css.format(ind))
+                out_file.write(css.format(ind))
 
         # now write out the specific stuff to the html header:
         if img_dict is None:
@@ -264,14 +277,11 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
         out_file.write(ind + '</head>\n')
 
         # now start the body:
-        margins = 'leftmargin="0" topmargin="0" marginwidth="0" marginheight="0"'
-        bgcolor = 'bcolor="#FFFFFF"'
-        text_color = 'text="#000000"'
-        out_file.write('{}<body {} {} {}>\n'.format(ind, bgcolor, text_color, margins))
+        out_file.write('{}<body>\n'.format(ind))
 
         # the preamble is the first thing to go in the body:
-        if not preamble is None:
-            out_file.write(preamble)
+        if preamble is not None:
+            out_file.write(preamble + '\n')
         # now the img_dict content:
         if img_dict is None:
             out_file.write('<p><h1>No images are available for this page.</h1></p>')
@@ -292,14 +302,14 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
                                   show_singleton_selectors=show_singleton_selectors,
                                   animated_level=anim_level)
         # the body is done, so the postamble comes in:
-        if not postamble is None:
+        if postamble is not None:
             out_file.write(postamble + '\n')
         # finish the body, and html:
         out_file.write(ind + '</body>\n')
         out_file.write('\n</html>')
 
 
-        if  write_intmed_tmpfile:
+        if write_intmed_tmpfile:
             tmp_files_to_mv = json_files + [(tmp_html_filepath, filepath)]
         else:
             tmp_files_to_mv = json_files
@@ -365,12 +375,12 @@ def write_js_to_header(img_dict, initial_selectors=None, optgroups=None, style=N
     if ind is None:
         ind = ''
 
-    if not description is None:
+    if description is not None:
         file_obj.write('{}<meta name="description" content="{}">\n'.format(ind, description))
-    if not keywords is None:
+    if keywords is not None:
         file_obj.write('{}<meta name="keywords" content="{}">\n'.format(ind, keywords))
 
-    if not img_dict is None:
+    if img_dict is not None:
         ## add a reference to the data structure:
         #out_str = '{}<script type="text/javascript" src="{}"></script>\n'.format(ind, json_files)
         #file_obj.write(out_str)
@@ -380,7 +390,7 @@ def write_js_to_header(img_dict, initial_selectors=None, optgroups=None, style=N
             out_str = '{}<script type="text/javascript" src="{}"></script>\n'.format(ind, js_file)
             file_obj.write(out_str)
 
-        # now write out the javascript cnfiguration variables:
+        # now write out the javascript configuration variables:
         file_obj.write(ind + '<script type="text/javascript">\n')
         ind = _indent_up_one(ind)
         # define, read in and parse the json file:
@@ -425,7 +435,7 @@ def write_js_to_header(img_dict, initial_selectors=None, optgroups=None, style=N
         if initial_selectors is None:
             # if it's not set, then set it to something invalid, and the validator
             # in the javascript will sort it out. It MUST be the right length though:
-            file_obj.write('{}var selected_id = {}\n;'.format(ind, str([-1]*dict_depth)))
+            file_obj.write('{}var selected_id = {};\n'.format(ind, str([-1]*dict_depth)))
         else:
             if not isinstance(initial_selectors, list):
                 msg = 'Input initial_selectors must be a list, of length the depth of the ImageDict'
@@ -520,7 +530,8 @@ def write_js_to_header(img_dict, initial_selectors=None, optgroups=None, style=N
 
         # now some top level things:
         if style == 'horiz dropdowns':
-            file_obj.write('''{0}// other top level derived variables
+            file_obj.write('''
+{0}// other top level derived variables
 {0}// the depth of the ImageMetaTag ImageDict (number of selectors):
 {0}var n_deep = selected_id.length;
 {0}// a list of the options available to the animator buttons, with the current selection
