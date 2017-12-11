@@ -30,7 +30,7 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
             do_thumb=False, img_tags=None, keep_open=False, dpi=None,
             logo_file=None, logo_width=40, logo_padding=0, logo_pos=0,
             db_file=None, db_timeout=DEFAULT_DB_TIMEOUT, db_attempts=DEFAULT_DB_ATTEMPTS,
-            db_full_paths=False,
+            db_replace=False, db_full_paths=False,
             verbose=False, ):
     '''
     A wrapper around matplotlib.pyplot.savefig, to include file size optimisation and
@@ -54,6 +54,9 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
                       db_full_paths is True.
     * db_timeout - change the database timeout (in seconds).
     * db_attempts - change the number of attempts to write to the database.
+    * db_replace - if True, an image's metadata will be replaced in the database if it \
+                   already exists. This can be slow, and the metadata is usually the same so \
+                   the default is db_replace=False.
     * dpi - change the image resolution passed into matplotlib.savefig.
     * keep_open - by default, this savefig wrapper closes the figure after use, except if \
                   keep_open is True.
@@ -151,7 +154,8 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
         n_tries = 1
         while not wrote_db and n_tries <= db_attempts:
             try:
-                db.write_img_to_dbfile(db_file, db_filename, img_tags, timeout=db_timeout)
+                db.write_img_to_dbfile(db_file, db_filename, img_tags, timeout=db_timeout,
+                                       attempt_replace=db_replace)
                 wrote_db = True
             except sqlite3.OperationalError as OpErr:
                 if 'database is locked' in OpErr.message:

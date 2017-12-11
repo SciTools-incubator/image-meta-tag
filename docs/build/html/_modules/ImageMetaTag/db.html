@@ -102,6 +102,7 @@
     <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">in_str</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;__&#39;</span><span class="p">,</span> <span class="s">&#39; &#39;</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="write_img_to_dbfile"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.write_img_to_dbfile">[docs]</a><span class="k">def</span> <span class="nf">write_img_to_dbfile</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">img_filename</span><span class="p">,</span> <span class="n">img_info</span><span class="p">,</span> <span class="n">add_strict</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                        <span class="n">attempt_replace</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
                         <span class="n">timeout</span><span class="o">=</span><span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Writes image metadata to a database.</span>
@@ -118,6 +119,7 @@
 <span class="sd">    Options:</span>
 
 <span class="sd">    * add_strict - passed into :func:`ImageMetaTag.db.write_img_to_open_db`</span>
+<span class="sd">    * attempt_replace - passed into :func:`ImageMetaTag.db.write_img_to_open_db`</span>
 <span class="sd">    * timeout - default timeout to try and write to the database.</span>
 
 <span class="sd">    This is commonly used in :func:`ImageMetaTag.savefig`</span>
@@ -131,7 +133,8 @@
         <span class="c"># open the database:</span>
         <span class="n">dbcn</span><span class="p">,</span> <span class="n">dbcr</span> <span class="o">=</span> <span class="n">open_or_create_db_file</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">img_info</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
         <span class="c"># now write:</span>
-        <span class="n">write_img_to_open_db</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span> <span class="n">img_filename</span><span class="p">,</span> <span class="n">img_info</span><span class="p">,</span> <span class="n">add_strict</span><span class="o">=</span><span class="n">add_strict</span><span class="p">)</span>
+        <span class="n">write_img_to_open_db</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span> <span class="n">img_filename</span><span class="p">,</span> <span class="n">img_info</span><span class="p">,</span>
+                             <span class="n">add_strict</span><span class="o">=</span><span class="n">add_strict</span><span class="p">,</span> <span class="n">attempt_replace</span><span class="o">=</span><span class="n">attempt_replace</span><span class="p">)</span>
         <span class="c"># now commit that databasde entry and close:</span>
         <span class="n">dbcn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
         <span class="n">dbcn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -210,7 +213,7 @@
 <span class="n">read_img_info_from_dbfile</span> <span class="o">=</span> <span class="n">read</span>
 
 <div class="viewcode-block" id="merge_db_files"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.merge_db_files">[docs]</a><span class="k">def</span> <span class="nf">merge_db_files</span><span class="p">(</span><span class="n">main_db_file</span><span class="p">,</span> <span class="n">add_db_file</span><span class="p">,</span> <span class="n">delete_add_db</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                   <span class="n">delete_added_entries</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                   <span class="n">delete_added_entries</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">attempt_replace</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
                    <span class="n">db_timeout</span><span class="o">=</span><span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">,</span> <span class="n">db_attempts</span><span class="o">=</span><span class="n">DEFAULT_DB_ATTEMPTS</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Merges two ImageMetaTag database files, with the contents of add_db_file added</span>
@@ -239,7 +242,8 @@
                     <span class="n">dbcn</span><span class="p">,</span> <span class="n">dbcr</span> <span class="o">=</span> <span class="n">open_db_file</span><span class="p">(</span><span class="n">main_db_file</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">db_timeout</span><span class="p">)</span>
                     <span class="c"># and add in the new contents:</span>
                     <span class="k">for</span> <span class="n">add_file</span><span class="p">,</span> <span class="n">add_info</span> <span class="ow">in</span> <span class="n">add_tags</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
-                        <span class="n">write_img_to_open_db</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span> <span class="n">add_file</span><span class="p">,</span> <span class="n">add_info</span><span class="p">)</span>
+                        <span class="n">write_img_to_open_db</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span> <span class="n">add_file</span><span class="p">,</span> <span class="n">add_info</span><span class="p">,</span>
+                                             <span class="n">attempt_replace</span><span class="o">=</span><span class="n">attempt_replace</span><span class="p">)</span>
                     <span class="n">dbcn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
                     <span class="c"># if we got here, then we&#39;re good!</span>
                     <span class="n">wrote_db</span> <span class="o">=</span> <span class="bp">True</span>
@@ -303,7 +307,7 @@
 </div>
 <span class="k">def</span> <span class="nf">create_table_for_img_info</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span> <span class="n">img_info</span><span class="p">):</span>
     <span class="s">&#39;Creates a database table, in a database cursor, to store for the input img_info&#39;</span>
-    
+
     <span class="n">create_command</span> <span class="o">=</span> <span class="s">&#39;CREATE TABLE {}(fname TEXT PRIMARY KEY,&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">SQLITE_IMG_INFO_TABLE</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">img_info</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="n">create_command</span> <span class="o">+=</span> <span class="s">&#39; &quot;{}&quot; TEXT,&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">info_key_to_db_name</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
@@ -316,7 +320,8 @@
     <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span> <span class="k">as</span> <span class="n">OpErr</span><span class="p">:</span>
         <span class="k">if</span> <span class="s">&#39;table {} already exists&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">SQLITE_IMG_INFO_TABLE</span><span class="p">)</span> <span class="ow">in</span> <span class="n">OpErr</span><span class="o">.</span><span class="n">message</span><span class="p">:</span>
             <span class="c"># another process has just created the table, so sleep(1)</span>
-            <span class="c"># This is only when a db file is created so isn&#39;t called often (and the race condition is rare!)</span>
+            <span class="c"># This is only when a db file is created so isn&#39;t called often</span>
+            <span class="c"># (and the race condition is rare!)</span>
             <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c"># everything else needs to be reported and raised immediately:</span>
@@ -401,9 +406,9 @@
     <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">IntegrityError</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">attempt_replace</span><span class="p">:</span>
             <span class="c"># try an INSERT OR REPLACE</span>
-            <span class="n">add_command</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;INSERT &#39;</span><span class="p">,</span> <span class="s">&#39;INSERT OR REPLACE &#39;</span><span class="p">)</span>
+            <span class="n">add_repl_command</span> <span class="o">=</span> <span class="n">add_command</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;INSERT &#39;</span><span class="p">,</span> <span class="s">&#39;INSERT OR REPLACE &#39;</span><span class="p">)</span>
             <span class="c"># if this fails, want it to report it&#39;s error message as is, so no &#39;try&#39;:</span>
-            <span class="n">dbcr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">add_command</span><span class="p">,</span> <span class="n">add_list</span><span class="p">)</span>
+            <span class="n">dbcr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">add_repl_command</span><span class="p">,</span> <span class="n">add_list</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c"># this file is already in the database (as the primary key, so do nothing...)</span>
             <span class="k">pass</span>
@@ -576,8 +581,8 @@
             <span class="k">pass</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">allow_retries</span><span class="p">:</span>
-                <span class="c"># split the list of filenames up into appropciately sized chunks, so that concurrent</span>
-                <span class="c"># delete commands each have a chance to complete:</span>
+                <span class="c"># split the list of filenames up into appropciately sized chunks, so that</span>
+                <span class="c"># concurrent delete commands each have a chance to complete:</span>
                 <span class="c"># 200 is arbriatily chosen, but seems to work</span>
                 <span class="n">chunk_size</span> <span class="o">=</span> <span class="mi">200</span>
                 <span class="n">chunks</span> <span class="o">=</span> <span class="n">__gen_chunk_of_list</span><span class="p">(</span><span class="n">fn_list</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">)</span>
@@ -591,10 +596,12 @@
                             <span class="n">dbcn</span><span class="p">,</span> <span class="n">dbcr</span> <span class="o">=</span> <span class="n">open_db_file</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">db_timeout</span><span class="p">)</span>
                             <span class="c"># go through the file chunk, one by one, and delete:</span>
                             <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">chunk_o_filenames</span><span class="p">:</span>
+                                <span class="n">del_cmd</span> <span class="o">=</span> <span class="s">&quot;DELETE FROM {} WHERE fname=?&quot;</span>
                                 <span class="k">try</span><span class="p">:</span>
-                                    <span class="n">dbcr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;DELETE FROM </span><span class="si">%s</span><span class="s"> WHERE fname=?&quot;</span> <span class="o">%</span> <span class="n">SQLITE_IMG_INFO_TABLE</span><span class="p">,</span> <span class="p">(</span><span class="n">fname</span><span class="p">,))</span>
+                                    <span class="n">dbcr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">del_cmd</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">SQLITE_IMG_INFO_TABLE</span><span class="p">),</span> <span class="p">(</span><span class="n">fname</span><span class="p">,))</span>
                                 <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span> <span class="k">as</span> <span class="n">OpErr_file</span><span class="p">:</span>
-                                    <span class="k">if</span> <span class="n">OpErr_file</span><span class="o">.</span><span class="n">message</span> <span class="o">==</span> <span class="s">&#39;no such table: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">SQLITE_IMG_INFO_TABLE</span><span class="p">):</span>
+                                    <span class="n">err_check</span> <span class="o">=</span> <span class="s">&#39;no such table: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">SQLITE_IMG_INFO_TABLE</span><span class="p">)</span>
+                                    <span class="k">if</span> <span class="n">OpErr_file</span><span class="o">.</span><span class="n">message</span> <span class="o">==</span> <span class="n">err_check</span><span class="p">:</span>
                                         <span class="c"># the db file exists, but it doesn&#39;t have anything in it:</span>
                                         <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_warning</span><span class="p">:</span>
                                             <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;WARNING: Unable to delete file entry &quot;{}&quot; from&#39;</span>

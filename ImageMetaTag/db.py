@@ -32,6 +32,7 @@ def db_name_to_info_key(in_str):
     return str(in_str).replace('__', ' ')
 
 def write_img_to_dbfile(db_file, img_filename, img_info, add_strict=False,
+                        attempt_replace=False,
                         timeout=DEFAULT_DB_TIMEOUT):
     '''
     Writes image metadata to a database.
@@ -48,6 +49,7 @@ def write_img_to_dbfile(db_file, img_filename, img_info, add_strict=False,
     Options:
 
     * add_strict - passed into :func:`ImageMetaTag.db.write_img_to_open_db`
+    * attempt_replace - passed into :func:`ImageMetaTag.db.write_img_to_open_db`
     * timeout - default timeout to try and write to the database.
 
     This is commonly used in :func:`ImageMetaTag.savefig`
@@ -61,7 +63,8 @@ def write_img_to_dbfile(db_file, img_filename, img_info, add_strict=False,
         # open the database:
         dbcn, dbcr = open_or_create_db_file(db_file, img_info, timeout=timeout)
         # now write:
-        write_img_to_open_db(dbcr, img_filename, img_info, add_strict=add_strict)
+        write_img_to_open_db(dbcr, img_filename, img_info,
+                             add_strict=add_strict, attempt_replace=attempt_replace)
         # now commit that databasde entry and close:
         dbcn.commit()
         dbcn.close()
@@ -140,7 +143,7 @@ def read(db_file, required_tags=None, tag_strings=None,
 read_img_info_from_dbfile = read
 
 def merge_db_files(main_db_file, add_db_file, delete_add_db=False,
-                   delete_added_entries=False,
+                   delete_added_entries=False, attempt_replace=False,
                    db_timeout=DEFAULT_DB_TIMEOUT, db_attempts=DEFAULT_DB_ATTEMPTS):
     '''
     Merges two ImageMetaTag database files, with the contents of add_db_file added
@@ -169,7 +172,8 @@ def merge_db_files(main_db_file, add_db_file, delete_add_db=False,
                     dbcn, dbcr = open_db_file(main_db_file, timeout=db_timeout)
                     # and add in the new contents:
                     for add_file, add_info in add_tags.iteritems():
-                        write_img_to_open_db(dbcr, add_file, add_info)
+                        write_img_to_open_db(dbcr, add_file, add_info,
+                                             attempt_replace=attempt_replace)
                     dbcn.commit()
                     # if we got here, then we're good!
                     wrote_db = True
@@ -332,9 +336,9 @@ def write_img_to_open_db(dbcr, filename, img_info, add_strict=False, attempt_rep
     except sqlite3.IntegrityError:
         if attempt_replace:
             # try an INSERT OR REPLACE
-            add_command.replace('INSERT ', 'INSERT OR REPLACE ')
+            add_repl_command = add_command.replace('INSERT ', 'INSERT OR REPLACE ')
             # if this fails, want it to report it's error message as is, so no 'try':
-            dbcr.execute(add_command, add_list)
+            dbcr.execute(add_repl_command, add_list)
         else:
             # this file is already in the database (as the primary key, so do nothing...)
             pass
