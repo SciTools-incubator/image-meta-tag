@@ -132,7 +132,7 @@
                     <span class="n">show_singleton_selectors</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">optgroups</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                     <span class="n">url_type</span><span class="o">=</span><span class="s">&#39;int&#39;</span><span class="p">,</span> <span class="n">only_show_rel_url</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
                     <span class="n">style</span><span class="o">=</span><span class="s">&#39;horiz dropdowns&#39;</span><span class="p">,</span> <span class="n">write_intmed_tmpfile</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                    <span class="n">description</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+                    <span class="n">description</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">css</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Writes out an :class:`ImageMetaTag.ImageDict` as a webpage, to a given file location.</span>
 <span class="sd">    The files are created as temporary files and when complete they replace any files that</span>
@@ -172,6 +172,8 @@
 <span class="sd">    * compression - default False. If True, then the json data object will be compressed \</span>
 <span class="sd">                    using zlib string compression. When read into the browser, we will use \</span>
 <span class="sd">                    pako to inflate it (https://github.com/nodeca/pako)</span>
+<span class="sd">    * css - Optional CSS file used to style webpage. By default a small amount of css is \</span>
+<span class="sd">            written out in the page header.</span>
 
 <span class="sd">    Returns a list of files that the the created webpage is dependent upon</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -236,14 +238,26 @@
         <span class="n">ind</span> <span class="o">=</span> <span class="n">_indent_up_one</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
         <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;&lt;head&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
         <span class="n">ind</span> <span class="o">=</span> <span class="n">_indent_up_one</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">title</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;{}&lt;title&gt;{}&lt;/title&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">title</span><span class="p">))</span>
         <span class="n">out_str</span> <span class="o">=</span> <span class="n">ind</span><span class="o">+</span><span class="s">&#39;&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=iso-8859-1&quot;&gt;</span><span class="se">\n</span><span class="s">&#39;</span>
         <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">out_str</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">style</span> <span class="o">==</span> <span class="s">&#39;horiz dropdowns&#39;</span><span class="p">:</span>
-            <span class="c"># write out a little css at the top:</span>
-            <span class="n">css</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;{0}&lt;style&gt;</span>
+        <span class="k">if</span> <span class="n">css</span><span class="p">:</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">css</span><span class="p">,</span> <span class="n">file_dir</span><span class="p">)</span>
+            <span class="n">base_css</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">css</span><span class="p">)</span>
+            <span class="n">page_dependencies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_css</span><span class="p">)</span>
+            <span class="n">out_str</span> <span class="o">=</span> <span class="n">ind</span><span class="o">+</span><span class="s">&#39;&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;{0}&quot;&gt;</span><span class="se">\n</span><span class="s">&#39;</span>
+            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">out_str</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">base_css</span><span class="p">))</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">style</span> <span class="o">==</span> <span class="s">&#39;horiz dropdowns&#39;</span><span class="p">:</span>
+                <span class="c"># write out a little css at the top:</span>
+                <span class="n">css</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;{0}&lt;style&gt;</span>
+<span class="s">{0}  body {{</span>
+<span class="s">{0}    background-color: #ffffff;</span>
+<span class="s">{0}    color: #000000;</span>
+<span class="s">{0}  }}</span>
 <span class="s">{0}  body, div, dl, dt, dd, li, h1, h2 {{</span>
 <span class="s">{0}    margin: 0;</span>
 <span class="s">{0}    padding: 0;</span>
@@ -306,7 +320,7 @@
 <span class="s">{0}  }}</span>
 <span class="s">{0}&lt;/style&gt;</span>
 <span class="s">&#39;&#39;&#39;</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">css</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">))</span>
+                <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">css</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">))</span>
 
         <span class="c"># now write out the specific stuff to the html header:</span>
         <span class="k">if</span> <span class="n">img_dict</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
@@ -334,14 +348,11 @@
         <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;&lt;/head&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
 
         <span class="c"># now start the body:</span>
-        <span class="n">margins</span> <span class="o">=</span> <span class="s">&#39;leftmargin=&quot;0&quot; topmargin=&quot;0&quot; marginwidth=&quot;0&quot; marginheight=&quot;0&quot;&#39;</span>
-        <span class="n">bgcolor</span> <span class="o">=</span> <span class="s">&#39;bcolor=&quot;#FFFFFF&quot;&#39;</span>
-        <span class="n">text_color</span> <span class="o">=</span> <span class="s">&#39;text=&quot;#000000&quot;&#39;</span>
-        <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;{}&lt;body {} {} {}&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">bgcolor</span><span class="p">,</span> <span class="n">text_color</span><span class="p">,</span> <span class="n">margins</span><span class="p">))</span>
+        <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;{}&lt;body&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">))</span>
 
         <span class="c"># the preamble is the first thing to go in the body:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">preamble</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">preamble</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">preamble</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">preamble</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
         <span class="c"># now the img_dict content:</span>
         <span class="k">if</span> <span class="n">img_dict</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&lt;p&gt;&lt;h1&gt;No images are available for this page.&lt;/h1&gt;&lt;/p&gt;&#39;</span><span class="p">)</span>
@@ -362,14 +373,14 @@
                                   <span class="n">show_singleton_selectors</span><span class="o">=</span><span class="n">show_singleton_selectors</span><span class="p">,</span>
                                   <span class="n">animated_level</span><span class="o">=</span><span class="n">anim_level</span><span class="p">)</span>
         <span class="c"># the body is done, so the postamble comes in:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">postamble</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">postamble</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">postamble</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
         <span class="c"># finish the body, and html:</span>
         <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;&lt;/body&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
         <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&lt;/html&gt;&#39;</span><span class="p">)</span>
 
 
-        <span class="k">if</span>  <span class="n">write_intmed_tmpfile</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">write_intmed_tmpfile</span><span class="p">:</span>
             <span class="n">tmp_files_to_mv</span> <span class="o">=</span> <span class="n">json_files</span> <span class="o">+</span> <span class="p">[(</span><span class="n">tmp_html_filepath</span><span class="p">,</span> <span class="n">filepath</span><span class="p">)]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">tmp_files_to_mv</span> <span class="o">=</span> <span class="n">json_files</span>
@@ -435,12 +446,12 @@
     <span class="k">if</span> <span class="n">ind</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">ind</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">description</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">description</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;{}&lt;meta name=&quot;description&quot; content=&quot;{}&quot;&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">description</span><span class="p">))</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">keywords</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">keywords</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;{}&lt;meta name=&quot;keywords&quot; content=&quot;{}&quot;&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">keywords</span><span class="p">))</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">img_dict</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">img_dict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
         <span class="c">## add a reference to the data structure:</span>
         <span class="c">#out_str = &#39;{}&lt;script type=&quot;text/javascript&quot; src=&quot;{}&quot;&gt;&lt;/script&gt;\n&#39;.format(ind, json_files)</span>
         <span class="c">#file_obj.write(out_str)</span>
@@ -450,7 +461,7 @@
             <span class="n">out_str</span> <span class="o">=</span> <span class="s">&#39;{}&lt;script type=&quot;text/javascript&quot; src=&quot;{}&quot;&gt;&lt;/script&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">js_file</span><span class="p">)</span>
             <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">out_str</span><span class="p">)</span>
 
-        <span class="c"># now write out the javascript cnfiguration variables:</span>
+        <span class="c"># now write out the javascript configuration variables:</span>
         <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;&lt;script type=&quot;text/javascript&quot;&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
         <span class="n">ind</span> <span class="o">=</span> <span class="n">_indent_up_one</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
         <span class="c"># define, read in and parse the json file:</span>
@@ -495,7 +506,7 @@
         <span class="k">if</span> <span class="n">initial_selectors</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="c"># if it&#39;s not set, then set it to something invalid, and the validator</span>
             <span class="c"># in the javascript will sort it out. It MUST be the right length though:</span>
-            <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;{}var selected_id = {}</span><span class="se">\n</span><span class="s">;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="nb">str</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">dict_depth</span><span class="p">)))</span>
+            <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;{}var selected_id = {};</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="nb">str</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">dict_depth</span><span class="p">)))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">initial_selectors</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
                 <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;Input initial_selectors must be a list, of length the depth of the ImageDict&#39;</span>
@@ -590,7 +601,8 @@
 
         <span class="c"># now some top level things:</span>
         <span class="k">if</span> <span class="n">style</span> <span class="o">==</span> <span class="s">&#39;horiz dropdowns&#39;</span><span class="p">:</span>
-            <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;{0}// other top level derived variables</span>
+            <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">{0}// other top level derived variables</span>
 <span class="s">{0}// the depth of the ImageMetaTag ImageDict (number of selectors):</span>
 <span class="s">{0}var n_deep = selected_id.length;</span>
 <span class="s">{0}// a list of the options available to the animator buttons, with the current selection</span>

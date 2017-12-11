@@ -109,7 +109,7 @@ Released under BSD 3-Clause License. See LICENSE for more details.</p>
 <p>For most use cases, the following functions provide the required functionality to use the database:</p>
 <dl class="function">
 <dt id="ImageMetaTag.db.write_img_to_dbfile">
-<tt class="descclassname">ImageMetaTag.db.</tt><tt class="descname">write_img_to_dbfile</tt><big>(</big><em>db_file</em>, <em>img_filename</em>, <em>img_info</em>, <em>add_strict=False</em>, <em>timeout=6</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/db.html#write_img_to_dbfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.write_img_to_dbfile" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">ImageMetaTag.db.</tt><tt class="descname">write_img_to_dbfile</tt><big>(</big><em>db_file</em>, <em>img_filename</em>, <em>img_info</em>, <em>add_strict=False</em>, <em>attempt_replace=False</em>, <em>timeout=6</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/db.html#write_img_to_dbfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.write_img_to_dbfile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes image metadata to a database.</p>
 <p>Arguments:</p>
 <ul class="simple">
@@ -120,6 +120,7 @@ Released under BSD 3-Clause License. See LICENSE for more details.</p>
 <p>Options:</p>
 <ul class="simple">
 <li>add_strict - passed into <a class="reference internal" href="#ImageMetaTag.db.write_img_to_open_db" title="ImageMetaTag.db.write_img_to_open_db"><tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.db.write_img_to_open_db()</span></tt></a></li>
+<li>attempt_replace - passed into <a class="reference internal" href="#ImageMetaTag.db.write_img_to_open_db" title="ImageMetaTag.db.write_img_to_open_db"><tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.db.write_img_to_open_db()</span></tt></a></li>
 <li>timeout - default timeout to try and write to the database.</li>
 </ul>
 <p>This is commonly used in <a class="reference internal" href="savefig.html#ImageMetaTag.savefig" title="ImageMetaTag.savefig"><tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.savefig()</span></tt></a></p>
@@ -176,7 +177,7 @@ with the dictionary.</p>
 
 <dl class="function">
 <dt id="ImageMetaTag.db.merge_db_files">
-<tt class="descclassname">ImageMetaTag.db.</tt><tt class="descname">merge_db_files</tt><big>(</big><em>main_db_file</em>, <em>add_db_file</em>, <em>delete_add_db=False</em>, <em>delete_added_entries=False</em>, <em>db_timeout=6</em>, <em>db_attempts=20</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/db.html#merge_db_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.merge_db_files" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">ImageMetaTag.db.</tt><tt class="descname">merge_db_files</tt><big>(</big><em>main_db_file</em>, <em>add_db_file</em>, <em>delete_add_db=False</em>, <em>delete_added_entries=False</em>, <em>attempt_replace=False</em>, <em>db_timeout=6</em>, <em>db_attempts=20</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/db.html#merge_db_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.merge_db_files" title="Permalink to this definition">¶</a></dt>
 <dd><p>Merges two ImageMetaTag database files, with the contents of add_db_file added
 to the main_db_file. The databases should have the same tags within them for the
 merge to work.</p>

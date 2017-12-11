@@ -15,7 +15,7 @@ convention (http://semver.org/)
    time to make sure it works, as the code at this stage is what will be
    released.
 
-2) Update the documentation, from the docs directory:
+3) Update the documentation, from the docs directory:
   cd docs
  * Clean the documentation build:
      make html clean
@@ -23,18 +23,20 @@ convention (http://semver.org/)
    new build:
      PYTHONPATH=../ make html
 
-3) Commit the version number and documentation changes:
+4) Commit the version number and documentation changes:
   git commit -a
   git push origin {{ branch_name }}
 
-4) Start a pull request for your branch on your github fork and follow the
+5) Start a pull request for your branch on your github fork and follow the
 process to merge it to the master branch.
+
+6) Test the package works at the commit which you intend to release by installing from the specific commit to a temporary location. Install it using the setup.py and run the test.py script.
 
 
 From this point onwards, admin rights are required to both image-meta-tag and image-meta-tag-feedstock repositories.
 
 
-5) Pulbish a release in the image-meta-tag repository for the new release
+7) Pulbish a release in the image-meta-tag repository for the new release
 number at: https://github.com/SciTools-incubator/image-meta-tag/releases
  * Tag version is just the version number e.g. '0.6.7' in the code.
  * The convention used for the release title adds 'vn' before the number, e.g. 
@@ -42,7 +44,7 @@ number at: https://github.com/SciTools-incubator/image-meta-tag/releases
  * The release description can be used to give a very brief outline of the
    changes.
 
-6) Update the recipe on the conda-forge-feedstock:
+8) Update the recipe on the conda-forge-feedstock:
  * The main repository is:
      https://github.com/conda-forge/image-meta-tag-feedstock
  * The location of admin branches is:

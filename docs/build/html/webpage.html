@@ -127,7 +127,7 @@ Released under BSD 3-Clause License. See LICENSE for more details.</p>
 <h2>Writing a whole page<a class="headerlink" href="#writing-a-whole-page" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="ImageMetaTag.webpage.write_full_page">
-<tt class="descclassname">ImageMetaTag.webpage.</tt><tt class="descname">write_full_page</tt><big>(</big><em>img_dict</em>, <em>filepath</em>, <em>title</em>, <em>page_filename=None</em>, <em>tab_s_name=None</em>, <em>preamble=None</em>, <em>postamble=None</em>, <em>compression=False</em>, <em>initial_selectors=None</em>, <em>show_selector_names=False</em>, <em>show_singleton_selectors=True</em>, <em>optgroups=None</em>, <em>url_type='int'</em>, <em>only_show_rel_url=False</em>, <em>verbose=False</em>, <em>style='horiz dropdowns'</em>, <em>write_intmed_tmpfile=False</em>, <em>description=None</em>, <em>keywords=None</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/webpage.html#write_full_page"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.webpage.write_full_page" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">ImageMetaTag.webpage.</tt><tt class="descname">write_full_page</tt><big>(</big><em>img_dict</em>, <em>filepath</em>, <em>title</em>, <em>page_filename=None</em>, <em>tab_s_name=None</em>, <em>preamble=None</em>, <em>postamble=None</em>, <em>compression=False</em>, <em>initial_selectors=None</em>, <em>show_selector_names=False</em>, <em>show_singleton_selectors=True</em>, <em>optgroups=None</em>, <em>url_type='int'</em>, <em>only_show_rel_url=False</em>, <em>verbose=False</em>, <em>style='horiz dropdowns'</em>, <em>write_intmed_tmpfile=False</em>, <em>description=None</em>, <em>keywords=None</em>, <em>css=None</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/webpage.html#write_full_page"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.webpage.write_full_page" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes out an <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a> as a webpage, to a given file location.
 The files are created as temporary files and when complete they replace any files that
 are currently in the specified location.</p>
@@ -152,6 +152,7 @@ webpage styles could be added.</p>
 <li>description - html description metadata</li>
 <li>keywords - html keyword metadata</li>
 <li>compression - default False. If True, then the json data object will be compressed                     using zlib string compression. When read into the browser, we will use                     pako to inflate it (<a class="reference external" href="https://github.com/nodeca/pako">https://github.com/nodeca/pako</a>)</li>
+<li>css - Optional CSS file used to style webpage. By default a small amount of css is             written out in the page header.</li>
 </ul>
 <p>Returns a list of files that the the created webpage is dependent upon</p>
 </dd></dl>

@@ -102,7 +102,8 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
     * compression - default False. If True, then the json data object will be compressed \
                     using zlib string compression. When read into the browser, we will use \
                     pako to inflate it (https://github.com/nodeca/pako)
-    * css - CSS file used to style webpage
+    * css - Optional CSS file used to style webpage. By default a small amount of css is \
+            written out in the page header.
 
     Returns a list of files that the the created webpage is dependent upon
     '''

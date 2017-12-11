@@ -107,7 +107,7 @@ Released under BSD 3-Clause License. See LICENSE for more details.</p>
 <p>The only function that is usaully needed from this module is savefig wrapper iteself:</p>
 <dl class="function">
 <dt id="ImageMetaTag.savefig">
-<tt class="descclassname">ImageMetaTag.</tt><tt class="descname">savefig</tt><big>(</big><em>filename</em>, <em>img_format=None</em>, <em>img_converter=0</em>, <em>do_trim=False</em>, <em>trim_border=0</em>, <em>do_thumb=False</em>, <em>img_tags=None</em>, <em>keep_open=False</em>, <em>dpi=None</em>, <em>logo_file=None</em>, <em>logo_width=40</em>, <em>logo_padding=0</em>, <em>logo_pos=0</em>, <em>db_file=None</em>, <em>db_timeout=6</em>, <em>db_attempts=20</em>, <em>db_full_paths=False</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#ImageMetaTag.savefig" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">ImageMetaTag.</tt><tt class="descname">savefig</tt><big>(</big><em>filename</em>, <em>img_format=None</em>, <em>img_converter=0</em>, <em>do_trim=False</em>, <em>trim_border=0</em>, <em>do_thumb=False</em>, <em>img_tags=None</em>, <em>keep_open=False</em>, <em>dpi=None</em>, <em>logo_file=None</em>, <em>logo_width=40</em>, <em>logo_padding=0</em>, <em>logo_pos=0</em>, <em>db_file=None</em>, <em>db_timeout=6</em>, <em>db_attempts=20</em>, <em>db_replace=False</em>, <em>db_full_paths=False</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#ImageMetaTag.savefig" title="Permalink to this definition">¶</a></dt>
 <dd><p>A wrapper around matplotlib.pyplot.savefig, to include file size optimisation and
 image tagging.</p>
 <p>The filesize optimisation depends on the img_converter input passes into
@@ -122,6 +122,7 @@ filename (can include the file extension, or that can be specified in the img_fo
 <li>db_full_paths - by default, if the images can be expressed as relative path to the database                       file then the database will contain only relative links, unless                       db_full_paths is True.</li>
 <li>db_timeout - change the database timeout (in seconds).</li>
 <li>db_attempts - change the number of attempts to write to the database.</li>
+<li>db_replace - if True, an image&#8217;s metadata will be replaced in the database if it                    already exists. This can be slow, and the metadata is usually the same so                    the default is db_replace=False.</li>
 <li>dpi - change the image resolution passed into matplotlib.savefig.</li>
 <li>keep_open - by default, this savefig wrapper closes the figure after use, except if                   keep_open is True.</li>
 <li>verbose - switch for verbose output (reports file sizes before/after conversion)</li>
