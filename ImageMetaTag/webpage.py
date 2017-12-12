@@ -484,8 +484,6 @@ def write_js_to_header(img_dict, initial_selectors=None, optgroups=None, style=N
                 # keep a note of the elements in the whole list, so we know which ones 
                 # aren't in any optgroup:
                 all_keys = copy.deepcopy(img_dict.keys[group_ind])
-                
-                print optgroups[group_ind].keys(), optgroup.keys()
                 if 'imt_optgroup_order' not in optgroup:
                     optgroup['imt_optgroup_order'] = sorted(optgroup.keys())
                 # make sure that the elements within the optgroup are a sorted
