@@ -31,7 +31,9 @@ convention (http://semver.org/)
 process to merge it to the master branch.
 
 6) Test the package works at the commit which you intend to release by installing from the specific commit to a temporary location. Install it using the setup.py and run the test.py script.
+  py27 setup.py install
 
+This will also make a dist/ folder for uploading to pypi later.
 
 From this point onwards, admin rights are required to both image-meta-tag and image-meta-tag-feedstock repositories.
 
@@ -69,3 +71,8 @@ number at: https://github.com/SciTools-incubator/image-meta-tag/releases
  * The pull request will automatically run the tests. These can take a while.
  * When the tests have completed succesfully the change can be merged.
  * Without an hour or so the new release should be available via conda.
+
+
+9) With a correctly set up pypi login and .pypirc file, the following 
+command will set up a pypi record for the release (python > 2.7.13 is needed):
+  twine upload dist/*
