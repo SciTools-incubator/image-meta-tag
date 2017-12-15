@@ -150,7 +150,7 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
     # now write the actual output file:
     if write_intmed_tmpfile:
         # get a temporary file:
-        with tempfile.NamedTemporaryFile('w', suffix='.html', prefix='imt_',
+        with tempfile.NamedTemporaryFile('w', suffix='.html', prefix='imt_tmppage_',
                                          dir=file_dir, delete=False) as html_file_obj:
             tmp_html_filepath = html_file_obj.name
         filepath_to_write = tmp_html_filepath
@@ -174,7 +174,9 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
         out_file.write(out_str)
 
         if css:
-            shutil.copy(css, file_dir)
+            # copy the css file into the file_dir (unless that's were it already is):
+            if os.path.split(css)[0] != file_dir:
+                shutil.copy(css, file_dir)
             base_css = os.path.basename(css)
             page_dependencies.append(base_css)
             out_str = ind+'<link rel="stylesheet" type="text/css" href="{0}">\n'

@@ -308,6 +308,81 @@ def define_img_dict_in_tuple(in_tuple):
 
     return img_dict
 
+
+def make_test_css(webdir):
+    'writes out a test.css file in a specified directory'
+
+    css_file = os.path.join(webdir, 'test.css')
+
+    css_content = '''body {
+  background-color: #d3eeed;
+  color: black;
+}
+body, div, dl, dt, dd, li, h1, h2 {
+  margin: 0;
+  padding: 0;
+}
+h3, h4, h5, h6, pre, form, fieldset, input {
+  margin: 0;
+  padding: 0;
+}
+textarea, p, blockquote, th, td {
+  margin: 0;
+  padding: 0;
+}
+fieldset, img {
+  border: 0 none;
+}
+body {
+  font: 12px Myriad,Helvetica,Tahoma,Arial,clean,sans-serif;
+  *font-size: 75%;
+}
+h1 {
+  font-size: 1.5em;
+  font-weight: normal;
+  line-height: 1em;
+  margin-top: 1em;
+  margin-bottom:0;
+}
+h2 {
+  font-size: 1.1667em;
+  font-weight: bold;
+  line-height: 1.286em;
+  margin-top: 1.929em;
+  margin-bottom:0.643em;
+}
+h3, h4, h5, h6 {
+  font-size: 1em;
+  font-weight: bold;
+  line-height: 1.5em;
+  margin-top: 1.5em;
+  margin-bottom: 0;
+}
+p {
+  font-size: 1em;
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+  line-height: 1.5em;
+}
+pre, code {
+  font-size:115%;
+  *font-size:100%;
+  font-family: Courier, "Courier New";
+  background-color: #efefef;
+  border: 1px solid #ccc;
+}
+pre {
+  border-width: 1px 0;
+  padding: 1.5em;
+}
+table {
+  font-size:100%;
+}
+'''
+    with open(css_file, 'w') as file_obj:
+        file_obj.write(css_content)
+    return css_file
+
 def __main__():
 
     # parse the arguments, straight fail if there's a problem.
@@ -802,6 +877,8 @@ def __main__():
     out_page = '%s/page.html' % webdir
     out_page_para = '%s/page_para.html' % webdir
     out_page_multi = '%s/page_multi.html' % webdir
+    # another test page, this time specifying the css:    
+    test_css = make_test_css(webdir)
     out_page_css = '%s/page_css.html' % webdir
 
     shutil.copy(LOGO_FILE, '%s/logo.png' % webdir)
@@ -895,7 +972,7 @@ def __main__():
                                                         show_selector_names=True,
                                                         show_singleton_selectors=False,
                                                         compression=True,
-                                                        css='test.css')
+                                                        css=test_css)
 
     # now, finally, produce a large ImageDict:
     if not args.no_biggus_dictus:
