@@ -556,9 +556,13 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
                                 print '%s database timeout deleting from file "%s", %s s' \
                                                 % (dt_now_str(), db_file, n_tries * db_timeout)
                                 n_tries += 1
+                            elif 'disk I/O error' in OpErr.message:
+                                msg = '{} for file {}'.format(OpErr.message, db_file)
+                                raise IOError(msg)
                             else:
                                 # everything else needs to be reported and raised immediately:
-                                raise ValueError(OpErr.message)
+                                msg = '{} for file {}'.format(OpErr.message, db_file)
+                                raise ValueError(msg)
 
                     # if we went through all the attempts then it is time to raise the error:
                     if n_tries > db_attempts:
