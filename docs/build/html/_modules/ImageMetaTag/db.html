@@ -626,9 +626,13 @@
                                 <span class="k">print</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> database timeout deleting from file &quot;</span><span class="si">%s</span><span class="s">&quot;, </span><span class="si">%s</span><span class="s"> s&#39;</span> \
                                                 <span class="o">%</span> <span class="p">(</span><span class="n">dt_now_str</span><span class="p">(),</span> <span class="n">db_file</span><span class="p">,</span> <span class="n">n_tries</span> <span class="o">*</span> <span class="n">db_timeout</span><span class="p">)</span>
                                 <span class="n">n_tries</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="k">elif</span> <span class="s">&#39;disk I/O error&#39;</span> <span class="ow">in</span> <span class="n">OpErr</span><span class="o">.</span><span class="n">message</span><span class="p">:</span>
+                                <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;{} for file {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">OpErr</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="n">db_file</span><span class="p">)</span>
+                                <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                             <span class="k">else</span><span class="p">:</span>
                                 <span class="c"># everything else needs to be reported and raised immediately:</span>
-                                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">OpErr</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+                                <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;{} for file {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">OpErr</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="n">db_file</span><span class="p">)</span>
+                                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
                     <span class="c"># if we went through all the attempts then it is time to raise the error:</span>
                     <span class="k">if</span> <span class="n">n_tries</span> <span class="o">&gt;</span> <span class="n">db_attempts</span><span class="p">:</span>
@@ -887,7 +891,7 @@
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2015-2017, British Crown Copyright.
+        &copy; Copyright 2015-2018, British Crown Copyright.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
