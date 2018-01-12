@@ -220,7 +220,7 @@
     <span class="c"># now write the actual output file:</span>
     <span class="k">if</span> <span class="n">write_intmed_tmpfile</span><span class="p">:</span>
         <span class="c"># get a temporary file:</span>
-        <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="s">&#39;w&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s">&#39;.html&#39;</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s">&#39;imt_&#39;</span><span class="p">,</span>
+        <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="s">&#39;w&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s">&#39;.html&#39;</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s">&#39;imt_tmppage_&#39;</span><span class="p">,</span>
                                          <span class="nb">dir</span><span class="o">=</span><span class="n">file_dir</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">html_file_obj</span><span class="p">:</span>
             <span class="n">tmp_html_filepath</span> <span class="o">=</span> <span class="n">html_file_obj</span><span class="o">.</span><span class="n">name</span>
         <span class="n">filepath_to_write</span> <span class="o">=</span> <span class="n">tmp_html_filepath</span>
@@ -244,7 +244,9 @@
         <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">out_str</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">css</span><span class="p">:</span>
-            <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">css</span><span class="p">,</span> <span class="n">file_dir</span><span class="p">)</span>
+            <span class="c"># copy the css file into the file_dir (unless that&#39;s were it already is):</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">css</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">file_dir</span><span class="p">:</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">css</span><span class="p">,</span> <span class="n">file_dir</span><span class="p">)</span>
             <span class="n">base_css</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">css</span><span class="p">)</span>
             <span class="n">page_dependencies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_css</span><span class="p">)</span>
             <span class="n">out_str</span> <span class="o">=</span> <span class="n">ind</span><span class="o">+</span><span class="s">&#39;&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;{0}&quot;&gt;</span><span class="se">\n</span><span class="s">&#39;</span>
@@ -554,8 +556,6 @@
                 <span class="c"># keep a note of the elements in the whole list, so we know which ones </span>
                 <span class="c"># aren&#39;t in any optgroup:</span>
                 <span class="n">all_keys</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">img_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">group_ind</span><span class="p">])</span>
-                
-                <span class="k">print</span> <span class="n">optgroups</span><span class="p">[</span><span class="n">group_ind</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">optgroup</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
                 <span class="k">if</span> <span class="s">&#39;imt_optgroup_order&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">optgroup</span><span class="p">:</span>
                     <span class="n">optgroup</span><span class="p">[</span><span class="s">&#39;imt_optgroup_order&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">optgroup</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
                 <span class="c"># make sure that the elements within the optgroup are a sorted</span>
@@ -1028,7 +1028,7 @@
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2015-2017, British Crown Copyright.
+        &copy; Copyright 2015-2018, British Crown Copyright.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
