@@ -175,8 +175,13 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
 
         if css:
             # copy the css file into the file_dir (unless that's were it already is):
-            if os.path.split(css)[0] != file_dir:
+            try:
                 shutil.copy(css, file_dir)
+            except shutil.Error as ShErr:
+                if 'are the same file' in ShErr.message:
+                    pass
+                else:
+                    raise ShErr
             base_css = os.path.basename(css)
             page_dependencies.append(base_css)
             out_str = ind+'<link rel="stylesheet" type="text/css" href="{0}">\n'
