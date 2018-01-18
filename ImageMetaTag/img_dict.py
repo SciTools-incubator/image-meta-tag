@@ -495,7 +495,7 @@ class ImageDict(object):
                     # get a list of tuples, containing the string, and the value
                     # of the T+ from a pattern match regex:
                     try:
-                        labels_and_values = [(x, re.match('[tT][+]{,}([0-9.]{1,})|None', x).group(1)) for x in self.keys[i_key]]
+                        labels_and_values = [(x, re.match('[tT]([-+0-9.]{1,})|None', x).group(1)) for x in self.keys[i_key]]
                         if method == 'T+':
                             # map the None to a string, so it goes to then end of a sort
                             labels_and_values = [(x, float(y)) if not y is None else (x, 'None') for x, y in labels_and_values]
