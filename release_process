@@ -19,8 +19,7 @@ convention (http://semver.org/)
   cd docs
  * Clean the documentation build:
      make html clean
- * Rebuild the docs, ensuring that the PYTHONPATH refers to the source of the
-   new build:
+ * Rebuild the docs, ensuring that the PYTHONPATH refers to the source of the new build:
      PYTHONPATH=../ make html
 
 4) Commit the version number and documentation changes:
