@@ -127,7 +127,8 @@
 
 
 <div class="viewcode-block" id="write_full_page"><a class="viewcode-back" href="../../webpage.html#ImageMetaTag.webpage.write_full_page">[docs]</a><span class="k">def</span> <span class="nf">write_full_page</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">page_filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tab_s_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                    <span class="n">preamble</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">postamble</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                    <span class="n">preamble</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">postamble</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">postamble_no_imt_link</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                    <span class="n">compression</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
                     <span class="n">initial_selectors</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">show_selector_names</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
                     <span class="n">show_singleton_selectors</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">optgroups</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                     <span class="n">url_type</span><span class="o">=</span><span class="s">&#39;int&#39;</span><span class="p">,</span> <span class="n">only_show_rel_url</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
@@ -150,7 +151,10 @@
 <span class="sd">                   of a larger page.</span>
 <span class="sd">    * preamble : html text added at the top of the &lt;body&gt; text, but before the ImageMetaTag \</span>
 <span class="sd">                 section. Can be quite extensive.</span>
-<span class="sd">    * postable : html text added after the ImageMetaTag section.</span>
+<span class="sd">    * postable : html text added after the ImageMetaTag section. A link to the ImageMetaTag \</span>
+<span class="sd">                 documentation will be appended unless postamble_no_imt_link is True.</span>
+<span class="sd">    * postamble_no_imt_link : if True, no link to the ImageMetaTag documentation will be added \</span>
+<span class="sd">                              to the postamble.</span>
 <span class="sd">    * initial_selectors - A list of initial values for the selectors, to be passed into \</span>
 <span class="sd">                          :func:`ImageMetaTag.webpage.write_js_setup`.</span>
 <span class="sd">    * show_selector_names - switches on displaying the selector full names defined by the \</span>
@@ -379,13 +383,20 @@
                                   <span class="n">style</span><span class="o">=</span><span class="n">style</span><span class="p">,</span> <span class="n">level_names</span><span class="o">=</span><span class="n">level_names</span><span class="p">,</span>
                                   <span class="n">show_singleton_selectors</span><span class="o">=</span><span class="n">show_singleton_selectors</span><span class="p">,</span>
                                   <span class="n">animated_level</span><span class="o">=</span><span class="n">anim_level</span><span class="p">)</span>
+            
         <span class="c"># the body is done, so the postamble comes in:</span>
+        <span class="n">postamble_endline</span> <span class="o">=</span> <span class="s">&#39;Page created with &lt;a href=&quot;{}&quot;&gt;ImageMetaTag {}&lt;/a&gt;&#39;</span>
+        <span class="n">postamble_endline</span> <span class="o">=</span> <span class="n">postamble_endline</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">imt</span><span class="o">.</span><span class="n">__documentation__</span><span class="p">,</span> <span class="n">imt</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">postamble_no_imt_link</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">postamble</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">postamble</span> <span class="o">=</span> <span class="n">postamble_endline</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">postamble</span> <span class="o">=</span> <span class="s">&#39;{}</span><span class="se">\n</span><span class="s">{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">postamble</span><span class="p">,</span> <span class="n">postamble_endline</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">postamble</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">postamble</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
         <span class="c"># finish the body, and html:</span>
         <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="s">&#39;&lt;/body&gt;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
         <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&lt;/html&gt;&#39;</span><span class="p">)</span>
-
 
         <span class="k">if</span> <span class="n">write_intmed_tmpfile</span><span class="p">:</span>
             <span class="n">tmp_files_to_mv</span> <span class="o">=</span> <span class="n">json_files</span> <span class="o">+</span> <span class="p">[(</span><span class="n">tmp_html_filepath</span><span class="p">,</span> <span class="n">filepath</span><span class="p">)]</span>

@@ -57,7 +57,8 @@ PAKO_SOURE_TAR = 'https://github.com/nodeca/pako/archive/{}.tar.gz'.format(PAKO_
 
 
 def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=None,
-                    preamble=None, postamble=None, compression=False,
+                    preamble=None, postamble=None, postamble_no_imt_link=False,
+                    compression=False,
                     initial_selectors=None, show_selector_names=False,
                     show_singleton_selectors=True, optgroups=None,
                     url_type='int', only_show_rel_url=False, verbose=False,
@@ -80,7 +81,10 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
                    of a larger page.
     * preamble : html text added at the top of the <body> text, but before the ImageMetaTag \
                  section. Can be quite extensive.
-    * postable : html text added after the ImageMetaTag section.
+    * postable : html text added after the ImageMetaTag section. A link to the ImageMetaTag \
+                 documentation will be appended unless postamble_no_imt_link is True.
+    * postamble_no_imt_link : if True, no link to the ImageMetaTag documentation will be added \
+                              to the postamble.
     * initial_selectors - A list of initial values for the selectors, to be passed into \
                           :func:`ImageMetaTag.webpage.write_js_setup`.
     * show_selector_names - switches on displaying the selector full names defined by the \
@@ -309,13 +313,20 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
                                   style=style, level_names=level_names,
                                   show_singleton_selectors=show_singleton_selectors,
                                   animated_level=anim_level)
+            
         # the body is done, so the postamble comes in:
+        postamble_endline = 'Page created with <a href="{}">ImageMetaTag {}</a>'
+        postamble_endline = postamble_endline.format(imt.__documentation__, imt.__version__)
+        if not postamble_no_imt_link:
+            if postamble is None:
+                postamble = postamble_endline
+            else:
+                postamble = '{}\n{}'.format(postamble, postamble_endline)
         if postamble is not None:
             out_file.write(postamble + '\n')
         # finish the body, and html:
         out_file.write(ind + '</body>\n')
         out_file.write('\n</html>')
-
 
         if write_intmed_tmpfile:
             tmp_files_to_mv = json_files + [(tmp_html_filepath, filepath)]
