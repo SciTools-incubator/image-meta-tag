@@ -1,4 +1,4 @@
-// ImageMetaTag dropdown menu scripting - vn0.6.11
+// ImageMetaTag dropdown menu scripting - vn0.6.12
 // ImageMetaTag is a python package built around a wrapper for savefig in 
 // matplotlib, which adds metadata tags to supported image file formats.
 // See https://github.com/SciTools-incubator/image-meta-tag for details.
@@ -303,15 +303,29 @@ function update_selector(depth, options, selected) {
 		// now within the optgroup, add the options:
 		for (var i_opt=0, n_opt=optgroup.length; i_opt< n_opt; i_opt++){
 		    // loop over the options, and write out a line for each one:
-		    for (var j_opt=0, len_j=key_lists[depth].length; j_opt < len_j; j_opt++){
+		    //
+		    // first determine if this element of the group is valid for the current
+		    // selection:
+		    var opt_in_options=Boolean(false);
+		    for (var j_opt=0, len_j=options.length; j_opt < len_j; j_opt++){
 			// first, get the index in key_lists[depth] to which i_opt refers
 			// as not every option is used in every selection:
-			if (key_lists[depth][j_opt] == optgroup[i_opt]){break};
+			if (options[j_opt] == optgroup[i_opt]){
+			    opt_in_options=Boolean(true);
+			    break;
+			};
 		    };
-		    if (optgroup[i_opt] == selected){
-			sel_text += "  <option value=" + j_opt + " selected=selected>"+optgroup[i_opt]+"</option>\n";
-		    } else {
-			sel_text += "  <option value=" + j_opt + ">"+optgroup[i_opt]+"</option>\n";
+		    if (opt_in_options){
+			// now work out the j_opt that's index of key_lists[depth], because that's what's needed
+			// for the selector:
+			for (var j_opt=0, len_j=key_lists[depth].length; j_opt < len_j; j_opt++){
+			    if (key_lists[depth][j_opt] == optgroup[i_opt]){break;};
+			};
+			if (optgroup[i_opt] == selected){
+			    sel_text += "  <option value=" + j_opt + " selected=selected>"+optgroup[i_opt]+"</option>\n";
+			} else {
+			    sel_text += "  <option value=" + j_opt + ">"+optgroup[i_opt]+"</option>\n";
+			};
 		    };
 		};
 		// close the optgroup:
