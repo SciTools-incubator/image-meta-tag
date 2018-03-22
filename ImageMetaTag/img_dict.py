@@ -491,18 +491,18 @@ class ImageDict(object):
 
                 elif method in ['T+', 'reverse T+', 'reversed_T+']:
                     #'T+' - in ascending order of the T+??? number:
-
+                    #
                     # get a list of tuples, containing the string, and the value
                     # of the T+ from a pattern match regex:
                     try:
-                        labels_and_values = [(x, re.match('[tT]([-+0-9.]{1,})|None', x).group(1)) for x in self.keys[i_key]]
+                        labels_and_values = [(x, re.match('[tT]([-+0-9.]{2,})|[tT][+-](None)', x).groups()) for x in self.keys[i_key]]
+                        # convert to float, so values can be sorted numerically:
                         if method == 'T+':
-                            # map the None to a string, so it goes to then end of a sort
-                            labels_and_values = [(x, float(y)) if not y is None else (x, 'None') for x, y in labels_and_values]
+                            # keep the None to a string, so it goes to then end of a sort
+                            labels_and_values = [(x, float(y[0])) if y[1] != 'None' else (x, 'None') for x, y in labels_and_values]
                         elif method in ['reverse T+', 'reversed_T+']:
-                            # don;t map the none to a string, so it goes to the
-                            # end of a reversed sort...
-                            labels_and_values = [(x, float(y)) if not y is None else (x, y) for x, y in labels_and_values]
+                            # map the 'None' string to an actual None so it goes to the end of a reversed sort...
+                            labels_and_values = [(x, float(y[0])) if y[1] != 'None' else (x, None) for x, y in labels_and_values]
                     except:
                         msg = 'Keys for plot dictionary level "%s" ' % self.keys[i_key]
                         msg += 'do not match the "T+" (or None) pattern'
@@ -512,7 +512,6 @@ class ImageDict(object):
                             print 'stop'
                         else:
                             raise ValueError(msg)
-
                     # now either sort, or reverse sort, using the value as the key:
                     if method == 'T+':
                         labels_and_values.sort(key=lambda x: x[1])
