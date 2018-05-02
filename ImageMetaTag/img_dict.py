@@ -494,15 +494,15 @@ class ImageDict(object):
                     #
                     # get a list of tuples, containing the string, and the value
                     # of the T+ from a pattern match regex:
+                    
+                    # sort out the numerical (t+) keys from those with None in them:
+                    num_keys = [x for x in self.keys[i_key] if 'None' not in x]
+                    none_keys = [x for x in self.keys[i_key] if 'None' in x]
+                    
                     try:
-                        labels_and_values = [(x, re.match('[tT]([-+0-9.]{2,})|[tT][+-](None)', x).groups()) for x in self.keys[i_key]]
+                        labels_and_values = [(x, re.match('[tT]([-+0-9.]{2,})', x).groups()) for x in num_keys]
                         # convert to float, so values can be sorted numerically:
-                        if method == 'T+':
-                            # keep the None to a string, so it goes to then end of a sort
-                            labels_and_values = [(x, float(y[0])) if y[1] != 'None' else (x, 'None') for x, y in labels_and_values]
-                        elif method in ['reverse T+', 'reversed_T+']:
-                            # map the 'None' string to an actual None so it goes to the end of a reversed sort...
-                            labels_and_values = [(x, float(y[0])) if y[1] != 'None' else (x, None) for x, y in labels_and_values]
+                        values_and_labels = [(float(y[0]), x) for x, y in labels_and_values]
                     except:
                         msg = 'Keys for plot dictionary level "%s" ' % self.keys[i_key]
                         msg += 'do not match the "T+" (or None) pattern'
@@ -514,11 +514,14 @@ class ImageDict(object):
                             raise ValueError(msg)
                     # now either sort, or reverse sort, using the value as the key:
                     if method == 'T+':
-                        labels_and_values.sort(key=lambda x: x[1])
+                        values_and_labels.sort()
+                        none_keys.sort()
                     elif method in ['reverse T+', 'reversed_T+']:
-                        labels_and_values.sort(key=lambda x: x[1], reverse=True)
-                    # and pull out the labels, in the right order:
-                    self.keys[i_key] = [x[0] for x in labels_and_values]
+                        values_and_labels.sort(reverse=True)
+                        none_keys.sort(reverse=True)
+                    # and pull out the labels, in the right order,
+                    # with the none_keys go at the end:
+                    self.keys[i_key] = [x[0] for x in labels_and_values] + none_keys
 
                 elif method in ['level', 'numeric', 'reverse_level', 'reverse_numeric']:
                     #'level' - starting with the surface and working upwards, then 'special'
