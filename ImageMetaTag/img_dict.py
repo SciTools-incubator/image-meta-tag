@@ -521,7 +521,7 @@ class ImageDict(object):
                         none_keys.sort(reverse=True)
                     # and pull out the labels, in the right order,
                     # with the none_keys go at the end:
-                    self.keys[i_key] = [x[0] for x in labels_and_values] + none_keys
+                    self.keys[i_key] = [x[1] for x in values_and_labels] + none_keys
 
                 elif method in ['level', 'numeric', 'reverse_level', 'reverse_numeric']:
                     #'level' - starting with the surface and working upwards, then 'special'
