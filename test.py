@@ -308,7 +308,6 @@ def define_img_dict_in_tuple(in_tuple):
 
     return img_dict
 
-
 def make_test_css(webdir):
     'writes out a test.css file in a specified directory'
 
@@ -382,6 +381,78 @@ table {
     with open(css_file, 'w') as file_obj:
         file_obj.write(css_content)
     return css_file
+
+def test_key_sorting():
+    '''
+    Tests that the different variants of sorting in an ImageDict work correctly.
+    These are not all used in the type of web pages used in the main tests
+    so they are tested directly.
+    '''
+    
+    # for each type of test, define the input keys and how they should be when
+    # they are sorted:
+    sort_tests = {}
+    
+    # a straight alphabetical sort:
+    sort_tests['sort'] = (['aaa', 'zaa', 'aba', '257', 'bob'],
+                          ['257', 'aaa', 'aba', 'bob', 'zaa'])
+    # a reversed alphabetical sort:
+    sort_tests['reverse sort'] = (['aaa', 'zaa', 'aba', '257', 'bob'],
+                                  ['zaa', 'bob', 'aba', 'aaa', '257'])
+     
+    # T+ - used for forecast lead times, so sort by the value after the T+
+    # and anything with None gets alphabetically sorted at the end
+    sort_tests['T+'] = (['T+0', 'T+1', 't+10', 'T+2', 't-3', 'T+None', 't-None', 'None'],
+                        ['t-3', 'T+0', 'T+1', 'T+2', 't+10', 'None', 'T+None', 't-None'])
+    
+    # here, we will use a list to sort by, and anything not in the list
+    # gets a simple sort:
+    sort_by_list = ['aaa', 'zaa']
+    sort_tests['sort_by_list'] = (['aaa', 'zaa', 'aba', '257', 'bob'],
+                                  ['aaa', 'zaa', '257', 'aba', 'bob'])
+    
+    # a set of numeric values common in meteorology:
+    sort_tests['numeric'] = (['10m', '50m', '4mm', '62 hPa', '2m', '16 km', 'Model level 7',
+                              'Surface', '12mb', '3.344E, 16.7N', '2.344E, 18.7N', '16nm'],
+                             ['Surface', '16nm', '4mm', '2m', '10m', '50m', '16 km', '62 hPa',
+                              '12mb', 'Model level 7', '2.344E, 18.7N', '3.344E, 16.7N'])
+
+    test_order = sorted(sort_tests.keys())
+    n_sorts_to_test = len(test_order)
+    # make a dummy ImageDict
+    dummy_tag_order = []
+    dummy_tag_info = {}
+    for level in range(n_sorts_to_test):
+        lname = 'l{}'.format(level)
+        dummy_tag_order.append(lname)
+        dummy_tag_info[lname] = str(level)
+    tmp_dict = imt.dict_heirachy_from_list(dummy_tag_info, 'None', dummy_tag_order)
+    img_dict = imt.ImageDict(tmp_dict)
+    
+    # now overide the keys of imd_dict with the keys we want to test,
+    # and make the list of how each level is to be sorted:
+    sort_methods = []
+    for level, test_name in enumerate(test_order):
+        img_dict.keys[level] = sort_tests[test_name][0]
+        if test_name == 'sort_by_list':
+            sort_methods.append(sort_by_list)
+        else:
+            sort_methods.append(test_name)
+    # now do the sort:
+    img_dict.sort_keys(sort_methods)
+    
+    # now go through the sort methods and check the output is as expected:
+    failed = False
+    for level, test_name in enumerate(test_order):
+        if img_dict.keys[level] == sort_tests[test_name][1]:
+            pass
+        else:
+            msg = ('Sort method test "{}" has failed to correctly sort its ImageDict keys:'
+                   '\n  Input list: {}\n  Sorted list: {}\n  Expected list: {}')
+            print msg
+            failed = True
+    
+    return not failed
 
 def __main__():
 
@@ -974,6 +1045,12 @@ def __main__():
                                                         show_singleton_selectors=False,
                                                         compression=True,
                                                         css=test_css)
+    
+    sorts_work = test_key_sorting()
+    if sorts_work:
+        print 'Sorting tests pass OK'
+    else:
+        raise ValueError('Testing failed in test_key_sorting')
 
     # now, finally, produce a large ImageDict:
     if not args.no_biggus_dictus:
@@ -1110,7 +1187,7 @@ def __main__():
         rebuild_db = '{}/imt_rebuild.db'.format(webdir)
         # rebuild the img_savedir, makging sure we don't scan the thumbnail directory:
         imt.db.scan_dir_for_db(webdir, rebuild_db, restart_db=True, img_tag_req=required_tags,
-                               subdir_excl_list=['thumbnail'], known_file_tags=None, verbose=True)
+                               subdir_excl_list=['thumbnail'], known_file_tags=None, verbose=False)
         # now load that db and test it:
         imgs_r, imgs_tags_r = imt.db.read(rebuild_db, required_tags=required_tags,
                                           tag_strings=tag_strings)
@@ -1133,7 +1210,6 @@ Has the directory got other images/old tests in it?'''.format(webdir))
         print 'Testing of database rebuild functionality complete.'
 
     print 'Web page outputs\n', web_out
-
-
+    
 if __name__ == '__main__':
     __main__()
