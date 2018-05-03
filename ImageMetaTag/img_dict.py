@@ -542,8 +542,8 @@ class ImageDict(object):
                     # to be sorted, starting with the lowest:
                     # TODO: add more things to this, microns, with the micro as /mu????
                     metre_patterns_and_scalings = [(r'([0-9.eE+-]{1,})[\s]{,}m$', 1.0),
-                                                   (r'([0-9.eE+-]{1,})[\s]{,}mm$', 1.0-3),
-                                                   (r'([0-9.eE+-]{1,})[\s]{,}microns$', 1.0-6),
+                                                   (r'([0-9.eE+-]{1,})[\s]{,}mm$', 1.0e-3),
+                                                   (r'([0-9.eE+-]{1,})[\s]{,}microns$', 1.0e-6),
                                                    (r'([0-9.eE+-]{1,})[\s]{,}\mum$', 1.0-6),
                                                    (r'([0-9.eE+-]{1,})[\s]{,}nm$', 1.0e-9),
                                                    (r'([0-9.eE+-]{1,})[\s]{,}km$', 1000.0)]
@@ -569,7 +569,8 @@ class ImageDict(object):
                     # now anything else with a numeric value:
                     numeric_patterns_and_scalings = [(r'([0-9.eE+-]{1,})', 1.0)]
 
-                    # now loop through the different patterns/scalings, and their orders:
+                    # now loop through the different patterns/scalings, and their orders,
+                    # with pressure reversed as we assume it's a descending vertical coordinate: 
                     if method.startswith('reverse'):
                         pattern_order_loop = [(metre_patterns_and_scalings, 'reversed'),
                                               (pressure_patterns_and_scalings, 'sort'),

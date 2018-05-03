@@ -1,0 +1,1022 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ImageMetaTag.img_dict &#8212; ImageMetaTag 0.6.17 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.6.17',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="top" title="ImageMetaTag 0.6.17 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">ImageMetaTag 0.6.17 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ImageMetaTag.img_dict</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">This submodule contains the :class:`ImageMetaTag.ImageDict` class, and functions for </span>
+<span class="sd">preparing instances of it.</span>
+
+<span class="sd">The purpose of an :class:`ImageMetaTag.ImageDict` is to sort the image metadata, supplied to</span>
+<span class="sd">:func:`ImageMetaTag.savefig` and usually stored in a database file, into a useful form that</span>
+<span class="sd">can quickly and easily be presented as a webpage by :func:`ImageMetaTag.webpage.write_full_page`.</span>
+
+<span class="sd">An easy example of creating a webpage, using an ImageDict is shown in</span>
+<span class="sd">`simplest_image_dict.py &lt;simple.html&gt;`_</span>
+
+<span class="sd">.. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks</span>
+
+<span class="sd">(C) Crown copyright Met Office. All rights reserved.</span>
+<span class="sd">Released under BSD 3-Clause License. See LICENSE for more details.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="c1"># required imports</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">collections</span><span class="o">,</span> <span class="nn">inspect</span><span class="o">,</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="k">import</span> <span class="n">Image</span>
+<span class="c1"># useful for debugging</span>
+<span class="kn">import</span> <span class="nn">pdb</span>
+
+<span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">islice</span><span class="p">,</span> <span class="n">compress</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="k">import</span> <span class="n">ceil</span>
+
+<div class="viewcode-block" id="ImageDict"><a class="viewcode-back" href="../../ImageDict.html#ImageMetaTag.ImageDict">[docs]</a><span class="k">class</span> <span class="nc">ImageDict</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    A class which holds a heirachical dictionary of dictionaries, and the associated</span>
+<span class="sd">    methods for appending/removing dictionaries from it.</span>
+
+<span class="sd">    The expected use case for the dictionary is to represent a large set of images,</span>
+<span class="sd">    which can be organised by their metadata tags.</span>
+
+<span class="sd">    When used in this way, the ImageDict module contains functions to produce web</span>
+<span class="sd">    pages for browsing the images.</span>
+
+<span class="sd">    The input_dict should be a heirachical dictionary of dictionaries, containing</span>
+<span class="sd">    the image metadata, in the required order. In order to convert a flat dictionary</span>
+<span class="sd">    of metadata items, use :func:`ImageMetaTag.dict_heirachy_from_list`</span>
+
+<span class="sd">    Options:</span>
+<span class="sd">     * level_names - a list of the tagnames, in full, giving a name/description of what \</span>
+<span class="sd">                     the metadata item means. Ordered by level of the input dict.</span>
+<span class="sd">     * selector_widths - a list of html strings giving the widths of each selector in the \</span>
+<span class="sd">                         output webpage. CURRENTLY UNUSED!</span>
+<span class="sd">     * selector_animated - an integer indicating which selector on the output webpage is \</span>
+<span class="sd">                           to be animated.</span>
+<span class="sd">     * animation_dicrection - +1 indicates the animation moves forwards, -1 indicates it \</span>
+<span class="sd">                              moves backwards.</span>
+
+<span class="sd">    Objects:</span>
+<span class="sd">     * dict - the heirachical dictionary of dictionaries containing the image structure.</span>
+<span class="sd">     * keys - a list of keys for each level of the dict, within a dictionary using the level \</span>
+<span class="sd">              number as the keys.</span>
+<span class="sd">     * level_names - If supplied, this stores the full names of the items in keys.</span>
+<span class="sd">     * selector_animated - the level index which will be animated on the output webpage.</span>
+<span class="sd">     * animation_direction - the direction of animation (+1 for forward, -1 for backward).</span>
+<span class="sd">     * selector_widths - a list of desired widths on the output web page (CURRENTLY UNUSED).</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dict</span><span class="p">,</span> <span class="n">level_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">selector_widths</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">selector_animated</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">animation_direction</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">level_names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">level_names</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">level_names</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;A mapping of key names to full names has been supplied, but it is not a list&#39;</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">level_names</span> <span class="o">=</span> <span class="n">level_names</span>
+
+        <span class="c1"># set the dictionary:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dict</span> <span class="o">=</span> <span class="n">input_dict</span>
+        <span class="c1"># now list the keys, at each level, as lists. These can be reorderd by the calling routine,</span>
+        <span class="c1"># so when the dictionary is written out, they can be in the desired order:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">list_keys_by_depth</span><span class="p">()</span>
+
+        <span class="n">dict_depth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dict_depth</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">level_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">dict_depth</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">level_names</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Mismatch between depth of dictionary and level_names&#39;</span><span class="p">)</span>
+
+        <span class="c1"># this controls the width of the selector, on the resultant webpage:</span>
+        <span class="k">if</span> <span class="n">selector_widths</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selector_widths</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">dict_depth</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">selector_widths</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Specified selector_widths should be a list, but it is &#39;</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;&quot;</span><span class="si">%s</span><span class="s1">&quot; instead&#39;</span> <span class="o">%</span> <span class="n">selector_widths</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">selector_widths</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dict_depth</span><span class="p">():</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Specified selector_widths length disagrees with the dictionary depth&#39;</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">selector_widths</span> <span class="o">=</span> <span class="n">selector_widths</span>
+        <span class="c1"># this controls whether or not a particualr selector uses the animation controls or not.</span>
+        <span class="c1"># There can be only one per page, default is that none use it...</span>
+        <span class="k">if</span> <span class="n">selector_animated</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selector_animated</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">selector_animated</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Specified selector_animated should be a single integer&#39;</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">selector_animated</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">or</span> <span class="n">selector_animated</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dict_depth</span><span class="p">():</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;selector_animated (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">selector_animated</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39; is out of range of the plot dictionary depth.&#39;</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="c1"># that passes, so store it:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selector_animated</span> <span class="o">=</span> <span class="n">selector_animated</span>
+
+        <span class="k">if</span> <span class="n">animation_direction</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">animation_direction</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">animation_direction</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="p">(</span><span class="n">animation_direction</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">animation_direction</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Specified animation_direction should be a single integer with values&#39;</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39; +1 or -1, but it is &quot;</span><span class="si">%s</span><span class="s1">&quot; instead&#39;</span> <span class="o">%</span> <span class="n">animation_direction</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">animation_direction</span> <span class="o">=</span> <span class="n">animation_direction</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">outstr</span> <span class="o">=</span> <span class="s1">&#39;ImageMetaTag ImageDict:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">outstr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dict_print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dict</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">outstr</span><span class="o">=</span><span class="n">outstr</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">outstr</span>
+
+<div class="viewcode-block" id="ImageDict.append"><a class="viewcode-back" href="../../ImageDict.html#ImageMetaTag.ImageDict.append">[docs]</a>    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_dict</span><span class="p">,</span> <span class="n">devmode</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">skip_key_relist</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        appends a new dictionary (with a single element in each layer!) into a current ImageDict.</span>
+
+<span class="sd">        The skip_key_relist option can be set to True to stop the regeneration of key lists.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new_dict</span><span class="p">,</span> <span class="n">ImageDict</span><span class="p">):</span>
+            <span class="n">merged_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mergedicts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dict</span><span class="p">,</span> <span class="n">new_dict</span><span class="o">.</span><span class="n">dict</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dict</span> <span class="o">=</span> <span class="n">merged_dict</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new_dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">merged_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mergedicts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dict</span><span class="p">,</span> <span class="n">new_dict</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dict</span> <span class="o">=</span> <span class="n">merged_dict</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot append data type </span><span class="si">%s</span><span class="s1"> to a ImageDict&#39;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="n">new_dict</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_key_relist</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">list_keys_by_depth</span><span class="p">(</span><span class="n">devmode</span><span class="o">=</span><span class="n">devmode</span><span class="p">)</span>
+
+        <span class="c1"># if there is a level_names, check that the</span>
+        <span class="c1"># new dict is consistent:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new_dict</span><span class="p">,</span> <span class="n">ImageDict</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">level_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">new_dict</span><span class="o">.</span><span class="n">level_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">level_names</span> <span class="o">!=</span> <span class="n">new_dict</span><span class="o">.</span><span class="n">level_names</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Attempting to append two ImageDict objects with&#39;</span>
+                                     <span class="s1">&#39; different level_names&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ImageDict.dict_union"><a class="viewcode-back" href="../../ImageDict.html#ImageMetaTag.ImageDict.dict_union">[docs]</a>    <span class="k">def</span> <span class="nf">dict_union</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_dict</span><span class="p">,</span> <span class="n">new_dict</span><span class="p">):</span>
+        <span class="s1">&#39;produces the union of a dictionary of dictionaries&#39;</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">new_dict</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">in_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">subdict</span> <span class="o">=</span> <span class="n">in_dict</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dict_union</span><span class="p">(</span><span class="n">subdict</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ImageDict.mergedicts"><a class="viewcode-back" href="../../ImageDict.html#ImageMetaTag.ImageDict.mergedicts">[docs]</a>    <span class="k">def</span> <span class="nf">mergedicts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict1</span><span class="p">,</span> <span class="n">dict2</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Alternative version of dict_union using generators which is much faster for large dicts</span>
+<span class="sd">        but needs to be converted to a dict when it&#39;s called:</span>
+<span class="sd">        new_dict = dict(mergdicts(dict1,dict))</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">dict1</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">dict2</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">dict1</span> <span class="ow">and</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">dict2</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dict1</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dict2</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
+                    <span class="k">yield</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mergedicts</span><span class="p">(</span><span class="n">dict1</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">dict2</span><span class="p">[</span><span class="n">k</span><span class="p">])))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># If one of the values is not a dict, you can&#39;t continue merging it.</span>
+                    <span class="c1"># Value from second dict overrides one in first and we move on.</span>
+                    <span class="k">yield</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">dict2</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+                    <span class="c1"># Alternatively, replace this with exception raise</span>
+                    <span class="c1"># to alert you of value conflicts</span>
+            <span class="k">elif</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">dict1</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">dict1</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">dict2</span><span class="p">[</span><span class="n">k</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="ImageDict.remove"><a class="viewcode-back" href="../../ImageDict.html#ImageMetaTag.ImageDict.remove">[docs]</a>    <span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rm_dict</span><span class="p">,</span> <span class="n">skip_key_relist</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        removes a dictionary from within an ImageDict.</span>
+<span class="sd">        The skip_key_relist option can be set to True to stop the regeneration of key lists.</span>
+
+<span class="sd">        TIP: Because the remove process needs to prune empty sections afterwards,</span>
+<span class="sd">        it can be slow. When working with large dictionaries, and removing a large number</span>
+<span class="sd">        of elements from it, is often faster to build up a dictionary of things you want to</span>
+<span class="sd">        remove, and then do one remove at the end.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># delete the items in question from the dictionary - this can leave</span>
+        <span class="c1"># empty branches of the dictionary though:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rm_dict</span><span class="p">,</span> <span class="n">ImageDict</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dict_remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dict</span><span class="p">,</span> <span class="n">rm_dict</span><span class="o">.</span><span class="n">dict</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rm_dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dict_remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dict</span><span class="p">,</span> <span class="n">rm_dict</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot remove data type </span><span class="si">%s</span><span class="s1"> from a ImageDict&#39;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="n">rm_dict</span><span class="p">))</span>
+        <span class="c1"># now prune empty branches away:</span>
+        <span class="n">dicts_to_prune</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">while</span> <span class="n">dicts_to_prune</span><span class="p">:</span>
+            <span class="n">dicts_to_prune</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dict_prune</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dict</span><span class="p">)</span>
+        <span class="c1"># relist the keys:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_key_relist</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">list_keys_by_depth</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ImageDict.dict_remove"><a class="viewcode-back" href="../../ImageDict.html#ImageMetaTag.ImageDict.dict_remove">[docs]</a>    <span class="k">def</span> <span class="nf">dict_remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_dict</span><span class="p">,</span> <span class="n">rm_dict</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        removes a dictionary of dictionaries from another, larger, one.</span>
+<span class="sd">        This can leave empty branches, at multiple levels of the dict,</span>
+<span class="sd">        so needs cleaning up afterwards.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">rm_dict</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="c1"># descend further up into the dictionary tree structure:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dict_remove</span><span class="p">(</span><span class="n">in_dict</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">{}),</span> <span class="n">val</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># if the key is in the in_dict at this level, remove it:</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">in_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">in_dict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ImageDict.dict_prune"><a class="viewcode-back" href="../../ImageDict.html#ImageMetaTag.ImageDict.dict_prune">[docs]</a>    <span class="k">def</span> <span class="nf">dict_prune</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_dict</span><span class="p">,</span> <span class="n">dicts_pruned</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Prunes the ImageDict of empty, unterminated, branches</span>
+<span class="sd">        (which occur after parts have been removed).</span>
+<span class="sd">        Returns True if a dict was pruned, False if not.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">pop_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">in_dict</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="c1"># descend further up into the dictionary tree structure:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">dicts_pruned</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dict_prune</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">dicts_pruned</span><span class="o">=</span><span class="n">dicts_pruned</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">pop_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                    <span class="n">dicts_pruned</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">elif</span> <span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">pop_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="n">dicts_pruned</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="c1"># now do the prune:</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">pop_list</span><span class="p">:</span>
+            <span class="n">in_dict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">dicts_pruned</span></div>
+
+<div class="viewcode-block" id="ImageDict.dict_print"><a class="viewcode-back" href="../../ImageDict.html#ImageMetaTag.ImageDict.dict_print">[docs]</a>    <span class="k">def</span> <span class="nf">dict_print</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_dict</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">outstr</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="s1">&#39;recursively details a dictionary of dictionaries, with indentation, to a string&#39;</span>
+        <span class="n">n_spaces</span> <span class="o">=</span> <span class="mi">2</span> <span class="c1"># number of spaces to indent, per level</span>
+        <span class="c1"># loop over the defined list of keys, to present in them in the current sorted order.</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">in_dict</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="n">outstr</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s%s</span><span class="s1">:</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">outstr</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="o">*</span><span class="n">indent</span><span class="o">*</span><span class="n">n_spaces</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">outstr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dict_print</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="n">indent</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">outstr</span><span class="o">=</span><span class="n">outstr</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">outstr</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">outstr</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="o">*</span><span class="p">(</span><span class="n">indent</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">n_spaces</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">outstr</span></div>
+
+<div class="viewcode-block" id="ImageDict.dict_depth"><a class="viewcode-back" href="../../ImageDict.html#ImageMetaTag.ImageDict.dict_depth">[docs]</a>    <span class="k">def</span> <span class="nf">dict_depth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uniform_depth</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Uses dict_depths to get the depth of all branches of the plot_dict and,</span>
+<span class="sd">        if required, checks they all equal the max</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1">#  get the depth of all trees of the dict, and flatten the list:</span>
+        <span class="n">dict_depths</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">flatten_lists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dict_depths</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dict</span><span class="p">))]</span>
+        <span class="c1"># find the max:</span>
+        <span class="n">dict_depth</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">dict_depths</span><span class="p">)</span>
+        <span class="c1"># and check its uniformity if required:</span>
+        <span class="k">if</span> <span class="n">uniform_depth</span><span class="p">:</span>
+            <span class="c1"># check the dictionary depth is uniform_depth for all elements,</span>
+            <span class="c1"># and raise an error if not</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">dict_depths</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Plot Dictionary has non uniform depth and uniform_depth=True is specified&#39;</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dict_depth</span></div>
+
+<div class="viewcode-block" id="ImageDict.dict_depths"><a class="viewcode-back" href="../../ImageDict.html#ImageMetaTag.ImageDict.dict_depths">[docs]</a>    <span class="k">def</span> <span class="nf">dict_depths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_dict</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="s1">&#39;Recursively finds the depth of a ImageDict and returns a list of lists&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">in_dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">in_dict</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">depth</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dict_depths</span><span class="p">(</span><span class="n">next_dict</span><span class="p">,</span> <span class="n">depth</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">next_key</span><span class="p">,</span> <span class="n">next_dict</span><span class="p">)</span> <span class="ow">in</span> <span class="n">in_dict</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()]</span></div>
+
+<div class="viewcode-block" id="ImageDict.flatten_lists"><a class="viewcode-back" href="../../ImageDict.html#ImageMetaTag.ImageDict.flatten_lists">[docs]</a>    <span class="k">def</span> <span class="nf">flatten_lists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_list</span><span class="p">):</span>
+        <span class="s1">&#39;Recursively flattens a list of lists:&#39;</span>
+        <span class="k">for</span> <span class="n">list_element</span> <span class="ow">in</span> <span class="n">in_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">list_element</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span><span class="p">)</span> <span class="ow">and</span> \
+               <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">list_element</span><span class="p">,</span> <span class="n">basestring</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">sub_list</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">flatten_lists</span><span class="p">(</span><span class="n">list_element</span><span class="p">):</span>
+                    <span class="k">yield</span> <span class="n">sub_list</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">list_element</span></div>
+
+<div class="viewcode-block" id="ImageDict.list_keys_by_depth"><a class="viewcode-back" href="../../ImageDict.html#ImageMetaTag.ImageDict.list_keys_by_depth">[docs]</a>    <span class="k">def</span> <span class="nf">list_keys_by_depth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">devmode</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Lists the keys of the dictionary to create a list of keys, for each level of the</span>
+<span class="sd">        dictionary, up to its depth.</span>
+
+<span class="sd">        It is usually much faster to create an ImageDict by appending images to it,</span>
+<span class="sd">        with skip_key_relist=True but this leaves an ImageDict without a list of keys. In this</span>
+<span class="sd">        case, list_keys_by_depth needs to be called once at the end of the process to complete</span>
+<span class="sd">        the list of keys.</span>
+
+<span class="sd">        It works by converting the sets, from keys_by_depth to a list (where they can be ordered</span>
+<span class="sd">        and indexed).</span>
+<span class="sd">        This also produces the unique subdirectory locations of all images.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">keys</span><span class="p">,</span> <span class="n">subdirs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys_by_depth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dict</span><span class="p">)</span>
+
+        <span class="n">out_keys</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="n">keys</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="c1"># convert to a sorted list:</span>
+            <span class="n">out_keys</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">keys</span><span class="p">[</span><span class="n">level</span><span class="p">]))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">keys</span> <span class="o">=</span> <span class="n">out_keys</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subdirs</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">subdirs</span><span class="p">))</span></div>
+        <span class="c1">#return out_keys</span>
+
+<div class="viewcode-block" id="ImageDict.keys_by_depth"><a class="viewcode-back" href="../../ImageDict.html#ImageMetaTag.ImageDict.keys_by_depth">[docs]</a>    <span class="k">def</span> <span class="nf">keys_by_depth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_dict</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keys</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subdirs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns:</span>
+
+<span class="sd">        * a dictionary of sets, containing the keys at each level of\</span>
+<span class="sd">          the dictionary (keyed by the level number).</span>
+<span class="sd">        * a set of the subdirectories for the target images</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">keys</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">subdirs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">depth</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+            <span class="n">keys</span><span class="p">[</span><span class="n">depth</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">in_dict</span><span class="p">:</span>
+            <span class="n">keys</span><span class="p">[</span><span class="n">depth</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">in_dict</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">keys_by_depth</span><span class="p">(</span><span class="n">in_dict</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">depth</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">keys</span><span class="p">,</span> <span class="n">subdirs</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">in_dict</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="c1"># we have a list of images:</span>
+                <span class="k">for</span> <span class="n">img_file</span> <span class="ow">in</span> <span class="n">in_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+                    <span class="n">subdirs</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">img_file</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">in_dict</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="c1"># we have the location of a single image;</span>
+                <span class="n">subdirs</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">in_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">keys</span><span class="p">,</span> <span class="n">subdirs</span></div>
+
+<div class="viewcode-block" id="ImageDict.key_at_depth"><a class="viewcode-back" href="../../ImageDict.html#ImageMetaTag.ImageDict.key_at_depth">[docs]</a>    <span class="k">def</span> <span class="nf">key_at_depth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_dict</span><span class="p">,</span> <span class="n">depth</span><span class="p">):</span>
+        <span class="s1">&#39;returns the keys of a dictionary, at a given depth&#39;</span>
+        <span class="k">if</span> <span class="n">depth</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">subdict</span> <span class="ow">in</span> <span class="n">in_dict</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_at_depth</span><span class="p">(</span><span class="n">subdict</span><span class="p">,</span> <span class="n">depth</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">in_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ImageDict.return_key_inds"><a class="viewcode-back" href="../../ImageDict.html#ImageMetaTag.ImageDict.return_key_inds">[docs]</a>    <span class="k">def</span> <span class="nf">return_key_inds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_dict</span><span class="p">,</span> <span class="n">out_array</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">this_set_of_inds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">depth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">devmode</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Does the work for dict_index_array, by recursively adding indices to</span>
+<span class="sd">        the keys to a current list, and branching where required, and adding</span>
+<span class="sd">        compelted lists to the out_array</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">in_dict</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s1">&#39;IN: level: </span><span class="si">%s</span><span class="s1">, before changes: </span><span class="si">%s</span><span class="s1">, key &quot;</span><span class="si">%s</span><span class="s1">&quot; in </span><span class="si">%s</span><span class="s1">&#39;</span> \
+                        <span class="o">%</span> <span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">this_set_of_inds</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">level</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="c1"># make a note of which key it is:</span>
+
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">level</span><span class="p">]:</span>
+                    <span class="c1"># we&#39;ve moved up a level from the previous one, make a</span>
+                    <span class="c1"># note of the new value at the new level</span>
+                    <span class="n">this_set_of_inds</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">level</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                    <span class="c1"># increment the level, in case the next dict is at the</span>
+                    <span class="c1"># higher level in the tree structure:</span>
+                    <span class="k">if</span> <span class="n">level</span><span class="o">+</span><span class="mi">1</span> <span class="o">&lt;</span> <span class="n">depth</span><span class="p">:</span>
+                        <span class="n">level</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                            <span class="nb">print</span> <span class="s1">&#39;new setting: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">this_set_of_inds</span>
+                            <span class="nb">print</span> <span class="s1">&#39;out_array: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">out_array</span>
+                        <span class="c1"># and recurse, to the next level if needed:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">return_key_inds</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">out_array</span><span class="o">=</span><span class="n">out_array</span><span class="p">,</span>
+                                             <span class="n">this_set_of_inds</span><span class="o">=</span><span class="n">this_set_of_inds</span><span class="p">,</span>
+                                             <span class="n">depth</span><span class="o">=</span><span class="n">depth</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">,</span> <span class="n">devmode</span><span class="o">=</span><span class="n">devmode</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">out_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">this_set_of_inds</span><span class="p">))</span>
+
+                <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">level</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="c1"># the dictionary we&#39;ve now got isn&#39;t at a higher level than before, which means</span>
+                    <span class="c1"># we&#39;re traversing the level from the previous call.</span>
+                    <span class="c1"># record the new index on a copy, and then recursively carry on:</span>
+                    <span class="n">branched_level</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+                    <span class="n">branched_set_of_inds</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">this_set_of_inds</span><span class="p">)</span>
+                    <span class="n">branched_set_of_inds</span><span class="p">[</span><span class="n">branched_level</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">branched_level</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                        <span class="nb">print</span> <span class="s1">&#39;new setting: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">this_set_of_inds</span>
+                        <span class="nb">print</span> <span class="s1">&#39;out_array: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">out_array</span>
+                    <span class="c1"># and recurse:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">return_key_inds</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">out_array</span><span class="o">=</span><span class="n">out_array</span><span class="p">,</span>
+                                         <span class="n">this_set_of_inds</span><span class="o">=</span><span class="n">branched_set_of_inds</span><span class="p">,</span>
+                                         <span class="n">depth</span><span class="o">=</span><span class="n">depth</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">branched_level</span><span class="p">,</span>
+                                         <span class="n">devmode</span><span class="o">=</span><span class="n">devmode</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># we really shouldn&#39;t be here:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Error recursing through dict: key &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">key</span>
+                    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39; not found in this level, or one below&#39;</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="c1">#elif isinstance(value, dict) and level == depth:</span>
+            <span class="c1">#</span>
+            <span class="c1">#    pdb.set_trace()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># we&#39;re at the top level of the tree, as far as we can or want to go,</span>
+                <span class="c1"># so record the index:</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">level</span><span class="p">]:</span>
+                    <span class="c1"># we&#39;ve moved up a level from the previous one,</span>
+                    <span class="c1"># make a note of the new value at the new level</span>
+                    <span class="n">this_set_of_inds</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">level</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="c1">#elif level == 0:</span>
+                <span class="c1">#    # wer&#39;re traversing the top level of the dictionary, so</span>
+                <span class="c1">#    # level has been set to zero:</span>
+                <span class="c1">#    this_set_of_inds[-1] = self.keys[depth-1].index(key)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># again, we shouldn&#39;t ever get here:</span>
+                    <span class="k">if</span> <span class="n">devmode</span><span class="p">:</span>
+                        <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span> <span class="c1">#@@@</span>
+                        <span class="nb">print</span> <span class="s1">&#39;stop here&#39;</span> <span class="c1">#@@@</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Error recursing through the plot dictionary: &#39;</span>
+                        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;key not found in top level!&#39;</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+                <span class="c1"># we&#39;re done, so append this to the out_array, and DON&#39;T recurse:</span>
+                <span class="n">out_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">this_set_of_inds</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="ImageDict.dict_index_array"><a class="viewcode-back" href="../../ImageDict.html#ImageMetaTag.ImageDict.dict_index_array">[docs]</a>    <span class="k">def</span> <span class="nf">dict_index_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">devmode</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">maxdepth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Using the list of dictionary keys (at each level of a uniform_depth dictionary</span>
+<span class="sd">        of dictionaries), this produces a list of the indices that can be used to reference</span>
+<span class="sd">        the keys to get the result for each element.</span>
+
+<span class="sd">        Options:</span>
+<span class="sd">         * maxdepth - the maximum desired depth to go to (ie. the number of levels)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># want to build up a list of lists, each giving the indices of the keys that get to a plot:</span>
+        <span class="n">out_array</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">maxdepth</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">depth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dict_depth</span><span class="p">(</span><span class="n">uniform_depth</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">this_set_of_inds</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">depth</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">depth</span><span class="o">=</span><span class="n">maxdepth</span>
+            <span class="n">this_set_of_inds</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">depth</span>
+        <span class="n">level</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_key_inds</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dict</span><span class="p">,</span> <span class="n">out_array</span><span class="o">=</span><span class="n">out_array</span><span class="p">,</span>
+                             <span class="n">this_set_of_inds</span><span class="o">=</span><span class="n">this_set_of_inds</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="n">depth</span><span class="p">,</span>
+                             <span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">,</span> <span class="n">devmode</span><span class="o">=</span><span class="n">devmode</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="c1"># the recursive method comes out sorted as it iterates about the dictionary,</span>
+        <span class="c1"># not as to how the keys are sorted. Easy to do:</span>
+        <span class="n">out_array</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">,</span> <span class="n">out_array</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ImageDict.sort_keys"><a class="viewcode-back" href="../../ImageDict.html#ImageMetaTag.ImageDict.sort_keys">[docs]</a>    <span class="k">def</span> <span class="nf">sort_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sort_methods</span><span class="p">,</span> <span class="n">devmode</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Sorts the keys of a plot dictionary, according to a particular sort method</span>
+<span class="sd">        (or a list of sort methods that matches the number of keys).</span>
+
+<span class="sd">        Valid sort methods so far are mostly focused on meteorological terms, and include:</span>
+<span class="sd">         * &#39;sort&#39; - just an ordinary sort</span>
+<span class="sd">         * &#39;level&#39; or &#39;numeric&#39; - starting with the surface and working upwards, then \</span>
+<span class="sd">                                  &#39;special&#39; levels like cross sections etc.</span>
+<span class="sd">         * &#39;T+&#39; - in ascending order of the number after a T+ (or similar) string.</span>
+<span class="sd">         * an input list - Specific elements in the input list are sorted as per their order\</span>
+<span class="sd">                           in the list, while the rest are just sorted.</span>
+
+<span class="sd">        The methods activated by a string can be reversed as &#39;reverse_sort&#39; or &#39;reverse_sort&#39;,</span>
+<span class="sd">        or &#39;reverse numeric&#39; or &#39;reverse_numeric&#39;.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sort_methods</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;inconsistent lengths of the sort_methods and the self.keys to sort&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i_key</span><span class="p">,</span> <span class="n">method</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sort_methods</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="c1"># the method is a specified way of sorting:</span>
+                <span class="k">if</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;sort&#39;</span><span class="p">,</span> <span class="s1">&#39;alphabetical&#39;</span><span class="p">]:</span>
+                    <span class="c1"># - just alphanumeric style sort.</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">i_key</span><span class="p">]</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+                <span class="k">elif</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;reverse sort&#39;</span><span class="p">,</span> <span class="s1">&#39;reverse_sort&#39;</span><span class="p">]:</span>
+                    <span class="c1"># -a reversed sort</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">i_key</span><span class="p">]</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+                <span class="k">elif</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;T+&#39;</span><span class="p">,</span> <span class="s1">&#39;reverse T+&#39;</span><span class="p">,</span> <span class="s1">&#39;reversed_T+&#39;</span><span class="p">]:</span>
+                    <span class="c1">#&#39;T+&#39; - in ascending order of the T+??? number:</span>
+                    <span class="c1">#</span>
+                    <span class="c1"># get a list of tuples, containing the string, and the value</span>
+                    <span class="c1"># of the T+ from a pattern match regex:</span>
+                    
+                    <span class="c1"># sort out the numerical (t+) keys from those with None in them:</span>
+                    <span class="n">num_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">i_key</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;None&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">x</span><span class="p">]</span>
+                    <span class="n">none_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">i_key</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;None&#39;</span> <span class="ow">in</span> <span class="n">x</span><span class="p">]</span>
+                    
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">labels_and_values</span> <span class="o">=</span> <span class="p">[(</span><span class="n">x</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s1">&#39;[tT]([-+0-9.]{2,})&#39;</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">groups</span><span class="p">())</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">num_keys</span><span class="p">]</span>
+                        <span class="c1"># convert to float, so values can be sorted numerically:</span>
+                        <span class="n">values_and_labels</span> <span class="o">=</span> <span class="p">[(</span><span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">labels_and_values</span><span class="p">]</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Keys for plot dictionary level &quot;</span><span class="si">%s</span><span class="s1">&quot; &#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">i_key</span><span class="p">]</span>
+                        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;do not match the &quot;T+&quot; (or None) pattern&#39;</span>
+                        <span class="k">if</span> <span class="n">devmode</span><span class="p">:</span>
+                            <span class="nb">print</span> <span class="n">msg</span>
+                            <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span>
+                            <span class="nb">print</span> <span class="s1">&#39;stop&#39;</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                    <span class="c1"># now either sort, or reverse sort, using the value as the key:</span>
+                    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;T+&#39;</span><span class="p">:</span>
+                        <span class="n">values_and_labels</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+                        <span class="n">none_keys</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+                    <span class="k">elif</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;reverse T+&#39;</span><span class="p">,</span> <span class="s1">&#39;reversed_T+&#39;</span><span class="p">]:</span>
+                        <span class="n">values_and_labels</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="n">none_keys</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="c1"># and pull out the labels, in the right order,</span>
+                    <span class="c1"># with the none_keys go at the end:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">i_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">values_and_labels</span><span class="p">]</span> <span class="o">+</span> <span class="n">none_keys</span>
+
+                <span class="k">elif</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;level&#39;</span><span class="p">,</span> <span class="s1">&#39;numeric&#39;</span><span class="p">,</span> <span class="s1">&#39;reverse_level&#39;</span><span class="p">,</span> <span class="s1">&#39;reverse_numeric&#39;</span><span class="p">]:</span>
+                    <span class="c1">#&#39;level&#39; - starting with the surface and working upwards, then &#39;special&#39;</span>
+                    <span class="c1"># levels like cross sections etc.</span>
+
+                    <span class="c1"># add to this as keys from self.keys[i_key] are added to it:</span>
+                    <span class="n">tmp_keys</span> <span class="o">=</span> <span class="p">[]</span>
+
+                    <span class="c1"># the surface levels go first:</span>
+                    <span class="n">surface_levels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Surface&#39;</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">surface_levels</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">i_key</span><span class="p">]:</span>
+                            <span class="n">tmp_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">i_key</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">i_key</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">item</span><span class="p">)))</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">i_key</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="k">break</span>
+
+                    <span class="c1"># now anything with a &#39;m&#39; or &#39;km&#39; or &#39;nm&#39; (for wavelenghts!) needs</span>
+                    <span class="c1"># to be sorted, starting with the lowest:</span>
+                    <span class="c1"># TODO: add more things to this, microns, with the micro as /mu????</span>
+                    <span class="n">metre_patterns_and_scalings</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">r&#39;([0-9.eE+-]{1,})[\s]{,}m$&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+                                                   <span class="p">(</span><span class="s1">r&#39;([0-9.eE+-]{1,})[\s]{,}mm$&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="o">-</span><span class="mi">3</span><span class="p">),</span>
+                                                   <span class="p">(</span><span class="s1">r&#39;([0-9.eE+-]{1,})[\s]{,}microns$&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="o">-</span><span class="mi">6</span><span class="p">),</span>
+                                                   <span class="p">(</span><span class="s1">r&#39;([0-9.eE+-]{1,})[\s]{,}\mum$&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="o">-</span><span class="mi">6</span><span class="p">),</span>
+                                                   <span class="p">(</span><span class="s1">r&#39;([0-9.eE+-]{1,})[\s]{,}nm$&#39;</span><span class="p">,</span> <span class="mf">1.0e-9</span><span class="p">),</span>
+                                                   <span class="p">(</span><span class="s1">r&#39;([0-9.eE+-]{1,})[\s]{,}km$&#39;</span><span class="p">,</span> <span class="mf">1000.0</span><span class="p">)]</span>
+
+                    <span class="c1"># now anything with a &#39;hPa&#39; or &#39;mb&#39; needs to be sorted, starting</span>
+                    <span class="c1"># with the lowest in height (hieghest value):</span>
+                    <span class="n">pressure_patterns_and_scalings</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">r&#39;([0-9.eE+-]{1,})[\s]{,}Pa$&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+                                                      <span class="p">(</span><span class="s1">r&#39;([0-9.eE+-]{1,})[\s]{,}mb$&#39;</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">),</span>
+                                                      <span class="p">(</span><span class="s1">r&#39;([0-9.eE+-]{1,})[\s]{,}mbar$&#39;</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">),</span>
+                                                      <span class="p">(</span><span class="s1">r&#39;([0-9.eE+-]{1,})[\s]{,}hPa$&#39;</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">)]</span>
+
+                    <span class="n">model_lev_patterns_and_scalings</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">r&#39;Model level ([0-9]{1,})&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+                                                       <span class="p">(</span><span class="s1">r&#39;model level ([0-9]{1,})&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+                                                       <span class="p">(</span><span class="s1">r&#39;Model lev ([0-9]{1,})&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+                                                       <span class="p">(</span><span class="s1">r&#39;model level ([0-9]{1,})&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+                                                       <span class="p">(</span><span class="s1">r&#39;ML([0-9]{1,})&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+                                                       <span class="p">(</span><span class="s1">r&#39;ml([0-9]{1,})&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)]</span>
+
+                    <span class="c1"># now anything where the level defines locations, with latt long coordinates:</span>
+                    <span class="n">lattlong_patterns_and_scalings</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;([0-9.]{1,})[E][,\s]{,}[0-9.]{1,}[NS]&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+                                                      <span class="p">(</span><span class="s1">&#39;([0-9.]{1,})[W][,\s]{,}[0-9.]{1,}[NS]&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">)]</span>
+
+                    <span class="c1"># now anything else with a numeric value:</span>
+                    <span class="n">numeric_patterns_and_scalings</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">r&#39;([0-9.eE+-]{1,})&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)]</span>
+
+                    <span class="c1"># now loop through the different patterns/scalings, and their orders:</span>
+                    <span class="k">if</span> <span class="n">method</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;reverse&#39;</span><span class="p">):</span>
+                        <span class="n">pattern_order_loop</span> <span class="o">=</span> <span class="p">[(</span><span class="n">metre_patterns_and_scalings</span><span class="p">,</span> <span class="s1">&#39;reversed&#39;</span><span class="p">),</span>
+                                              <span class="p">(</span><span class="n">pressure_patterns_and_scalings</span><span class="p">,</span> <span class="s1">&#39;sort&#39;</span><span class="p">),</span>
+                                              <span class="p">(</span><span class="n">model_lev_patterns_and_scalings</span><span class="p">,</span> <span class="s1">&#39;reversed&#39;</span><span class="p">),</span>
+                                              <span class="p">(</span><span class="n">lattlong_patterns_and_scalings</span><span class="p">,</span> <span class="s1">&#39;reversed&#39;</span><span class="p">),</span>
+                                              <span class="p">(</span><span class="n">numeric_patterns_and_scalings</span><span class="p">,</span> <span class="s1">&#39;reversed&#39;</span><span class="p">)]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">pattern_order_loop</span> <span class="o">=</span> <span class="p">[(</span><span class="n">metre_patterns_and_scalings</span><span class="p">,</span> <span class="s1">&#39;sort&#39;</span><span class="p">),</span>
+                                              <span class="p">(</span><span class="n">pressure_patterns_and_scalings</span><span class="p">,</span> <span class="s1">&#39;reversed&#39;</span><span class="p">),</span>
+                                              <span class="p">(</span><span class="n">model_lev_patterns_and_scalings</span><span class="p">,</span> <span class="s1">&#39;sort&#39;</span><span class="p">),</span>
+                                              <span class="p">(</span><span class="n">lattlong_patterns_and_scalings</span><span class="p">,</span> <span class="s1">&#39;sort&#39;</span><span class="p">),</span>
+                                              <span class="p">(</span><span class="n">numeric_patterns_and_scalings</span><span class="p">,</span> <span class="s1">&#39;sort&#39;</span><span class="p">)]</span>
+
+                    <span class="k">for</span> <span class="n">patterns_scalings</span><span class="p">,</span> <span class="n">sort_method</span> <span class="ow">in</span> <span class="n">pattern_order_loop</span><span class="p">:</span>
+                        <span class="n">labels_and_values</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">i_key</span><span class="p">]:</span>
+                            <span class="k">for</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">scaling</span> <span class="ow">in</span> <span class="n">patterns_scalings</span><span class="p">:</span>
+                                <span class="n">item_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="n">item_match</span><span class="p">:</span>
+                                    <span class="c1"># add the label and value to the list:</span>
+                                    <span class="k">if</span> <span class="n">devmode</span><span class="p">:</span>
+                                        <span class="k">try</span><span class="p">:</span>
+                                            <span class="n">_</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">item_match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="n">scaling</span>
+                                        <span class="k">except</span><span class="p">:</span>
+                                            <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span>
+                                            <span class="nb">print</span> <span class="s1">&#39;unable to convert item &quot;</span><span class="si">%s</span><span class="s1">&quot; with pattern &quot;</span><span class="si">%s</span><span class="s1">&quot; to float&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">pattern</span><span class="p">)</span>
+                                    <span class="n">labels_and_values</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">item</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">item_match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">))</span>
+                                    <span class="k">break</span>
+                        <span class="c1"># now sort the labels_and_values, according to the value:</span>
+                        <span class="k">if</span> <span class="n">sort_method</span> <span class="o">==</span> <span class="s1">&#39;sort&#39;</span><span class="p">:</span>
+                            <span class="n">labels_and_values</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="k">elif</span> <span class="n">sort_method</span> <span class="o">==</span> <span class="s1">&#39;reversed&#39;</span><span class="p">:</span>
+                            <span class="n">labels_and_values</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unrecognised sort_method &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">sort_method</span><span class="p">)</span>
+                        <span class="c1"># add the labels to the tmp_keys and remove them from the self.keys[i_key]:</span>
+                        <span class="k">for</span> <span class="n">item</span><span class="p">,</span> <span class="n">scaling</span> <span class="ow">in</span> <span class="n">labels_and_values</span><span class="p">:</span>
+                            <span class="n">tmp_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">i_key</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">i_key</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
+
+
+                    <span class="c1"># now sort what&#39;s left:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">i_key</span><span class="p">]</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+                    <span class="c1"># and put the tmp_keys at the start of it:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">i_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp_keys</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">i_key</span><span class="p">]</span>
+
+
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="c1"># the input list should be a list of strings, which give the priority contents</span>
+                <span class="c1"># to be put at the start of the list. The remaining items are sorted normally:</span>
+                <span class="c1"># - specific model names get to the top, the rest are alphaebetical</span>
+
+                <span class="c1"># add to tmp_keys as we go, by popping elements from the main list:</span>
+                <span class="n">tmp_keys</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="c1"># this sets the order of the model names (names not in this list are alphabetical):</span>
+                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">method</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">i_key</span><span class="p">]:</span>
+                        <span class="n">tmp_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">i_key</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">i_key</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">item</span><span class="p">)))</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">i_key</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">break</span>
+                <span class="c1"># now sort the remaining keys alphabetically:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">i_key</span><span class="p">]</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+                <span class="c1"># and put the tmp_keys back in at the start:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">i_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp_keys</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="n">i_key</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="ImageDict.copy_except_dict_and_keys"><a class="viewcode-back" href="../../ImageDict.html#ImageMetaTag.ImageDict.copy_except_dict_and_keys">[docs]</a>    <span class="k">def</span> <span class="nf">copy_except_dict_and_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s1">&#39;returns a copy of an ImageDict except it will have null values for the dict and keys&#39;</span>
+        <span class="n">out_imgdict</span> <span class="o">=</span> <span class="n">ImageDict</span><span class="p">({</span><span class="s1">&#39;null&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">})</span>
+        <span class="k">for</span> <span class="n">mem_name</span><span class="p">,</span> <span class="n">mem_value</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmembers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">mem_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;__&#39;</span><span class="p">):</span>
+                <span class="k">pass</span>
+            <span class="k">elif</span> <span class="n">mem_name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;dict&#39;</span><span class="p">,</span> <span class="s1">&#39;keys&#39;</span><span class="p">]:</span>
+                <span class="k">pass</span>
+            <span class="k">elif</span> <span class="n">inspect</span><span class="o">.</span><span class="n">ismethod</span><span class="p">(</span><span class="nb">eval</span><span class="p">(</span><span class="s1">&#39;self.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">mem_name</span><span class="p">)):</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">out_imgdict</span><span class="p">,</span> <span class="n">mem_name</span><span class="p">,</span> <span class="n">mem_value</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">out_imgdict</span></div>
+
+<div class="viewcode-block" id="ImageDict.return_from_list"><a class="viewcode-back" href="../../ImageDict.html#ImageMetaTag.ImageDict.return_from_list">[docs]</a>    <span class="k">def</span> <span class="nf">return_from_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vals_at_depth</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns the end values of ImageDict, when given a list of values for the keys</span>
+<span class="sd">        at different depths.</span>
+<span class="sd">        Returns None if the set of values is not contained in the ImageDict.</span>
+
+<span class="sd">        Assumes that the ImageDict has its keys up to date, so last time it was</span>
+<span class="sd">        appended/removed it was with skip_key_relist=False   or  list_keys_by_depth()</span>
+<span class="sd">        method has been called since.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">vals_at_depth</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Input vals_at_depth should be a list&#39;</span><span class="p">)</span>
+        <span class="n">dict_depth</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vals_at_depth</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">dict_depth</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Length of input list, vals_at_depth, greater than the length of the keys list&#39;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">vals_at_depth</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sub_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dict</span><span class="p">[</span><span class="n">vals_at_depth</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+
+        <span class="k">for</span> <span class="n">depth</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">vals_at_depth</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">vals_at_depth</span><span class="p">[</span><span class="n">depth</span><span class="p">]</span> <span class="ow">in</span> <span class="n">sub_dict</span><span class="p">:</span>
+                <span class="n">sub_dict</span> <span class="o">=</span> <span class="n">sub_dict</span><span class="p">[</span><span class="n">vals_at_depth</span><span class="p">[</span><span class="n">depth</span><span class="p">]]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">sub_dict</span></div></div>
+
+
+<div class="viewcode-block" id="readmeta_from_image"><a class="viewcode-back" href="../../ImageDict.html#ImageMetaTag.readmeta_from_image">[docs]</a><span class="k">def</span> <span class="nf">readmeta_from_image</span><span class="p">(</span><span class="n">img_file</span><span class="p">,</span> <span class="n">img_format</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Reads the metadata added by the ImageMetaTag savefig, from an image file,</span>
+<span class="sd">    and returns a dictionary of *tagname: value* pairs&#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="n">img_format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># get the img_format from the end of the filename</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">img_format</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">img_file</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">img_format</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">img_format</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Cannot determine file img_format to read from filename &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">img_file</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="c1"># get rid of the . to be consistent throughout</span>
+        <span class="n">img_format</span> <span class="o">=</span> <span class="n">img_format</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">img_format</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">):</span>
+            <span class="n">img_format</span> <span class="o">=</span> <span class="n">img_format</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="c1"># how we read in the metadata depends on the format:</span>
+    <span class="k">if</span> <span class="n">img_format</span> <span class="o">==</span> <span class="s1">&#39;png&#39;</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">img_obj</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">img_file</span><span class="p">)</span>
+            <span class="n">img_info</span> <span class="o">=</span> <span class="n">img_obj</span><span class="o">.</span><span class="n">info</span>
+            <span class="n">read_ok</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="c1"># if anthing goes wrong, then read_ok is False and img_info None</span>
+            <span class="n">read_ok</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">img_info</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Currently, ImageMetaTag does not support &quot;</span><span class="si">%s</span><span class="s1">&quot; format images&#39;</span> <span class="o">%</span> <span class="n">img_format</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">read_ok</span><span class="p">,</span> <span class="n">img_info</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="dict_heirachy_from_list"><a class="viewcode-back" href="../../ImageDict.html#ImageMetaTag.dict_heirachy_from_list">[docs]</a><span class="k">def</span> <span class="nf">dict_heirachy_from_list</span><span class="p">(</span><span class="n">in_dict</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="n">heirachy</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Converts a flat dictionary of *tagname: value* pairs, into an ordered dictionary</span>
+<span class="sd">    of dictionaries according to the input heirachy (which is a list of tagnames).</span>
+
+<span class="sd">    The output dictionary will only have one element per level, but can be used to create or</span>
+<span class="sd">    append into an :class:`ImageMetaTag.ImageDict`.</span>
+<span class="sd">    The final level will be the &#39;payload&#39; input, which is the object the dictionary, with all</span>
+<span class="sd">    it&#39;s levels, is describing.</span>
+<span class="sd">    The payload would usually be the full/relative path of the image file, or list of image files.</span>
+
+<span class="sd">    Returns False if the input dict does not contain the required keys.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="n">heirachy</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">level</span> <span class="ow">in</span> <span class="n">in_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">out_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">in_dict</span><span class="p">[</span><span class="n">heirachy</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]:</span> <span class="n">payload</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="n">heirachy</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="n">out_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">in_dict</span><span class="p">[</span><span class="n">level</span><span class="p">]:</span> <span class="n">out_dict</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">out_dict</span></div>
+
+
+<div class="viewcode-block" id="dict_split"><a class="viewcode-back" href="../../ImageDict.html#ImageMetaTag.dict_split">[docs]</a><span class="k">def</span> <span class="nf">dict_split</span><span class="p">(</span><span class="n">in_dict</span><span class="p">,</span> <span class="n">n_split</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">size_split</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">extra_opts</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Generator that breaks up a flat dictionary and yields a set of sub-dictionaries in</span>
+<span class="sd">    n_split chunks, or size_split in size. It is split on it&#39;s first level, not recursively.</span>
+
+<span class="sd">    It is very useful for splitting large dictionaries of image metadata</span>
+<span class="sd">    to parallelise processing these into ImageDicts.</span>
+
+<span class="sd">    Inputs:</span>
+<span class="sd">    in_dict - the dictionary to split</span>
+
+<span class="sd">    Options:</span>
+
+<span class="sd">    * n_split - the number of dictionaries to break the in_dict up into.</span>
+<span class="sd">    * size_split - the size of the required output dictionaries.</span>
+<span class="sd">    * extra_opts - If supplied as an iterable, this routine will yield a tuple containing the \</span>
+<span class="sd">                   output sub-dictionary and then each of the elements of extra_opts.</span>
+
+<span class="sd">    .. note:: One, and only one, of n_slpit, or size_split must be specified, as an integer.</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">in_dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Input in_dict is not a dictionary&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">in_dict</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># an empty dict needs to output an empty dict, possiblty with the</span>
+        <span class="c1"># extra options:</span>
+        <span class="n">out_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">extra_opts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">out_dict</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># yield a tuple containing the output dictionary, plus all the extra options,</span>
+            <span class="c1"># as elements in a tuple:</span>
+            <span class="n">out_tuple</span> <span class="o">=</span> <span class="p">(</span><span class="n">out_dict</span><span class="p">,</span> <span class="p">)</span>
+            <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">extra_opts</span><span class="p">:</span>
+                <span class="n">out_tuple</span> <span class="o">=</span> <span class="n">out_tuple</span> <span class="o">+</span> <span class="p">(</span><span class="n">opt</span><span class="p">,)</span>
+            <span class="k">yield</span> <span class="n">out_tuple</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">size_split</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n_split</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">n_split</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot split a dictionary into less than 1 dictionary&#39;</span><span class="p">)</span>
+            <span class="c1"># work out the size of a split - the last dict can be smaller than the others:</span>
+            <span class="n">size_split</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ceil</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">in_dict</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">n_split</span><span class="p">)))</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">size_split</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">n_split</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># do nothing, use the input size_split</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;One, and only one, of n_slpit, or size_split must be specified, as an integer.&#39;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="n">iterdict</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">in_dict</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">in_dict</span><span class="p">),</span> <span class="n">size_split</span><span class="p">):</span>
+
+            <span class="n">out_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span><span class="n">in_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">islice</span><span class="p">(</span><span class="n">iterdict</span><span class="p">,</span> <span class="n">size_split</span><span class="p">)}</span>
+
+            <span class="k">if</span> <span class="n">extra_opts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">out_dict</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># yield a tuple containing the output dictionary, plus all the extra options,</span>
+                <span class="c1"># as elements in a tuple:</span>
+                <span class="n">out_tuple</span> <span class="o">=</span> <span class="p">(</span><span class="n">out_dict</span><span class="p">,</span> <span class="p">)</span>
+                <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">extra_opts</span><span class="p">:</span>
+                    <span class="n">out_tuple</span> <span class="o">=</span> <span class="n">out_tuple</span> <span class="o">+</span> <span class="p">(</span><span class="n">opt</span><span class="p">,)</span>
+
+                <span class="k">yield</span> <span class="n">out_tuple</span></div>
+
+
+
+<div class="viewcode-block" id="simple_dict_filter"><a class="viewcode-back" href="../../ImageDict.html#ImageMetaTag.simple_dict_filter">[docs]</a><span class="k">def</span> <span class="nf">simple_dict_filter</span><span class="p">(</span><span class="n">simple_dict</span><span class="p">,</span> <span class="n">tests</span><span class="p">,</span> <span class="n">raise_key_mismatch</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Tests the contents of a simple, un-heirachical dict (properties an image) against</span>
+<span class="sd">    a set of tests.</span>
+
+<span class="sd">    An example set of tests:</span>
+<span class="sd">    tests = {&#39;number of rolls&#39;: [&#39;6 simulated rolls&#39;, &#39;216 simulated rolls&#39;, &#39;1296 simulated rolls&#39;],\</span>
+<span class="sd">             &#39;plot color&#39;: None,\</span>
+<span class="sd">             &#39;image compression&#39;: None,\</span>
+<span class="sd">             &#39;plot type&#39;: [&#39;Histogram&#39;, (&#39;All&#39;, [&#39;Histogram&#39;, &#39;Line plots&#39;])],\</span>
+<span class="sd">             &#39;image trim&#39;: None}</span>
+<span class="sd">    Here, the &#39;number of rolls&#39; is restricted to a simple list.</span>
+
+<span class="sd">    The plot type is filtered according to &#39;Histogram&#39;, and there is also a second element that</span>
+<span class="sd">    contains both &#39;Histogram and &#39;Line plots&#39; which are to be presented together.</span>
+
+<span class="sd">    The other image characteristics are not filtered.</span>
+
+<span class="sd">    Options:</span>
+
+<span class="sd">    * raise_key_mismatch - if True, then attempting to test a dictionary with a missing key \</span>
+<span class="sd">                           will raise. Default is to return all False</span>
+
+<span class="sd">    Returns three logicals:</span>
+
+<span class="sd">    * The first indicates whether the input dict passes the simple tests</span>
+<span class="sd">    * The second indicates whether the input dict is part of the grouped elements \</span>
+<span class="sd">      of the test (the [&#39;Histogram&#39;, &#39;Line plots&#39;] list).#</span>
+<span class="sd">    * The third indicates whether the input dict is the first element of a list grouped \</span>
+<span class="sd">      elements (is &#39;Histogram&#39; in this [&#39;Histogram&#39;, &#39;Line plots&#39;] list).</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># this is set to False if the input dict fails the simple criteria:</span>
+    <span class="n">passes_tests</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="c1"># this stores all of the tests:</span>
+    <span class="n">passes</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">tests</span><span class="p">)</span>
+    <span class="c1"># this stores if it passes and if the test is complex, this image is first:</span>
+    <span class="n">passes_and_first</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">tests</span><span class="p">)</span>
+
+    <span class="c1"># the input tests can also contain a tuple that define how multiple</span>
+    <span class="c1"># images can be grouped together:</span>
+    <span class="n">has_complex_test</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">tests</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i_test</span><span class="p">,</span> <span class="n">test</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tests</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="n">tests</span><span class="p">[</span><span class="n">test</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># None here means no filter is applied:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">test</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">simple_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Specified filter test &quot;</span><span class="si">{}</span><span class="s1">&quot; not a property of the input dict &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span>
+                    <span class="k">if</span> <span class="n">raise_key_mismatch</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">simple_dict</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="nb">print</span> <span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">simple_dict</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tests</span><span class="p">[</span><span class="n">test</span><span class="p">],</span> <span class="nb">list</span><span class="p">):</span>
+                    <span class="c1"># simple test, does it meet the normal criteria:</span>
+                    <span class="c1"># now check to see if the test includes a tuple, marking out a complex</span>
+                    <span class="c1"># multi-element list:</span>
+                    <span class="n">test_is_tuple</span> <span class="o">=</span> <span class="p">[</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">tests</span><span class="p">[</span><span class="n">test</span><span class="p">]]</span>
+                    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">test_is_tuple</span><span class="p">):</span>
+                        <span class="n">has_complex_test</span> <span class="o">=</span> <span class="kc">True</span>
+
+                        <span class="c1"># now loop through all of the tuples within the test:</span>
+                        <span class="n">any_tuple_passes</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="c1"># this marks whether it is the FIRST element in a tuple (and so the one that</span>
+                        <span class="c1"># would typically be used for processing a set of images)</span>
+                        <span class="n">first_tuple_passes</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="n">tuple_tests</span> <span class="o">=</span> <span class="n">compress</span><span class="p">(</span><span class="n">tests</span><span class="p">[</span><span class="n">test</span><span class="p">],</span> <span class="n">test_is_tuple</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">tuple_test</span> <span class="ow">in</span> <span class="n">tuple_tests</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">simple_dict</span><span class="p">[</span><span class="n">test</span><span class="p">]</span> <span class="ow">in</span> <span class="n">tuple_test</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                                <span class="c1"># failed this test, so it counts as a failure:</span>
+                                <span class="n">any_tuple_passes</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="c1"># and is this the first element in the tuple:</span>
+                            <span class="k">if</span> <span class="n">simple_dict</span><span class="p">[</span><span class="n">test</span><span class="p">]</span> <span class="o">==</span> <span class="n">tuple_test</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span>
+                                <span class="n">first_tuple_passes</span> <span class="o">=</span> <span class="kc">True</span>
+
+                        <span class="c1"># if none of the tuple tests pass, then make a note of that:</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">any_tuple_passes</span><span class="p">:</span>
+                            <span class="n">passes</span><span class="p">[</span><span class="n">i_test</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="n">passes_and_first</span><span class="p">[</span><span class="n">i_test</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">elif</span> <span class="ow">not</span> <span class="n">first_tuple_passes</span><span class="p">:</span>
+                            <span class="c1"># and make a note if this wasn&#39;t first:</span>
+                            <span class="n">passes_and_first</span><span class="p">[</span><span class="n">i_test</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+
+                        <span class="c1"># also apply a test in the simple case:</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">simple_dict</span><span class="p">[</span><span class="n">test</span><span class="p">]</span> <span class="ow">in</span> <span class="n">tests</span><span class="p">[</span><span class="n">test</span><span class="p">]:</span>
+                            <span class="n">passes_tests</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># no complex test for this test, just the simlpe one:</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">simple_dict</span><span class="p">[</span><span class="n">test</span><span class="p">]</span> <span class="ow">in</span> <span class="n">tests</span><span class="p">[</span><span class="n">test</span><span class="p">]:</span>
+                            <span class="n">passes_tests</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="n">passes</span><span class="p">[</span><span class="n">i_test</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="n">passes_and_first</span><span class="p">[</span><span class="n">i_test</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Test values should be specified as lists&#39;</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">has_complex_test</span><span class="p">:</span>
+        <span class="c1"># for the complex test, all tests need to be passed as well as the complex case:</span>
+        <span class="n">passes_complex_test</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span><span class="n">passes</span><span class="p">)</span>
+        <span class="n">passes_and_first</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span><span class="n">passes_and_first</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">passes_complex_test</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">passes_and_first</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">passes_tests</span><span class="p">,</span> <span class="n">passes_complex_test</span><span class="p">,</span> <span class="n">passes_and_first</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="check_for_required_keys"><a class="viewcode-back" href="../../ImageDict.html#ImageMetaTag.check_for_required_keys">[docs]</a><span class="k">def</span> <span class="nf">check_for_required_keys</span><span class="p">(</span><span class="n">img_info</span><span class="p">,</span> <span class="n">req_keys</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Checks an img_info dictionary has a set of required keys, specifed as a list of strings</span>
+
+<span class="sd">    Returns True or False accordingly.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">req_keys</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">img_info</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">ImageMetaTag 0.6.17 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2015-2018, British Crown Copyright.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
+    </div>
+  </body>
+</html>
