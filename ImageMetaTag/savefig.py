@@ -101,7 +101,7 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
     else:
         savefig_file = write_file
         buf = None
-    
+
     # should probably add lots of other args, or use **kwargs
     if dpi:
         plt.savefig(savefig_file, dpi=dpi)
@@ -157,24 +157,25 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
                 db.write_img_to_dbfile(db_file, db_filename, img_tags, timeout=db_timeout,
                                        attempt_replace=db_replace)
                 wrote_db = True
-            except sqlite3.OperationalError as OpErr:
-                if 'database is locked' in OpErr.message:
+            except sqlite3.OperationalError as op_err:
+                if 'database is locked' in op_err.message:
                     # database being locked is what the retries and timeouts are for:
                     print '%s database timeout for image "%s", writing to file "%s", %s s' \
                                 % (db.dt_now_str(), db_file, write_file, n_tries * db_timeout)
                     n_tries += 1
                 else:
                     # everything else needs to be reported and raised immediately:
-                    msg = '{} for file {}'.format(OpErr.message, db_file)
+                    msg = '{} for file {}'.format(op_err.message, db_file)
                     raise sqlite3.OperationalError(msg)
             except:
                 raise
         if n_tries > db_attempts:
-            raise sqlite3.OperationalError(OpErr.message)
+            raise sqlite3.OperationalError(op_err.message)
         if verbose:
             print 'Database write took: %s' %(str(datetime.now() - db_st))
 
-def image_file_postproc(filename, outfile=None, img_buf=None, img_converter=0, do_trim=False, trim_border=0,
+def image_file_postproc(filename, outfile=None, img_buf=None, img_converter=0,
+                        do_trim=False, trim_border=0,
                         logo_file=None, logo_width=40, logo_padding=0, logo_pos=0,
                         do_thumb=False, img_tags=None, verbose=False):
     '''

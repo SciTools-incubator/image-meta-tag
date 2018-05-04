@@ -181,11 +181,11 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
             # copy the css file into the file_dir (unless that's were it already is):
             try:
                 shutil.copy(css, file_dir)
-            except shutil.Error as ShErr:
-                if 'are the same file' in ShErr.message:
+            except shutil.Error as sh_err:
+                if 'are the same file' in sh_err.message:
                     pass
                 else:
-                    raise ShErr
+                    raise sh_err
             base_css = os.path.basename(css)
             page_dependencies.append(base_css)
             out_str = ind+'<link rel="stylesheet" type="text/css" href="{0}">\n'
@@ -272,7 +272,8 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
                                ind=ind,
                                description=description, keywords=keywords)
         else:
-            # the json_files is a list of (tmp_file, final_file) tuples. Here we want the final one:
+            # the json_files is a list of (tmp_file, final_file) tuples.
+            # Here we want the final one:
             final_json_files = [os.path.split(x[1])[1] for x in json_files]
             write_js_to_header(img_dict, initial_selectors=initial_selectors, optgroups=optgroups,
                                file_obj=out_file, json_files=final_json_files, js_files=js_files,
@@ -313,7 +314,7 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
                                   style=style, level_names=level_names,
                                   show_singleton_selectors=show_singleton_selectors,
                                   animated_level=anim_level)
-            
+
         # the body is done, so the postamble comes in:
         postamble_endline = 'Page created with <a href="{}">ImageMetaTag {}</a>'
         postamble_endline = postamble_endline.format(imt.__documentation__, imt.__version__)
@@ -496,10 +497,10 @@ def write_js_to_header(img_dict, initial_selectors=None, optgroups=None, style=N
         # now write out optgroups:
         non_optgroup_elems = {}
         if optgroups:
-            # if the optgroup order hasn't been specified, then 
+            # if the optgroup order hasn't been specified, then
             # the default is a sort:
             for group_ind, optgroup in optgroups.iteritems():
-                # keep a note of the elements in the whole list, so we know which ones 
+                # keep a note of the elements in the whole list, so we know which ones
                 # aren't in any optgroup:
                 all_keys = copy.deepcopy(img_dict.keys[group_ind])
                 if 'imt_optgroup_order' not in optgroup:
@@ -520,7 +521,8 @@ def write_js_to_header(img_dict, initial_selectors=None, optgroups=None, style=N
                             all_keys.remove(group_element)
                 non_optgroup_elems[group_ind] = all_keys
 
-            # convert the optgroups to a list, in javascript, with each selector having an element within it:
+            # convert the optgroups to a list, in javascript, with each selector
+            # having an element within it:
             optg_str = '['
             non_optg_str = '['
             for i_depth in range(dict_depth):
@@ -677,7 +679,8 @@ def write_json(img_dict, file_name_no_ext, compression=False,
             # make a note of the outputs:
             out_files.append((tmp_file_path, json_file))
 
-            # now add this to the top level dict structure, so the final json file can pull them all togther:
+            # now add this to the top level dict structure, so the final
+            # json file can pull them all togther:
             path_dict = {path[-1]: '**FILE_{}**'.format(i_json)}
             # go backwards, from the second from last element of the path, to add more;
             for key in path[-2::-1]:
@@ -686,7 +689,8 @@ def write_json(img_dict, file_name_no_ext, compression=False,
             # add it to the paths, as a cross reference:
             paths.append(path)
 
-        # now create the final json file that combines the previous ones into a single usable object:
+        # now create the final json file that combines the previous
+        # ones into a single usable object:
         i_json += 1
         # convert the subdict to .json
         subdict_as_json = json_from_dict(top_dict)
