@@ -1,5 +1,5 @@
 '''
-This submodule contains the :class:`ImageMetaTag.ImageDict` class, and functions for 
+This submodule contains the :class:`ImageMetaTag.ImageDict` class, and functions for
 preparing instances of it.
 
 The purpose of an :class:`ImageMetaTag.ImageDict` is to sort the image metadata, supplied to
@@ -148,8 +148,8 @@ class ImageDict(object):
         if isinstance(new_dict, ImageDict) and self.level_names is not None:
             if new_dict.level_names is not None:
                 if self.level_names != new_dict.level_names:
-                    raise ValueError('Attempting to append two ImageDict objects with'
-                                     ' different level_names')
+                    msg = 'Attempting to append two ImageDict objects with different level_names'
+                    raise ValueError(msg)
 
     def dict_union(self, in_dict, new_dict):
         'produces the union of a dictionary of dictionaries'
@@ -280,7 +280,7 @@ class ImageDict(object):
         'Recursively finds the depth of a ImageDict and returns a list of lists'
         if not isinstance(in_dict, dict) or not in_dict:
             return depth
-        return [self.dict_depths(next_dict, depth+1) for (next_key, next_dict) in in_dict.iteritems()]
+        return [self.dict_depths(n_dict, depth+1) for (_n_key, n_dict) in in_dict.iteritems()]
 
     def flatten_lists(self, in_list):
         'Recursively flattens a list of lists:'
@@ -446,7 +446,7 @@ class ImageDict(object):
             depth = self.dict_depth(uniform_depth=True)
             this_set_of_inds = [None] * depth
         else:
-            depth=maxdepth
+            depth = maxdepth
             this_set_of_inds = [None] * depth
         level = 0
         self.return_key_inds(self.dict, out_array=out_array,
@@ -494,16 +494,17 @@ class ImageDict(object):
                     #
                     # get a list of tuples, containing the string, and the value
                     # of the T+ from a pattern match regex:
-                    
+
                     # sort out the numerical (t+) keys from those with None in them:
                     num_keys = [x for x in self.keys[i_key] if 'None' not in x]
                     none_keys = [x for x in self.keys[i_key] if 'None' in x]
-                    
+                    # what matches a T+ string:
+                    t_match = re.compile('[tT]([-+0-9.]{2,})')
                     try:
-                        labels_and_values = [(x, re.match('[tT]([-+0-9.]{2,})', x).groups()) for x in num_keys]
+                        labels_and_values = [(x, t_match.match(x).groups()) for x in num_keys]
                         # convert to float, so values can be sorted numerically:
                         values_and_labels = [(float(y[0]), x) for x, y in labels_and_values]
-                    except:
+                    except Exception:
                         msg = 'Keys for plot dictionary level "%s" ' % self.keys[i_key]
                         msg += 'do not match the "T+" (or None) pattern'
                         if devmode:
@@ -541,48 +542,48 @@ class ImageDict(object):
                     # now anything with a 'm' or 'km' or 'nm' (for wavelenghts!) needs
                     # to be sorted, starting with the lowest:
                     # TODO: add more things to this, microns, with the micro as /mu????
-                    metre_patterns_and_scalings = [(r'([0-9.eE+-]{1,})[\s]{,}m$', 1.0),
-                                                   (r'([0-9.eE+-]{1,})[\s]{,}mm$', 1.0e-3),
-                                                   (r'([0-9.eE+-]{1,})[\s]{,}microns$', 1.0e-6),
-                                                   (r'([0-9.eE+-]{1,})[\s]{,}\mum$', 1.0-6),
-                                                   (r'([0-9.eE+-]{1,})[\s]{,}nm$', 1.0e-9),
-                                                   (r'([0-9.eE+-]{1,})[\s]{,}km$', 1000.0)]
+                    metre_patterns_scalings = [(r'([0-9.eE+-]{1,})[\s]{,}m$', 1.0),
+                                               (r'([0-9.eE+-]{1,})[\s]{,}mm$', 1.0e-3),
+                                               (r'([0-9.eE+-]{1,})[\s]{,}microns$', 1.0e-6),
+                                               (r'([0-9.eE+-]{1,})[\s]{,}\mum$', 1.0-6),
+                                               (r'([0-9.eE+-]{1,})[\s]{,}nm$', 1.0e-9),
+                                               (r'([0-9.eE+-]{1,})[\s]{,}km$', 1000.0)]
 
                     # now anything with a 'hPa' or 'mb' needs to be sorted, starting
                     # with the lowest in height (hieghest value):
-                    pressure_patterns_and_scalings = [(r'([0-9.eE+-]{1,})[\s]{,}Pa$', 1.0),
-                                                      (r'([0-9.eE+-]{1,})[\s]{,}mb$', 100.0),
-                                                      (r'([0-9.eE+-]{1,})[\s]{,}mbar$', 100.0),
-                                                      (r'([0-9.eE+-]{1,})[\s]{,}hPa$', 100.0)]
+                    pressure_patterns_scalings = [(r'([0-9.eE+-]{1,})[\s]{,}Pa$', 1.0),
+                                                  (r'([0-9.eE+-]{1,})[\s]{,}mb$', 100.0),
+                                                  (r'([0-9.eE+-]{1,})[\s]{,}mbar$', 100.0),
+                                                  (r'([0-9.eE+-]{1,})[\s]{,}hPa$', 100.0)]
 
-                    model_lev_patterns_and_scalings = [(r'Model level ([0-9]{1,})', 1.0),
-                                                       (r'model level ([0-9]{1,})', 1.0),
-                                                       (r'Model lev ([0-9]{1,})', 1.0),
-                                                       (r'model level ([0-9]{1,})', 1.0),
-                                                       (r'ML([0-9]{1,})', 1.0),
-                                                       (r'ml([0-9]{1,})', 1.0)]
+                    model_lev_patterns_scalings = [(r'Model level ([0-9]{1,})', 1.0),
+                                                   (r'model level ([0-9]{1,})', 1.0),
+                                                   (r'Model lev ([0-9]{1,})', 1.0),
+                                                   (r'model level ([0-9]{1,})', 1.0),
+                                                   (r'ML([0-9]{1,})', 1.0),
+                                                   (r'ml([0-9]{1,})', 1.0)]
 
                     # now anything where the level defines locations, with latt long coordinates:
-                    lattlong_patterns_and_scalings = [('([0-9.]{1,})[E][,\s]{,}[0-9.]{1,}[NS]', 1.0),
-                                                      ('([0-9.]{1,})[W][,\s]{,}[0-9.]{1,}[NS]', -1.0)]
+                    lattlong_patterns_scalings = [(r'([0-9.]{1,})[E][,\s]{,}[0-9.]{1,}[NS]', 1.0),
+                                                  (r'([0-9.]{1,})[W][,\s]{,}[0-9.]{1,}[NS]', -1.0)]
 
                     # now anything else with a numeric value:
-                    numeric_patterns_and_scalings = [(r'([0-9.eE+-]{1,})', 1.0)]
+                    numeric_patterns_scalings = [(r'([0-9.eE+-]{1,})', 1.0)]
 
                     # now loop through the different patterns/scalings, and their orders,
-                    # with pressure reversed as we assume it's a descending vertical coordinate: 
+                    # with pressure reversed as we assume it's a descending vertical coordinate:
                     if method.startswith('reverse'):
-                        pattern_order_loop = [(metre_patterns_and_scalings, 'reversed'),
-                                              (pressure_patterns_and_scalings, 'sort'),
-                                              (model_lev_patterns_and_scalings, 'reversed'),
-                                              (lattlong_patterns_and_scalings, 'reversed'),
-                                              (numeric_patterns_and_scalings, 'reversed')]
+                        pattern_order_loop = [(metre_patterns_scalings, 'reversed'),
+                                              (pressure_patterns_scalings, 'sort'),
+                                              (model_lev_patterns_scalings, 'reversed'),
+                                              (lattlong_patterns_scalings, 'reversed'),
+                                              (numeric_patterns_scalings, 'reversed')]
                     else:
-                        pattern_order_loop = [(metre_patterns_and_scalings, 'sort'),
-                                              (pressure_patterns_and_scalings, 'reversed'),
-                                              (model_lev_patterns_and_scalings, 'sort'),
-                                              (lattlong_patterns_and_scalings, 'sort'),
-                                              (numeric_patterns_and_scalings, 'sort')]
+                        pattern_order_loop = [(metre_patterns_scalings, 'sort'),
+                                              (pressure_patterns_scalings, 'reversed'),
+                                              (model_lev_patterns_scalings, 'sort'),
+                                              (lattlong_patterns_scalings, 'sort'),
+                                              (numeric_patterns_scalings, 'sort')]
 
                     for patterns_scalings, sort_method in pattern_order_loop:
                         labels_and_values = []
@@ -594,10 +595,12 @@ class ImageDict(object):
                                     if devmode:
                                         try:
                                             _ = float(item_match.group(1)) * scaling
-                                        except:
+                                        except Exception:
+                                            msg = 'unable to float("{}") with pattern "{}"'
+                                            print msg.format(item, pattern)
                                             pdb.set_trace()
-                                            print 'unable to convert item "%s" with pattern "%s" to float' % (item, pattern)
-                                    labels_and_values.append((item, float(item_match.group(1)) * scaling))
+                                    as_float = float(item_match.group(1)) * scaling
+                                    labels_and_values.append((item, as_float))
                                     break
                         # now sort the labels_and_values, according to the value:
                         if sort_method == 'sort':
@@ -813,10 +816,12 @@ def simple_dict_filter(simple_dict, tests, raise_key_mismatch=False):
     a set of tests.
 
     An example set of tests:
-    tests = {'number of rolls': ['6 simulated rolls', '216 simulated rolls', '1296 simulated rolls'],\
-             'plot color': None,\
-             'image compression': None,\
-             'plot type': ['Histogram', ('All', ['Histogram', 'Line plots'])],\
+    tests = {'number of rolls': ['6 simulated rolls',
+                                 '216 simulated rolls',
+                                 '1296 simulated rolls'],
+             'plot color': None,
+             'image compression': None,
+             'plot type': ['Histogram', ('All', ['Histogram', 'Line plots'])],
              'image trim': None}
     Here, the 'number of rolls' is restricted to a simple list.
 

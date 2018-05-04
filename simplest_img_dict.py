@@ -68,7 +68,8 @@ def __main__():
     # html content to go at the top of the page:
     webpage_preamble = '<h3>This is the simplest page ImageMetaTag can produce</h3>'
     # and some html content at the bottom:
-    webpage_postamble = '<i>Page produced {}</i>'.format(datetime.datetime.now().strftime(DATE_FORMAT_WWW))
+    dt_now_str = datetime.datetime.now().strftime(DATE_FORMAT_WWW)
+    webpage_postamble = '<i>Page produced {}</i>'.format(dt_now_str)
     imt.webpage.write_full_page(img_dict, page_filename, page_title,
                                 preamble=webpage_preamble,
                                 postamble=webpage_postamble)
@@ -78,5 +79,3 @@ def __main__():
 
 if __name__ == '__main__':
     __main__()
-
-

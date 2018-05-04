@@ -112,28 +112,28 @@ def read(db_file, required_tags=None, tag_strings=None,
                     dbcn, dbcr = open_db_file(db_file, timeout=db_timeout)
                     # read it:
                     f_list, out_dict = read_img_info_from_dbcursor(dbcr,
-                                                required_tags=required_tags,
-                                                tag_strings=tag_strings)
+                                                                   required_tags=required_tags,
+                                                                   tag_strings=tag_strings)
                     # close connection:
                     dbcn.close()
                     read_db = True
-                except sqlite3.OperationalError as OpErr:
-                    if 'database is locked' in OpErr.message:
+                except sqlite3.OperationalError as op_err:
+                    if 'database is locked' in op_err.message:
                         # database being locked is what the retries and timeouts are for:
                         print '%s database timeout reading from file "%s", %s s' \
                                 % (dt_now_str(), db_file, n_tries * db_timeout)
                         n_tries += 1
-                    elif OpErr.message == 'no such table: {}'.format(SQLITE_IMG_INFO_TABLE):
+                    elif op_err.message == 'no such table: {}'.format(SQLITE_IMG_INFO_TABLE):
                         # the db file exists, but it doesn't have anything in it:
                         return None, None
                     else:
                         # everything else needs to be reported and raised immediately:
-                        msg = '{} for file {}'.format(OpErr.message, db_file)
+                        msg = '{} for file {}'.format(op_err.message, db_file)
                         raise sqlite3.OperationalError(msg)
 
             # if we went through all the attempts then it is time to raise the error:
             if n_tries > db_attempts:
-                msg = '{} for file {}'.format(OpErr.message, db_file)
+                msg = '{} for file {}'.format(op_err.message, db_file)
                 raise sqlite3.OperationalError(msg)
 
             # close connection:
@@ -179,20 +179,20 @@ def merge_db_files(main_db_file, add_db_file, delete_add_db=False,
                     wrote_db = True
                     # finally close:
                     dbcn.close()
-                except sqlite3.OperationalError as OpErr:
-                    if 'database is locked' in OpErr.message:
+                except sqlite3.OperationalError as op_err:
+                    if 'database is locked' in op_err.message:
                         # database being locked is what the retries and timeouts are for:
                         print '%s database timeout writing to file "%s", %s s' \
                                         % (dt_now_str(), main_db_file, n_tries * db_timeout)
                         n_tries += 1
                     else:
                         # everything else needs to be reported and raised immediately:
-                        msg = '{} for file {}'.format(OpErr.message, main_db_file)
+                        msg = '{} for file {}'.format(op_err.message, main_db_file)
                         raise sqlite3.OperationalError(msg)
 
             # if we went through all the attempts then it is time to raise the error:
             if n_tries > db_attempts:
-                msg = '{} for file {}'.format(OpErr.message, main_db_file)
+                msg = '{} for file {}'.format(op_err.message, main_db_file)
                 raise sqlite3.OperationalError(msg)
 
     # delete or tidy:
@@ -247,18 +247,18 @@ def create_table_for_img_info(dbcr, img_info):
     # sqlite3.OperationalError: table img_info already exists for file .......
     try:
         dbcr.execute(create_command)
-    except sqlite3.OperationalError as OpErr:
-        if 'table {} already exists'.format(SQLITE_IMG_INFO_TABLE) in OpErr.message:
+    except sqlite3.OperationalError as op_err:
+        if 'table {} already exists'.format(SQLITE_IMG_INFO_TABLE) in op_err.message:
             # another process has just created the table, so sleep(1)
             # This is only when a db file is created so isn't called often
             # (and the race condition is rare!)
             time.sleep(1)
         else:
             # everything else needs to be reported and raised immediately:
-            raise sqlite3.OperationalError(OpErr.message)
-    except sqlite3.Error as SqErr:
+            raise sqlite3.OperationalError(op_err.message)
+    except sqlite3.Error as sq_err:
         # everything else needs to be reported and raised immediately:
-        raise sqlite3.Error(SqErr.message)
+        raise sqlite3.Error(sq_err.message)
 
 
 def open_db_file(db_file, timeout=DEFAULT_DB_TIMEOUT):
@@ -504,6 +504,8 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
     else:
         fn_list = filenames
 
+    # delete command to use:
+    del_cmd = "DELETE FROM {} WHERE fname=?"
     if db_file is None:
         pass
     else:
@@ -526,12 +528,11 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
                             dbcn, dbcr = open_db_file(db_file, timeout=db_timeout)
                             # go through the file chunk, one by one, and delete:
                             for fname in chunk_o_filenames:
-                                del_cmd = "DELETE FROM {} WHERE fname=?"
                                 try:
                                     dbcr.execute(del_cmd.format(SQLITE_IMG_INFO_TABLE), (fname,))
-                                except sqlite3.OperationalError as OpErr_file:
+                                except sqlite3.OperationalError as op_err_file:
                                     err_check = 'no such table: {}'.format(SQLITE_IMG_INFO_TABLE)
-                                    if OpErr_file.message == err_check:
+                                    if op_err_file.message == err_check:
                                         # the db file exists, but it doesn't have anything in it:
                                         if not skip_warning:
                                             msg = ('WARNING: Unable to delete file entry "{}" from'
@@ -550,23 +551,23 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
                             wrote_db = True
                             # finally close (for this chunk)
                             dbcn.close()
-                        except sqlite3.OperationalError as OpErr:
-                            if 'database is locked' in OpErr.message:
+                        except sqlite3.OperationalError as op_err:
+                            if 'database is locked' in op_err.message:
                                 # database being locked is what the retries and timeouts are for:
                                 print '%s database timeout deleting from file "%s", %s s' \
                                                 % (dt_now_str(), db_file, n_tries * db_timeout)
                                 n_tries += 1
-                            elif 'disk I/O error' in OpErr.message:
-                                msg = '{} for file {}'.format(OpErr.message, db_file)
+                            elif 'disk I/O error' in op_err.message:
+                                msg = '{} for file {}'.format(op_err.message, db_file)
                                 raise IOError(msg)
                             else:
                                 # everything else needs to be reported and raised immediately:
-                                msg = '{} for file {}'.format(OpErr.message, db_file)
+                                msg = '{} for file {}'.format(op_err.message, db_file)
                                 raise ValueError(msg)
 
                     # if we went through all the attempts then it is time to raise the error:
                     if n_tries > db_attempts:
-                        msg = '{} for file {}'.format(OpErr.message, db_file)
+                        msg = '{} for file {}'.format(op_err.message, db_file)
                         raise sqlite3.OperationalError(msg)
 
             else:
@@ -575,7 +576,7 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
                 # delete the contents:
                 for i_fn, fname in enumerate(fn_list):
                     try:
-                        dbcr.execute("DELETE FROM %s WHERE fname=?" % SQLITE_IMG_INFO_TABLE, (fname,))
+                        dbcr.execute(del_cmd.format(SQLITE_IMG_INFO_TABLE), (fname,))
                     except:
                         if not skip_warning:
                             # if this fails, print a warning...

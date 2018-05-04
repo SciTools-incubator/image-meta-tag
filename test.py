@@ -388,29 +388,29 @@ def test_key_sorting():
     These are not all used in the type of web pages used in the main tests
     so they are tested directly.
     '''
-    
+
     # for each type of test, define the input keys and how they should be when
     # they are sorted:
     sort_tests = {}
-    
+
     # a straight alphabetical sort:
     sort_tests['sort'] = (['aaa', 'zaa', 'aba', '257', 'bob'],
                           ['257', 'aaa', 'aba', 'bob', 'zaa'])
     # a reversed alphabetical sort:
     sort_tests['reverse sort'] = (['aaa', 'zaa', 'aba', '257', 'bob'],
                                   ['zaa', 'bob', 'aba', 'aaa', '257'])
-     
+
     # T+ - used for forecast lead times, so sort by the value after the T+
     # and anything with None gets alphabetically sorted at the end
     sort_tests['T+'] = (['T+0', 'T+1', 't+10', 'T+2', 't-3', 'T+None', 't-None', 'None'],
                         ['t-3', 'T+0', 'T+1', 'T+2', 't+10', 'None', 'T+None', 't-None'])
-    
+
     # here, we will use a list to sort by, and anything not in the list
     # gets a simple sort:
     sort_by_list = ['aaa', 'zaa']
     sort_tests['sort_by_list'] = (['aaa', 'zaa', 'aba', '257', 'bob'],
                                   ['aaa', 'zaa', '257', 'aba', 'bob'])
-    
+
     # a set of numeric values common in meteorology:
     sort_tests['numeric'] = (['10m', '50m', '4mm', '62 hPa', '2m', '16 km', 'Model level 7',
                               'Surface', '12mb', '3.344E, 16.7N', '2.344E, 18.7N', '16nm'],
@@ -428,7 +428,7 @@ def test_key_sorting():
         dummy_tag_info[lname] = str(level)
     tmp_dict = imt.dict_heirachy_from_list(dummy_tag_info, 'None', dummy_tag_order)
     img_dict = imt.ImageDict(tmp_dict)
-    
+
     # now overide the keys of imd_dict with the keys we want to test,
     # and make the list of how each level is to be sorted:
     sort_methods = []
@@ -440,7 +440,7 @@ def test_key_sorting():
             sort_methods.append(test_name)
     # now do the sort:
     img_dict.sort_keys(sort_methods)
-    
+
     # now go through the sort methods and check the output is as expected:
     failed = False
     for level, test_name in enumerate(test_order):
@@ -451,7 +451,7 @@ def test_key_sorting():
                    '\n  Input list: {}\n  Sorted list: {}\n  Expected list: {}')
             print msg
             failed = True
-    
+
     return not failed
 
 def __main__():
@@ -948,7 +948,7 @@ def __main__():
     out_page = '%s/page.html' % webdir
     out_page_para = '%s/page_para.html' % webdir
     out_page_multi = '%s/page_multi.html' % webdir
-    # another test page, this time specifying the css:    
+    # another test page, this time specifying the css:
     test_css = make_test_css(webdir)
     out_page_css = '%s/page_css.html' % webdir
 
@@ -1045,7 +1045,7 @@ def __main__():
                                                         show_singleton_selectors=False,
                                                         compression=True,
                                                         css=test_css)
-    
+
     sorts_work = test_key_sorting()
     if sorts_work:
         print 'Sorting tests pass OK'
@@ -1210,6 +1210,6 @@ Has the directory got other images/old tests in it?'''.format(webdir))
         print 'Testing of database rebuild functionality complete.'
 
     print 'Web page outputs\n', web_out
-    
+
 if __name__ == '__main__':
     __main__()
