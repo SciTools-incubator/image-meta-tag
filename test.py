@@ -21,11 +21,11 @@ import matplotlib
 #matplotlib.use('GTKAgg')
 matplotlib.use('Agg')
 
-import os, shutil, sys, errno, argparse, copy, random, pdb
+import os, shutil, sys, errno, argparse, copy, random, platform, pdb
 
 import numpy as np
 import matplotlib.pyplot as plt
-import cPickle as pickle
+import pickle as pickle
 from multiprocessing import Pool
 
 # make sure test is using the version of ImageMetaTag being tested:
@@ -39,7 +39,7 @@ LOGO_PADDING = 5
 
 # Now, import ImageMetaTag to do things:
 import ImageMetaTag as imt
-print 'ImageMetaTag from "{}"'.format(imt.__path__[0])
+print('ImageMetaTag from "{}"'.format(imt.__path__[0]))
 
 def get_webdir():
     '''
@@ -257,7 +257,7 @@ def print_simple_timer(dt_start, dt_end, label):
     dt_en_str = dt_end.strftime(DATE_FORMAT)
     message = '%s: started at %s, completed at %s, taking %s' \
                 % (label, dt_st_str, dt_en_str, (dt_end - dt_start))
-    print message
+    print(message)
 
 def check_img_tags(img_file, in_tags):
     '''
@@ -272,10 +272,10 @@ def check_img_tags(img_file, in_tags):
         msg = 'Image metadata tags read from file "%s"' % img_file
         msg += 'do not match the expected tags.\n'
         msg += '  Input tags:\n'
-        for key, val in in_tags.items():
+        for key, val in list(in_tags.items()):
             msg += '     "%s" : "%s"\n' % (key, val)
         msg += '  Tags read from file:\n'
-        for key, val in read_tags.items():
+        for key, val in list(read_tags.items()):
             msg += '     "%s" : "%s"\n' % (key, val)
         raise ValueError(msg)
 
@@ -295,7 +295,7 @@ def define_img_dict_in_tuple(in_tuple):
     # now assemble the ImageDict:
     # This is the simple way, but it is possible to parallelise this step,
     # which I might include below:
-    for img_file, img_info in sub_dict.iteritems():
+    for img_file, img_info in sub_dict.items():
         tmp_dict = imt.dict_heirachy_from_list(img_info, img_file, tag_order)
         if not img_dict:
             img_dict = imt.ImageDict(tmp_dict,
@@ -449,7 +449,7 @@ def test_key_sorting():
         else:
             msg = ('Sort method test "{}" has failed to correctly sort its ImageDict keys:'
                    '\n  Input list: {}\n  Sorted list: {}\n  Expected list: {}')
-            print msg
+            print(msg)
             failed = True
 
     return not failed
@@ -477,6 +477,8 @@ def __main__():
     # img_savedir is now relative to webdir:
     img_savedir = os.path.join(webdir, 'images')
     mkdir_p(img_savedir)
+
+    test_zlib_compression = False
 
     # a database to store the image metadata, as we write them:
     imt_db = define_imt_db()
@@ -539,7 +541,7 @@ def __main__():
     metadata_pickle = '%s/meta.p' % img_savedir
     if not (args.skip_plotting and os.path.isfile(metadata_pickle) and os.path.isfile(imt_db)):
         if os.path.isfile(imt_db):
-            print 'Deleting pre-exising image database "%s"' % imt_db
+            print('Deleting pre-exising image database "%s"' % imt_db)
             os.remove(imt_db)
         # now plot the random data in some different ways, tagging the image as we go:
         for i_rand in range(n_random_data):
@@ -550,7 +552,7 @@ def __main__():
                                                  img_format, plot_owner,
                                                  imt_db)
                 # now stick the new img ingo into the main dict:
-                for img_file, img_info in new_imgs_tags.iteritems():
+                for img_file, img_info in new_imgs_tags.items():
                     images_and_tags[img_file] = img_info
 
         print_simple_timer(DATE_START, datetime.now(), 'plotting')
@@ -559,7 +561,7 @@ def __main__():
 
     else:
         # load the metadata from the pickle
-        print 'loading metadata from %s' % metadata_pickle
+        print('loading metadata from %s' % metadata_pickle)
         with open(metadata_pickle, "rb") as open_pickle:
             images_and_tags = pickle.load(open_pickle)
 
@@ -571,7 +573,7 @@ def __main__():
     # In actual usage, the database would be the place to get the metadata, but in this test
     # we also want to test the integrity of the database.
     rel_images_and_tags = {}
-    for img_file, img_info in images_and_tags.iteritems():
+    for img_file, img_info in images_and_tags.items():
         if img_file.startswith(webdir):
             img_file = img_file[len(webdir)+1:]
         rel_images_and_tags[img_file] = img_info
@@ -580,7 +582,7 @@ def __main__():
     # now assemble the ImageDict using the image metadata:
     img_dict = None
     # This is the simple way, but it is possible to parallelise this step as done below:
-    for img_file, img_info in images_and_tags.iteritems():
+    for img_file, img_info in images_and_tags.items():
         tmp_dict = imt.dict_heirachy_from_list(img_info, img_file, tagorder)
         if not img_dict:
             img_dict = imt.ImageDict(tmp_dict, selector_animated=selector_animated,
@@ -668,8 +670,8 @@ def __main__():
     img_dict_para.sort_keys(sort_methods)
 
     # now these should be the same, on a print:
-    print img_dict
-    print img_dict_para
+    print(img_dict)
+    print(img_dict_para)
 
     # quick test of dict_index_array:
     # first to a particular depth:
@@ -723,7 +725,7 @@ def __main__():
 
     # now assemble the ImageDict:
     # This is the simple way, but it is possible to parallelise this step as done below:
-    for img_file, img_info in images_and_tags.iteritems():
+    for img_file, img_info in images_and_tags.items():
         # test the image to see if its needed, and if it's needed
         # for the complex/multiple image case:
         use_plain, use_multi, first_multi = imt.simple_dict_filter(img_info, key_filter)
@@ -758,8 +760,8 @@ def __main__():
                                 already_in_img_dict_multi = True
 
                         if already_in_img_dict_multi:
-                            print 'multi image already added!'
-                            print key_lookup
+                            print('multi image already added!')
+                            print(key_lookup)
                             #msg = 'Adding a multi-image that has already been added.'
                             #msg += ' Checks on first_image_multi should prevent that.'
                             #raise ValueError(msg)
@@ -832,13 +834,13 @@ def __main__():
 
     # becasue we are going to do a lot of searches,
     # we need to read the imt_db into memory for fast access:
-    print 'reading database file: %s' % imt_db
+    print('reading database file: %s' % imt_db)
     dbcn, dbcr = imt.db.read_db_file_to_mem(imt_db)
-    print 'db file read'
+    print('db file read')
 
     # now assemble the ImageDict:
     # This is the simple way, but it is possible to parallelise this step as done below:
-    for img_file, img_info in images_and_tags.iteritems():
+    for img_file, img_info in images_and_tags.items():
         # test the image to see if its needed, and if it's
         # needed for the complex/multiple image case:
         use_plain, use_multi, first_multi = imt.simple_dict_filter(img_info, key_filter)
@@ -960,9 +962,9 @@ def __main__():
 </div>
 <div id='preamble'>
     <p>&nbsp;</p>
-    <h1>This is a test page for the ImageMetaTag module at vn{}.</h1>
+    <h1>This is a test page for the ImageMetaTag module at vn{} with python {}.</h1>
 </div>
-'''.format(imt.__version__)
+'''.format(imt.__version__, platform.python_version())
 
     # add a post-amble, including some server side
     #includes for last-modified, and a disk usage string.
@@ -980,7 +982,7 @@ def __main__():
         else:
             # select a new selector, at random, from those
             # which are consistent with the current tree:
-            next_sel = random.choice(img_dict.return_from_list(initial_selectors).keys())
+            next_sel = random.choice(list(img_dict.return_from_list(initial_selectors).keys()))
             initial_selectors.append(next_sel)
 
 
@@ -1020,7 +1022,7 @@ def __main__():
                                                     write_intmed_tmpfile=True,
                                                     show_selector_names=True,
                                                     show_singleton_selectors=False,
-                                                    compression=True)
+                                                    compression=test_zlib_compression)
     web_out[out_page_para] = imt.webpage.write_full_page(img_dict, out_page_para,
                                                          'Test ImageDict webpage (Parallel)',
                                                          preamble=webpage_preamble,
@@ -1043,18 +1045,18 @@ def __main__():
                                                         write_intmed_tmpfile=True,
                                                         show_selector_names=True,
                                                         show_singleton_selectors=False,
-                                                        compression=True,
+                                                        compression=test_zlib_compression,
                                                         css=test_css)
 
     sorts_work = test_key_sorting()
     if sorts_work:
-        print 'Sorting tests pass OK'
+        print('Sorting tests pass OK')
     else:
         raise ValueError('Testing failed in test_key_sorting')
 
     # now, finally, produce a large ImageDict:
     if not args.no_biggus_dictus:
-        print 'Producing a very large ImageDict, as a scalability and speed test'
+        print('Producing a very large ImageDict, as a scalability and speed test')
         # Make a large input dictionary, not actual images though.
         # That would take up a lot of disk space!
         # We don't need to be big or clever for this, it's a test, so simple and readable is fine.
@@ -1071,16 +1073,16 @@ def __main__():
         n_to_do = np.math.factorial(9)
         n_to_do_flt = float(np.math.factorial(9))
         dt_prev = datetime.now()
-        pcents = range(5, 101, 5) # write out every 5% completed
-        for i_1 in xrange(1):
-            for i_2 in xrange(2):
-                for i_3 in xrange(3):
-                    for i_4 in xrange(4):
-                        for i_5 in xrange(5):
-                            for i_6 in xrange(6):
-                                for i_7 in xrange(7):
-                                    for i_8 in xrange(8):
-                                        for i_9 in xrange(9):
+        pcents = list(range(5, 101, 5)) # write out every 5% completed
+        for i_1 in range(1):
+            for i_2 in range(2):
+                for i_3 in range(3):
+                    for i_4 in range(4):
+                        for i_5 in range(5):
+                            for i_6 in range(6):
+                                for i_7 in range(7):
+                                    for i_8 in range(8):
+                                        for i_9 in range(9):
                                             # we don't want to actually make an image!
                                             img_name = 'no_image_%s_%s_%s_%s_%s_%s_%s_%s_%s.png ' \
                                                     % (i_1, i_2, i_3, i_4, i_5, i_6, i_7, i_8, i_9)
@@ -1103,14 +1105,14 @@ def __main__():
                                             if pcent_done > pcents[0]:
                                                 dt_now = datetime.now()
                                                 msg = '{} out of {} ({:.2f}%) {}'
-                                                print msg.format(i_count,
+                                                print(msg.format(i_count,
                                                                  n_to_do,
                                                                  pcent_done,
-                                                                 dt_now - dt_prev)
+                                                                 dt_now - dt_prev))
                                                 dt_prev = dt_now
                                                 # remove the current percentage:
                                                 pcents.pop(0)
-        print '  input dictionary complete, with %s elements' % len(biggus_dictus)
+        print('  input dictionary complete, with %s elements' % len(biggus_dictus))
 
         bigdb_cn.commit()
         bigdb_cn.close()
@@ -1132,13 +1134,13 @@ def __main__():
         # run through the big dict, and delete a smallish subset of 'images' from the big database
         db_img_list, db_images_and_tags = imt.db.read(bigdb)
         len_b4_del = len(db_img_list)
-        print 'Length of large database before deleting subset {}'.format(len_b4_del)
+        print('Length of large database before deleting subset {}'.format(len_b4_del))
         del_list = db_img_list[500::1000]
         imt.db.del_plots_from_dbfile(bigdb, del_list)
 
         db_img_list, db_images_and_tags = imt.db.read(bigdb)
         len_aft_del = len(db_img_list)
-        print 'Length of large database after deleting subset {}'.format(len_aft_del)
+        print('Length of large database after deleting subset {}'.format(len_aft_del))
         # and check it's the right length, to see if some data is actually gone:
         if len_b4_del != len_aft_del + len(del_list):
             raise ValueError('Inconsistent database size after deleting subset.')
@@ -1181,7 +1183,7 @@ def __main__():
         print_simple_timer(date_start_web, datetime.now(), 'Large dict webpage')
 
     if not args.no_db_rebuild:
-        print 'Testing imt.db.scan_dir_for_db'
+        print('Testing imt.db.scan_dir_for_db')
         # rebuilding an image database from files on disk can be slow, but it can be
         # very useulf:
         rebuild_db = '{}/imt_rebuild.db'.format(webdir)
@@ -1203,13 +1205,13 @@ Has the directory got other images/old tests in it?'''.format(webdir))
         # just check the tags of the first image.
         # Note that as we restricted the rebuild to a subset of tags, the rebuilt database won't
         # have as many tags as the one produced as the images were produced.
-        for tag_name, tag_value in imgs_tags_r[imgs_r[0]].iteritems():
+        for tag_name, tag_value in imgs_tags_r[imgs_r[0]].items():
             if not db_images_and_tags[db_img_list[0]][tag_name] == tag_value:
                 raise ValueError('Tag values mistmatch between plotted and rebuilt database!')
 
-        print 'Testing of database rebuild functionality complete.'
+        print('Testing of database rebuild functionality complete.')
 
-    print 'Web page outputs\n', web_out
+    print('Web page outputs\n', web_out)
 
 if __name__ == '__main__':
     __main__()

@@ -182,10 +182,16 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
             try:
                 shutil.copy(css, file_dir)
             except shutil.Error as sh_err:
-                if 'are the same file' in sh_err.message:
-                    pass
+                if imt.PY3:
+                    if 'are the same file' in sh_err.__str__():
+                        pass
+                    else:
+                        raise sh_err
                 else:
-                    raise sh_err
+                    if 'are the same file' in sh_err.message:
+                        pass
+                    else:
+                        raise sh_err
             base_css = os.path.basename(css)
             page_dependencies.append(base_css)
             out_str = ind+'<link rel="stylesheet" type="text/css" href="{0}">\n'
@@ -335,11 +341,11 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
             tmp_files_to_mv = json_files
         for tmp_file_mv in tmp_files_to_mv:
             # now move the json, then the html files:
-            os.chmod(tmp_file_mv[0], 0644)
+            os.chmod(tmp_file_mv[0], 0o644)
             shutil.move(tmp_file_mv[0], tmp_file_mv[1])
 
         if verbose:
-            print 'File "%s" complete.' % filepath
+            print('File "%s" complete.' % filepath)
 
     return page_dependencies
 
@@ -486,7 +492,7 @@ def write_js_to_header(img_dict, initial_selectors=None, optgroups=None, style=N
             file_obj.write('{}var selected_id = {};\n'.format(ind, initial_selectors_as_inds))
 
         # now write out the lists of keys, to the different levels:
-        keys_to_js = [str(x[1]) for x in img_dict.keys.iteritems()]
+        keys_to_js = [str(x[1]) for x in img_dict.keys.items()]
         file_obj.write('{}var key_lists = [{},\n'.format(ind, keys_to_js[0]))
         ind = _indent_up_one(ind)
         for i_depth in range(1, dict_depth):
@@ -499,7 +505,7 @@ def write_js_to_header(img_dict, initial_selectors=None, optgroups=None, style=N
         if optgroups:
             # if the optgroup order hasn't been specified, then
             # the default is a sort:
-            for group_ind, optgroup in optgroups.iteritems():
+            for group_ind, optgroup in optgroups.items():
                 # keep a note of the elements in the whole list, so we know which ones
                 # aren't in any optgroup:
                 all_keys = copy.deepcopy(img_dict.keys[group_ind])
@@ -507,7 +513,7 @@ def write_js_to_header(img_dict, initial_selectors=None, optgroups=None, style=N
                     optgroup['imt_optgroup_order'] = sorted(optgroup.keys())
                 # make sure that the elements within the optgroup are a sorted
                 # list, sorted according to the order in the img_dict.keys()
-                for group_name, group_elements in optgroup.iteritems():
+                for group_name, group_elements in optgroup.items():
                     if group_name != 'imt_optgroup_order':
                         # pick up the indices of the elements, in the main list of keys:
                         elem_inds = [img_dict.keys[group_ind].index(x) for x in group_elements]
@@ -622,7 +628,7 @@ def write_json(img_dict, file_name_no_ext, compression=False,
         with tempfile.NamedTemporaryFile('w', suffix='.json', prefix='imt_',
                                          dir=tmp_file_dir, delete=False) as file_obj:
             if compression:
-                file_obj.write(zlib.compress(dict_as_json))
+                file_obj.write(compress_string(dict_as_json))
             else:
                 file_obj.write(dict_as_json)
             tmp_file_path = file_obj.name
@@ -672,7 +678,7 @@ def write_json(img_dict, file_name_no_ext, compression=False,
             with tempfile.NamedTemporaryFile('w', suffix='.json', prefix='imt_',
                                              dir=tmp_file_dir, delete=False) as file_obj:
                 if compression:
-                    file_obj.write(zlib.compress(subdict_as_json))
+                    file_obj.write(compress_string(subdict_as_json))
                 else:
                     file_obj.write(subdict_as_json)
                 tmp_file_path = file_obj.name
@@ -699,7 +705,7 @@ def write_json(img_dict, file_name_no_ext, compression=False,
         with tempfile.NamedTemporaryFile('w', suffix='.json', prefix='imt_',
                                          dir=tmp_file_dir, delete=False) as file_obj:
             if compression:
-                file_obj.write(zlib.compress(subdict_as_json))
+                file_obj.write(compress_string(subdict_as_json))
             else:
                 file_obj.write(subdict_as_json)
             tmp_file_path = file_obj.name
@@ -707,6 +713,18 @@ def write_json(img_dict, file_name_no_ext, compression=False,
         out_files.append((tmp_file_path, json_file))
 
     return out_files
+
+def compress_string(in_str):
+    '''
+    Compresses a string using zlib to a format that can be read with pako
+    '''
+    if imt.PY3:
+        # python3, compress a byte:
+        comp_str = str(zlib.compress(bytearray(in_str, 'utf-8')))
+    else:
+        # python2, compress a string:
+        comp_str = zlib.compress(in_str)
+    return comp_str
 
 def write_js_placeholders(img_dict, file_obj=None, dict_depth=None, selector_prefix=None,
                           style='horiz dropdowns', level_names=False,
@@ -860,8 +878,8 @@ def copy_required_javascript(file_dir, style, compression=False, overwrite=True)
                 shutil.copy(os.path.join(file_src_dir, imt_js_to_copy),
                             os.path.join(file_dir, imt_js_to_copy))
             else:
-                print '''File: {}/{} differs to the expected contents, but is
-not being overwritten. Your webpage may be broken!'''.format(file_dir, imt_js_to_copy)
+                print('''File: {}/{} differs to the expected contents, but is
+not being overwritten. Your webpage may be broken!'''.format(file_dir, imt_js_to_copy))
 
     # make a list of all the required javascript files
     js_files = [imt_js_to_copy]
@@ -910,7 +928,7 @@ def get_pako(pako_to_dir=None):
     the 'javascript' directory alongside the ImageMetaTag python code is used.
     '''
     import tarfile
-    from urllib2 import urlopen
+    from urllib.request import urlopen
 
     # set up pako into the current imt_dir:
     if pako_to_dir is None:
@@ -918,7 +936,7 @@ def get_pako(pako_to_dir=None):
 
     # Open the url
     pako_urlopen = urlopen(PAKO_SOURE_TAR)
-    print "downloading " + PAKO_SOURE_TAR
+    print("downloading " + PAKO_SOURE_TAR)
     # Open our local file for writing
     with tempfile.NamedTemporaryFile('w', suffix='.tar.gz', prefix='pako_',
                                      delete=False) as local_file:
@@ -940,12 +958,12 @@ def get_pako(pako_to_dir=None):
 
 def _indent_up_one(ind):
     'increases the indent level of an input ind by one'
-    n_indents = len(ind) / LEN_INDENT
+    n_indents = int(len(ind) / LEN_INDENT)
     return INDENT * (n_indents + 1)
 
 def _indent_down_one(ind):
     'decreases the indent level of an input ind by one'
-    n_indents = len(ind) / LEN_INDENT
+    n_indents = int(len(ind) / LEN_INDENT)
     return INDENT * max(n_indents - 1, 0)
 
 def _py_to_js_bool(py_bool):

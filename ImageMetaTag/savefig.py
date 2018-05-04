@@ -134,7 +134,7 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
     if buf:
         buf.close()
     if verbose:
-        print 'Image post-processing took: %s' %(str(datetime.now() - postproc_st))
+        print('Image post-processing took: %s' %(str(datetime.now() - postproc_st)))
 
 
     # now write to the database, if it is specifed:
@@ -160,8 +160,8 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
             except sqlite3.OperationalError as op_err:
                 if 'database is locked' in op_err.message:
                     # database being locked is what the retries and timeouts are for:
-                    print '%s database timeout for image "%s", writing to file "%s", %s s' \
-                                % (db.dt_now_str(), db_file, write_file, n_tries * db_timeout)
+                    print('%s database timeout for image "%s", writing to file "%s", %s s' \
+                                % (db.dt_now_str(), db_file, write_file, n_tries * db_timeout))
                     n_tries += 1
                 else:
                     # everything else needs to be reported and raised immediately:
@@ -172,7 +172,7 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
         if n_tries > db_attempts:
             raise sqlite3.OperationalError(op_err.message)
         if verbose:
-            print 'Database write took: %s' %(str(datetime.now() - db_st))
+            print('Database write took: %s' %(str(datetime.now() - db_st)))
 
 def image_file_postproc(filename, outfile=None, img_buf=None, img_converter=0,
                         do_trim=False, trim_border=0,
@@ -335,7 +335,7 @@ def image_file_postproc(filename, outfile=None, img_buf=None, img_converter=0,
         en_fsize = os.path.getsize(outfile)
         msg = 'File: "{}". Size: {}, to {} bytes ({}% original size)'
         relative_size = (100.0 * en_fsize)/st_fsize
-        print msg.format(filename, st_fsize, en_fsize, relative_size)
+        print(msg.format(filename, st_fsize, en_fsize, relative_size))
 
 def _im_trim(im_obj, border=0):
     'Trims an image object using Python Image Library'
@@ -452,7 +452,7 @@ def _im_logo(im_obj, logo_file, logo_width, logo_padding, logo_pos):
 
 def _im_add_png_tags(im_obj, png_tags):
     'adds img_tags to an image object for later saving'
-    for key, val in png_tags.iteritems():
+    for key, val in png_tags.items():
         im_obj.info[key] = val
     return im_obj
 
@@ -467,12 +467,12 @@ def _im_pngsave_addmeta(im_obj, outfile, optimize=True, verbose=False):
     meta = PngImagePlugin.PngInfo()
 
     # copy metadata into new object
-    for key, val in im_obj.info.iteritems():
+    for key, val in im_obj.info.items():
         if key in reserved:
             pass
         elif val is None:
             if verbose:
-                print 'key "%s" is set to None' % key
+                print('key "%s" is set to None' % key)
         else:
             meta.add_text(key, val, 0)
 

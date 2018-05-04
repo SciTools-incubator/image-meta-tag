@@ -33,6 +33,14 @@ POSTPROC_IMG_FORMATS = ['png']
 DEFAULT_DB_TIMEOUT = 6
 DEFAULT_DB_ATTEMPTS = 20
 
+import platform
+if platform.python_version().startswith('2'):
+    PY3 = False
+elif platform.python_version().startswith('3'):
+    PY3 = True
+else:
+    raise NotImplementedError('Only writtend for python2 or python3')
+
 from ImageMetaTag.savefig import savefig, image_file_postproc
 from ImageMetaTag.img_dict import ImageDict, readmeta_from_image, dict_heirachy_from_list, \
                                   dict_split, simple_dict_filter, check_for_required_keys
