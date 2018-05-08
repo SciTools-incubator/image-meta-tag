@@ -38,9 +38,9 @@ def __main__():
     # Now load in the database:
     tag_str = []
     img_list, images_and_tags = imt.db.read(imt_db, required_tags=img_tags, tag_strings=tag_str)
-    # we have supplied the database read with the image tags we expect, and an empty list of values
-    # so that we can construct what is returned (and therefore the ImageDict) in a memory
-    # efficient way.
+    # we have supplied the database read with the image tags we expect, and an empty
+    # list of values so that we can construct what is returned (and therefore the ImageDict)
+    # in a memory efficient way.
 
     # the img_list is a list of the images in the databse file:
     print(img_list)

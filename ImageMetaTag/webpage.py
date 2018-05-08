@@ -566,7 +566,7 @@ def write_js_to_header(img_dict, initial_selectors=None, optgroups=None, style=N
 '''.format(ind))
 
         # now, the main call:
-        file_obj.write(ind + '// redefine onload, so it calls the imt_main to actually write the page:\n')
+        file_obj.write(ind + '// redefine onload, so it calls the imt_main to write the page:\n')
         file_obj.write(ind + 'window.onload = function() {imt_main();}\n')
         # END of the imt specifc header content:
 
@@ -625,12 +625,14 @@ def write_json(img_dict, file_name_no_ext, compression=False,
     if n_chunks == 1:
         # easy if it fits into a single file:
         json_file = file_name_no_ext + suffix
-        with tempfile.NamedTemporaryFile('w', suffix='.json', prefix='imt_',
+        if compression:
+            wrt_str, file_mode = compress_string(dict_as_json)
+        else:
+            wrt_str = dict_as_json
+            file_mode = 'w'
+        with tempfile.NamedTemporaryFile(file_mode, suffix='.json', prefix='imt_',
                                          dir=tmp_file_dir, delete=False) as file_obj:
-            if compression:
-                file_obj.write(compress_string(dict_as_json))
-            else:
-                file_obj.write(dict_as_json)
+            file_obj.write(wrt_str)
             tmp_file_path = file_obj.name
         # make a note of the outputs:
         out_files.append((tmp_file_path, json_file))
@@ -675,12 +677,14 @@ def write_json(img_dict, file_name_no_ext, compression=False,
             subdict_as_json = json_from_dict(subdict)
             # and write this out:
             json_file = '{}_{}{}'.format(file_name_no_ext, i_json, suffix)
-            with tempfile.NamedTemporaryFile('w', suffix='.json', prefix='imt_',
+            if compression:
+                wrt_str, file_mode = compress_string(subdict_as_json)
+            else:
+                wrt_str = dict_as_json
+                file_mode = 'w'
+            with tempfile.NamedTemporaryFile(file_mode, suffix='.json', prefix='imt_',
                                              dir=tmp_file_dir, delete=False) as file_obj:
-                if compression:
-                    file_obj.write(compress_string(subdict_as_json))
-                else:
-                    file_obj.write(subdict_as_json)
+                file_obj.write(wrt_str)
                 tmp_file_path = file_obj.name
             # make a note of the outputs:
             out_files.append((tmp_file_path, json_file))
@@ -702,12 +706,14 @@ def write_json(img_dict, file_name_no_ext, compression=False,
         subdict_as_json = json_from_dict(top_dict)
         # and write this out:
         json_file = '{}_{}{}'.format(file_name_no_ext, i_json, suffix)
-        with tempfile.NamedTemporaryFile('w', suffix='.json', prefix='imt_',
+        if compression:
+            wrt_str, file_mode = compress_string(subdict_as_json)
+        else:
+            wrt_str = dict_as_json
+            file_mode = 'w'
+        with tempfile.NamedTemporaryFile(file_mode, suffix='.json', prefix='imt_',
                                          dir=tmp_file_dir, delete=False) as file_obj:
-            if compression:
-                file_obj.write(compress_string(subdict_as_json))
-            else:
-                file_obj.write(subdict_as_json)
+            file_obj.write(wrt_str)
             tmp_file_path = file_obj.name
         # make a note of the outputs:
         out_files.append((tmp_file_path, json_file))
@@ -716,15 +722,19 @@ def write_json(img_dict, file_name_no_ext, compression=False,
 
 def compress_string(in_str):
     '''
-    Compresses a string using zlib to a format that can be read with pako
+    Compresses a string using zlib to a format that can be read with pako.
+    Returns both the compressed string and the file mode to use.
     '''
     if imt.PY3:
         # python3, compress a byte:
-        comp_str = str(zlib.compress(bytearray(in_str, 'utf-8')))
+        #comp_str = str(zlib.compress(bytearray(in_str, 'utf-8')))
+        comp_str = zlib.compress(in_str.encode(encoding='utf=8'))
+        file_mode = 'wb'
     else:
         # python2, compress a string:
         comp_str = zlib.compress(in_str)
-    return comp_str
+        file_mode = 'w'
+    return comp_str, file_mode
 
 def write_js_placeholders(img_dict, file_obj=None, dict_depth=None, selector_prefix=None,
                           style='horiz dropdowns', level_names=False,

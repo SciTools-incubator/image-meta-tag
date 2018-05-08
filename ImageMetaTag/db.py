@@ -292,7 +292,7 @@ def read_db_file_to_mem(db_file, timeout=DEFAULT_DB_TIMEOUT):
     dbcn, _ = open_db_file(db_file, timeout=timeout)
     memfile = StringIO()
     for line in dbcn.iterdump():
-        memfile.write('%s\n' % line)
+        memfile.write(u'{}\n'.format(line))
     dbcn.close()
     memfile.seek(0)
 

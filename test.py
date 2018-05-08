@@ -65,9 +65,12 @@ def get_webdir():
 
     return webdir
 
-def define_imt_db():
+def define_imt_db(wipe=False):
     'Defines the main database file to use to the image metadate:'
     imt_db = '{}/imt.db'.format(get_webdir())
+    if wipe and os.path.isfile(imt_db):
+        os.remove(imt_db)
+
     return imt_db
 
 def get_user_and_email():
@@ -478,10 +481,10 @@ def __main__():
     img_savedir = os.path.join(webdir, 'images')
     mkdir_p(img_savedir)
 
-    test_zlib_compression = False
+    test_zlib_compression = True
 
     # a database to store the image metadata, as we write them:
-    imt_db = define_imt_db()
+    imt_db = define_imt_db(wipe=not args.skip_plotting)
 
     if not os.path.isfile(LOGO_FILE):
         raise ValueError('No logo file found at: %s' % LOGO_FILE)
@@ -1123,10 +1126,10 @@ def __main__():
         db_img_list, db_images_and_tags = imt.db.read(bigdb)
         img_list = sorted(biggus_dictus.keys())
         db_img_list.sort()
-        if not img_list == db_img_list:
+        if img_list != db_img_list:
             msg = 'List of plots differ between memory and database versions of big dict'
             raise ValueError(msg)
-        if not biggus_dictus == db_images_and_tags:
+        if biggus_dictus != db_images_and_tags:
             msg = 'images_and_tags differ between memory and database versions of big dict'
             raise ValueError(msg)
 
