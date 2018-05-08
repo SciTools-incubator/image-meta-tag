@@ -153,7 +153,7 @@ class ImageDict(object):
 
     def dict_union(self, in_dict, new_dict):
         'produces the union of a dictionary of dictionaries'
-        for key, val in new_dict.iteritems():
+        for key, val in new_dict.items():
             if not isinstance(val, dict):
                 in_dict[key] = val
             else:
@@ -166,7 +166,7 @@ class ImageDict(object):
         but needs to be converted to a dict when it's called:
         new_dict = dict(mergdicts(dict1,dict))
         '''
-        for k in set(dict1.keys()).union(dict2.keys()):
+        for k in set(dict1.keys()).union(list(dict2.keys())):
             if k in dict1 and k in dict2:
                 if isinstance(dict1[k], dict) and isinstance(dict2[k], dict):
                     yield (k, dict(self.mergedicts(dict1[k], dict2[k])))
@@ -213,13 +213,13 @@ class ImageDict(object):
         This can leave empty branches, at multiple levels of the dict,
         so needs cleaning up afterwards.
         '''
-        for key, val in rm_dict.iteritems():
+        for key, val in rm_dict.items():
             if isinstance(val, dict):
                 # descend further up into the dictionary tree structure:
                 self.dict_remove(in_dict.setdefault(key, {}), val)
             else:
                 # if the key is in the in_dict at this level, remove it:
-                if key in in_dict.keys():
+                if key in list(in_dict.keys()):
                     in_dict.pop(key)
 
     def dict_prune(self, in_dict, dicts_pruned=False):
@@ -229,10 +229,10 @@ class ImageDict(object):
         Returns True if a dict was pruned, False if not.
         '''
         pop_list = []
-        for key, val in in_dict.iteritems():
+        for key, val in in_dict.items():
             if isinstance(val, dict):
                 # descend further up into the dictionary tree structure:
-                if len(val.keys()) > 0:
+                if len(list(val.keys())) > 0:
                     dicts_pruned = self.dict_prune(val, dicts_pruned=dicts_pruned)
                 else:
                     pop_list.append(key)
@@ -250,7 +250,7 @@ class ImageDict(object):
         'recursively details a dictionary of dictionaries, with indentation, to a string'
         n_spaces = 2 # number of spaces to indent, per level
         # loop over the defined list of keys, to present in them in the current sorted order.
-        for key, value in in_dict.iteritems():
+        for key, value in in_dict.items():
             outstr = '%s%s%s:\n' % (outstr, ' '*indent*n_spaces, key)
             if isinstance(value, dict):
                 outstr = self.dict_print(value, indent=indent+1, outstr=outstr)
@@ -280,13 +280,13 @@ class ImageDict(object):
         'Recursively finds the depth of a ImageDict and returns a list of lists'
         if not isinstance(in_dict, dict) or not in_dict:
             return depth
-        return [self.dict_depths(n_dict, depth+1) for (_n_key, n_dict) in in_dict.iteritems()]
+        return [self.dict_depths(n_dict, depth+1) for (_n_key, n_dict) in in_dict.items()]
 
     def flatten_lists(self, in_list):
         'Recursively flattens a list of lists:'
         for list_element in in_list:
             if isinstance(list_element, collections.Iterable) and \
-               not isinstance(list_element, basestring):
+               not isinstance(list_element, str):
                 for sub_list in self.flatten_lists(list_element):
                     yield sub_list
             else:
@@ -309,7 +309,7 @@ class ImageDict(object):
         keys, subdirs = self.keys_by_depth(self.dict)
 
         out_keys = {}
-        for level in keys.keys():
+        for level in list(keys.keys()):
             # convert to a sorted list:
             out_keys[level] = sorted(list(keys[level]))
 
@@ -346,9 +346,9 @@ class ImageDict(object):
     def key_at_depth(self, in_dict, depth):
         'returns the keys of a dictionary, at a given depth'
         if depth > 0:
-            return [key for subdict in in_dict.itervalues() for key in self.key_at_depth(subdict, depth-1)]
+            return [key for subdict in in_dict.values() for key in self.key_at_depth(subdict, depth-1)]
         else:
-            return in_dict.keys()
+            return list(in_dict.keys())
 
     def return_key_inds(self, in_dict, out_array=None, this_set_of_inds=None,
                         depth=None, level=None, verbose=False, devmode=False):
@@ -357,10 +357,10 @@ class ImageDict(object):
         the keys to a current list, and branching where required, and adding
         compelted lists to the out_array
         '''
-        for key, value in in_dict.iteritems():
+        for key, value in in_dict.items():
             if verbose:
-                print 'IN: level: %s, before changes: %s, key "%s" in %s' \
-                        % (level, this_set_of_inds, key, self.keys[level])
+                print('IN: level: %s, before changes: %s, key "%s" in %s' \
+                        % (level, this_set_of_inds, key, self.keys[level]))
 
             if isinstance(value, dict):
                 # make a note of which key it is:
@@ -374,8 +374,8 @@ class ImageDict(object):
                     if level+1 < depth:
                         level += 1
                         if verbose:
-                            print 'new setting: %s' % this_set_of_inds
-                            print 'out_array: %s' % out_array
+                            print('new setting: %s' % this_set_of_inds)
+                            print('out_array: %s' % out_array)
                         # and recurse, to the next level if needed:
                         self.return_key_inds(value, out_array=out_array,
                                              this_set_of_inds=this_set_of_inds,
@@ -391,8 +391,8 @@ class ImageDict(object):
                     branched_set_of_inds = deepcopy(this_set_of_inds)
                     branched_set_of_inds[branched_level-1] = self.keys[branched_level-1].index(key)
                     if verbose:
-                        print 'new setting: %s' % this_set_of_inds
-                        print 'out_array: %s' % out_array
+                        print('new setting: %s' % this_set_of_inds)
+                        print('out_array: %s' % out_array)
                     # and recurse:
                     self.return_key_inds(value, out_array=out_array,
                                          this_set_of_inds=branched_set_of_inds,
@@ -422,7 +422,7 @@ class ImageDict(object):
                     # again, we shouldn't ever get here:
                     if devmode:
                         pdb.set_trace() #@@@
-                        print 'stop here' #@@@
+                        print('stop here') #@@@
                     else:
                         msg = 'Error recursing through the plot dictionary: '
                         msg += 'key not found in top level!'
@@ -508,9 +508,9 @@ class ImageDict(object):
                         msg = 'Keys for plot dictionary level "%s" ' % self.keys[i_key]
                         msg += 'do not match the "T+" (or None) pattern'
                         if devmode:
-                            print msg
+                            print(msg)
                             pdb.set_trace()
-                            print 'stop'
+                            print('stop')
                         else:
                             raise ValueError(msg)
                     # now either sort, or reverse sort, using the value as the key:
@@ -545,7 +545,7 @@ class ImageDict(object):
                     metre_patterns_scalings = [(r'([0-9.eE+-]{1,})[\s]{,}m$', 1.0),
                                                (r'([0-9.eE+-]{1,})[\s]{,}mm$', 1.0e-3),
                                                (r'([0-9.eE+-]{1,})[\s]{,}microns$', 1.0e-6),
-                                               (r'([0-9.eE+-]{1,})[\s]{,}\mum$', 1.0-6),
+                                               (r'([0-9.eE+-]{1,})[\s]{,}\\mum$', 1.0-6),
                                                (r'([0-9.eE+-]{1,})[\s]{,}nm$', 1.0e-9),
                                                (r'([0-9.eE+-]{1,})[\s]{,}km$', 1000.0)]
 
@@ -597,7 +597,7 @@ class ImageDict(object):
                                             _ = float(item_match.group(1)) * scaling
                                         except Exception:
                                             msg = 'unable to float("{}") with pattern "{}"'
-                                            print msg.format(item, pattern)
+                                            print(msg.format(item, pattern))
                                             pdb.set_trace()
                                     as_float = float(item_match.group(1)) * scaling
                                     labels_and_values.append((item, as_float))
@@ -732,7 +732,7 @@ def dict_heirachy_from_list(in_dict, payload, heirachy):
     Returns False if the input dict does not contain the required keys.
     '''
     for level in heirachy:
-        if not level in in_dict.keys():
+        if not level in list(in_dict.keys()):
             return False
 
     out_dict = {in_dict[heirachy[-1]]: payload}
@@ -793,7 +793,7 @@ def dict_split(in_dict, n_split=None, size_split=None, extra_opts=None):
             raise ValueError(msg)
 
         iterdict = iter(in_dict)
-        for i in xrange(0, len(in_dict), size_split):
+        for i in range(0, len(in_dict), size_split):
 
             out_dict = {k:in_dict[k] for k in islice(iterdict, size_split)}
 
@@ -860,12 +860,12 @@ def simple_dict_filter(simple_dict, tests, raise_key_mismatch=False):
                 # None here means no filter is applied:
                 pass
             else:
-                if test not in simple_dict.keys():
+                if test not in list(simple_dict.keys()):
                     msg = 'Specified filter test "{}" not a property of the input dict "{}"'
                     if raise_key_mismatch:
                         raise ValueError(msg.format(test, simple_dict))
                     else:
-                        print msg.format(test, simple_dict)
+                        print(msg.format(test, simple_dict))
                         return (False, False, False)
                 if isinstance(tests[test], list):
                     # simple test, does it meet the normal criteria:
@@ -929,6 +929,6 @@ def check_for_required_keys(img_info, req_keys):
     Returns True or False accordingly.
     '''
     for key in req_keys:
-        if key not in img_info.keys():
+        if key not in list(img_info.keys()):
             return False
     return True

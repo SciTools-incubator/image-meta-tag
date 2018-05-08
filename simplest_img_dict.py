@@ -38,16 +38,16 @@ def __main__():
     # Now load in the database:
     tag_str = []
     img_list, images_and_tags = imt.db.read(imt_db, required_tags=img_tags, tag_strings=tag_str)
-    # we have supplied the database read with the image tags we expect, and an empty list of values
-    # so that we can construct what is returned (and therefore the ImageDict) in a memory
-    # efficient way.
+    # we have supplied the database read with the image tags we expect, and an empty
+    # list of values so that we can construct what is returned (and therefore the ImageDict)
+    # in a memory efficient way.
 
     # the img_list is a list of the images in the databse file:
-    print img_list
+    print(img_list)
 
     # now assemble the ImageDict in the simple way. See test.py for parallel versions etc.
     img_dict = None
-    for img_file, img_info in images_and_tags.iteritems():
+    for img_file, img_info in images_and_tags.items():
         # make a temporary ordered dictionary for this image:
         tmp_dict = imt.dict_heirachy_from_list(img_info, img_file, img_tags)
         if not img_dict:
@@ -57,7 +57,7 @@ def __main__():
             # append this tmp_dict to the ImageDict
             img_dict.append(imt.ImageDict(tmp_dict))
     # printing the img_dict will show it's heirachy (but is a lot of text):
-    print img_dict
+    print(img_dict)
     # now sort the keys of each level of the ImageDict according to the sort_method
     img_dict.sort_keys(sort_methods)
 
@@ -75,7 +75,7 @@ def __main__():
                                 postamble=webpage_postamble)
 
     # and sign off as completed:
-    print 'completed, using ImageMetaTag at {}'.format(imt.__path__[0])
+    print('completed, using ImageMetaTag at {}'.format(imt.__path__[0]))
 
 if __name__ == '__main__':
     __main__()

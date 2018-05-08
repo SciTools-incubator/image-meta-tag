@@ -17,7 +17,7 @@ from ImageMetaTag.img_dict import readmeta_from_image, check_for_required_keys
 
 from datetime import datetime
 import numpy as np
-from cStringIO import StringIO
+from io import StringIO
 
 # the name of the database table that holds the sqlite database of plot metadata
 SQLITE_IMG_INFO_TABLE = 'img_info'
@@ -120,8 +120,8 @@ def read(db_file, required_tags=None, tag_strings=None,
                 except sqlite3.OperationalError as op_err:
                     if 'database is locked' in op_err.message:
                         # database being locked is what the retries and timeouts are for:
-                        print '%s database timeout reading from file "%s", %s s' \
-                                % (dt_now_str(), db_file, n_tries * db_timeout)
+                        print('%s database timeout reading from file "%s", %s s' \
+                                % (dt_now_str(), db_file, n_tries * db_timeout))
                         n_tries += 1
                     elif op_err.message == 'no such table: {}'.format(SQLITE_IMG_INFO_TABLE):
                         # the db file exists, but it doesn't have anything in it:
@@ -171,7 +171,7 @@ def merge_db_files(main_db_file, add_db_file, delete_add_db=False,
                     # open the main database
                     dbcn, dbcr = open_db_file(main_db_file, timeout=db_timeout)
                     # and add in the new contents:
-                    for add_file, add_info in add_tags.iteritems():
+                    for add_file, add_info in add_tags.items():
                         write_img_to_open_db(dbcr, add_file, add_info,
                                              attempt_replace=attempt_replace)
                     dbcn.commit()
@@ -182,8 +182,8 @@ def merge_db_files(main_db_file, add_db_file, delete_add_db=False,
                 except sqlite3.OperationalError as op_err:
                     if 'database is locked' in op_err.message:
                         # database being locked is what the retries and timeouts are for:
-                        print '%s database timeout writing to file "%s", %s s' \
-                                        % (dt_now_str(), main_db_file, n_tries * db_timeout)
+                        print('%s database timeout writing to file "%s", %s s' \
+                                        % (dt_now_str(), main_db_file, n_tries * db_timeout))
                         n_tries += 1
                     else:
                         # everything else needs to be reported and raised immediately:
@@ -239,7 +239,7 @@ def create_table_for_img_info(dbcr, img_info):
     'Creates a database table, in a database cursor, to store for the input img_info'
 
     create_command = 'CREATE TABLE {}(fname TEXT PRIMARY KEY,'.format(SQLITE_IMG_INFO_TABLE)
-    for key in img_info.keys():
+    for key in list(img_info.keys()):
         create_command += ' "{}" TEXT,'.format(info_key_to_db_name(key))
     create_command = create_command[0:-1] + ')'
     # Can make a rare race condition if multiple processes try to create the file at the same time;
@@ -292,7 +292,7 @@ def read_db_file_to_mem(db_file, timeout=DEFAULT_DB_TIMEOUT):
     dbcn, _ = open_db_file(db_file, timeout=timeout)
     memfile = StringIO()
     for line in dbcn.iterdump():
-        memfile.write('%s\n' % line)
+        memfile.write(u'{}\n'.format(line))
     dbcn.close()
     memfile.seek(0)
 
@@ -323,7 +323,7 @@ def write_img_to_open_db(dbcr, filename, img_info, add_strict=False, attempt_rep
     # now build the command
     add_command = 'INSERT INTO {}(fname,'.format(SQLITE_IMG_INFO_TABLE)
     add_list = [filename]
-    for key, item in img_info.iteritems():
+    for key, item in img_info.items():
         if key in field_names:
             add_command += ' "{}",'.format(info_key_to_db_name(key))
             add_list.append(item)
@@ -348,7 +348,7 @@ def write_img_to_open_db(dbcr, filename, img_info, add_strict=False, attempt_rep
 def list_tables(dbcr):
     'lists the tables present, from a database cursor'
     result = dbcr.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
-    table_names = sorted(zip(*result)[0])
+    table_names = sorted([x[0] for x in zip(*result)])
     return table_names
 
 def read_img_info_from_dbcursor(dbcr, required_tags=None, tag_strings=None):
@@ -537,7 +537,7 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
                                         if not skip_warning:
                                             msg = ('WARNING: Unable to delete file entry "{}" from'
                                                    ' database "{}" as database table is missing')
-                                            print msg.format(fname, db_file)
+                                            print(msg.format(fname, db_file))
                                         return
                                     else:
                                         if not skip_warning:
@@ -545,7 +545,7 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
                                             # need to figure out why this happens
                                             msg = ('WARNING: unable to delete file entry:'
                                                    ' "{}", type "{}" from database')
-                                            print msg.format(fname, type(fname))
+                                            print(msg.format(fname, type(fname)))
                             dbcn.commit()
                             # if we got here, then we're good!
                             wrote_db = True
@@ -554,8 +554,8 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
                         except sqlite3.OperationalError as op_err:
                             if 'database is locked' in op_err.message:
                                 # database being locked is what the retries and timeouts are for:
-                                print '%s database timeout deleting from file "%s", %s s' \
-                                                % (dt_now_str(), db_file, n_tries * db_timeout)
+                                print('%s database timeout deleting from file "%s", %s s' \
+                                                % (dt_now_str(), db_file, n_tries * db_timeout))
                                 n_tries += 1
                             elif 'disk I/O error' in op_err.message:
                                 msg = '{} for file {}'.format(op_err.message, db_file)
@@ -583,7 +583,7 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
                             # need to figure out why this happens
                             msg = ('WARNING: unable to delete file entry:'
                                    ' "{}", type "{}" from database')
-                            print msg.format(fname, type(fname))
+                            print(msg.format(fname, type(fname)))
                     # commit every 100 to give other processes a chance:
                     if i_fn % 100 == 0:
                         dbcn.commit()
@@ -636,7 +636,7 @@ def select_dbcr_by_tags(dbcr, select_tags):
         return read_img_info_from_dbcursor(dbcr)
     else:
         # convert these to lists:
-        tag_names = select_tags.keys()
+        tag_names = list(select_tags.keys())
         tag_values = [select_tags[x] for x in tag_names]
         # Right... this is where I need to understand how to do a select!
         #select_command = 'SELECT * FROM %s WHERE symbol=?' % SQLITE_IMG_INFO_TABLE
@@ -644,7 +644,7 @@ def select_dbcr_by_tags(dbcr, select_tags):
         n_tags = len(tag_names)
 
         use_tag_values = []
-        for i_tag, tag_name, tag_val in zip(range(n_tags), tag_names, tag_values):
+        for i_tag, tag_name, tag_val in zip(list(range(n_tags)), tag_names, tag_values):
             if isinstance(tag_val, (list, tuple)):
                 # if a list or tuple, then use IN:
                 select_command += '%s IN (' % info_key_to_db_name(tag_name)
@@ -703,7 +703,7 @@ def scan_dir_for_db(basedir, db_file, img_tag_req=None, subdir_excl_list=None,
 is True, in which case the database file will be restarted as empty. Use with care.''')
 
     if known_file_tags is not None:
-        known_files = known_file_tags.keys()
+        known_files = list(known_file_tags.keys())
     else:
         known_files = []
 
@@ -759,7 +759,7 @@ is True, in which case the database file will be restarted as empty. Use with ca
                             first_img = False
                         write_img_to_open_db(db_cr, img_name, img_info)
                         if verbose:
-                            print img_name
+                            print(img_name)
 
                         if return_timings:
                             n_added += 1
@@ -773,8 +773,8 @@ is True, in which case the database file will be restarted as empty. Use with ca
                                 add_interval = np.ceil(np.sqrt(n_added))
                                 n_add_this_timer = 0
                                 if verbose:
-                                    print 'len(n_adds)=%s, currently every %s' \
-                                            % (len(n_adds), add_interval)
+                                    print('len(n_adds)=%s, currently every %s' \
+                                            % (len(n_adds), add_interval))
 
     # commit and close, and we are done:
     if not first_img:
