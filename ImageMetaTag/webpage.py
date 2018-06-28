@@ -213,12 +213,18 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
 {0}    margin: 0;
 {0}    padding: 0;
 {0}  }}
-{0}  textarea, p, blockquote, th, td {{
+{0}  textarea, p, blockquote {{
+{0}    margin: 0;
+{0}   padding: 0;
+{0}  }}
+{0}  th, td {{
 {0}    margin: 0;
 {0}    padding: 0;
+{0}    vertical-align: top;
 {0}  }}
 {0}  fieldset, img {{
 {0}    border: 0 none;
+{0}    vertical-align: top;
 {0}  }}
 {0}  body {{
 {0}    font: 12px Myriad,Helvetica,Tahoma,Arial,clean,sans-serif;
