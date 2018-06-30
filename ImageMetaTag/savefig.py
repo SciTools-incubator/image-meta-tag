@@ -207,10 +207,10 @@ def image_file_postproc(filename, outfile=None, img_buf=None, img_converter=0,
     * logo_padding - a number of pixels to pad around the logo (default to zero)
     * logo_pos - corner position of the logo (following pyplot.legend, but for corners):
                * 0: 'best' in this context will be upper left (default)
-               * TODO: 1: 'upper right'
-               * 2: 'upper left'
-               * TODO: 3: 'lower left'
-               * TODO: 4: 'lower right'
+               * 1: 'upper right' (image grows in width to fit)
+               * 2: 'upper left' (image grows in width to fit)
+               * 3: 'lower left' (image grows in height to fit)
+               * 4: 'lower right' (image grows in height to fit)
     * do_thumb - switch to produce default sized thumbnail, or integer/tuple to define the \
                  maximum size in pixels
     * img_tags: a dictionary of tags to be added to the image metadata
@@ -390,63 +390,89 @@ def _im_logo(im_obj, logo_file, logo_width, logo_padding, logo_pos):
     else:
         res_logo_obj = logo_obj
 
-    # TODO: this is written for putting a logo in the top-left corner, but could be extended:
+    # now pull out a sub image from the main image, that's just where the logo would go,
+    # it it were this is the size we want to have blank, to put the logo, including padding:
+    req_logo_size = [x + 2*logo_padding for x in res_logo_obj.size]
     if logo_pos in [0, 2]:
-
-        # now pull out a sub image from the main image, that's just where the logo would go,
-        # it it were this is the size we want to have blank, to put the logo, including padding:
-        req_logo_size = [x + 2*logo_padding for x in res_logo_obj.size]
-
-        corner_obj = im_obj.crop((0, 0, req_logo_size[0], req_logo_size[1]))
-        #
-        # now get a bounding box as though we were trimming this image:
-        backg = Image.new(corner_obj.mode, corner_obj.size, corner_obj.getpixel((0, 0)))
-        # do an image difference:
-        diff = ImageChops.difference(corner_obj, backg)
-        # add it together
-        diff = ImageChops.add(diff, diff, 1.0, -100)
-        # and see what the bbox is of that...
-        bbox = diff.getbbox()
-
-#        # get the offset in x and y:
-#        if bbox is None:
-#            # the corner object is empty so no need to offset:
-#            offsets = (0,0)
-#        else:
-#            offsets = (req_logo_size[0] - bbox[0], req_logo_size[1] - bbox[1])
-#        # but you only ever need to offset in one direction (the shortest one):
-#        offset = min(offsets)
-#        offset_ind = offsets.index(offset)
-
-        # as this is the top left corner of a plot, the logo should be offset only
-        # in x (so the title is still at the top)
-        if bbox is None:
-            # the corner object is empty so no need to offset:
-            offset = 0
-        else:
-            offset = req_logo_size[0] - bbox[0]
-        offset_ind = 0
-
-
-        # now put that together to make an image:
-
-        # create the blank image:
-        new_size = list(im_obj.size)
-        new_size[offset_ind] += offset
-        new_obj = Image.new(im_obj.mode, new_size, im_obj.getpixel((0, 0)))
-
-        # now put the main image into it, offset:
-        if offset_ind == 0:
-            offsets = (offset, 0)
-        else:
-            offsets = (0, offset)
-        new_obj.paste(im_obj, offsets)
-        # and put the rescaled logo onto it too, in the right place:
-        new_obj.paste(res_logo_obj, (logo_padding, logo_padding))
-
+        corner_coords = (0, 0, req_logo_size[0], req_logo_size[1])
+    elif logo_pos == 1:
+        corner_coords = (im_obj.size[0] - req_logo_size[0], 0,
+                         im_obj.size[0], req_logo_size[1])
+    elif logo_pos == 3:
+        corner_coords = (0, im_obj.size[1] - req_logo_size[1],                         req_logo_size[0], im_obj.size[1])
+    elif logo_pos == 4:
+        corner_coords = (im_obj.size[0] - req_logo_size[0],
+                         im_obj.size[1] - req_logo_size[1],
+                         im_obj.size[0], im_obj.size[1])
     else:
-        msg = 'logo positions other than 0 and 2 (both top left) have not been implemented yet'
-        raise NotImplementedError(msg)
+        msg = 'logo_pos={} is invalid. Valid options in range 0 to 4'
+        raise ValueError(msg)
+    corner_obj = im_obj.crop(corner_coords)
+
+    # now get a bounding box as though we were trimming this image:
+    backg = Image.new(corner_obj.mode, corner_obj.size, corner_obj.getpixel((0, 0)))
+    # do an image difference:
+    diff = ImageChops.difference(corner_obj, backg)
+    # add it together
+    diff = ImageChops.add(diff, diff, 1.0, -100)
+    # we should do something sophisticated, and look at each row, and see Where
+    # it could fit, minimise the distance to go  etc...
+    # instead, see what the bbox is of that...
+    bbox = diff.getbbox()
+
+    if bbox is None:
+        # the corner object is empty so no need to offset:
+        offset_x = 0
+        offset_y = 0
+    else:
+        if logo_pos in [0, 2]:
+            # as this is the top left corner of a plot, the logo should be offset only
+            # in x (so the title is still at the top)
+            offset_x = req_logo_size[0] - bbox[0]
+            offset_y = 0
+        elif logo_pos == 1:
+            # top right, again just in x
+            offset_x = bbox[2]
+            offset_y = 0
+        elif logo_pos in [3, 4]:
+            # both of these are on the bottom, so drop the logo downwards:
+            offset_x = 0
+            offset_y = bbox[3]
+    # now put that together to make an image:
+    # create the blank image:
+    new_size = list(im_obj.size)
+    new_size[0] += offset_x
+    new_size[1] += offset_y
+    new_obj = Image.new(im_obj.mode, new_size, im_obj.getpixel((0, 0)))
+
+    # put in the main image and logo at the required positions
+    if logo_pos in [0, 2]:
+        # main image is offset by x and y:
+        im_coords = (offset_x, offset_y)
+        # logo pops in the corner, padded:
+        logo_coords = (logo_padding, logo_padding)
+    elif logo_pos == 1:
+        # main image starts immediately in x, and offset_y in y:
+        im_coords = (0, offset_y)
+        # the logo goes in the top right corner, offset/padded:
+        logo_coords = (new_size[0] - req_logo_size[0] + logo_padding,
+                       logo_padding)
+    elif logo_pos == 3:
+        # main image at the top, but can be offset in x:
+        im_coords = (offset_x, 0)
+        # logo
+        logo_coords = (logo_padding,
+                       new_size[1] - req_logo_size[1] + logo_padding)
+    elif logo_pos == 4:
+        # main image must start at 0,0
+        im_coords = (0, 0)
+        # logo needs to go in the bottom right, padded:
+        logo_coords = (new_size[0] - req_logo_size[0] + logo_padding,
+                       new_size[1] - req_logo_size[1] + logo_padding)
+
+    # now put that together to make an image:
+    new_obj.paste(im_obj, im_coords)
+    new_obj.paste(res_logo_obj, logo_coords)
 
     return new_obj
 
