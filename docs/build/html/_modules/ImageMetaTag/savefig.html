@@ -264,19 +264,20 @@
 <span class="sd">    * do_trim - switch to trim whitespace from the edge of the image</span>
 <span class="sd">    * trim_border - if do_trim then this can be used to define an integer number of pixels as a \</span>
 <span class="sd">                    border around the trim.</span>
-<span class="sd">    * logo_file - a file to use as a logo, to be added to the image</span>
-<span class="sd">    * logo_width - the desired width of the logo, in pixels. If the supplied image file is not \</span>
-<span class="sd">                   the right size, it will be resized using a method that applies filters and \</span>
-<span class="sd">                   antialiasing that works well for shrinking images with text to a much \</span>
+<span class="sd">    * logo_file - a file, or list of files, to use as a logo (s), to be added to the image</span>
+<span class="sd">    * logo_width - the desired width of each single logo, in pixels. If the supplied image file \</span>
+<span class="sd">                   is not the right size, it will be resized using a method that applies filters \</span>
+<span class="sd">                   and antialiasing that works well for shrinking images with text to a much \</span>
 <span class="sd">                   smaller size. The aspect ratio of the logo image is always maintained. \</span>
 <span class="sd">                   Defaults to 40 pixels.</span>
 <span class="sd">    * logo_padding - a number of pixels to pad around the logo (default to zero)</span>
-<span class="sd">    * logo_pos - corner position of the logo (following pyplot.legend, but for corners):</span>
-<span class="sd">               * 0: &#39;best&#39; in this context will be upper left (default)</span>
-<span class="sd">               * 1: &#39;upper right&#39; (image grows in width to fit)</span>
-<span class="sd">               * 2: &#39;upper left&#39; (image grows in width to fit)</span>
-<span class="sd">               * 3: &#39;lower left&#39; (image grows in height to fit)</span>
-<span class="sd">               * 4: &#39;lower right&#39; (image grows in height to fit)</span>
+<span class="sd">    * logo_pos - corner, or list of corners, of the logo(s) (following pyplot.legend,\</span>
+<span class="sd">                 but for corners):</span>
+<span class="sd">                  * 0: &#39;best&#39; in this context will be upper left (default)</span>
+<span class="sd">                  * 1: &#39;upper right&#39; (image grows in width to fit)</span>
+<span class="sd">                  * 2: &#39;upper left&#39; (image grows in width to fit)</span>
+<span class="sd">                  * 3: &#39;lower left&#39; (image grows in height to fit)</span>
+<span class="sd">                  * 4: &#39;lower right&#39; (image grows in height to fit)</span>
 <span class="sd">    * do_thumb - switch to produce default sized thumbnail, or integer/tuple to define the \</span>
 <span class="sd">                 maximum size in pixels</span>
 <span class="sd">    * img_tags: a dictionary of tags to be added to the image metadata</span>
@@ -328,7 +329,7 @@
         <span class="n">im_obj</span> <span class="o">=</span> <span class="n">_im_trim</span><span class="p">(</span><span class="n">im_obj</span><span class="p">,</span> <span class="n">border</span><span class="o">=</span><span class="n">trim_border</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">logo_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">im_obj</span> <span class="o">=</span> <span class="n">_im_logo</span><span class="p">(</span><span class="n">im_obj</span><span class="p">,</span> <span class="n">logo_file</span><span class="p">,</span> <span class="n">logo_width</span><span class="p">,</span> <span class="n">logo_padding</span><span class="p">,</span> <span class="n">logo_pos</span><span class="p">)</span>
+        <span class="n">im_obj</span> <span class="o">=</span> <span class="n">_im_logos</span><span class="p">(</span><span class="n">im_obj</span><span class="p">,</span> <span class="n">logo_file</span><span class="p">,</span> <span class="n">logo_width</span><span class="p">,</span> <span class="n">logo_padding</span><span class="p">,</span> <span class="n">logo_pos</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">do_thumb</span><span class="p">:</span>
         <span class="c1"># make a thumbnail image here, if required. It is important to do this</span>
@@ -444,17 +445,55 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">im_obj</span>
 
+<span class="k">def</span> <span class="nf">_im_logos</span><span class="p">(</span><span class="n">im_obj</span><span class="p">,</span> <span class="n">logo_files</span><span class="p">,</span> <span class="n">logo_width</span><span class="p">,</span> <span class="n">logo_padding</span><span class="p">,</span> <span class="n">logo_poss</span><span class="p">):</span>
+    <span class="s1">&#39;adds logo or logos to the corners of an image object (usually after an im_trim)&#39;</span>
+
+    <span class="c1"># work out what logo files go in what corners:</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">logo_files</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">logo_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">logo_files</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">logo_poss</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">logo_poss</span> <span class="o">=</span> <span class="p">[</span><span class="n">logo_poss</span><span class="p">]</span>
+    <span class="n">logos_by_corner</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">logo_file</span><span class="p">,</span> <span class="n">logo_pos</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">logo_files</span><span class="p">,</span> <span class="n">logo_poss</span><span class="p">):</span>
+        <span class="c1"># at this stage, each logo_file should be a string</span>
+        <span class="c1"># pointing to a file</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">logo_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;logo file specifier not a string - should be a path but is </span><span class="si">{}</span><span class="s1">&#39;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">logo_file</span><span class="p">))</span>
+        <span class="c1"># and logo_pos should be an intger:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">logo_pos</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;logo position specified not an int, but is </span><span class="si">{}</span><span class="s1">&#39;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">logo_pos</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">logo_pos</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">logos_by_corner</span><span class="p">:</span>
+            <span class="n">logos_by_corner</span><span class="p">[</span><span class="n">logo_pos</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">logo_file</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logos_by_corner</span><span class="p">[</span><span class="n">logo_pos</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">logo_file</span><span class="p">)</span>
+    <span class="c1"># now add them:</span>
+    <span class="k">for</span> <span class="n">logo_pos</span><span class="p">,</span> <span class="n">logo_file</span> <span class="ow">in</span> <span class="n">logos_by_corner</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">logo_file</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">logo_file</span> <span class="o">=</span> <span class="n">logo_file</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># multiple files get merged before adding:</span>
+            <span class="n">logo_file</span> <span class="o">=</span> <span class="n">_logo_merge</span><span class="p">(</span><span class="n">logo_file</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">logo_width</span><span class="p">),</span> <span class="n">logo_padding</span><span class="p">,</span>
+                                    <span class="n">im_obj</span><span class="o">.</span><span class="n">getpixel</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)))</span>
+        <span class="n">im_obj</span> <span class="o">=</span> <span class="n">_im_logo</span><span class="p">(</span><span class="n">im_obj</span><span class="p">,</span> <span class="n">logo_file</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">logo_width</span><span class="p">),</span>
+                          <span class="n">logo_padding</span><span class="p">,</span> <span class="n">logo_pos</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">im_obj</span>
+
 <span class="k">def</span> <span class="nf">_im_logo</span><span class="p">(</span><span class="n">im_obj</span><span class="p">,</span> <span class="n">logo_file</span><span class="p">,</span> <span class="n">logo_width</span><span class="p">,</span> <span class="n">logo_padding</span><span class="p">,</span> <span class="n">logo_pos</span><span class="p">):</span>
     <span class="s1">&#39;adds a logo to the required corner of an image object (usually after an im_trim)&#39;</span>
 
-    <span class="c1"># load in the logo file image:</span>
-    <span class="n">logo_obj</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">logo_file</span><span class="p">)</span>
-    <span class="c1"># rescale to the new width and height:</span>
-    <span class="k">if</span> <span class="n">logo_width</span> <span class="o">!=</span> <span class="n">logo_obj</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-        <span class="n">logo_height</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">logo_obj</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="n">logo_width</span><span class="p">)</span> <span class="o">/</span> <span class="n">logo_obj</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="n">res_logo_obj</span> <span class="o">=</span> <span class="n">_img_stong_resize</span><span class="p">(</span><span class="n">logo_obj</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">logo_width</span><span class="p">,</span> <span class="n">logo_height</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">logo_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># somehow got here with a None, do nothing:</span>
+        <span class="k">return</span> <span class="n">im_obj</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">logo_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="c1"># load in and resize the logo file image:</span>
+        <span class="n">res_logo_obj</span> <span class="o">=</span> <span class="n">resize_logo</span><span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">logo_file</span><span class="p">),</span> <span class="n">logo_width</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">res_logo_obj</span> <span class="o">=</span> <span class="n">logo_obj</span>
+        <span class="c1"># assume this is a pre-loaded/resized logo image:</span>
+        <span class="n">res_logo_obj</span> <span class="o">=</span> <span class="n">logo_file</span>
 
     <span class="c1"># now pull out a sub image from the main image, that&#39;s just where the logo would go,</span>
     <span class="c1"># it it were this is the size we want to have blank, to put the logo, including padding:</span>
@@ -465,7 +504,8 @@
         <span class="n">corner_coords</span> <span class="o">=</span> <span class="p">(</span><span class="n">im_obj</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">req_logo_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span>
                          <span class="n">im_obj</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">req_logo_size</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
     <span class="k">elif</span> <span class="n">logo_pos</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-        <span class="n">corner_coords</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">im_obj</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">req_logo_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>                         <span class="n">req_logo_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">im_obj</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">corner_coords</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">im_obj</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">req_logo_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                         <span class="n">req_logo_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">im_obj</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
     <span class="k">elif</span> <span class="n">logo_pos</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
         <span class="n">corner_coords</span> <span class="o">=</span> <span class="p">(</span><span class="n">im_obj</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">req_logo_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                          <span class="n">im_obj</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">req_logo_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
@@ -541,6 +581,48 @@
     <span class="n">new_obj</span><span class="o">.</span><span class="n">paste</span><span class="p">(</span><span class="n">res_logo_obj</span><span class="p">,</span> <span class="n">logo_coords</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">new_obj</span>
+
+<span class="k">def</span> <span class="nf">resize_logo</span><span class="p">(</span><span class="n">logo_obj</span><span class="p">,</span> <span class="n">logo_width</span><span class="p">):</span>
+    <span class="c1"># rescale to the new width and height:</span>
+    <span class="k">if</span> <span class="n">logo_width</span> <span class="o">!=</span> <span class="n">logo_obj</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="n">logo_height</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">logo_obj</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="n">logo_width</span><span class="p">)</span> <span class="o">/</span> <span class="n">logo_obj</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">res_logo_obj</span> <span class="o">=</span> <span class="n">_img_stong_resize</span><span class="p">(</span><span class="n">logo_obj</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">logo_width</span><span class="p">,</span> <span class="n">logo_height</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">res_logo_obj</span> <span class="o">=</span> <span class="n">logo_obj</span>
+    <span class="k">return</span> <span class="n">res_logo_obj</span>
+
+<span class="k">def</span> <span class="nf">_logo_merge</span><span class="p">(</span><span class="n">logo_list</span><span class="p">,</span> <span class="n">logo_width</span><span class="p">,</span> <span class="n">padding</span><span class="p">,</span> <span class="n">bg_col</span><span class="p">):</span>
+    <span class="s1">&#39;merges a list of image files horizontally, with padding (pixels)&#39;</span>
+
+    <span class="c1"># load up and files that aren&#39;t already loaded and get their dims:</span>
+    <span class="n">im_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">im_heights</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">im_widths</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">logo_file</span> <span class="ow">in</span> <span class="n">logo_list</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">logo_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">logo_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">im_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">resize_logo</span><span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">logo_file</span><span class="p">),</span> <span class="n">logo_width</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># going to assume that this is a pre-loaded image object</span>
+            <span class="c1"># as not simple to do a clean for all PIL image formats</span>
+            <span class="n">im_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">logo_file</span><span class="p">)</span>
+        <span class="n">im_widths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">im_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">im_heights</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">im_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="c1"># now create the merged image:</span>
+    <span class="n">new_size</span> <span class="o">=</span> <span class="p">[</span><span class="nb">sum</span><span class="p">(</span><span class="n">im_widths</span><span class="p">)</span> <span class="o">+</span> <span class="n">padding</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">im_heights</span><span class="p">)]</span>
+    <span class="n">merged</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">im_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">mode</span><span class="p">,</span> <span class="n">new_size</span><span class="p">,</span> <span class="n">bg_col</span><span class="p">)</span>
+    <span class="c1"># and put the images in:</span>
+    <span class="n">current_x</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i_logo</span><span class="p">,</span> <span class="n">logo_obj</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">im_list</span><span class="p">):</span>
+        <span class="c1"># vertically centre this logo:</span>
+        <span class="n">y_offset</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">new_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">logo_obj</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="c1"># add the image:</span>
+        <span class="n">merged</span><span class="o">.</span><span class="n">paste</span><span class="p">(</span><span class="n">logo_obj</span><span class="p">,</span> <span class="p">(</span><span class="n">current_x</span><span class="p">,</span> <span class="n">y_offset</span><span class="p">))</span>
+        <span class="c1"># and increment the x:</span>
+        <span class="n">current_x</span> <span class="o">+=</span> <span class="n">logo_obj</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">padding</span>
+
+    <span class="k">return</span> <span class="n">merged</span>
 
 <span class="k">def</span> <span class="nf">_im_add_png_tags</span><span class="p">(</span><span class="n">im_obj</span><span class="p">,</span> <span class="n">png_tags</span><span class="p">):</span>
     <span class="s1">&#39;adds img_tags to an image object for later saving&#39;</span>
