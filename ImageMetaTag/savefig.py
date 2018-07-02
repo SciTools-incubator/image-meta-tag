@@ -28,7 +28,7 @@ THUMB_DEFAULT_DIR_NAME = 'thumbnail'
 
 def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_border=0,
             do_thumb=False, img_tags=None, keep_open=False, dpi=None,
-            logo_file=None, logo_width=40, logo_padding=0, logo_pos=0,
+            logo_file=None, logo_width=None, logo_height=None, logo_padding=0, logo_pos=0,
             db_file=None, db_timeout=DEFAULT_DB_TIMEOUT, db_attempts=DEFAULT_DB_ATTEMPTS,
             db_replace=False, db_full_paths=False,
             verbose=False, ):
@@ -66,6 +66,7 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
     * trim_border - see :func:`ImageMetaTag.image_file_postproc`.
     * logo_file - see :func:`ImageMetaTag.image_file_postproc`.
     * logo_width - see :func:`ImageMetaTag.image_file_postproc`.
+    * logo_height - see :func:`ImageMetaTag.image_file_postproc`.
     * logo_padding - see :func:`ImageMetaTag.image_file_postproc`.
     * logo_pos - see :func:`ImageMetaTag.image_file_postproc`.
     * do_thumb - see :func:`ImageMetaTag.image_file_postproc`.
@@ -123,7 +124,8 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
 
     if img_format in POSTPROC_IMG_FORMATS:
         image_file_postproc(write_file, img_buf=buf, img_converter=img_converter, do_trim=do_trim,
-                            trim_border=trim_border, logo_file=logo_file, logo_width=logo_width,
+                            trim_border=trim_border, logo_file=logo_file,
+                            logo_width=logo_width, logo_height=logo_height,
                             logo_padding=logo_padding, logo_pos=logo_pos,
                             do_thumb=do_thumb, img_tags=use_img_tags, verbose=verbose)
     else:
@@ -176,7 +178,7 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
 
 def image_file_postproc(filename, outfile=None, img_buf=None, img_converter=0,
                         do_trim=False, trim_border=0,
-                        logo_file=None, logo_width=40, logo_padding=0, logo_pos=0,
+                        logo_file=None, logo_width=None, logo_height=None, logo_padding=0, logo_pos=0,
                         do_thumb=False, img_tags=None, verbose=False):
     '''
     Does the image post-processing for :func:`ImageMetaTag.savefig`.
@@ -203,7 +205,9 @@ def image_file_postproc(filename, outfile=None, img_buf=None, img_converter=0,
                    is not the right size, it will be resized using a method that applies filters \
                    and antialiasing that works well for shrinking images with text to a much \
                    smaller size. The aspect ratio of the logo image is always maintained. \
+                   Either logo_width or logo_height need to be specified (width overrides height). \
                    Defaults to 40 pixels.
+    * logo_height - the desired height of each logo, in pixels, instead of logo_width.
     * logo_padding - a number of pixels to pad around the logo (default to zero)
     * logo_pos - corner, or list of corners, of the logo(s) (following pyplot.legend,\
                  but for corners):
@@ -217,6 +221,17 @@ def image_file_postproc(filename, outfile=None, img_buf=None, img_converter=0,
     * img_tags: a dictionary of tags to be added to the image metadata
     * verbose: switch for verbose output (reports file sizes before/after conversion)
     '''
+
+    # if both logo_width and height are None, apply the defualt to the width:
+    if logo_height is None and logo_width is None:
+        logo_size = {'w': 40}
+    elif logo_height is None:
+        logo_size = {'w': logo_width}
+    elif logo_width is None:
+        logo_size = {'h': logo_height}
+    else:
+        # if both height and width are set, only apply the width:
+        logo_size = {'w': logo_width}
 
     # usually, this is used to overwrite a file, but an outfile can be specified:
     if not outfile:
@@ -263,7 +278,7 @@ def image_file_postproc(filename, outfile=None, img_buf=None, img_converter=0,
         im_obj = _im_trim(im_obj, border=trim_border)
 
     if logo_file is not None:
-        im_obj = _im_logos(im_obj, logo_file, logo_width, logo_padding, logo_pos)
+        im_obj = _im_logos(im_obj, logo_file, logo_size, logo_padding, logo_pos)
 
     if do_thumb:
         # make a thumbnail image here, if required. It is important to do this
@@ -379,7 +394,7 @@ def _im_trim(im_obj, border=0):
     else:
         return im_obj
 
-def _im_logos(im_obj, logo_files, logo_width, logo_padding, logo_poss):
+def _im_logos(im_obj, logo_files, logo_size, logo_padding, logo_poss):
     'adds logo or logos to the corners of an image object (usually after an im_trim)'
 
     # work out what logo files go in what corners:
@@ -409,14 +424,14 @@ def _im_logos(im_obj, logo_files, logo_width, logo_padding, logo_poss):
             logo_file = logo_file[0]
         else:
             # multiple files get merged before adding:
-            logo_file = _logo_merge(logo_file, int(logo_width), logo_padding,
+            logo_file = _logo_merge(logo_file, logo_size, logo_padding,
                                     im_obj.getpixel((0,0)))
-        im_obj = _im_logo(im_obj, logo_file, int(logo_width),
+        im_obj = _im_logo(im_obj, logo_file, logo_size,
                           logo_padding, logo_pos)
 
     return im_obj
 
-def _im_logo(im_obj, logo_file, logo_width, logo_padding, logo_pos):
+def _im_logo(im_obj, logo_file, logo_size, logo_padding, logo_pos):
     'adds a logo to the required corner of an image object (usually after an im_trim)'
 
     if logo_file is None:
@@ -424,7 +439,7 @@ def _im_logo(im_obj, logo_file, logo_width, logo_padding, logo_pos):
         return im_obj
     elif isinstance(logo_file, str):
         # load in and resize the logo file image:
-        res_logo_obj = resize_logo(Image.open(logo_file), logo_width)
+        res_logo_obj = resize_logo(Image.open(logo_file), logo_size)
     else:
         # assume this is a pre-loaded/resized logo image:
         res_logo_obj = logo_file
@@ -516,16 +531,31 @@ def _im_logo(im_obj, logo_file, logo_width, logo_padding, logo_pos):
 
     return new_obj
 
-def resize_logo(logo_obj, logo_width):
+def resize_logo(logo_obj, logo_size):
     # rescale to the new width and height:
-    if logo_width != logo_obj.size[0]:
-        logo_height = int(logo_obj.size[1] * float(logo_width) / logo_obj.size[0])
+    
+    do_resize = False
+    # either resize by width or height, keeping the aspect ratio the same
+    # so work out  height from width and vice versa:
+    if 'w' in logo_size:
+        logo_width = int(logo_size['w'])
+        if logo_width != logo_obj.size[0]:
+            logo_height = int(logo_obj.size[1] * float(logo_width) / logo_obj.size[0])
+            do_resize = True
+    elif 'h' in logo_size:
+        logo_height = int(logo_size['h'])
+        if logo_height != logo_obj.size[1]:
+            logo_width = int(logo_obj.size[0] * float(logo_height) / logo_obj.size[1])
+            do_resize = True
+    # now resize if required:
+    if do_resize:
         res_logo_obj = _img_stong_resize(logo_obj, size=(logo_width, logo_height))
     else:
         res_logo_obj = logo_obj
+        
     return res_logo_obj
 
-def _logo_merge(logo_list, logo_width, padding, bg_col):
+def _logo_merge(logo_list, logo_size, padding, bg_col):
     'merges a list of image files horizontally, with padding (pixels)'
 
     # load up and files that aren't already loaded and get their dims:
@@ -536,7 +566,7 @@ def _logo_merge(logo_list, logo_width, padding, bg_col):
         if logo_file is None:
             pass
         elif isinstance(logo_file, str):
-            im_list.append(resize_logo(Image.open(logo_file), logo_width))
+            im_list.append(resize_logo(Image.open(logo_file), logo_size))
         else:
             # going to assume that this is a pre-loaded image object
             # as not simple to do a clean for all PIL image formats
@@ -547,12 +577,23 @@ def _logo_merge(logo_list, logo_width, padding, bg_col):
     new_size = [sum(im_widths) + padding, max(im_heights)]
     merged = Image.new(im_list[0].mode, new_size, bg_col)
     # and put the images in:
+    
     current_x = 0
     for i_logo, logo_obj in enumerate(im_list):
+        # if the logo has an alpha channel, make a new version with
+        # the new background color:
+        if logo_obj.mode =='RGBA':
+            # create a new version of logo_obj with the correct background color:
+            tmp_logo = Image.new(mode='RGB', size=logo_obj.size, color=bg_col)
+            # paste the thumbnail into the full sized image
+            tmp_logo.paste(logo_obj, (0,0), mask=logo_obj.split()[3])
+        else:
+            tmp_logo = logo_obj    
+        
         # vertically centre this logo:
         y_offset = int((new_size[1] - logo_obj.size[1]) / 2)
         # add the image:
-        merged.paste(logo_obj, (current_x, y_offset))
+        merged.paste(tmp_logo, (current_x, y_offset))
         # and increment the x:
         current_x += logo_obj.size[0] + padding
 
@@ -604,7 +645,7 @@ def _img_stong_resize(img_obj, size=None):
     return res_img_obj
 
 def _img_premultiplyAlpha(img_obj):
-    'Premultiplies an input image by its alpha channel, which is useful for stron resizes'
+    'Premultiplies an input image by its alpha channel, which is useful for strong resizes'
     # fake transparent image to blend with
     transparent = Image.new("RGBA", img_obj.size, (0, 0, 0, 0))
     # blend with transparent image using own alpha

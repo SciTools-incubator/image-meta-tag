@@ -242,7 +242,7 @@ def plot_random_data(random_data, i_rand, plot_col, col_name, trims, borders,
                             keep_open=True,
                             verbose=imt_verbose,
                             db_file=imt_db, db_timeout=db_timeout,
-                            logo_file=[LOGO_FILE, LOGO_FILE], logo_width=LOGO_SIZE//2,
+                            logo_file=[LOGO_FILE, LOGO_FILE], logo_height=LOGO_SIZE//2,
                             logo_padding=LOGO_PADDING, logo_pos=[1, 1])
                 # log tags:
                 images_and_tags[outfile] = img_tags

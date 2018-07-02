@@ -23,6 +23,8 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="top" title="ImageMetaTag 0.7.3 documentation" href="index.html" />
     <link rel="next" title="ImageMetaTag.db" href="db.html" />
     <link rel="prev" title="ImageMetaTag - Image metadata tagging and presentation" href="index.html" /> 
@@ -106,7 +108,7 @@ Released under BSD 3-Clause License. See LICENSE for more details.</p>
 <p>The only function that is usaully needed from this module is savefig wrapper iteself:</p>
 <dl class="function">
 <dt id="ImageMetaTag.savefig">
-<code class="descclassname">ImageMetaTag.</code><code class="descname">savefig</code><span class="sig-paren">(</span><em>filename</em>, <em>img_format=None</em>, <em>img_converter=0</em>, <em>do_trim=False</em>, <em>trim_border=0</em>, <em>do_thumb=False</em>, <em>img_tags=None</em>, <em>keep_open=False</em>, <em>dpi=None</em>, <em>logo_file=None</em>, <em>logo_width=40</em>, <em>logo_padding=0</em>, <em>logo_pos=0</em>, <em>db_file=None</em>, <em>db_timeout=6</em>, <em>db_attempts=20</em>, <em>db_replace=False</em>, <em>db_full_paths=False</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/savefig.html#savefig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.savefig" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ImageMetaTag.</code><code class="descname">savefig</code><span class="sig-paren">(</span><em>filename</em>, <em>img_format=None</em>, <em>img_converter=0</em>, <em>do_trim=False</em>, <em>trim_border=0</em>, <em>do_thumb=False</em>, <em>img_tags=None</em>, <em>keep_open=False</em>, <em>dpi=None</em>, <em>logo_file=None</em>, <em>logo_width=None</em>, <em>logo_height=None</em>, <em>logo_padding=0</em>, <em>logo_pos=0</em>, <em>db_file=None</em>, <em>db_timeout=6</em>, <em>db_attempts=20</em>, <em>db_replace=False</em>, <em>db_full_paths=False</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/savefig.html#savefig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.savefig" title="Permalink to this definition">¶</a></dt>
 <dd><p>A wrapper around matplotlib.pyplot.savefig, to include file size optimisation and
 image tagging.</p>
 <p>The filesize optimisation depends on the img_converter input passes into
@@ -130,6 +132,7 @@ filename (can include the file extension, or that can be specified in the img_fo
 <li>trim_border - see <a class="reference internal" href="#ImageMetaTag.image_file_postproc" title="ImageMetaTag.image_file_postproc"><code class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.image_file_postproc()</span></code></a>.</li>
 <li>logo_file - see <a class="reference internal" href="#ImageMetaTag.image_file_postproc" title="ImageMetaTag.image_file_postproc"><code class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.image_file_postproc()</span></code></a>.</li>
 <li>logo_width - see <a class="reference internal" href="#ImageMetaTag.image_file_postproc" title="ImageMetaTag.image_file_postproc"><code class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.image_file_postproc()</span></code></a>.</li>
+<li>logo_height - see <a class="reference internal" href="#ImageMetaTag.image_file_postproc" title="ImageMetaTag.image_file_postproc"><code class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.image_file_postproc()</span></code></a>.</li>
 <li>logo_padding - see <a class="reference internal" href="#ImageMetaTag.image_file_postproc" title="ImageMetaTag.image_file_postproc"><code class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.image_file_postproc()</span></code></a>.</li>
 <li>logo_pos - see <a class="reference internal" href="#ImageMetaTag.image_file_postproc" title="ImageMetaTag.image_file_postproc"><code class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.image_file_postproc()</span></code></a>.</li>
 <li>do_thumb - see <a class="reference internal" href="#ImageMetaTag.image_file_postproc" title="ImageMetaTag.image_file_postproc"><code class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.image_file_postproc()</span></code></a>.</li>
@@ -163,7 +166,7 @@ right  corner, for instance.</p>
 <p>The image_file_postproc function could be used to process pre-created images:</p>
 <dl class="function">
 <dt id="ImageMetaTag.image_file_postproc">
-<code class="descclassname">ImageMetaTag.</code><code class="descname">image_file_postproc</code><span class="sig-paren">(</span><em>filename</em>, <em>outfile=None</em>, <em>img_buf=None</em>, <em>img_converter=0</em>, <em>do_trim=False</em>, <em>trim_border=0</em>, <em>logo_file=None</em>, <em>logo_width=40</em>, <em>logo_padding=0</em>, <em>logo_pos=0</em>, <em>do_thumb=False</em>, <em>img_tags=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/savefig.html#image_file_postproc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.image_file_postproc" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ImageMetaTag.</code><code class="descname">image_file_postproc</code><span class="sig-paren">(</span><em>filename</em>, <em>outfile=None</em>, <em>img_buf=None</em>, <em>img_converter=0</em>, <em>do_trim=False</em>, <em>trim_border=0</em>, <em>logo_file=None</em>, <em>logo_width=None</em>, <em>logo_height=None</em>, <em>logo_padding=0</em>, <em>logo_pos=0</em>, <em>do_thumb=False</em>, <em>img_tags=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/savefig.html#image_file_postproc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.image_file_postproc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Does the image post-processing for <a class="reference internal" href="#ImageMetaTag.savefig" title="ImageMetaTag.savefig"><code class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.savefig()</span></code></a>.</p>
 <p>Arguments: filename the name of the image file to process</p>
 <p>Options:</p>
@@ -189,7 +192,9 @@ right  corner, for instance.</p>
 </li>
 <li><p class="first">logo_file - a file, or list of files, to use as a logo (s), to be added to the image</p>
 </li>
-<li><p class="first">logo_width - the desired width of each single logo, in pixels. If the supplied image file                    is not the right size, it will be resized using a method that applies filters                    and antialiasing that works well for shrinking images with text to a much                    smaller size. The aspect ratio of the logo image is always maintained.                    Defaults to 40 pixels.</p>
+<li><p class="first">logo_width - the desired width of each single logo, in pixels. If the supplied image file                    is not the right size, it will be resized using a method that applies filters                    and antialiasing that works well for shrinking images with text to a much                    smaller size. The aspect ratio of the logo image is always maintained.                    Either logo_width or logo_height need to be specified (width overrides height).                    Defaults to 40 pixels.</p>
+</li>
+<li><p class="first">logo_height - the desired height of each logo, in pixels, instead of logo_width.</p>
 </li>
 <li><p class="first">logo_padding - a number of pixels to pad around the logo (default to zero)</p>
 </li>
@@ -243,7 +248,7 @@ right  corner, for instance.</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2015-2018, British Crown Copyright.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.6.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
     </div>
   </body>
 </html>
