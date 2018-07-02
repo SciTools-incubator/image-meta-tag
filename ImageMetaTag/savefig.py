@@ -28,7 +28,7 @@ THUMB_DEFAULT_DIR_NAME = 'thumbnail'
 
 def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_border=0,
             do_thumb=False, img_tags=None, keep_open=False, dpi=None,
-            logo_file=None, logo_width=40, logo_padding=0, logo_pos=0,
+            logo_file=None, logo_width=None, logo_height=None, logo_padding=0, logo_pos=0,
             db_file=None, db_timeout=DEFAULT_DB_TIMEOUT, db_attempts=DEFAULT_DB_ATTEMPTS,
             db_replace=False, db_full_paths=False,
             verbose=False, ):
@@ -66,6 +66,7 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
     * trim_border - see :func:`ImageMetaTag.image_file_postproc`.
     * logo_file - see :func:`ImageMetaTag.image_file_postproc`.
     * logo_width - see :func:`ImageMetaTag.image_file_postproc`.
+    * logo_height - see :func:`ImageMetaTag.image_file_postproc`.
     * logo_padding - see :func:`ImageMetaTag.image_file_postproc`.
     * logo_pos - see :func:`ImageMetaTag.image_file_postproc`.
     * do_thumb - see :func:`ImageMetaTag.image_file_postproc`.
@@ -123,7 +124,8 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
 
     if img_format in POSTPROC_IMG_FORMATS:
         image_file_postproc(write_file, img_buf=buf, img_converter=img_converter, do_trim=do_trim,
-                            trim_border=trim_border, logo_file=logo_file, logo_width=logo_width,
+                            trim_border=trim_border, logo_file=logo_file,
+                            logo_width=logo_width, logo_height=logo_height,
                             logo_padding=logo_padding, logo_pos=logo_pos,
                             do_thumb=do_thumb, img_tags=use_img_tags, verbose=verbose)
     else:
@@ -176,7 +178,7 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
 
 def image_file_postproc(filename, outfile=None, img_buf=None, img_converter=0,
                         do_trim=False, trim_border=0,
-                        logo_file=None, logo_width=40, logo_padding=0, logo_pos=0,
+                        logo_file=None, logo_width=None, logo_height=None, logo_padding=0, logo_pos=0,
                         do_thumb=False, img_tags=None, verbose=False):
     '''
     Does the image post-processing for :func:`ImageMetaTag.savefig`.
@@ -198,24 +200,39 @@ def image_file_postproc(filename, outfile=None, img_buf=None, img_converter=0,
     * do_trim - switch to trim whitespace from the edge of the image
     * trim_border - if do_trim then this can be used to define an integer number of pixels as a \
                     border around the trim.
-    * logo_file - a file to use as a logo, to be added to the image
-    * logo_width - the desired width of the logo, in pixels. If the supplied image file is not \
-                   the right size, it will be resized using a method that applies filters and \
-                   antialiasing that works well for shrinking images with text to a much \
+    * logo_file - a file, or list of image files, to be added as logo(s) to the image. Multiple \
+                  files are grouped horizontally from left to right before being added.
+    * logo_width - the desired width of a single logo, in pixels. If the supplied image file \
+                   is not the right size, it will be resized using a method that applies filters \
+                   and antialiasing that works well for shrinking images with text to a much \
                    smaller size. The aspect ratio of the logo image is always maintained. \
+                   Either logo_width or logo_height need to be specified (width overrides height). \
                    Defaults to 40 pixels.
+    * logo_height - the desired height of each logo, in pixels, instead of logo_width.
     * logo_padding - a number of pixels to pad around the logo (default to zero)
-    * logo_pos - corner position of the logo (following pyplot.legend, but for corners):
-               * 0: 'best' in this context will be upper left (default)
-               * TODO: 1: 'upper right'
-               * 2: 'upper left'
-               * TODO: 3: 'lower left'
-               * TODO: 4: 'lower right'
+    * logo_pos - corner, or list of corners, of the logo(s) (following pyplot.legend,\
+                 but for corners):
+                  * 0: 'best' in this context will be upper left (default)
+                  * 1: 'upper right' (image grows in width to fit)
+                  * 2: 'upper left' (image grows in width to fit)
+                  * 3: 'lower left' (image grows in height to fit)
+                  * 4: 'lower right' (image grows in height to fit)
     * do_thumb - switch to produce default sized thumbnail, or integer/tuple to define the \
                  maximum size in pixels
     * img_tags: a dictionary of tags to be added to the image metadata
     * verbose: switch for verbose output (reports file sizes before/after conversion)
     '''
+
+    # if both logo_width and height are None, apply the defualt to the width:
+    if logo_height is None and logo_width is None:
+        logo_size = {'w': 40}
+    elif logo_height is None:
+        logo_size = {'w': logo_width}
+    elif logo_width is None:
+        logo_size = {'h': logo_height}
+    else:
+        # if both height and width are set, only apply the width:
+        logo_size = {'w': logo_width}
 
     # usually, this is used to overwrite a file, but an outfile can be specified:
     if not outfile:
@@ -262,7 +279,7 @@ def image_file_postproc(filename, outfile=None, img_buf=None, img_converter=0,
         im_obj = _im_trim(im_obj, border=trim_border)
 
     if logo_file is not None:
-        im_obj = _im_logo(im_obj, logo_file, logo_width, logo_padding, logo_pos)
+        im_obj = _im_logos(im_obj, logo_file, logo_size, logo_padding, logo_pos)
 
     if do_thumb:
         # make a thumbnail image here, if required. It is important to do this
@@ -378,77 +395,210 @@ def _im_trim(im_obj, border=0):
     else:
         return im_obj
 
-def _im_logo(im_obj, logo_file, logo_width, logo_padding, logo_pos):
+def _im_logos(im_obj, logo_files, logo_size, logo_padding, logo_poss):
+    'adds logo or logos to the corners of an image object (usually after an im_trim)'
+
+    # work out what logo files go in what corners:
+    if isinstance(logo_files, str):
+        logo_files = [logo_files]
+    if isinstance(logo_poss, int):
+        logo_poss = [logo_poss]
+    logos_by_corner = {}
+    for logo_file, logo_pos in zip(logo_files, logo_poss):
+        # at this stage, each logo_file should be a string
+        # pointing to a file
+        if not isinstance(logo_file, str):
+            msg = 'logo file specifier not a string - should be a path but is {}'
+            raise ValueError(msg.format(logo_file))
+        # and logo_pos should be an intger:
+        if not isinstance(logo_pos, int):
+            msg = 'logo position specified not an int, but is {}'
+            raise ValueError(msg.format(logo_pos))
+
+        if logo_pos not in logos_by_corner:
+            logos_by_corner[logo_pos] = [logo_file]
+        else:
+            logos_by_corner[logo_pos].append(logo_file)
+    # now add them:
+    for logo_pos, logo_file in logos_by_corner.items():
+        if len(logo_file) == 1:
+            logo_file = logo_file[0]
+        else:
+            # multiple files get merged before adding:
+            logo_file = _logo_merge(logo_file, logo_size, logo_padding,
+                                    im_obj.getpixel((0,0)))
+        im_obj = _im_logo(im_obj, logo_file, logo_size,
+                          logo_padding, logo_pos)
+
+    return im_obj
+
+def _im_logo(im_obj, logo_file, logo_size, logo_padding, logo_pos):
     'adds a logo to the required corner of an image object (usually after an im_trim)'
 
-    # load in the logo file image:
-    logo_obj = Image.open(logo_file)
+    if logo_file is None:
+        # somehow got here with a None, do nothing:
+        return im_obj
+    elif isinstance(logo_file, str):
+        # load in and resize the logo file image:
+        res_logo_obj = resize_logo(Image.open(logo_file), logo_size)
+    else:
+        # assume this is a pre-loaded/resized logo image:
+        res_logo_obj = logo_file
+
+    # now pull out a sub image from the main image, that's just where the logo would go,
+    # it it were this is the size we want to have blank, to put the logo, including padding:
+    req_logo_size = [x + 2*logo_padding for x in res_logo_obj.size]
+    if logo_pos in [0, 2]:
+        corner_coords = (0, 0, req_logo_size[0], req_logo_size[1])
+    elif logo_pos == 1:
+        corner_coords = (im_obj.size[0] - req_logo_size[0], 0,
+                         im_obj.size[0], req_logo_size[1])
+    elif logo_pos == 3:
+        corner_coords = (0, im_obj.size[1] - req_logo_size[1],
+                         req_logo_size[0], im_obj.size[1])
+    elif logo_pos == 4:
+        corner_coords = (im_obj.size[0] - req_logo_size[0],
+                         im_obj.size[1] - req_logo_size[1],
+                         im_obj.size[0], im_obj.size[1])
+    else:
+        msg = 'logo_pos={} is invalid. Valid options in range 0 to 4'
+        raise ValueError(msg)
+    corner_obj = im_obj.crop(corner_coords)
+
+    # now get a bounding box as though we were trimming this image:
+    backg = Image.new(corner_obj.mode, corner_obj.size, corner_obj.getpixel((0, 0)))
+    # do an image difference:
+    diff = ImageChops.difference(corner_obj, backg)
+    # add it together
+    diff = ImageChops.add(diff, diff, 1.0, -100)
+    # we should do something sophisticated, and look at each row, and see Where
+    # it could fit, minimise the distance to go  etc...
+    # instead, see what the bbox is of that...
+    bbox = diff.getbbox()
+
+    if bbox is None:
+        # the corner object is empty so no need to offset:
+        offset_x = 0
+        offset_y = 0
+    else:
+        if logo_pos in [0, 2]:
+            # as this is the top left corner of a plot, the logo should be offset only
+            # in x (so the title is still at the top)
+            offset_x = req_logo_size[0] - bbox[0]
+            offset_y = 0
+        elif logo_pos == 1:
+            # top right, again just in x
+            offset_x = bbox[2]
+            offset_y = 0
+        elif logo_pos in [3, 4]:
+            # both of these are on the bottom, so drop the logo downwards:
+            offset_x = 0
+            offset_y = bbox[3]
+    # now put that together to make an image:
+    # create the blank image:
+    new_size = list(im_obj.size)
+    new_size[0] += offset_x
+    new_size[1] += offset_y
+    new_obj = Image.new(im_obj.mode, new_size, im_obj.getpixel((0, 0)))
+
+    # put in the main image and logo at the required positions
+    if logo_pos in [0, 2]:
+        # main image is offset by x and y:
+        im_coords = (offset_x, offset_y)
+        # logo pops in the corner, padded:
+        logo_coords = (logo_padding, logo_padding)
+    elif logo_pos == 1:
+        # main image starts immediately in x, and offset_y in y:
+        im_coords = (0, offset_y)
+        # the logo goes in the top right corner, offset/padded:
+        logo_coords = (new_size[0] - req_logo_size[0] + logo_padding,
+                       logo_padding)
+    elif logo_pos == 3:
+        # main image at the top, but can be offset in x:
+        im_coords = (offset_x, 0)
+        # logo
+        logo_coords = (logo_padding,
+                       new_size[1] - req_logo_size[1] + logo_padding)
+    elif logo_pos == 4:
+        # main image must start at 0,0
+        im_coords = (0, 0)
+        # logo needs to go in the bottom right, padded:
+        logo_coords = (new_size[0] - req_logo_size[0] + logo_padding,
+                       new_size[1] - req_logo_size[1] + logo_padding)
+
+    # now put that together to make an image:
+    new_obj.paste(im_obj, im_coords)
+    new_obj.paste(res_logo_obj, logo_coords)
+
+    return new_obj
+
+def resize_logo(logo_obj, logo_size):
     # rescale to the new width and height:
-    if logo_width != logo_obj.size[0]:
-        logo_height = int(logo_obj.size[1] * float(logo_width) / logo_obj.size[0])
+    
+    do_resize = False
+    # either resize by width or height, keeping the aspect ratio the same
+    # so work out  height from width and vice versa:
+    if 'w' in logo_size:
+        logo_width = int(logo_size['w'])
+        if logo_width != logo_obj.size[0]:
+            logo_height = int(logo_obj.size[1] * float(logo_width) / logo_obj.size[0])
+            do_resize = True
+    elif 'h' in logo_size:
+        logo_height = int(logo_size['h'])
+        if logo_height != logo_obj.size[1]:
+            logo_width = int(logo_obj.size[0] * float(logo_height) / logo_obj.size[1])
+            do_resize = True
+    # now resize if required:
+    if do_resize:
         res_logo_obj = _img_stong_resize(logo_obj, size=(logo_width, logo_height))
     else:
         res_logo_obj = logo_obj
+        
+    return res_logo_obj
 
-    # TODO: this is written for putting a logo in the top-left corner, but could be extended:
-    if logo_pos in [0, 2]:
+def _logo_merge(logo_list, logo_size, padding, bg_col):
+    'merges a list of image files horizontally, with padding (pixels)'
 
-        # now pull out a sub image from the main image, that's just where the logo would go,
-        # it it were this is the size we want to have blank, to put the logo, including padding:
-        req_logo_size = [x + 2*logo_padding for x in res_logo_obj.size]
-
-        corner_obj = im_obj.crop((0, 0, req_logo_size[0], req_logo_size[1]))
-        #
-        # now get a bounding box as though we were trimming this image:
-        backg = Image.new(corner_obj.mode, corner_obj.size, corner_obj.getpixel((0, 0)))
-        # do an image difference:
-        diff = ImageChops.difference(corner_obj, backg)
-        # add it together
-        diff = ImageChops.add(diff, diff, 1.0, -100)
-        # and see what the bbox is of that...
-        bbox = diff.getbbox()
-
-#        # get the offset in x and y:
-#        if bbox is None:
-#            # the corner object is empty so no need to offset:
-#            offsets = (0,0)
-#        else:
-#            offsets = (req_logo_size[0] - bbox[0], req_logo_size[1] - bbox[1])
-#        # but you only ever need to offset in one direction (the shortest one):
-#        offset = min(offsets)
-#        offset_ind = offsets.index(offset)
-
-        # as this is the top left corner of a plot, the logo should be offset only
-        # in x (so the title is still at the top)
-        if bbox is None:
-            # the corner object is empty so no need to offset:
-            offset = 0
+    # load up and files that aren't already loaded and get their dims:
+    im_list = []
+    im_heights = []
+    im_widths = []
+    for logo_file in logo_list:
+        if logo_file is None:
+            pass
+        elif isinstance(logo_file, str):
+            im_list.append(resize_logo(Image.open(logo_file), logo_size))
         else:
-            offset = req_logo_size[0] - bbox[0]
-        offset_ind = 0
-
-
-        # now put that together to make an image:
-
-        # create the blank image:
-        new_size = list(im_obj.size)
-        new_size[offset_ind] += offset
-        new_obj = Image.new(im_obj.mode, new_size, im_obj.getpixel((0, 0)))
-
-        # now put the main image into it, offset:
-        if offset_ind == 0:
-            offsets = (offset, 0)
+            # going to assume that this is a pre-loaded image object
+            # as not simple to do a clean for all PIL image formats
+            im_list.append(logo_file)
+        im_widths.append(im_list[-1].size[0])
+        im_heights.append(im_list[-1].size[1])
+    # now create the merged image:
+    new_size = [sum(im_widths) + padding, max(im_heights)]
+    merged = Image.new(im_list[0].mode, new_size, bg_col)
+    # and put the images in:
+    
+    current_x = 0
+    for i_logo, logo_obj in enumerate(im_list):
+        # if the logo has an alpha channel, make a new version with
+        # the new background color:
+        if logo_obj.mode =='RGBA':
+            # create a new version of logo_obj with the correct background color:
+            tmp_logo = Image.new(mode='RGB', size=logo_obj.size, color=bg_col)
+            # paste the thumbnail into the full sized image
+            tmp_logo.paste(logo_obj, (0,0), mask=logo_obj.split()[3])
         else:
-            offsets = (0, offset)
-        new_obj.paste(im_obj, offsets)
-        # and put the rescaled logo onto it too, in the right place:
-        new_obj.paste(res_logo_obj, (logo_padding, logo_padding))
+            tmp_logo = logo_obj    
+        
+        # vertically centre this logo:
+        y_offset = int((new_size[1] - logo_obj.size[1]) / 2)
+        # add the image:
+        merged.paste(tmp_logo, (current_x, y_offset))
+        # and increment the x:
+        current_x += logo_obj.size[0] + padding
 
-    else:
-        msg = 'logo positions other than 0 and 2 (both top left) have not been implemented yet'
-        raise NotImplementedError(msg)
-
-    return new_obj
+    return merged
 
 def _im_add_png_tags(im_obj, png_tags):
     'adds img_tags to an image object for later saving'
@@ -496,7 +646,7 @@ def _img_stong_resize(img_obj, size=None):
     return res_img_obj
 
 def _img_premultiplyAlpha(img_obj):
-    'Premultiplies an input image by its alpha channel, which is useful for stron resizes'
+    'Premultiplies an input image by its alpha channel, which is useful for strong resizes'
     # fake transparent image to blend with
     transparent = Image.new("RGBA", img_obj.size, (0, 0, 0, 0))
     # blend with transparent image using own alpha

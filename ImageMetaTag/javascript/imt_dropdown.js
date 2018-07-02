@@ -1,5 +1,5 @@
-// ImageMetaTag dropdown menu scripting - vn0.7.2
-// ImageMetaTag is a python package built around a wrapper for savefig in 
+// ImageMetaTag dropdown menu scripting - vn0.7.3
+// ImageMetaTag is a python package built around a wrapper for savefig in
 // matplotlib, which adds metadata tags to supported image file formats.
 // See https://github.com/SciTools-incubator/image-meta-tag for details.
 //
@@ -7,7 +7,7 @@
 // Released under BSD 3-Clause License. See LICENSE for more details.
 
 function read_parse_json_files(json_files, zlib_comp){
-    // reads a list of files that contain the json 
+    // reads a list of files that contain the json
     // data structure. The files can be compressed
     // using zlib compression. Very large files can
     // be split into chunks to be consolidated back into
@@ -37,7 +37,7 @@ function read_parse_json_file(json_file, zlib_comp){
 	var json_str = readTextFile(json_file);
     };
     json = JSON.parse(json_str);
-    return json;    
+    return json;
 }
 
 function readTextFile(filepath){
@@ -196,7 +196,7 @@ function apply_selection (start_depth, only_cache) {
 	update_selectors(options_at_depth, selected_at_depth, start_depth);
 	// write out the url
 	write_url_to_div();
-    
+
 	// now the the_image div is updated, the user should be happy, so we can
 	// go backwards and forwards on the animator buttons to preload images:
 	if (anim_sel >= 0) {
@@ -283,7 +283,7 @@ function update_selector(depth, options, selected) {
     //console.log("  and selected val", selected);
     if (show_singleton_selectors == 1 || key_lists[depth].length > 1){
 	target_div = key_to_selector[depth];
-	
+
 	// set up the text to define the selector:
 	sel_text = "<select id='select_"+ depth;
 	sel_text += "' onChange='OnSelected("+ depth +")'>\n";
