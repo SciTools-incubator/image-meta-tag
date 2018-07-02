@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>ImageMetaTag - simplest_img_dict.py &#8212; ImageMetaTag 0.7.3 documentation</title>
+    <title>ImageMetaTag - simplest_img_dict.py &mdash; ImageMetaTag 0.7.3 documentation</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -23,14 +23,12 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
     <link rel="top" title="ImageMetaTag 0.7.3 documentation" href="index.html" />
     <link rel="next" title="Versions of Python" href="versions.html" />
     <link rel="prev" title="ImageMetaTag - test.py" href="test.html" /> 
   </head>
-  <body role="document">
-    <div class="related" role="navigation" aria-label="related navigation">
+  <body>
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -45,10 +43,10 @@
         <li class="right" >
           <a href="test.html" title="ImageMetaTag - test.py"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.3 documentation</a> &#187;</li> 
+        <li><a href="index.html">ImageMetaTag 0.7.3 documentation</a> &raquo;</li> 
       </ul>
     </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
             <p class="logo"><a href="index.html">
               <img class="logo" src="_static/logo.png" alt="Logo"/>
@@ -59,21 +57,22 @@
   <h4>Next topic</h4>
   <p class="topless"><a href="versions.html"
                         title="next chapter">Versions of Python</a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/simple.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/simple.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -82,12 +81,12 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body" role="main">
+          <div class="body">
             
   <div class="section" id="imagemetatag-simplest-img-dict-py">
 <h1>ImageMetaTag - simplest_img_dict.py<a class="headerlink" href="#imagemetatag-simplest-img-dict-py" title="Permalink to this headline">¶</a></h1>
 <p>While the code in test.py aims to test as much of the ImageMetaTag functionality as possible, this routine aims to show the simplest possible code that keeps &#8216;best practice&#8217; to use an ImageMetaTag database of metadata to produce a webpage.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">While the code in test.py aims to test as much of the ImageMetaTag functionality as possible,</span>
 <span class="sd">this routine aims to show the simplest possible code that keeps &#39;best practice&#39; to use an</span>
 <span class="sd">ImageMetaTag database of metadata to produce a webpage.</span>
@@ -95,75 +94,75 @@
 <span class="sd">.. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
-<span class="c1"># minimal set of imports:</span>
+<span class="c"># minimal set of imports:</span>
 <span class="kn">import</span> <span class="nn">datetime</span>
 
-<span class="c1"># import ImageMetaTag:</span>
+<span class="c"># import ImageMetaTag:</span>
 <span class="kn">import</span> <span class="nn">ImageMetaTag</span> <span class="kn">as</span> <span class="nn">imt</span>
 
-<span class="c1"># we are going to use just a couple of things from the test.py routine.</span>
+<span class="c"># we are going to use just a couple of things from the test.py routine.</span>
 <span class="kn">from</span> <span class="nn">test</span> <span class="kn">import</span> <span class="n">get_webdir</span><span class="p">,</span> <span class="n">define_imt_db</span><span class="p">,</span> <span class="n">DATE_FORMAT_WWW</span>
 
 <span class="k">def</span> <span class="nf">__main__</span><span class="p">():</span>
-    <span class="c1"># define the web page directory and image database</span>
-    <span class="c1"># Any real application of an ImageDict web page would need to</span>
-    <span class="c1"># define the locations of the web page and database for its own</span>
-    <span class="c1"># requirements.</span>
-    <span class="c1"># In this case, we are using the same functions in test, to be sure that</span>
-    <span class="c1"># they are consistent.</span>
+    <span class="c"># define the web page directory and image database</span>
+    <span class="c"># Any real application of an ImageDict web page would need to</span>
+    <span class="c"># define the locations of the web page and database for its own</span>
+    <span class="c"># requirements.</span>
+    <span class="c"># In this case, we are using the same functions in test, to be sure that</span>
+    <span class="c"># they are consistent.</span>
     <span class="n">webdir</span> <span class="o">=</span> <span class="n">get_webdir</span><span class="p">()</span>
     <span class="n">imt_db</span> <span class="o">=</span> <span class="n">define_imt_db</span><span class="p">()</span>
 
-    <span class="c1"># these are the image tags that are present in the metadata, and</span>
-    <span class="c1"># the sort order we want to present them with on a web page:</span>
-    <span class="n">img_tags</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;plot type&#39;</span><span class="p">,</span> <span class="s1">&#39;number of rolls&#39;</span><span class="p">,</span> <span class="s1">&#39;plot color&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;image trim&#39;</span><span class="p">,</span> <span class="s1">&#39;border&#39;</span><span class="p">,</span> <span class="s1">&#39;image compression&#39;</span><span class="p">]</span>
-    <span class="c1"># and how those tags are to be sorted:</span>
-    <span class="n">sort_methods</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;sort&#39;</span><span class="p">,</span> <span class="s1">&#39;numeric&#39;</span><span class="p">,</span> <span class="s1">&#39;reverse_sort&#39;</span><span class="p">,</span> <span class="s1">&#39;sort&#39;</span><span class="p">,</span> <span class="s1">&#39;reverse_numeric&#39;</span><span class="p">,</span> <span class="s1">&#39;sort&#39;</span><span class="p">]</span>
+    <span class="c"># these are the image tags that are present in the metadata, and</span>
+    <span class="c"># the sort order we want to present them with on a web page:</span>
+    <span class="n">img_tags</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;plot type&#39;</span><span class="p">,</span> <span class="s">&#39;number of rolls&#39;</span><span class="p">,</span> <span class="s">&#39;plot color&#39;</span><span class="p">,</span>
+                <span class="s">&#39;image trim&#39;</span><span class="p">,</span> <span class="s">&#39;border&#39;</span><span class="p">,</span> <span class="s">&#39;image compression&#39;</span><span class="p">]</span>
+    <span class="c"># and how those tags are to be sorted:</span>
+    <span class="n">sort_methods</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;sort&#39;</span><span class="p">,</span> <span class="s">&#39;numeric&#39;</span><span class="p">,</span> <span class="s">&#39;reverse_sort&#39;</span><span class="p">,</span> <span class="s">&#39;sort&#39;</span><span class="p">,</span> <span class="s">&#39;reverse_numeric&#39;</span><span class="p">,</span> <span class="s">&#39;sort&#39;</span><span class="p">]</span>
 
-    <span class="c1"># Now load in the database:</span>
+    <span class="c"># Now load in the database:</span>
     <span class="n">tag_strings</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">img_list</span><span class="p">,</span> <span class="n">images_and_tags</span> <span class="o">=</span> <span class="n">imt</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">imt_db</span><span class="p">,</span> <span class="n">required_tags</span><span class="o">=</span><span class="n">img_tags</span><span class="p">,</span>
                                             <span class="n">tag_strings</span><span class="o">=</span><span class="n">tag_strings</span><span class="p">)</span>
-    <span class="c1"># we have supplied the database read with the image tags we expect, and an empty list of values</span>
-    <span class="c1"># so that we can construct what is returned (and therefore the ImageDict) in a memory</span>
-    <span class="c1"># efficient way.</span>
+    <span class="c"># we have supplied the database read with the image tags we expect, and an empty list of values</span>
+    <span class="c"># so that we can construct what is returned (and therefore the ImageDict) in a memory</span>
+    <span class="c"># efficient way.</span>
 
-    <span class="c1"># the img_list is a list of the images in the databse file:</span>
+    <span class="c"># the img_list is a list of the images in the databse file:</span>
     <span class="k">print</span> <span class="n">img_list</span>
 
-    <span class="c1"># now assemble the ImageDict in the simple way. See test.py for parallel versions etc.</span>
+    <span class="c"># now assemble the ImageDict in the simple way. See test.py for parallel versions etc.</span>
     <span class="n">img_dict</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="k">for</span> <span class="n">img_file</span><span class="p">,</span> <span class="n">img_info</span> <span class="ow">in</span> <span class="n">images_and_tags</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
-        <span class="c1"># make a temporary ordered dictionary for this image:</span>
+        <span class="c"># make a temporary ordered dictionary for this image:</span>
         <span class="n">tmp_dict</span> <span class="o">=</span> <span class="n">imt</span><span class="o">.</span><span class="n">dict_heirachy_from_list</span><span class="p">(</span><span class="n">img_info</span><span class="p">,</span> <span class="n">img_file</span><span class="p">,</span> <span class="n">img_tags</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">img_dict</span><span class="p">:</span>
-            <span class="c1"># turn it into an ImageDict</span>
+            <span class="c"># turn it into an ImageDict</span>
             <span class="n">img_dict</span> <span class="o">=</span> <span class="n">imt</span><span class="o">.</span><span class="n">ImageDict</span><span class="p">(</span><span class="n">tmp_dict</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># append this tmp_dict to the ImageDict</span>
+            <span class="c"># append this tmp_dict to the ImageDict</span>
             <span class="n">img_dict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">imt</span><span class="o">.</span><span class="n">ImageDict</span><span class="p">(</span><span class="n">tmp_dict</span><span class="p">))</span>
-    <span class="c1"># printing the img_dict will show it&#39;s heirachy (but is a lot of text):</span>
+    <span class="c"># printing the img_dict will show it&#39;s heirachy (but is a lot of text):</span>
     <span class="k">print</span> <span class="n">img_dict</span>
-    <span class="c1"># now sort the keys of each level of the ImageDict according to the sort_method</span>
+    <span class="c"># now sort the keys of each level of the ImageDict according to the sort_method</span>
     <span class="n">img_dict</span><span class="o">.</span><span class="n">sort_keys</span><span class="p">(</span><span class="n">sort_methods</span><span class="p">)</span>
 
-    <span class="c1"># now write a webpage:</span>
-    <span class="n">page_filename</span> <span class="o">=</span> <span class="s1">&#39;{}/simple.html&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">webdir</span><span class="p">)</span>
-    <span class="c1"># the title:</span>
-    <span class="n">page_title</span> <span class="o">=</span> <span class="s1">&#39;Simple ImageMetaTag wegbpage&#39;</span>
-    <span class="c1"># html content to go at the top of the page:</span>
-    <span class="n">webpage_preamble</span> <span class="o">=</span> <span class="s1">&#39;&lt;h3&gt;This is the simplest page ImageMetaTag can produce&lt;/h3&gt;&#39;</span>
-    <span class="c1"># and some html content at the bottom:</span>
-    <span class="n">webpage_postamble</span> <span class="o">=</span> <span class="s1">&#39;&lt;i&gt;Page produced {}&lt;/i&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">DATE_FORMAT_WWW</span><span class="p">))</span>
+    <span class="c"># now write a webpage:</span>
+    <span class="n">page_filename</span> <span class="o">=</span> <span class="s">&#39;{}/simple.html&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">webdir</span><span class="p">)</span>
+    <span class="c"># the title:</span>
+    <span class="n">page_title</span> <span class="o">=</span> <span class="s">&#39;Simple ImageMetaTag wegbpage&#39;</span>
+    <span class="c"># html content to go at the top of the page:</span>
+    <span class="n">webpage_preamble</span> <span class="o">=</span> <span class="s">&#39;&lt;h3&gt;This is the simplest page ImageMetaTag can produce&lt;/h3&gt;&#39;</span>
+    <span class="c"># and some html content at the bottom:</span>
+    <span class="n">webpage_postamble</span> <span class="o">=</span> <span class="s">&#39;&lt;i&gt;Page produced {}&lt;/i&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">DATE_FORMAT_WWW</span><span class="p">))</span>
     <span class="n">imt</span><span class="o">.</span><span class="n">webpage</span><span class="o">.</span><span class="n">write_full_page</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">page_filename</span><span class="p">,</span> <span class="n">page_title</span><span class="p">,</span>
                                 <span class="n">preamble</span><span class="o">=</span><span class="n">webpage_preamble</span><span class="p">,</span>
                                 <span class="n">postamble</span><span class="o">=</span><span class="n">webpage_postamble</span><span class="p">)</span>
 
-    <span class="c1"># and sign off as completed:</span>
-    <span class="k">print</span> <span class="s1">&#39;completed, using ImageMetaTag at {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">imt</span><span class="o">.</span><span class="n">__path__</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="c"># and sign off as completed:</span>
+    <span class="k">print</span> <span class="s">&#39;completed, using ImageMetaTag at {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">imt</span><span class="o">.</span><span class="n">__path__</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
-<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="n">__main__</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -175,7 +174,7 @@
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -190,12 +189,12 @@
         <li class="right" >
           <a href="test.html" title="ImageMetaTag - test.py"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.3 documentation</a> &#187;</li> 
+        <li><a href="index.html">ImageMetaTag 0.7.3 documentation</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer" role="contentinfo">
-        &#169; Copyright 2015-2018, British Crown Copyright.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
+    <div class="footer">
+        &copy; Copyright 2015-2018, British Crown Copyright.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>

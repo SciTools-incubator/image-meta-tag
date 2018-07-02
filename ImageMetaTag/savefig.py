@@ -200,8 +200,9 @@ def image_file_postproc(filename, outfile=None, img_buf=None, img_converter=0,
     * do_trim - switch to trim whitespace from the edge of the image
     * trim_border - if do_trim then this can be used to define an integer number of pixels as a \
                     border around the trim.
-    * logo_file - a file, or list of files, to use as a logo (s), to be added to the image
-    * logo_width - the desired width of each single logo, in pixels. If the supplied image file \
+    * logo_file - a file, or list of image files, to be added as logo(s) to the image. Multiple \
+                  files are grouped horizontally from left to right before being added.
+    * logo_width - the desired width of a single logo, in pixels. If the supplied image file \
                    is not the right size, it will be resized using a method that applies filters \
                    and antialiasing that works well for shrinking images with text to a much \
                    smaller size. The aspect ratio of the logo image is always maintained. \
