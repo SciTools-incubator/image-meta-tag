@@ -1184,6 +1184,15 @@ def __main__():
             # and check it's the right length, to see if some data is actually gone:
             if len_b4_del != len_aft_del + len(del_list):
                 raise ValueError('Inconsistent database size after deleting subset.')
+            
+            # test reading only a subset of the files:
+            n_samples = 500
+            db_img_list, db_images_and_tags = imt.db.read(bigdb, n_samples=n_samples)
+            len_sample = len(db_img_list)
+            if len_sample != n_samples:
+                raise ValueError('error loading subsample from database') 
+            else:
+                print('Tested ability to load a random subset of images - OK')
 
             # now process that big dict in parallel to an ImageDict, with this tag order:
             tagorder = ['l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'l8', 'l9']

@@ -71,7 +71,8 @@ def write_img_to_dbfile(db_file, img_filename, img_info, add_strict=False,
 
 def read(db_file, required_tags=None, tag_strings=None,
          db_timeout=DEFAULT_DB_TIMEOUT,
-         db_attempts=DEFAULT_DB_ATTEMPTS):
+         db_attempts=DEFAULT_DB_ATTEMPTS,
+         n_samples=None):
     '''
     reads in the database written by write_img_to_dbfile
 
@@ -80,6 +81,9 @@ def read(db_file, required_tags=None, tag_strings=None,
                        present
      * tag_strings - an input list that will be populated with the unique values of \
                      the image tags.
+     * n_samples - if provided, only the given number of entries will be loaded \
+                   from the database, at random. \ 
+                   Must be an integer or None (default None)
 
     Returns:
      * a list of filenames (payloads for the :class:`ImageMetaTag.ImageDict` class )
@@ -113,7 +117,8 @@ def read(db_file, required_tags=None, tag_strings=None,
                     # read it:
                     f_list, out_dict = read_img_info_from_dbcursor(dbcr,
                                                                    required_tags=required_tags,
-                                                                   tag_strings=tag_strings)
+                                                                   tag_strings=tag_strings,
+                                                                   n_samples=n_samples)
                     # close connection:
                     dbcn.close()
                     read_db = True
@@ -351,16 +356,28 @@ def list_tables(dbcr):
     table_names = sorted([x[0] for x in zip(*result)])
     return table_names
 
-def read_img_info_from_dbcursor(dbcr, required_tags=None, tag_strings=None):
+def read_img_info_from_dbcursor(dbcr, required_tags=None, tag_strings=None, n_samples=None):
     '''
     Reads from an open database cursor (dbcr) for :func:`ImageMetaTag.db.read` and other routines.
 
     Options
      * required_tags - a list of image tags to return, and to fail if not all are present
      * tag_strings - an input list that will be populated with the unique values of the image tags
+     * n_samples - if provided, only the given number of entries will be loaded \
+                   from the database, at random. \ 
+                   Must be an integer or None (default None)
     '''
     # read in the data from the database:
-    db_contents = dbcr.execute('select * from %s' % SQLITE_IMG_INFO_TABLE).fetchall()
+    if n_samples is None:
+        db_contents = dbcr.execute('SELECT * FROM {}'.format(SQLITE_IMG_INFO_TABLE)).fetchall()
+    else:
+        if not isinstance(n_samples, int):
+            raise ValueError('n_samples must be an integer')
+        elif n_samples < 1:
+            raise ValueError('n_samples must be > 1')
+        # read only a sample of lines:
+        read_cmd = 'SELECT * FROM {0} WHERE fname IN (SELECT fname FROM {0} ORDER BY RANDOM() LIMIT {1})'
+        db_contents = dbcr.execute(read_cmd.format(SQLITE_IMG_INFO_TABLE, n_samples)).fetchall()
     # and convert that to a useful dict/list combo:
     filename_list, out_dict = process_select_star_from(db_contents, dbcr,
                                                        required_tags=required_tags,
