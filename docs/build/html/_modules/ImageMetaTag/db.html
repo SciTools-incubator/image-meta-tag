@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>ImageMetaTag.db &mdash; ImageMetaTag 0.7.3 documentation</title>
+    <title>ImageMetaTag.db &mdash; ImageMetaTag 0.7.5 documentation</title>
     
     <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.7.3',
+        VERSION:     '0.7.5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <link rel="top" title="ImageMetaTag 0.7.3 documentation" href="../../index.html" />
+    <link rel="top" title="ImageMetaTag 0.7.5 documentation" href="../../index.html" />
     <link rel="up" title="ImageMetaTag" href="../ImageMetaTag.html" /> 
   </head>
   <body>
@@ -36,7 +36,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">ImageMetaTag 0.7.3 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">ImageMetaTag 0.7.5 documentation</a> &raquo;</li>
           <li><a href="../index.html" >Module code</a> &raquo;</li>
           <li><a href="../ImageMetaTag.html" accesskey="U">ImageMetaTag</a> &raquo;</li> 
       </ul>
@@ -141,7 +141,8 @@
 </div>
 <div class="viewcode-block" id="read"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.read">[docs]</a><span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">required_tags</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tag_strings</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
          <span class="n">db_timeout</span><span class="o">=</span><span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">,</span>
-         <span class="n">db_attempts</span><span class="o">=</span><span class="n">DEFAULT_DB_ATTEMPTS</span><span class="p">):</span>
+         <span class="n">db_attempts</span><span class="o">=</span><span class="n">DEFAULT_DB_ATTEMPTS</span><span class="p">,</span>
+         <span class="n">n_samples</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    reads in the database written by write_img_to_dbfile</span>
 
@@ -150,6 +151,9 @@
 <span class="sd">                       present</span>
 <span class="sd">     * tag_strings - an input list that will be populated with the unique values of \</span>
 <span class="sd">                     the image tags.</span>
+<span class="sd">     * n_samples - if provided, only the given number of entries will be loaded \</span>
+<span class="sd">                   from the database, at random. \ </span>
+<span class="sd">                   Must be an integer or None (default None)</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">     * a list of filenames (payloads for the :class:`ImageMetaTag.ImageDict` class )</span>
@@ -183,7 +187,8 @@
                     <span class="c"># read it:</span>
                     <span class="n">f_list</span><span class="p">,</span> <span class="n">out_dict</span> <span class="o">=</span> <span class="n">read_img_info_from_dbcursor</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span>
                                                                    <span class="n">required_tags</span><span class="o">=</span><span class="n">required_tags</span><span class="p">,</span>
-                                                                   <span class="n">tag_strings</span><span class="o">=</span><span class="n">tag_strings</span><span class="p">)</span>
+                                                                   <span class="n">tag_strings</span><span class="o">=</span><span class="n">tag_strings</span><span class="p">,</span>
+                                                                   <span class="n">n_samples</span><span class="o">=</span><span class="n">n_samples</span><span class="p">)</span>
                     <span class="c"># close connection:</span>
                     <span class="n">dbcn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
                     <span class="n">read_db</span> <span class="o">=</span> <span class="bp">True</span>
@@ -421,16 +426,28 @@
     <span class="n">table_names</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">result</span><span class="p">)])</span>
     <span class="k">return</span> <span class="n">table_names</span>
 
-<div class="viewcode-block" id="read_img_info_from_dbcursor"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.read_img_info_from_dbcursor">[docs]</a><span class="k">def</span> <span class="nf">read_img_info_from_dbcursor</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span> <span class="n">required_tags</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tag_strings</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="read_img_info_from_dbcursor"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.read_img_info_from_dbcursor">[docs]</a><span class="k">def</span> <span class="nf">read_img_info_from_dbcursor</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span> <span class="n">required_tags</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tag_strings</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Reads from an open database cursor (dbcr) for :func:`ImageMetaTag.db.read` and other routines.</span>
 
 <span class="sd">    Options</span>
 <span class="sd">     * required_tags - a list of image tags to return, and to fail if not all are present</span>
 <span class="sd">     * tag_strings - an input list that will be populated with the unique values of the image tags</span>
+<span class="sd">     * n_samples - if provided, only the given number of entries will be loaded \</span>
+<span class="sd">                   from the database, at random. \ </span>
+<span class="sd">                   Must be an integer or None (default None)</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="c"># read in the data from the database:</span>
-    <span class="n">db_contents</span> <span class="o">=</span> <span class="n">dbcr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&#39;select * from </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">SQLITE_IMG_INFO_TABLE</span><span class="p">)</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">n_samples</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">db_contents</span> <span class="o">=</span> <span class="n">dbcr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&#39;SELECT * FROM {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">SQLITE_IMG_INFO_TABLE</span><span class="p">))</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n_samples</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;n_samples must be an integer&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">n_samples</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;n_samples must be &gt; 1&#39;</span><span class="p">)</span>
+        <span class="c"># read only a sample of lines:</span>
+        <span class="n">read_cmd</span> <span class="o">=</span> <span class="s">&#39;SELECT * FROM {0} WHERE fname IN (SELECT fname FROM {0} ORDER BY RANDOM() LIMIT {1})&#39;</span>
+        <span class="n">db_contents</span> <span class="o">=</span> <span class="n">dbcr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">read_cmd</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">SQLITE_IMG_INFO_TABLE</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">))</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
     <span class="c"># and convert that to a useful dict/list combo:</span>
     <span class="n">filename_list</span><span class="p">,</span> <span class="n">out_dict</span> <span class="o">=</span> <span class="n">process_select_star_from</span><span class="p">(</span><span class="n">db_contents</span><span class="p">,</span> <span class="n">dbcr</span><span class="p">,</span>
                                                        <span class="n">required_tags</span><span class="o">=</span><span class="n">required_tags</span><span class="p">,</span>
@@ -886,7 +903,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">ImageMetaTag 0.7.3 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">ImageMetaTag 0.7.5 documentation</a> &raquo;</li>
           <li><a href="../index.html" >Module code</a> &raquo;</li>
           <li><a href="../ImageMetaTag.html" >ImageMetaTag</a> &raquo;</li> 
       </ul>

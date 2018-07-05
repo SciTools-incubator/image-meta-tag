@@ -1062,12 +1062,15 @@ def __main__():
                                                     show_selector_names=True,
                                                     show_singleton_selectors=False,
                                                     compression=test_zlib_compression)
+    
+    ie_warning = "If the page does not load correctly in Internet Explorer, please try using firefox or Chrome."
     web_out[out_page_para] = imt.webpage.write_full_page(img_dict, out_page_para,
                                                          'Test ImageDict webpage (Parallel)',
                                                          preamble=webpage_preamble,
                                                          postamble=webpage_postamble,
                                                          verbose=True,
-                                                         only_show_rel_url=False)
+                                                         only_show_rel_url=False,
+                                                         load_err_msg=ie_warning)
     if not args.minimal:
         web_out[out_page_multi] = imt.webpage.write_full_page(img_dict_multi, out_page_multi,
                                                               'Test ImageDict webpage',

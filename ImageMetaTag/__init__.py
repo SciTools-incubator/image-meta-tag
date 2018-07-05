@@ -21,7 +21,7 @@ Released under BSD 3-Clause License. See LICENSE for more details.
 '''
 
 # see release_process for details on incrementing the version
-__version__ = '0.7.3'
+__version__ = '0.7.5'
 __documentation__ = 'http://scitools-incubator.github.io/image-meta-tag/build/html/'
 
 # list fo file formats which are valid for saving metadata to:
