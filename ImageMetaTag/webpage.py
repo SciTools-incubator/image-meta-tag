@@ -848,8 +848,8 @@ def write_js_placeholders(img_dict, file_obj=None, dict_depth=None, selector_pre
             file_obj.write('''
    {}<span id="animator1">&nbsp;</span>
    <span id="animator2">&nbsp;</span>
-       <br>
-    '''.format(anim_label))
+   <br>
+'''.format(anim_label))
 
         # now add somewhere for the image to go:
         if load_err_msg is None:
