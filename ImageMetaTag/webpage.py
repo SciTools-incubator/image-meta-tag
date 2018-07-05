@@ -848,8 +848,8 @@ def write_js_placeholders(img_dict, file_obj=None, dict_depth=None, selector_pre
             file_obj.write('''
    {}<span id="animator1">&nbsp;</span>
    <span id="animator2">&nbsp;</span>
-       <br>
-    '''.format(anim_label))
+   <br>
+'''.format(anim_label))
 
         # now add somewhere for the image to go:
         if load_err_msg is None:
@@ -858,7 +858,7 @@ def write_js_placeholders(img_dict, file_obj=None, dict_depth=None, selector_pre
         else:
             img_div = '   <div id="the_image">Please wait while the page is loading.<br>{}</div>'
             file_obj.write(img_div.format(load_err_msg))
-        file_obj.write('   <div id="the_url">....</div>')
+        file_obj.write('\n   <div id="the_url">....</div>')
         # and finish off the placeholders:
         file_obj.write('''
    </font>
