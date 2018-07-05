@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>ImageMetaTag.webpage &mdash; ImageMetaTag 0.7.3 documentation</title>
+    <title>ImageMetaTag.webpage &mdash; ImageMetaTag 0.7.4 documentation</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.7.3',
+        VERSION:     '0.7.4',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="ImageMetaTag 0.7.3 documentation" href="index.html" />
+    <link rel="top" title="ImageMetaTag 0.7.4 documentation" href="index.html" />
     <link rel="next" title="ImageMetaTag - test.py" href="test.html" />
     <link rel="prev" title="ImageMetaTag.ImageDict" href="ImageDict.html" /> 
   </head>
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="ImageDict.html" title="ImageMetaTag.ImageDict"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">ImageMetaTag 0.7.3 documentation</a> &raquo;</li> 
+        <li><a href="index.html">ImageMetaTag 0.7.4 documentation</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -127,7 +127,7 @@ Released under BSD 3-Clause License. See LICENSE for more details.</p>
 <h2>Writing a whole page<a class="headerlink" href="#writing-a-whole-page" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="ImageMetaTag.webpage.write_full_page">
-<tt class="descclassname">ImageMetaTag.webpage.</tt><tt class="descname">write_full_page</tt><big>(</big><em>img_dict</em>, <em>filepath</em>, <em>title</em>, <em>page_filename=None</em>, <em>tab_s_name=None</em>, <em>preamble=None</em>, <em>postamble=None</em>, <em>postamble_no_imt_link=False</em>, <em>compression=False</em>, <em>initial_selectors=None</em>, <em>show_selector_names=False</em>, <em>show_singleton_selectors=True</em>, <em>optgroups=None</em>, <em>url_type='int'</em>, <em>only_show_rel_url=False</em>, <em>verbose=False</em>, <em>style='horiz dropdowns'</em>, <em>write_intmed_tmpfile=False</em>, <em>description=None</em>, <em>keywords=None</em>, <em>css=None</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/webpage.html#write_full_page"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.webpage.write_full_page" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">ImageMetaTag.webpage.</tt><tt class="descname">write_full_page</tt><big>(</big><em>img_dict</em>, <em>filepath</em>, <em>title</em>, <em>page_filename=None</em>, <em>tab_s_name=None</em>, <em>preamble=None</em>, <em>postamble=None</em>, <em>postamble_no_imt_link=False</em>, <em>compression=False</em>, <em>initial_selectors=None</em>, <em>show_selector_names=False</em>, <em>show_singleton_selectors=True</em>, <em>optgroups=None</em>, <em>url_type='int'</em>, <em>only_show_rel_url=False</em>, <em>verbose=False</em>, <em>style='horiz dropdowns'</em>, <em>write_intmed_tmpfile=False</em>, <em>description=None</em>, <em>keywords=None</em>, <em>css=None</em>, <em>load_err_msg=None</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/webpage.html#write_full_page"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.webpage.write_full_page" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes out an <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a> as a webpage, to a given file location.
 The files are created as temporary files and when complete they replace any files that
 are currently in the specified location.</p>
@@ -154,7 +154,9 @@ webpage styles could be added.</p>
 <li>keywords - html keyword metadata</li>
 <li>compression - default False. If True, then the json data object will be compressed                     using zlib string compression. When read into the browser, we will use                     pako to inflate it (<a class="reference external" href="https://github.com/nodeca/pako">https://github.com/nodeca/pako</a>)</li>
 <li>css - Optional CSS file used to style webpage. By default a small amount of css is             written out in the page header.</li>
+<li>load_err_msg - additional message to show after &#8216;Please wait while the page is loading&#8217;.                      default is None, but very large pages can crash with Internet Explorer so                      a message along the lines of this may be useful:</li>
 </ul>
+<p>&#8216;If the page does not load correctly in Internet Explorer, please try using firefox or Chrome.&#8217;</p>
 <p>Returns a list of files that the the created webpage is dependent upon</p>
 </dd></dl>
 
@@ -211,7 +213,7 @@ in a second level dictionary that specifies the &#8216;group name&#8217;: [conte
 
 <dl class="function">
 <dt id="ImageMetaTag.webpage.write_js_placeholders">
-<tt class="descclassname">ImageMetaTag.webpage.</tt><tt class="descname">write_js_placeholders</tt><big>(</big><em>img_dict</em>, <em>file_obj=None</em>, <em>dict_depth=None</em>, <em>selector_prefix=None</em>, <em>style='horiz dropdowns'</em>, <em>level_names=False</em>, <em>show_singleton_selectors=True</em>, <em>animated_level=None</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/webpage.html#write_js_placeholders"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.webpage.write_js_placeholders" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">ImageMetaTag.webpage.</tt><tt class="descname">write_js_placeholders</tt><big>(</big><em>img_dict</em>, <em>file_obj=None</em>, <em>dict_depth=None</em>, <em>selector_prefix=None</em>, <em>style='horiz dropdowns'</em>, <em>level_names=False</em>, <em>show_singleton_selectors=True</em>, <em>animated_level=None</em>, <em>load_err_msg=None</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/webpage.html#write_js_placeholders"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.webpage.write_js_placeholders" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes the placeholders into the page body, for the javascript to manipulate</p>
 <ul class="simple">
 <li>file_obj - an open file object to write to</li>
@@ -221,7 +223,9 @@ in a second level dictionary that specifies the &#8216;group name&#8217;: [conte
 <li>show_singleton_selectors - When set to False, selectors that have only one element are                                 not displayed (default=True).</li>
 <li>level_names - if supplied, this need to be a list of full names, for the selectors, of                     length dict_depth.</li>
 <li>animated_level - if supplied, as a string, this will be used to label the animator buttons.</li>
+<li>load_err_msg - additional message to show after &#8216;Please wait while the page is loading&#8217;.                      default is None, but very large pages can crash with Internet Explorer so                      a message along the lines of this may be useful:</li>
 </ul>
+<p>&#8216;If the page does not load correctly in Internet Explorer, please try using firefox or Chrome.&#8217;</p>
 </dd></dl>
 
 <dl class="function">
@@ -275,7 +279,7 @@ with zlib, if compression=True.</p>
         <li class="right" >
           <a href="ImageDict.html" title="ImageMetaTag.ImageDict"
              >previous</a> |</li>
-        <li><a href="index.html">ImageMetaTag 0.7.3 documentation</a> &raquo;</li> 
+        <li><a href="index.html">ImageMetaTag 0.7.4 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
