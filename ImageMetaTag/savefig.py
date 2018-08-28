@@ -611,7 +611,8 @@ def _im_pngsave_addmeta(im_obj, outfile, optimize=True, verbose=False):
     # these can be automatically added to Image.info dict
     # they are not user-added metadata
     reserved = ('interlace', 'gamma', 'dpi', 'transparency', 'aspect', 'signature', \
-                'date:create', 'date:modify')
+                'date:create', 'date:modify',
+                'jfif', 'jfif_unit', 'jfif_density', 'jfif_version')
 
     # undocumented class
     meta = PngImagePlugin.PngInfo()
@@ -624,8 +625,11 @@ def _im_pngsave_addmeta(im_obj, outfile, optimize=True, verbose=False):
             if verbose:
                 print('key "%s" is set to None' % key)
         else:
-            meta.add_text(key, val, 0)
-
+            try:
+                meta.add_text(key, val, 0)
+            except:
+                pdb.set_trace()
+                
     # and save
     im_obj.save(outfile, "PNG", optimize=optimize, pnginfo=meta)
 
