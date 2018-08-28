@@ -626,7 +626,7 @@ def _im_pngsave_addmeta(im_obj, outfile, optimize=True, verbose=False):
                 print('key "%s" is set to None' % key)
         else:
             meta.add_text(key, val, 0)
-                
+
     # and save
     im_obj.save(outfile, "PNG", optimize=optimize, pnginfo=meta)
 
