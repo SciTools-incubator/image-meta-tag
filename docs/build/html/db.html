@@ -128,13 +128,21 @@ Released under BSD 3-Clause License. See LICENSE for more details.</p>
 
 <dl class="function">
 <dt id="ImageMetaTag.db.read">
-<tt class="descclassname">ImageMetaTag.db.</tt><tt class="descname">read</tt><big>(</big><em>db_file</em>, <em>required_tags=None</em>, <em>tag_strings=None</em>, <em>db_timeout=6</em>, <em>db_attempts=20</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/db.html#read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.read" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">ImageMetaTag.db.</tt><tt class="descname">read</tt><big>(</big><em>db_file</em>, <em>required_tags=None</em>, <em>tag_strings=None</em>, <em>db_timeout=6</em>, <em>db_attempts=20</em>, <em>n_samples=None</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/db.html#read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>reads in the database written by write_img_to_dbfile</p>
 <dl class="docutils">
 <dt>Options:</dt>
-<dd><ul class="first last simple">
-<li>required_tags - a list of image tags to return, and to fail if not all are                        present</li>
-<li>tag_strings - an input list that will be populated with the unique values of                      the image tags.</li>
+<dd><ul class="first last">
+<li><p class="first">required_tags - a list of image tags to return, and to fail if not all are                        present</p>
+</li>
+<li><p class="first">tag_strings - an input list that will be populated with the unique values of                      the image tags.</p>
+</li>
+<li><dl class="first docutils">
+<dt>n_samples - if provided, only the given number of entries will be loaded                    from the database, at random. </dt>
+<dd><p class="first last">Must be an integer or None (default None)</p>
+</dd>
+</dl>
+</li>
 </ul>
 </dd>
 <dt>Returns:</dt>
@@ -245,13 +253,21 @@ for &gt; 100 selects.</p>
 
 <dl class="function">
 <dt id="ImageMetaTag.db.read_img_info_from_dbcursor">
-<tt class="descclassname">ImageMetaTag.db.</tt><tt class="descname">read_img_info_from_dbcursor</tt><big>(</big><em>dbcr</em>, <em>required_tags=None</em>, <em>tag_strings=None</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/db.html#read_img_info_from_dbcursor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.read_img_info_from_dbcursor" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">ImageMetaTag.db.</tt><tt class="descname">read_img_info_from_dbcursor</tt><big>(</big><em>dbcr</em>, <em>required_tags=None</em>, <em>tag_strings=None</em>, <em>n_samples=None</em><big>)</big><a class="reference internal" href="_modules/ImageMetaTag/db.html#read_img_info_from_dbcursor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.read_img_info_from_dbcursor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads from an open database cursor (dbcr) for <a class="reference internal" href="#ImageMetaTag.db.read" title="ImageMetaTag.db.read"><tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.db.read()</span></tt></a> and other routines.</p>
 <dl class="docutils">
 <dt>Options</dt>
-<dd><ul class="first last simple">
-<li>required_tags - a list of image tags to return, and to fail if not all are present</li>
-<li>tag_strings - an input list that will be populated with the unique values of the image tags</li>
+<dd><ul class="first last">
+<li><p class="first">required_tags - a list of image tags to return, and to fail if not all are present</p>
+</li>
+<li><p class="first">tag_strings - an input list that will be populated with the unique values of the image tags</p>
+</li>
+<li><dl class="first docutils">
+<dt>n_samples - if provided, only the given number of entries will be loaded                    from the database, at random. </dt>
+<dd><p class="first last">Must be an integer or None (default None)</p>
+</dd>
+</dl>
+</li>
 </ul>
 </dd>
 </dl>

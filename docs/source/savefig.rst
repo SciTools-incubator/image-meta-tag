@@ -3,7 +3,7 @@
 ImageMetaTag.savefig
 ========================================
 
-.. automodule:: ImageMetaTag.savefig
+.. automodule:noindex: ImageMetaTag.savefig
 
 The savefig wrapper
 -------------------

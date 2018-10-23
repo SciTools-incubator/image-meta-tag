@@ -832,16 +832,16 @@ def simple_dict_filter(simple_dict, tests, raise_key_mismatch=False):
 
     Options:
 
-    * raise_key_mismatch - if True, then attempting to test a dictionary with a missing key \
-                           will raise. Default is to return all False
+     * raise_key_mismatch - if True, then attempting to test a dictionary with a missing key \
+                            will raise. Default is to return all False
 
     Returns three logicals:
 
-    * The first indicates whether the input dict passes the simple tests
-    * The second indicates whether the input dict is part of the grouped elements \
-      of the test (the ['Histogram', 'Line plots'] list).#
-    * The third indicates whether the input dict is the first element of a list grouped \
-      elements (is 'Histogram' in this ['Histogram', 'Line plots'] list).
+     * The first indicates whether the input dict passes the simple tests
+     * The second indicates whether the input dict is part of the grouped elements \
+       of the test (the ['Histogram', 'Line plots'] list).#
+     * The third indicates whether the input dict is the first element of a list grouped \
+       elements (is 'Histogram' in this ['Histogram', 'Line plots'] list).
 
     '''
     # this is set to False if the input dict fails the simple criteria:
