@@ -342,6 +342,7 @@ def write_img_to_open_db(dbcr, filename, img_info, add_strict=False, attempt_rep
         err_check = 'no such table: {}'.format(SQLITE_IMG_INFO_TABLE)
         if err_check in op_err_file.message:
             create_table_for_img_info(dbcr, img_info)
+            dbcr.execute(add_command, add_list)
         else:
             raise op_err_file
     except sqlite3.IntegrityError:
