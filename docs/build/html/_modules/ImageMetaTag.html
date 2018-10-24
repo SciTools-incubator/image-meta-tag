@@ -71,11 +71,12 @@
 <span class="sd">ImageMetaTag is a python package built around a wrapper for</span>
 <span class="sd">`savefig &lt;http://matplotlib.org/api/pyplot_api.html?highlight=savefig#matplotlib.pyplot.savefig&gt;`_</span>
 <span class="sd">in</span>
-<span class="sd">`matplotlib &lt;http://matplotlib.org/&gt;`_, which adds metadata tags to supported image file formats.</span>
+<span class="sd">`matplotlib &lt;http://matplotlib.org/&gt;`_, which adds metadata tags to supported image</span>
+<span class="sd">file formats.</span>
 
 <span class="sd">Once the images have been tagged, it can also be used to manage an</span>
-<span class="sd">`SQL database &lt;https://docs.python.org/2/library/sqlite3.html&gt;`_ of images and their metadata.</span>
-<span class="sd">The image metadata can be used to produce an</span>
+<span class="sd">`SQL database &lt;https://docs.python.org/2/library/sqlite3.html&gt;`_ of images and their</span>
+<span class="sd">metadata. The image metadata can be used to produce an</span>
 <span class="sd">:class:`ImageMetaTag.ImageDict` object: a structured/heirachical dictionary of dictionaries</span>
 <span class="sd">which can be used to easily create web pages to present large numbers of images.</span>
 
@@ -89,32 +90,39 @@
 <span class="sd">Released under BSD 3-Clause License. See LICENSE for more details.</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
+<span class="kn">import</span> <span class="nn">platform</span>
+
+<span class="c"># Set constants/properties of ImageMetaTag (before any of it is imported)</span>
 <span class="c"># see release_process for details on incrementing the version</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="s">&#39;0.7.3&#39;</span>
 <span class="n">__documentation__</span> <span class="o">=</span> <span class="s">&#39;http://scitools-incubator.github.io/image-meta-tag/build/html/&#39;</span>
-
 <span class="c"># list fo file formats which are valid for saving metadata to:</span>
 <span class="n">META_IMG_FORMATS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;png&#39;</span><span class="p">]</span>
 <span class="c"># and which can do image post-processing</span>
 <span class="n">POSTPROC_IMG_FORMATS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;png&#39;</span><span class="p">]</span>
-
 <span class="c"># default timeout and retries for database access:</span>
 <span class="n">DEFAULT_DB_TIMEOUT</span> <span class="o">=</span> <span class="mi">6</span>
 <span class="n">DEFAULT_DB_ATTEMPTS</span> <span class="o">=</span> <span class="mi">20</span>
 
-<span class="kn">import</span> <span class="nn">platform</span>
+<span class="c"># we want all of the functions in webpage and db, as a separate level</span>
+<span class="kn">import</span> <span class="nn">ImageMetaTag.webpage</span>
+<span class="kn">import</span> <span class="nn">ImageMetaTag.db</span>
+<span class="c"># but only specfic parts of savefig and img_dict:</span>
+<span class="kn">from</span> <span class="nn">ImageMetaTag.savefig</span> <span class="kn">import</span> <span class="n">savefig</span>
+<span class="kn">from</span> <span class="nn">ImageMetaTag.savefig</span> <span class="kn">import</span> <span class="n">image_file_postproc</span>
+<span class="kn">from</span> <span class="nn">ImageMetaTag.img_dict</span> <span class="kn">import</span> <span class="n">ImageDict</span>
+<span class="kn">from</span> <span class="nn">ImageMetaTag.img_dict</span> <span class="kn">import</span> <span class="n">readmeta_from_image</span>
+<span class="kn">from</span> <span class="nn">ImageMetaTag.img_dict</span> <span class="kn">import</span> <span class="n">dict_heirachy_from_list</span>
+<span class="kn">from</span> <span class="nn">ImageMetaTag.img_dict</span> <span class="kn">import</span> <span class="n">dict_split</span>
+<span class="kn">from</span> <span class="nn">ImageMetaTag.img_dict</span> <span class="kn">import</span> <span class="n">simple_dict_filter</span>
+<span class="kn">from</span> <span class="nn">ImageMetaTag.img_dict</span> <span class="kn">import</span> <span class="n">check_for_required_keys</span>
+
 <span class="k">if</span> <span class="n">platform</span><span class="o">.</span><span class="n">python_version</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;2&#39;</span><span class="p">):</span>
     <span class="n">PY3</span> <span class="o">=</span> <span class="bp">False</span>
 <span class="k">elif</span> <span class="n">platform</span><span class="o">.</span><span class="n">python_version</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;3&#39;</span><span class="p">):</span>
     <span class="n">PY3</span> <span class="o">=</span> <span class="bp">True</span>
 <span class="k">else</span><span class="p">:</span>
     <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&#39;Only writtend for python2 or python3&#39;</span><span class="p">)</span>
-
-<span class="kn">from</span> <span class="nn">ImageMetaTag.savefig</span> <span class="kn">import</span> <span class="n">savefig</span><span class="p">,</span> <span class="n">image_file_postproc</span>
-<span class="kn">from</span> <span class="nn">ImageMetaTag.img_dict</span> <span class="kn">import</span> <span class="n">ImageDict</span><span class="p">,</span> <span class="n">readmeta_from_image</span><span class="p">,</span> <span class="n">dict_heirachy_from_list</span><span class="p">,</span> \
-                                  <span class="n">dict_split</span><span class="p">,</span> <span class="n">simple_dict_filter</span><span class="p">,</span> <span class="n">check_for_required_keys</span>
-<span class="c"># we want all of the functions in webpage and db, as a separate level</span>
-<span class="kn">import</span> <span class="nn">ImageMetaTag.webpage</span><span class="o">,</span> <span class="nn">ImageMetaTag.db</span>
 </pre></div>
 
           </div>
