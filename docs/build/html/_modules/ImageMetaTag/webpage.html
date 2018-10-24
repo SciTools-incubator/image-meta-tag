@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>ImageMetaTag.webpage &mdash; ImageMetaTag 0.7.3 documentation</title>
+    <title>ImageMetaTag.webpage &mdash; ImageMetaTag 0.7.5 documentation</title>
     
     <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.7.3',
+        VERSION:     '0.7.5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <link rel="top" title="ImageMetaTag 0.7.3 documentation" href="../../index.html" />
+    <link rel="top" title="ImageMetaTag 0.7.5 documentation" href="../../index.html" />
     <link rel="up" title="ImageMetaTag" href="../ImageMetaTag.html" /> 
   </head>
   <body>
@@ -36,7 +36,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">ImageMetaTag 0.7.3 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">ImageMetaTag 0.7.5 documentation</a> &raquo;</li>
           <li><a href="../index.html" >Module code</a> &raquo;</li>
           <li><a href="../ImageMetaTag.html" accesskey="U">ImageMetaTag</a> &raquo;</li> 
       </ul>
@@ -133,7 +133,7 @@
                     <span class="n">show_singleton_selectors</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">optgroups</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                     <span class="n">url_type</span><span class="o">=</span><span class="s">&#39;int&#39;</span><span class="p">,</span> <span class="n">only_show_rel_url</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
                     <span class="n">style</span><span class="o">=</span><span class="s">&#39;horiz dropdowns&#39;</span><span class="p">,</span> <span class="n">write_intmed_tmpfile</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                    <span class="n">description</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">css</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+                    <span class="n">description</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">css</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">load_err_msg</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Writes out an :class:`ImageMetaTag.ImageDict` as a webpage, to a given file location.</span>
 <span class="sd">    The files are created as temporary files and when complete they replace any files that</span>
@@ -178,6 +178,10 @@
 <span class="sd">                    pako to inflate it (https://github.com/nodeca/pako)</span>
 <span class="sd">    * css - Optional CSS file used to style webpage. By default a small amount of css is \</span>
 <span class="sd">            written out in the page header.</span>
+<span class="sd">    * load_err_msg - additional message to show after &#39;Please wait while the page is loading&#39;. \</span>
+<span class="sd">                     default is None, but very large pages can crash with Internet Explorer so \</span>
+<span class="sd">                     a message along the lines of this may be useful:</span>
+<span class="sd">    &#39;If the page does not load correctly in Internet Explorer, please try using firefox or Chrome.&#39;</span>
 
 <span class="sd">    Returns a list of files that the the created webpage is dependent upon</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -395,7 +399,7 @@
             <span class="n">write_js_placeholders</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">file_obj</span><span class="o">=</span><span class="n">out_file</span><span class="p">,</span> <span class="n">dict_depth</span><span class="o">=</span><span class="n">img_dict</span><span class="o">.</span><span class="n">dict_depth</span><span class="p">(),</span>
                                   <span class="n">style</span><span class="o">=</span><span class="n">style</span><span class="p">,</span> <span class="n">level_names</span><span class="o">=</span><span class="n">level_names</span><span class="p">,</span>
                                   <span class="n">show_singleton_selectors</span><span class="o">=</span><span class="n">show_singleton_selectors</span><span class="p">,</span>
-                                  <span class="n">animated_level</span><span class="o">=</span><span class="n">anim_level</span><span class="p">)</span>
+                                  <span class="n">animated_level</span><span class="o">=</span><span class="n">anim_level</span><span class="p">,</span> <span class="n">load_err_msg</span><span class="o">=</span><span class="n">load_err_msg</span><span class="p">)</span>
 
         <span class="c"># the body is done, so the postamble comes in:</span>
         <span class="n">postamble_endline</span> <span class="o">=</span> <span class="s">&#39;Page created with &lt;a href=&quot;{}&quot;&gt;ImageMetaTag {}&lt;/a&gt;&#39;</span>
@@ -815,7 +819,7 @@
 <div class="viewcode-block" id="write_js_placeholders"><a class="viewcode-back" href="../../webpage.html#ImageMetaTag.webpage.write_js_placeholders">[docs]</a><span class="k">def</span> <span class="nf">write_js_placeholders</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">file_obj</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">dict_depth</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">selector_prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                           <span class="n">style</span><span class="o">=</span><span class="s">&#39;horiz dropdowns&#39;</span><span class="p">,</span> <span class="n">level_names</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
                           <span class="n">show_singleton_selectors</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                          <span class="n">animated_level</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+                          <span class="n">animated_level</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">load_err_msg</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Writes the placeholders into the page body, for the javascript to manipulate</span>
 
@@ -830,6 +834,10 @@
 <span class="sd">    * level_names - if supplied, this need to be a list of full names, for the selectors, of \</span>
 <span class="sd">                    length dict_depth.</span>
 <span class="sd">    * animated_level - if supplied, as a string, this will be used to label the animator buttons.</span>
+<span class="sd">    * load_err_msg - additional message to show after &#39;Please wait while the page is loading&#39;. \</span>
+<span class="sd">                     default is None, but very large pages can crash with Internet Explorer so \</span>
+<span class="sd">                     a message along the lines of this may be useful:</span>
+<span class="sd">    &#39;If the page does not load correctly in Internet Explorer, please try using firefox or Chrome.&#39;</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">show_singleton_selectors</span><span class="p">:</span>
@@ -914,8 +922,13 @@
 <span class="s">    &#39;&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">anim_label</span><span class="p">))</span>
 
         <span class="c"># now add somewhere for the image to go:</span>
-        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;   &lt;div id=&quot;the_image&quot;&gt;Please wait while the page is loading&lt;/div&gt;</span>
-<span class="s">   &lt;div id=&quot;the_url&quot;&gt;....&lt;/div&gt;&#39;&#39;&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">load_err_msg</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">img_div</span> <span class="o">=</span> <span class="s">&#39;   &lt;div id=&quot;the_image&quot;&gt;Please wait while the page is loading&lt;/div&gt;&#39;</span>
+            <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">img_div</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">img_div</span> <span class="o">=</span> <span class="s">&#39;   &lt;div id=&quot;the_image&quot;&gt;Please wait while the page is loading.&lt;br&gt;{}&lt;/div&gt;&#39;</span>
+            <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">img_div</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">load_err_msg</span><span class="p">))</span>
+        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;   &lt;div id=&quot;the_url&quot;&gt;....&lt;/div&gt;&#39;</span><span class="p">)</span>
         <span class="c"># and finish off the placeholders:</span>
         <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;&#39;</span>
 <span class="s">   &lt;/font&gt;</span>
@@ -1076,7 +1089,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">ImageMetaTag 0.7.3 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">ImageMetaTag 0.7.5 documentation</a> &raquo;</li>
           <li><a href="../index.html" >Module code</a> &raquo;</li>
           <li><a href="../ImageMetaTag.html" >ImageMetaTag</a> &raquo;</li> 
       </ul>

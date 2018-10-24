@@ -63,7 +63,7 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
                     show_singleton_selectors=True, optgroups=None,
                     url_type='int', only_show_rel_url=False, verbose=False,
                     style='horiz dropdowns', write_intmed_tmpfile=False,
-                    description=None, keywords=None, css=None):
+                    description=None, keywords=None, css=None, load_err_msg=None):
     '''
     Writes out an :class:`ImageMetaTag.ImageDict` as a webpage, to a given file location.
     The files are created as temporary files and when complete they replace any files that
@@ -108,6 +108,10 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
                     pako to inflate it (https://github.com/nodeca/pako)
     * css - Optional CSS file used to style webpage. By default a small amount of css is \
             written out in the page header.
+    * load_err_msg - additional message to show after 'Please wait while the page is loading'. \
+                     default is None, but very large pages can crash with Internet Explorer so \
+                     a message along the lines of this may be useful:
+    'If the page does not load correctly in Internet Explorer, please try using firefox or Chrome.'
 
     Returns a list of files that the the created webpage is dependent upon
     '''
@@ -325,7 +329,7 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
             write_js_placeholders(img_dict, file_obj=out_file, dict_depth=img_dict.dict_depth(),
                                   style=style, level_names=level_names,
                                   show_singleton_selectors=show_singleton_selectors,
-                                  animated_level=anim_level)
+                                  animated_level=anim_level, load_err_msg=load_err_msg)
 
         # the body is done, so the postamble comes in:
         postamble_endline = 'Page created with <a href="{}">ImageMetaTag {}</a>'
@@ -745,7 +749,7 @@ def compress_string(in_str):
 def write_js_placeholders(img_dict, file_obj=None, dict_depth=None, selector_prefix=None,
                           style='horiz dropdowns', level_names=False,
                           show_singleton_selectors=True,
-                          animated_level=None):
+                          animated_level=None, load_err_msg=None):
     '''
     Writes the placeholders into the page body, for the javascript to manipulate
 
@@ -760,6 +764,10 @@ def write_js_placeholders(img_dict, file_obj=None, dict_depth=None, selector_pre
     * level_names - if supplied, this need to be a list of full names, for the selectors, of \
                     length dict_depth.
     * animated_level - if supplied, as a string, this will be used to label the animator buttons.
+    * load_err_msg - additional message to show after 'Please wait while the page is loading'. \
+                     default is None, but very large pages can crash with Internet Explorer so \
+                     a message along the lines of this may be useful:
+    'If the page does not load correctly in Internet Explorer, please try using firefox or Chrome.'
     '''
 
     if not show_singleton_selectors:
@@ -840,12 +848,17 @@ def write_js_placeholders(img_dict, file_obj=None, dict_depth=None, selector_pre
             file_obj.write('''
    {}<span id="animator1">&nbsp;</span>
    <span id="animator2">&nbsp;</span>
-       <br>
-    '''.format(anim_label))
+   <br>
+'''.format(anim_label))
 
         # now add somewhere for the image to go:
-        file_obj.write('''   <div id="the_image">Please wait while the page is loading</div>
-   <div id="the_url">....</div>''')
+        if load_err_msg is None:
+            img_div = '   <div id="the_image">Please wait while the page is loading</div>'
+            file_obj.write(img_div)
+        else:
+            img_div = '   <div id="the_image">Please wait while the page is loading.<br>{}</div>'
+            file_obj.write(img_div.format(load_err_msg))
+        file_obj.write('\n   <div id="the_url">....</div>')
         # and finish off the placeholders:
         file_obj.write('''
    </font>
