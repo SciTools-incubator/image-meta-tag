@@ -2,28 +2,35 @@
 This module contains a set of functions to create/write to/read
 and maintain an sqlite3 database of image files and their associated metadata.
 
-In normal usage it is primarily used by  :func:`ImageMetaTag.savefig` to create the database
-as figures are saved. Once the metadata database has been built up then the metadata can be
-loaded with :func:`ImageMetaTag.db.read`.
+In normal usage it is primarily used by  :func:`ImageMetaTag.savefig` to
+create the database as figures are saved. Once the metadata database has been
+built up then the metadata can be loaded with :func:`ImageMetaTag.db.read`.
 
 (C) Crown copyright Met Office. All rights reserved.
 Released under BSD 3-Clause License. See LICENSE for more details.
 '''
 
-import os, sqlite3, fnmatch, time, errno, pdb
-
-from ImageMetaTag import META_IMG_FORMATS, DEFAULT_DB_TIMEOUT, DEFAULT_DB_ATTEMPTS
-from ImageMetaTag.img_dict import readmeta_from_image, check_for_required_keys
+import os
+import sqlite3
+import fnmatch
+import time
+import errno
+import pdb
 
 from datetime import datetime
 import numpy as np
 from io import StringIO
 
-# the name of the database table that holds the sqlite database of plot metadata
+from ImageMetaTag import META_IMG_FORMATS
+from ImageMetaTag import DEFAULT_DB_TIMEOUT
+from ImageMetaTag import DEFAULT_DB_ATTEMPTS
+from ImageMetaTag.img_dict import readmeta_from_image, check_for_required_keys
+
+# the name of the database table that holds the plot metadata
 SQLITE_IMG_INFO_TABLE = 'img_info'
 
 def info_key_to_db_name(in_str):
-    'Consistently convert a name in the img_info dict to something to be used in the database'
+    'Consistently convert a name in the img_info dict database'
     return in_str.replace(' ', '__')
 
 def db_name_to_info_key(in_str):
@@ -82,7 +89,7 @@ def read(db_file, required_tags=None, tag_strings=None,
      * tag_strings - an input list that will be populated with the unique values of \
                      the image tags.
      * n_samples - if provided, only the given number of entries will be loaded \
-                   from the database, at random. \ 
+                   from the database, at random. \
                    Must be an integer or None (default None)
 
     Returns:
@@ -104,46 +111,45 @@ def read(db_file, required_tags=None, tag_strings=None,
     '''
     if db_file is None:
         return None, None
-    else:
-        if not os.path.isfile(db_file):
-            return None, None
-        else:
-            n_tries = 1
-            read_db = False
-            while not read_db and n_tries <= db_attempts:
-                try:
-                    # open the connection and the cursor:
-                    dbcn, dbcr = open_db_file(db_file, timeout=db_timeout)
-                    # read it:
-                    f_list, out_dict = read_img_info_from_dbcursor(dbcr,
-                                                                   required_tags=required_tags,
-                                                                   tag_strings=tag_strings,
-                                                                   n_samples=n_samples)
-                    # close connection:
-                    dbcn.close()
-                    read_db = True
-                except sqlite3.OperationalError as op_err:
-                    if 'database is locked' in op_err.message:
-                        # database being locked is what the retries and timeouts are for:
-                        print('%s database timeout reading from file "%s", %s s' \
-                                % (dt_now_str(), db_file, n_tries * db_timeout))
-                        n_tries += 1
-                    elif op_err.message == 'no such table: {}'.format(SQLITE_IMG_INFO_TABLE):
-                        # the db file exists, but it doesn't have anything in it:
-                        return None, None
-                    else:
-                        # everything else needs to be reported and raised immediately:
-                        msg = '{} for file {}'.format(op_err.message, db_file)
-                        raise sqlite3.OperationalError(msg)
+    if not os.path.isfile(db_file):
+        return None, None
 
-            # if we went through all the attempts then it is time to raise the error:
-            if n_tries > db_attempts:
+    n_tries = 1
+    read_db = False
+    while not read_db and n_tries <= db_attempts:
+        try:
+            # open the connection and the cursor:
+            dbcn, dbcr = open_db_file(db_file, timeout=db_timeout)
+            # read it:
+            f_list, out_dict = read_img_info_from_dbcursor(dbcr,
+                                                           required_tags=required_tags,
+                                                           tag_strings=tag_strings,
+                                                           n_samples=n_samples)
+            # close connection:
+            dbcn.close()
+            read_db = True
+        except sqlite3.OperationalError as op_err:
+            if 'database is locked' in op_err.message:
+                # database being locked is what the retries and timeouts are for:
+                print('%s database timeout reading from file "%s", %s s' \
+                        % (dt_now_str(), db_file, n_tries * db_timeout))
+                n_tries += 1
+            elif op_err.message == 'no such table: {}'.format(SQLITE_IMG_INFO_TABLE):
+                # the db file exists, but it doesn't have anything in it:
+                return None, None
+            else:
+                # everything else needs to be reported and raised immediately:
                 msg = '{} for file {}'.format(op_err.message, db_file)
                 raise sqlite3.OperationalError(msg)
 
-            # close connection:
-            dbcn.close()
-            return f_list, out_dict
+    # if we went through all the attempts then it is time to raise the error:
+    if n_tries > db_attempts:
+        msg = '{} for file {}'.format(op_err.message, db_file)
+        raise sqlite3.OperationalError(msg)
+
+    # close connection:
+    dbcn.close()
+    return f_list, out_dict
 
 read_img_info_from_dbfile = read
 
@@ -371,20 +377,23 @@ def read_img_info_from_dbcursor(dbcr, required_tags=None, tag_strings=None, n_sa
      * required_tags - a list of image tags to return, and to fail if not all are present
      * tag_strings - an input list that will be populated with the unique values of the image tags
      * n_samples - if provided, only the given number of entries will be loaded \
-                   from the database, at random. \ 
+                   from the database, at random. \
                    Must be an integer or None (default None)
     '''
     # read in the data from the database:
     if n_samples is None:
-        db_contents = dbcr.execute('SELECT * FROM {}'.format(SQLITE_IMG_INFO_TABLE)).fetchall()
+        sel_com = 'SELECT * FROM {}'.format(SQLITE_IMG_INFO_TABLE)
+        db_contents = dbcr.execute(sel_com).fetchall()
     else:
         if not isinstance(n_samples, int):
             raise ValueError('n_samples must be an integer')
         elif n_samples < 1:
             raise ValueError('n_samples must be > 1')
         # read only a sample of lines:
-        read_cmd = 'SELECT * FROM {0} WHERE fname IN (SELECT fname FROM {0} ORDER BY RANDOM() LIMIT {1})'
-        db_contents = dbcr.execute(read_cmd.format(SQLITE_IMG_INFO_TABLE, n_samples)).fetchall()
+        read_cmd = ('SELECT * FROM {0} WHERE fname IN (SELECT fname FROM {0} '
+                    'ORDER BY RANDOM() LIMIT {1})')
+        read_cmd = read_cmd.format(SQLITE_IMG_INFO_TABLE, n_samples)
+        db_contents = dbcr.execute(read_cmd).fetchall()
     # and convert that to a useful dict/list combo:
     filename_list, out_dict = process_select_star_from(db_contents, dbcr,
                                                        required_tags=required_tags,
@@ -807,7 +816,7 @@ is True, in which case the database file will be restarted as empty. Use with ca
 
     if return_timings:
         return n_adds, timings_per_add
-
+    return None
 
 def rmfile(path):
     """

@@ -408,6 +408,13 @@
     <span class="n">add_command</span> <span class="o">=</span> <span class="n">add_command</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;) VALUES(&#39;</span> <span class="o">+</span> <span class="s">&#39;?,&#39;</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">add_list</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;?)&#39;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">dbcr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">add_command</span><span class="p">,</span> <span class="n">add_list</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span> <span class="k">as</span> <span class="n">op_err_file</span><span class="p">:</span>
+        <span class="n">err_check</span> <span class="o">=</span> <span class="s">&#39;no such table: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">SQLITE_IMG_INFO_TABLE</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">err_check</span> <span class="ow">in</span> <span class="n">op_err_file</span><span class="o">.</span><span class="n">message</span><span class="p">:</span>
+            <span class="n">create_table_for_img_info</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span> <span class="n">img_info</span><span class="p">)</span>
+            <span class="n">dbcr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">add_command</span><span class="p">,</span> <span class="n">add_list</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">op_err_file</span>
     <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">IntegrityError</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">attempt_replace</span><span class="p">:</span>
             <span class="c"># try an INSERT OR REPLACE</span>
