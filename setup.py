@@ -23,6 +23,7 @@ setup_args = dict(
                    'Programming Language :: Python :: 3.6',
                   ],
     package_data = {'ImageMetaTag': ['javascript/*']},
+    scripts = ['bin/rm_imt_images.py'],
 )
 
 if __name__ == '__main__':
