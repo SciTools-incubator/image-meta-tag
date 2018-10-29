@@ -75,45 +75,48 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
     Currently only able to write out a page with horizontal dropdown menus, but other
     webpage styles could be added.
 
-    * page_filename - the file name, within the directory (defaults to the name of the file) \
-                      but can be set if tab_s_name is also used.
-    * tab_s_name : used to denote the name of the page, when it is used as a frame \
-                   of a larger page.
-    * preamble : html text added at the top of the <body> text, but before the ImageMetaTag \
-                 section. Can be quite extensive.
-    * postable : html text added after the ImageMetaTag section. A link to the ImageMetaTag \
-                 documentation will be appended unless postamble_no_imt_link is True.
-    * postamble_no_imt_link : if True, no link to the ImageMetaTag documentation will be added \
-                              to the postamble.
-    * initial_selectors - A list of initial values for the selectors, to be passed into \
-                          :func:`ImageMetaTag.webpage.write_js_setup`.
-    * show_selector_names - switches on displaying the selector full names defined by the \
-                            :class:`ImageMetaTag.ImageDict`.full_name_mapping
-    * show_singleton_selectors - When set to False, selectors that have only one element are \
-                                not displayed (default=True).
-    * optgroups - The contents of selectors can be grouped together to make large lists \
-                  more readable. This is passed into \
-                  :func:`ImageMetaTag.webpage.write_js_to_header`.
-    * url_type - determines the type of URL at the bottom of the ImageMetaTag section. Can be \
-                 'int' or 'str'.
-    * only_show_rel_url - If True, the wepage will only show relative urls in is link section.
-    * verbose - If True, stdout will be more verbose
-    * style - the style of output page to write, currently only 'horiz dropdowns' is valid
-    * write_intmed_tmpfile - If True, files are written out to temporary filenames and then \
-                             moved when completed.
-    * description - html description metadata
-    * keywords - html keyword metadata
-    * compression - default False. If True, then the json data object will be compressed \
-                    using zlib string compression. When read into the browser, we will use \
-                    pako to inflate it (https://github.com/nodeca/pako)
-    * css - Optional CSS file used to style webpage. By default a small amount of css is \
-            written out in the page header.
-    * load_err_msg - additional message to show after 'Please wait while the page is loading'. \
-                     default is None, but very large pages can crash with Internet Explorer so \
-                     a message along the lines of this may be useful:
-    'If the page does not load correctly in Internet Explorer, please try using firefox or Chrome.'
+    Options:
 
-    Returns a list of files that the the created webpage is dependent upon
+     * page_filename - the file name, within the directory (defaults to the name of the file) \
+                       but can be set if tab_s_name is also used.
+     * tab_s_name : used to denote the name of the page, when it is used as a frame \
+                    of a larger page.
+     * preamble : html text added at the top of the <body> text, but before the ImageMetaTag \
+                  section. Can be quite extensive.
+     * postable : html text added after the ImageMetaTag section. A link to the ImageMetaTag \
+                  documentation will be appended unless postamble_no_imt_link is True.
+     * postamble_no_imt_link : if True, no link to the ImageMetaTag documentation will be added \
+                               to the postamble.
+     * initial_selectors - A list of initial values for the selectors, to be passed into \
+                           :func:`ImageMetaTag.webpage.write_js_setup`.
+     * show_selector_names - switches on displaying the selector full names defined by the \
+                             :class:`ImageMetaTag.ImageDict`.full_name_mapping
+     * show_singleton_selectors - When set to False, selectors that have only one element are \
+                                 not displayed (default=True).
+     * optgroups - The contents of selectors can be grouped together to make large lists \
+                   more readable. This is passed into \
+                   :func:`ImageMetaTag.webpage.write_js_to_header`.
+     * url_type - determines the type of URL at the bottom of the ImageMetaTag section. Can be \
+                  'int' or 'str'.
+     * only_show_rel_url - If True, the wepage will only show relative urls in is link section.
+     * verbose - If True, stdout will be more verbose
+     * style - the style of output page to write, currently only 'horiz dropdowns' is valid
+     * write_intmed_tmpfile - If True, files are written out to temporary filenames and then \
+                              moved when completed.
+     * description - html description metadata
+     * keywords - html keyword metadata
+     * compression - default False. If True, then the json data object will be compressed \
+                     using zlib string compression. When read into the browser, we will use \
+                     pako to inflate it (https://github.com/nodeca/pako)
+     * css - Optional CSS file used to style webpage. By default a small amount of css is \
+             written out in the page header.
+     * load_err_msg - additional message to show after 'Please wait while the page is loading'. \
+                      default is None, but very large pages can crash with Internet Explorer so \
+                      a message along the lines of this may be useful: 'If the page does not \
+                      load correctly in Internet Explorer, please try using firefox or Chrome.'
+
+    Returns a list of files that the the created webpage is dependent upon.
+
     '''
 
     page_dependencies = []
@@ -746,28 +749,35 @@ def compress_string(in_str):
         file_mode = 'w'
     return comp_str, file_mode
 
-def write_js_placeholders(img_dict, file_obj=None, dict_depth=None, selector_prefix=None,
+def write_js_placeholders(img_dict, file_obj=None, dict_depth=None,
+                          selector_prefix=None,
                           style='horiz dropdowns', level_names=False,
                           show_singleton_selectors=True,
                           animated_level=None, load_err_msg=None):
     '''
-    Writes the placeholders into the page body, for the javascript to manipulate
+    Writes the placeholders into the page body, for the javascript to
+    manipulate
 
-    * file_obj - an open file object to write to
-    * dict_dept - the depth of the :class:`ImageMetaTag.ImageDict` being written
-    * selector_prefix - prefix for the variable names of the selectors (these are visible to \
-                        those people viewing the webpage!)
-    * style - In future, it would be great to write out different types of webpages. For now \
-              they are always horizontal dropdown menus: 'horiz dropdowns'.
-    * show_singleton_selectors - When set to False, selectors that have only one element are \
-                                not displayed (default=True).
-    * level_names - if supplied, this need to be a list of full names, for the selectors, of \
-                    length dict_depth.
-    * animated_level - if supplied, as a string, this will be used to label the animator buttons.
-    * load_err_msg - additional message to show after 'Please wait while the page is loading'. \
-                     default is None, but very large pages can crash with Internet Explorer so \
-                     a message along the lines of this may be useful:
-    'If the page does not load correctly in Internet Explorer, please try using firefox or Chrome.'
+     * file_obj - an open file object to write to
+     * dict_dept - the depth of the :class:`ImageMetaTag.ImageDict` \
+                   being written
+     * selector_prefix - prefix for the variable names of the selectors \
+                        (these are visible to people viewing the webpage!)
+     * style - In future, it would be great to write out different types of \
+               webpages. For now they are always horizontal dropdown menus.
+     * show_singleton_selectors - When set to False, selectors that have \
+                                  only one element are not displayed \
+                                  (default=True).
+     * level_names - if supplied, this need to be a list of full names, for \
+                     the selectors, of length dict_depth.
+     * animated_level - if supplied, as a string, this will be used to label \
+                        the animator buttons.
+     * load_err_msg - additional message to show after 'Please wait while the \
+                      page is loading'. default is None, but very large pages \
+                      can crash with Internet Explorer so a message along the \
+                      lines of this may be useful: 'If the page does not load \
+                      correctly in Internet Explorer, please try using \
+                      firefox or Chrome.'
     '''
 
     if not show_singleton_selectors:

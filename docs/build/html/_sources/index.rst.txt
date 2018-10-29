@@ -23,6 +23,7 @@ Contents:
    webpage
    test
    simple
+   scripts
    versions
 
 Indices and tables
