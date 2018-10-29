@@ -7,23 +7,24 @@ and http://scitools-incubator.github.io/image-meta-tag/build/html/index.html
 
 This script operates on a ImageMetaTag database file (imt.db in any examples).
 
-The script should be run within the directory that contains the imt.db file
-and it assumes that all images referenced within it are in that directory
-or subdirectories within it.
-
 Basic example:
   imt_rm_images imt.db file.png file2.png
 this would delete file1.png and file2.png from disk and the imt.db file
 
 Usage with wildcards:
-  /home/h01/freb/workspace/PyStuff/rm_imt_images.py imt.db  July16/*
-this would delete all files in the example directory (July16) that have
-and entry in the imt.db file.
-
+  rm_imt_images.py /path/to/images/imt.db  /path/to/images/subdir/*
+this would delete all files in the example subdirectory and their entry
+in the database
 
 Options:
   * -v : verbose output
   * -f : force deletes (similar to rm -f)
+
+Note that this utility is not designed to delete files optimally for speed
+but instead it deletes files on disk and then in the database one at a time.
+This is slower than deleting multiple files on disk, and then multiple files
+in the database, but this reduces the risk of the contents of the database
+and file system getting out of sync.
 
 Once a database file has been manipulated, and images deleted, any
 web pages prepared using the database should be recreated. Doing so is
