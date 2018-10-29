@@ -492,6 +492,7 @@ class ImageDict(object):
 
         Valid sort methods so far are mostly focused on meteorological terms,
         and include:
+ 
          * 'sort' - just an ordinary sort
          * 'level' or 'numeric' - starting with the surface and working \
                                   upwards, then 'special' levels like cross \
@@ -797,14 +798,13 @@ def dict_split(in_dict, n_split=None, size_split=None, extra_opts=None):
     in_dict - the dictionary to split
 
     Options:
+     * n_split - the number of dictionaries to break the in_dict up into.
+     * size_split - the size of the required output dictionaries.
+     * extra_opts - If supplied as an iterable, this routine will yield a \
+                    tuple containing the output sub-dictionary and then each \
+                    of the elements of extra_opts.
 
-    * n_split - the number of dictionaries to break the in_dict up into.
-    * size_split - the size of the required output dictionaries.
-    * extra_opts - If supplied as an iterable, this routine will yield a \
-                   tuple containing the output sub-dictionary and then each \
-                   of the elements of extra_opts.
-
-    .. note:: One, and only one, of n_slpit, or size_split must be specified,
+    .. note:: One, and only one, of n_slpit, or size_split must be specified,\
     as an integer.
 
     '''
@@ -864,13 +864,15 @@ def simple_dict_filter(simple_dict, tests, raise_key_mismatch=False):
     against a set of tests.
 
     An example set of tests:
-    tests = {'number of rolls': ['6 simulated rolls',
-                                 '216 simulated rolls',
-                                 '1296 simulated rolls'],
-             'plot color': None,
-             'image compression': None,
-             'plot type': ['Histogram', ('All', ['Histogram', 'Line plots'])],
-             'image trim': None}
+    ::
+        tests = {'number of rolls': ['6 simulated rolls',
+                                     '216 simulated rolls',
+                                     '1296 simulated rolls'],
+                 'plot color': None,
+                 'image compression': None,
+                 'plot type': ['Histogram', ('All', ['Histogram', 'Line plots'])],
+                 'image trim': None}
+
     Here, the 'number of rolls' is restricted to a simple list.
 
     The plot type is filtered according to 'Histogram', and there is also a
@@ -880,13 +882,11 @@ def simple_dict_filter(simple_dict, tests, raise_key_mismatch=False):
     The other image characteristics are not filtered.
 
     Options:
-
      * raise_key_mismatch - if True, then attempting to test a dictionary \
                             with a missing key will raise and exception. \
-                            Default is to return all False
+                            Default is to return all False.
 
     Returns three logicals:
-
      * The first indicates whether the input dict passes the simple tests
      * The second indicates whether the input dict is part of the grouped \
        elements of the test (the ['Histogram', 'Line plots'] list).
