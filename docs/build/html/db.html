@@ -1,23 +1,35 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>ImageMetaTag.db &#8212; ImageMetaTag 0.7.6 documentation</title>
+    
+    <title>ImageMetaTag.db &#8212; ImageMetaTag 0.7.7 documentation</title>
+    
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.7.7',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="ImageMetaTag 0.7.7 documentation" href="index.html" />
     <link rel="next" title="ImageMetaTag.ImageDict" href="ImageDict.html" />
     <link rel="prev" title="ImageMetaTag.savefig" href="savefig.html" /> 
-  </head><body>
+  </head>
+  <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -33,7 +45,7 @@
         <li class="right" >
           <a href="savefig.html" title="ImageMetaTag.savefig"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.6 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.7 documentation</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -62,20 +74,18 @@
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/db.rst.txt"
+      <li><a href="_sources/db.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
-    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -90,9 +100,9 @@
 <span id="imagemetatag-db"></span><h1>ImageMetaTag.db<a class="headerlink" href="#module-ImageMetaTag.db" title="Permalink to this headline">¶</a></h1>
 <p>This module contains a set of functions to create/write to/read
 and maintain an sqlite3 database of image files and their associated metadata.</p>
-<p>In normal usage it is primarily used by  <a class="reference internal" href="savefig.html#ImageMetaTag.savefig" title="ImageMetaTag.savefig"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.savefig()</span></code></a> to
+<p>In normal usage it is primarily used by  <a class="reference internal" href="savefig.html#ImageMetaTag.savefig" title="ImageMetaTag.savefig"><code class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.savefig()</span></code></a> to
 create the database as figures are saved. Once the metadata database has been
-built up then the metadata can be loaded with <a class="reference internal" href="#ImageMetaTag.db.read" title="ImageMetaTag.db.read"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.db.read()</span></code></a>.</p>
+built up then the metadata can be loaded with <a class="reference internal" href="#ImageMetaTag.db.read" title="ImageMetaTag.db.read"><code class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.db.read()</span></code></a>.</p>
 <p>(C) Crown copyright Met Office. All rights reserved.
 Released under BSD 3-Clause License. See LICENSE for more details.</p>
 <div class="section" id="commonly-used-functions">
@@ -110,11 +120,11 @@ Released under BSD 3-Clause License. See LICENSE for more details.</p>
 </ul>
 <p>Options:</p>
 <ul class="simple">
-<li>add_strict - passed into <a class="reference internal" href="#ImageMetaTag.db.write_img_to_open_db" title="ImageMetaTag.db.write_img_to_open_db"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.db.write_img_to_open_db()</span></code></a></li>
-<li>attempt_replace - passed into <a class="reference internal" href="#ImageMetaTag.db.write_img_to_open_db" title="ImageMetaTag.db.write_img_to_open_db"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.db.write_img_to_open_db()</span></code></a></li>
+<li>add_strict - passed into <a class="reference internal" href="#ImageMetaTag.db.write_img_to_open_db" title="ImageMetaTag.db.write_img_to_open_db"><code class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.db.write_img_to_open_db()</span></code></a></li>
+<li>attempt_replace - passed into <a class="reference internal" href="#ImageMetaTag.db.write_img_to_open_db" title="ImageMetaTag.db.write_img_to_open_db"><code class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.db.write_img_to_open_db()</span></code></a></li>
 <li>timeout - default timeout to try and write to the database.</li>
 </ul>
-<p>This is commonly used in <a class="reference internal" href="savefig.html#ImageMetaTag.savefig" title="ImageMetaTag.savefig"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.savefig()</span></code></a></p>
+<p>This is commonly used in <a class="reference internal" href="savefig.html#ImageMetaTag.savefig" title="ImageMetaTag.savefig"><code class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.savefig()</span></code></a></p>
 </dd></dl>
 
 <dl class="function">
@@ -131,7 +141,7 @@ Released under BSD 3-Clause License. See LICENSE for more details.</p>
 </dd>
 <dt>Returns:</dt>
 <dd><ul class="first last simple">
-<li>a list of filenames (payloads for the <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageMetaTag.ImageDict</span></code></a> class )</li>
+<li>a list of filenames (payloads for the <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><code class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></code></a> class )</li>
 <li>a dictionary, by filename, containing a dictionary of the image metadata        as <em>tagname: value</em></li>
 </ul>
 </dd>
@@ -141,7 +151,7 @@ large number of duplicated strings, which can be an inefficient use of memory
 with large databases. If tag_strings is supplied, it will be populated with a
 unique list of strings used as tags and the dictionary will only contain
 references to this list. This can reduce memory usage considerably, both for
-the dictionary itself but also of an <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageMetaTag.ImageDict</span></code></a> produced
+the dictionary itself but also of an <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><code class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></code></a> produced
 with the dictionary.</p>
 <p>Will return None, None if there is a problem.</p>
 <p>In older versions, this was named read_img_info_from_dbfile which will still work.</p>
@@ -150,7 +160,7 @@ with the dictionary.</p>
 <dl class="function">
 <dt id="ImageMetaTag.db.del_plots_from_dbfile">
 <code class="descclassname">ImageMetaTag.db.</code><code class="descname">del_plots_from_dbfile</code><span class="sig-paren">(</span><em>db_file</em>, <em>filenames</em>, <em>do_vacuum=True</em>, <em>allow_retries=True</em>, <em>db_timeout=6</em>, <em>db_attempts=20</em>, <em>skip_warning=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/db.html#del_plots_from_dbfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.del_plots_from_dbfile" title="Permalink to this definition">¶</a></dt>
-<dd><p>deletes a list of files from a database file created by <a class="reference internal" href="#module-ImageMetaTag.db" title="ImageMetaTag.db"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ImageMetaTag.db</span></code></a></p>
+<dd><p>deletes a list of files from a database file created by <a class="reference internal" href="#module-ImageMetaTag.db" title="ImageMetaTag.db"><code class="xref py py-mod docutils literal"><span class="pre">ImageMetaTag.db</span></code></a></p>
 <ul class="simple">
 <li>do_vacuum - if True, the database will be restructured/cleaned after the delete</li>
 <li>allow_retries - if True, retries will be allowed if the database is locked.                    If False there are no retries, but sleep commands try to avoid the need                    when doing a large number of deletes.</li>
@@ -164,7 +174,7 @@ with the dictionary.</p>
 <dt id="ImageMetaTag.db.select_dbfile_by_tags">
 <code class="descclassname">ImageMetaTag.db.</code><code class="descname">select_dbfile_by_tags</code><span class="sig-paren">(</span><em>db_file</em>, <em>select_tags</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/db.html#select_dbfile_by_tags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.select_dbfile_by_tags" title="Permalink to this definition">¶</a></dt>
 <dd><p>Selects from a database file the entries that match a dict of field names/acceptable values.</p>
-<p>Returns the output, processed by <a class="reference internal" href="#ImageMetaTag.db.process_select_star_from" title="ImageMetaTag.db.process_select_star_from"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.db.process_select_star_from()</span></code></a></p>
+<p>Returns the output, processed by <a class="reference internal" href="#ImageMetaTag.db.process_select_star_from" title="ImageMetaTag.db.process_select_star_from"><code class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.db.process_select_star_from()</span></code></a></p>
 </dd></dl>
 
 <dl class="function">
@@ -230,7 +240,7 @@ for &gt; 100 selects.</p>
 <code class="descclassname">ImageMetaTag.db.</code><code class="descname">write_img_to_open_db</code><span class="sig-paren">(</span><em>dbcr</em>, <em>filename</em>, <em>img_info</em>, <em>add_strict=False</em>, <em>attempt_replace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/db.html#write_img_to_open_db"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.write_img_to_open_db" title="Permalink to this definition">¶</a></dt>
 <dd><p>Does the work for write_img_to_dbfile to add an image to the open database cursor (dbcr)</p>
 <ul class="simple">
-<li>add_strict: if True then it will report a ValueError if you                   try and include fields that aren’t defined in the table</li>
+<li>add_strict: if True then it will report a ValueError if you                   try and include fields that aren&#8217;t defined in the table</li>
 <li>attempt_replace: if True, then it will attempt to replace a database                   entry if the image is already present. Otherwise it will ignore it.</li>
 </ul>
 </dd></dl>
@@ -238,7 +248,7 @@ for &gt; 100 selects.</p>
 <dl class="function">
 <dt id="ImageMetaTag.db.read_img_info_from_dbcursor">
 <code class="descclassname">ImageMetaTag.db.</code><code class="descname">read_img_info_from_dbcursor</code><span class="sig-paren">(</span><em>dbcr</em>, <em>required_tags=None</em>, <em>tag_strings=None</em>, <em>n_samples=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/db.html#read_img_info_from_dbcursor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.read_img_info_from_dbcursor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reads from an open database cursor (dbcr) for <a class="reference internal" href="#ImageMetaTag.db.read" title="ImageMetaTag.db.read"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.db.read()</span></code></a> and other routines.</p>
+<dd><p>Reads from an open database cursor (dbcr) for <a class="reference internal" href="#ImageMetaTag.db.read" title="ImageMetaTag.db.read"><code class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.db.read()</span></code></a> and other routines.</p>
 <dl class="docutils">
 <dt>Options</dt>
 <dd><ul class="first last simple">
@@ -255,7 +265,7 @@ for &gt; 100 selects.</p>
 <code class="descclassname">ImageMetaTag.db.</code><code class="descname">select_dbcr_by_tags</code><span class="sig-paren">(</span><em>dbcr</em>, <em>select_tags</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/db.html#select_dbcr_by_tags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.select_dbcr_by_tags" title="Permalink to this definition">¶</a></dt>
 <dd><p>Selects from an open database cursor (dbcr) the entries that match a dict of field
 names &amp; acceptable values.</p>
-<p>Returns the output, processed by <a class="reference internal" href="#ImageMetaTag.db.process_select_star_from" title="ImageMetaTag.db.process_select_star_from"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.db.process_select_star_from()</span></code></a></p>
+<p>Returns the output, processed by <a class="reference internal" href="#ImageMetaTag.db.process_select_star_from" title="ImageMetaTag.db.process_select_star_from"><code class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.db.process_select_star_from()</span></code></a></p>
 </dd></dl>
 
 </div>
@@ -276,7 +286,7 @@ names &amp; acceptable values.</p>
 <dl class="function">
 <dt id="ImageMetaTag.db.process_select_star_from">
 <code class="descclassname">ImageMetaTag.db.</code><code class="descname">process_select_star_from</code><span class="sig-paren">(</span><em>db_contents</em>, <em>dbcr</em>, <em>required_tags=None</em>, <em>tag_strings=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/db.html#process_select_star_from"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.process_select_star_from" title="Permalink to this definition">¶</a></dt>
-<dd><p>Converts the output from a select * from ….  command into a standard output format
+<dd><p>Converts the output from a select * from ....  command into a standard output format
 Requires a database cursor (dbcr) to identify the field names.</p>
 <dl class="docutils">
 <dt>Options:</dt>
@@ -287,8 +297,8 @@ Requires a database cursor (dbcr) to identify the field names.</p>
 </dd>
 <dt>Returns:</dt>
 <dd><ul class="first last simple">
-<li>as <a class="reference internal" href="#ImageMetaTag.db.read" title="ImageMetaTag.db.read"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.db.read()</span></code></a>, but filtered according to the select.</li>
-<li>a list of filenames (payloads for the <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageMetaTag.ImageDict</span></code></a>)</li>
+<li>as <a class="reference internal" href="#ImageMetaTag.db.read" title="ImageMetaTag.db.read"><code class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.db.read()</span></code></a>, but filtered according to the select.</li>
+<li>a list of filenames (payloads for the <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><code class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></code></a>)</li>
 <li>a dictionary, by filename, containing a dictionary of the image metadata        as tagname: value</li>
 </ul>
 </dd>
@@ -318,9 +328,9 @@ the database by accident).</p>
 <dt>Options:</dt>
 <dd><ul class="first last simple">
 <li>img_tag_req - a list of tag names that are to be applied/created. Tags not in this list                     will not be stored. Images without all of these tags are ignored.</li>
-<li>subdir_excl_list - a list of subdirectories that don’t need to be scanned. [‘thumbnail’]                         for instance, will prevent the image thumbnails being included.</li>
+<li>subdir_excl_list - a list of subdirectories that don&#8217;t need to be scanned. [&#8216;thumbnail&#8217;]                         for instance, will prevent the image thumbnails being included.</li>
 <li>no_file_ext - logical to exclude the file extension in the filenames saved to the database.</li>
-<li>known_file_tags - if supplied, this is a dict (keyed by filename entry),                         contains a dictionary, structured: {filename: {tag name: value}}                          for the images that are already known (so you don’t need to read them                          from the files themselves as that is slow). This can be useful                          if you have a old backup of a database file that needs updating.</li>
+<li>known_file_tags - if supplied, this is a dict (keyed by filename entry),                         contains a dictionary, structured: {filename: {tag name: value}}                          for the images that are already known (so you don&#8217;t need to read them                          from the files themselves as that is slow). This can be useful                          if you have a old backup of a database file that needs updating.</li>
 <li>restart_db - if True, the db_file will be restarted from an empty database.</li>
 <li>verbose - verbose output.</li>
 </ul>
@@ -352,12 +362,12 @@ the database by accident).</p>
         <li class="right" >
           <a href="savefig.html" title="ImageMetaTag.savefig"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.6 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.7 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2015-2018, British Crown Copyright.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.8.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
     </div>
   </body>
 </html>
