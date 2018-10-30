@@ -44,11 +44,7 @@ import errno
 import distutils.util
 
 # python 2.7/3.6 compatibility:
-import builtins
-import future
-import past
-import six
-from six.moves import input
+import __future__
 
 # make sure we use the version of the ImageMetaTag library associated with
 # this script (assumed to be in a bin directory, at the same level as the lib)
@@ -56,6 +52,8 @@ UTIL_PATH = os.sep.join(os.path.abspath(sys.argv[0]).split(os.sep)[0:-2])
 sys.path.insert(0, UTIL_PATH)
 import ImageMetaTag as imt
 
+# is this run in python2 or 3:
+PY3 = sys.version_info[0] == 3
 
 def imt_rm_img(db_file=None, files=None, verbose=False, force_deletes=False,
                delete_not_in_db=False):
@@ -144,7 +142,12 @@ with ImageMetaTag version {}, {}
         if file_in_db or file_rm:
             if not force_deletes:
                 msg = "rm_imt_images: remove file & db entry '{}'? "
-                allowed_to_delete = str_to_bool(input(msg.format(filename)))
+                if PY3:
+                    allowed_to_delete = input(msg.format(filename))
+                else:
+                    allowed_to_delete = raw_input(msg.format(filename))
+                # now convert to a bool:
+                allowed_to_delete = str_to_bool(allowed_to_delete)
             else:
                 allowed_to_delete = True
         else:
