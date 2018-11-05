@@ -141,7 +141,14 @@ with ImageMetaTag version {}, {}
         # now check is we can actually delete the file:
         if file_in_db or file_rm:
             if not force_deletes:
-                msg = "rm_imt_images: remove file & db entry '{}'? "
+                # need to ask whether we can delete, so then be clear what
+                # we're asking to do:
+                if db_rm and file_rm:
+                    msg = "rm_imt_images: remove file & db entry '{}'? "
+                elif db_rm and not file_rm:
+                    msg = "rm_imt_images: db entry '{}'? "
+                elif not db_rm and file_rm:
+                    msg = "rm_imt_images: remove file '{}'? "
                 if PY3:
                     allowed_to_delete = input(msg.format(filename))
                 else:

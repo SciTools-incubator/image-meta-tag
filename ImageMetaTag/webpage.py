@@ -53,7 +53,7 @@ LEN_INDENT = len(INDENT)
 # for compressed json files, we use pako to inflate the data back to full size:
 PAKO_JS_FILE = 'pako_inflate.js'
 PAKO_RELEASE = '1.0.5'
-PAKO_SOURE_TAR = 'https://github.com/nodeca/pako/archive/{}.tar.gz'.format(PAKO_RELEASE)
+PAKO_SOURCE_TAR = 'https://github.com/nodeca/pako/archive/{}.tar.gz'.format(PAKO_RELEASE)
 
 
 def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=None,
@@ -974,8 +974,8 @@ def get_pako(pako_to_dir=None):
         pako_to_dir = os.path.join(imt.__path__[0], 'javascript')
 
     # Open the url
-    pako_urlopen = urlopen(PAKO_SOURE_TAR)
-    print("downloading " + PAKO_SOURE_TAR)
+    pako_urlopen = urlopen(PAKO_SOURCE_TAR)
+    print("downloading " + PAKO_SOURCE_TAR)
     # Open our local file for writing
     with tempfile.NamedTemporaryFile('w', suffix='.tar.gz', prefix='pako_',
                                      delete=False) as local_file:
