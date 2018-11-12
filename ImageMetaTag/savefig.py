@@ -33,9 +33,9 @@ THUMB_DEFAULT_IMG_SIZE = 150, 150
 THUMB_DEFAULT_DIR_NAME = 'thumbnail'
 
 
-def savefig(filename, img_tags=None, img_format=None, img_converter=0,
+def savefig(filename, img_format=None, img_tags=None, img_converter=0,
             do_trim=False, trim_border=0,
-            do_thumb=False, keep_open=False, dpi=None,
+            do_thumb=False, keep_open=True, clear_fig=True, dpi=None,
             logo_file=None, logo_width=None, logo_height=None,
             logo_padding=0, logo_pos=0,
             db_file=None, db_timeout=DEFAULT_DB_TIMEOUT,
@@ -73,8 +73,10 @@ def savefig(filename, img_tags=None, img_format=None, img_converter=0,
                     metadata is usually the same so the default is \
                     db_replace=False.
      * dpi - change the image resolution passed into matplotlib.savefig.
-     * keep_open - by default, this savefig wrapper closes the figure after \
-                   use, except if keep_open is True.
+     * keep_open - True by default, this savefig wrapper keeps the figure \
+                   open after use. When False, the figure is closed.
+     * clear_fig - True by default, this savefig wrapper will clear the \
+                   figure after use. Not used if keep_open == False
      * verbose - switch for verbose output (reports file sizes before/after \
                  conversion)
      * img_converter - see :func:`ImageMetaTag.image_file_postproc`.
@@ -86,6 +88,13 @@ def savefig(filename, img_tags=None, img_format=None, img_converter=0,
      * logo_padding - see :func:`ImageMetaTag.image_file_postproc`.
      * logo_pos - see :func:`ImageMetaTag.image_file_postproc`.
      * do_thumb - see :func:`ImageMetaTag.image_file_postproc`.
+
+    The default behaviour for handling figures is to keep the figure open,
+    but clear it of any content. This is appropriate behaviour because the
+    most common situation where ImageMetaTag is being used is in batch
+    plotting to manage very large numbers of figures. In this context the
+    most memory/speed efficient way to make a plot is to reuse a single
+    figure, but clear it at the end of each plot.
 
     TODO: the logo would also be good if it could accept a list of files, \
     widths, positions and paddings. That way different logos could be added \
@@ -126,6 +135,9 @@ def savefig(filename, img_tags=None, img_format=None, img_converter=0,
         plt.savefig(savefig_file)
     if not keep_open:
         plt.close()
+    elif clear_fig:
+        fig = plt.gcf()
+        fig.clear()
     if buf:
         # need to go to the start of the buffer, if that's where it went:
         buf.seek(0)

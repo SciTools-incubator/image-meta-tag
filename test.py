@@ -213,9 +213,15 @@ def plot_random_data(random_data, i_rand, plot_col, col_name, trims, borders,
                 # (deleting any pre-existing file first):
                 if os.path.isfile(outfile):
                     os.remove(outfile)
+                # clear on the last image:
+                if border == these_borders[-1] and trim == trims[-1]:
+                    clear_fig = True
+                else:
+                    clear_fig = False
                 imt.savefig(outfile, do_trim=trim, trim_border=border,
                             do_thumb=True, img_converter=compression,
                             img_tags=img_tags, keep_open=True,
+                            clear_fig=clear_fig,
                             verbose=imt_verbose,
                             db_file=imt_db, db_timeout=db_timeout,
                             logo_file=LOGO_FILE, logo_width=LOGO_SIZE,
@@ -267,10 +273,15 @@ def plot_random_data(random_data, i_rand, plot_col, col_name, trims, borders,
                 # (deleting any pre-existing file first):
                 if os.path.isfile(outfile):
                     os.remove(outfile)
+                # clear on the last image:
+                if border == these_borders[-1] and trim == trims[-1]:
+                    clear_fig = True
+                else:
+                    clear_fig = False
                 imt.savefig(outfile, do_trim=trim, trim_border=border,
                             do_thumb=True, img_converter=compression,
                             img_tags=img_tags, keep_open=True,
-                            verbose=imt_verbose,
+                            clear_fig=clear_fig, verbose=imt_verbose,
                             db_file=imt_db, db_timeout=db_timeout,
                             logo_file=[LOGO_FILE, LOGO_FILE],
                             logo_height=LOGO_SIZE//2,
