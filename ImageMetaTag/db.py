@@ -366,7 +366,7 @@ def write_img_to_open_db(dbcr, filename, img_info, add_strict=False, attempt_rep
 def list_tables(dbcr):
     'lists the tables present, from a database cursor'
     result = dbcr.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
-    table_names = sorted([x[0] for x in zip(*result)])
+    table_names = sorted([x[0] for x in result])
     return table_names
 
 def read_img_info_from_dbcursor(dbcr, required_tags=None, tag_strings=None, n_samples=None):
