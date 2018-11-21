@@ -233,7 +233,7 @@ for &gt; 100 selects.</p>
 <dd><p>Does the work for write_img_to_dbfile to add an image
 to the open database cursor (dbcr)</p>
 <ul class="simple">
-<li>add_strict: if True then it will report a ValueError if you                   try and include fields that aren’t defined in the table</li>
+<li>add_strict: if True then it will report a ValueError if you                   try and include fields that aren’t defined in the table.                   If False, then adding a new metadata tag to the                   database will cause it be rewritten with the new item                   as a new column using                   <a class="reference internal" href="#ImageMetaTag.db.recrete_table_new_cols" title="ImageMetaTag.db.recrete_table_new_cols"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.db.recrete_table_new_cols()</span></code></a>                   All pre-existing images will have                   the new tag set to ‘None’. It is best to avoid using                   this functionality as it can be slow for large                   databases. Instead, all images should be ideally have                   all expected metadata tags included from the start                   but set to ‘None’ where they are not used.</li>
 <li>attempt_replace: if True, then it will attempt to replace a database                   entry if the image is already present.                   Otherwise it will ignore it.</li>
 </ul>
 </dd></dl>
@@ -260,6 +260,18 @@ to the open database cursor (dbcr)</p>
 <dd><p>Selects from an open database cursor (dbcr) the entries that match a dict of field
 names &amp; acceptable values.</p>
 <p>Returns the output, processed by <a class="reference internal" href="#ImageMetaTag.db.process_select_star_from" title="ImageMetaTag.db.process_select_star_from"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.db.process_select_star_from()</span></code></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ImageMetaTag.db.recrete_table_new_cols">
+<code class="descclassname">ImageMetaTag.db.</code><code class="descname">recrete_table_new_cols</code><span class="sig-paren">(</span><em>dbcr</em>, <em>current_cols</em>, <em>new_cols</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/db.html#recrete_table_new_cols"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.db.recrete_table_new_cols" title="Permalink to this definition">¶</a></dt>
+<dd><p>for a given database cursor (bdcr) this recreates a new version of the
+ImageMetaTag database table with new columns.</p>
+<p>This is a major change to a database, and takes place (deliberately)
+without any commit statements (otherwise the database file seen by other
+connections/processes will see an intermediate/incorrect database).</p>
+<p>Because of this, this process is slow and should be avoided if at all
+possible.</p>
 </dd></dl>
 
 </div>

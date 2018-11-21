@@ -399,7 +399,17 @@
 <span class="sd">    to the open database cursor (dbcr)</span>
 
 <span class="sd">    * add_strict: if True then it will report a ValueError if you \</span>
-<span class="sd">                  try and include fields that aren&#39;t defined in the table</span>
+<span class="sd">                  try and include fields that aren&#39;t defined in the table. \</span>
+<span class="sd">                  If False, then adding a new metadata tag to the \</span>
+<span class="sd">                  database will cause it be rewritten with the new item \</span>
+<span class="sd">                  as a new column using \</span>
+<span class="sd">                  :func:`ImageMetaTag.db.recrete_table_new_cols` \</span>
+<span class="sd">                  All pre-existing images will have \</span>
+<span class="sd">                  the new tag set to &#39;None&#39;. It is best to avoid using \</span>
+<span class="sd">                  this functionality as it can be slow for large \</span>
+<span class="sd">                  databases. Instead, all images should be ideally have \</span>
+<span class="sd">                  all expected metadata tags included from the start \</span>
+<span class="sd">                  but set to &#39;None&#39; where they are not used.</span>
 <span class="sd">    * attempt_replace: if True, then it will attempt to replace a database \</span>
 <span class="sd">                  entry if the image is already present. \</span>
 <span class="sd">                  Otherwise it will ignore it.</span>
@@ -813,7 +823,7 @@
     <span class="k">return</span> <span class="n">filename_list</span><span class="p">,</span> <span class="n">out_dict</span></div>
 
 
-<span class="k">def</span> <span class="nf">recrete_table_new_cols</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span> <span class="n">current_cols</span><span class="p">,</span> <span class="n">new_cols</span><span class="p">):</span>
+<div class="viewcode-block" id="recrete_table_new_cols"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.recrete_table_new_cols">[docs]</a><span class="k">def</span> <span class="nf">recrete_table_new_cols</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span> <span class="n">current_cols</span><span class="p">,</span> <span class="n">new_cols</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    for a given database cursor (bdcr) this recreates a new version of the</span>
 <span class="sd">    ImageMetaTag database table with new columns.</span>
@@ -869,7 +879,7 @@
                 <span class="n">this_ins</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;None&#39;</span><span class="p">)</span>
         <span class="n">ins_this</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">this_ins</span><span class="p">))</span>
     <span class="c1"># and exectuemany on the insert command:</span>
-    <span class="n">dbcr</span><span class="o">.</span><span class="n">executemany</span><span class="p">(</span><span class="n">ins_comm</span><span class="p">,</span> <span class="n">ins_this</span><span class="p">)</span>
+    <span class="n">dbcr</span><span class="o">.</span><span class="n">executemany</span><span class="p">(</span><span class="n">ins_comm</span><span class="p">,</span> <span class="n">ins_this</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="scan_dir_for_db"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.scan_dir_for_db">[docs]</a><span class="k">def</span> <span class="nf">scan_dir_for_db</span><span class="p">(</span><span class="n">basedir</span><span class="p">,</span> <span class="n">db_file</span><span class="p">,</span> <span class="n">img_tag_req</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">add_strict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>

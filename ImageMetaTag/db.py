@@ -342,7 +342,17 @@ def write_img_to_open_db(dbcr, filename, img_info,
     to the open database cursor (dbcr)
 
     * add_strict: if True then it will report a ValueError if you \
-                  try and include fields that aren't defined in the table
+                  try and include fields that aren't defined in the table. \
+                  If False, then adding a new metadata tag to the \
+                  database will cause it be rewritten with the new item \
+                  as a new column using \
+                  :func:`ImageMetaTag.db.recrete_table_new_cols` \
+                  All pre-existing images will have \
+                  the new tag set to 'None'. It is best to avoid using \
+                  this functionality as it can be slow for large \
+                  databases. Instead, all images should be ideally have \
+                  all expected metadata tags included from the start \
+                  but set to 'None' where they are not used.
     * attempt_replace: if True, then it will attempt to replace a database \
                   entry if the image is already present. \
                   Otherwise it will ignore it.
