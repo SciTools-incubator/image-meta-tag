@@ -1,35 +1,23 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Associated scripts packaged with ImageMetaTag &#8212; ImageMetaTag 0.7.7 documentation</title>
-    
+    <title>Associated scripts packaged with ImageMetaTag &#8212; ImageMetaTag 0.7.8 documentation</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.7.7',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="ImageMetaTag 0.7.7 documentation" href="index.html" />
     <link rel="next" title="Versions of Python" href="versions.html" />
     <link rel="prev" title="ImageMetaTag - simplest_img_dict.py" href="simple.html" /> 
-  </head>
-  <body role="document">
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -45,7 +33,7 @@
         <li class="right" >
           <a href="simple.html" title="ImageMetaTag - simplest_img_dict.py"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.7 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.8 documentation</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -70,18 +58,20 @@
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/scripts.txt"
+      <li><a href="_sources/scripts.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -101,12 +91,12 @@ library to interface with the library for common tasks.</p>
 <p>Deletes images from disk and an ImageMetaTag database in a consistent way.</p>
 <p>This script operates on a ImageMetaTag database file (imt.db in any examples).</p>
 <p>Basic example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">rm_imt_images</span> <span class="n">imt</span><span class="o">.</span><span class="n">db</span> <span class="n">file</span><span class="o">.</span><span class="n">png</span> <span class="n">file2</span><span class="o">.</span><span class="n">png</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rm_imt_images</span> <span class="n">imt</span><span class="o">.</span><span class="n">db</span> <span class="n">file</span><span class="o">.</span><span class="n">png</span> <span class="n">file2</span><span class="o">.</span><span class="n">png</span>
 </pre></div>
 </div>
 <p>this would delete file1.png and file2.png from disk and the imt.db file</p>
 <p>Usage with wildcards:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">rm_imt_images</span><span class="o">.</span><span class="n">py</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">imt</span><span class="o">.</span><span class="n">db</span>  <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">subdir</span><span class="o">/*</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rm_imt_images</span><span class="o">.</span><span class="n">py</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">imt</span><span class="o">.</span><span class="n">db</span>  <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">subdir</span><span class="o">/*</span>
 </pre></div>
 </div>
 <p>this would delete all files in the example subdirectory and their entry
@@ -151,12 +141,12 @@ not part of this script.</p>
         <li class="right" >
           <a href="simple.html" title="ImageMetaTag - simplest_img_dict.py"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.7 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.8 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2015-2018, British Crown Copyright.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.8.
     </div>
   </body>
 </html>

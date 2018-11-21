@@ -1,34 +1,21 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ImageMetaTag.webpage &#8212; ImageMetaTag 0.7.7 documentation</title>
-    
+    <title>ImageMetaTag.webpage &#8212; ImageMetaTag 0.7.8 documentation</title>
     <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../',
-        VERSION:     '0.7.7',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" />
-    <link rel="top" title="ImageMetaTag 0.7.7 documentation" href="../../index.html" />
-    <link rel="up" title="Module code" href="../index.html" /> 
-  </head>
-  <body role="document">
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -38,7 +25,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">ImageMetaTag 0.7.7 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">ImageMetaTag 0.7.8 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -49,12 +36,14 @@
             </a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -121,7 +110,7 @@
 <span class="c1"># for compressed json files, we use pako to inflate the data back to full size:</span>
 <span class="n">PAKO_JS_FILE</span> <span class="o">=</span> <span class="s1">&#39;pako_inflate.js&#39;</span>
 <span class="n">PAKO_RELEASE</span> <span class="o">=</span> <span class="s1">&#39;1.0.5&#39;</span>
-<span class="n">PAKO_SOURE_TAR</span> <span class="o">=</span> <span class="s1">&#39;https://github.com/nodeca/pako/archive/</span><span class="si">{}</span><span class="s1">.tar.gz&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">PAKO_RELEASE</span><span class="p">)</span>
+<span class="n">PAKO_SOURCE_TAR</span> <span class="o">=</span> <span class="s1">&#39;https://github.com/nodeca/pako/archive/</span><span class="si">{}</span><span class="s1">.tar.gz&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">PAKO_RELEASE</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="write_full_page"><a class="viewcode-back" href="../../webpage.html#ImageMetaTag.webpage.write_full_page">[docs]</a><span class="k">def</span> <span class="nf">write_full_page</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">page_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tab_s_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -258,7 +247,7 @@
                 <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">css</span><span class="p">,</span> <span class="n">file_dir</span><span class="p">)</span>
             <span class="k">except</span> <span class="n">shutil</span><span class="o">.</span><span class="n">Error</span> <span class="k">as</span> <span class="n">sh_err</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">imt</span><span class="o">.</span><span class="n">PY3</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="s1">&#39;are the same file&#39;</span> <span class="ow">in</span> <span class="n">sh_err</span><span class="o">.</span><span class="n">__str__</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="s1">&#39;are the same file&#39;</span> <span class="ow">in</span> <span class="n">sh_err</span><span class="o">.</span><span class="fm">__str__</span><span class="p">():</span>
                         <span class="k">pass</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="n">sh_err</span>
@@ -665,7 +654,7 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">selector_prefix</span><span class="p">,</span> <span class="n">list_prefix</span><span class="p">,</span> <span class="n">file_list_name</span><span class="p">)</span>
 
 <div class="viewcode-block" id="write_json"><a class="viewcode-back" href="../../webpage.html#ImageMetaTag.webpage.write_json">[docs]</a><span class="k">def</span> <span class="nf">write_json</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">file_name_no_ext</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-               <span class="n">chunk_char_limit</span><span class="o">=</span><span class="mi">1</span><span class="n">e7</span><span class="p">):</span>
+               <span class="n">chunk_char_limit</span><span class="o">=</span><span class="mf">1e7</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Writes a json dump of the :class:`ImageMetaTag.ImageDict` tree strucuture</span>
 <span class="sd">    to a target file path.</span>
@@ -1042,8 +1031,8 @@
         <span class="n">pako_to_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">imt</span><span class="o">.</span><span class="n">__path__</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;javascript&#39;</span><span class="p">)</span>
 
     <span class="c1"># Open the url</span>
-    <span class="n">pako_urlopen</span> <span class="o">=</span> <span class="n">urlopen</span><span class="p">(</span><span class="n">PAKO_SOURE_TAR</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;downloading &quot;</span> <span class="o">+</span> <span class="n">PAKO_SOURE_TAR</span><span class="p">)</span>
+    <span class="n">pako_urlopen</span> <span class="o">=</span> <span class="n">urlopen</span><span class="p">(</span><span class="n">PAKO_SOURCE_TAR</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;downloading &quot;</span> <span class="o">+</span> <span class="n">PAKO_SOURCE_TAR</span><span class="p">)</span>
     <span class="c1"># Open our local file for writing</span>
     <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;.tar.gz&#39;</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;pako_&#39;</span><span class="p">,</span>
                                      <span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">local_file</span><span class="p">:</span>
@@ -1097,13 +1086,13 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">ImageMetaTag 0.7.7 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">ImageMetaTag 0.7.8 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2015-2018, British Crown Copyright.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.8.
     </div>
   </body>
 </html>

@@ -1,34 +1,21 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ImageMetaTag.savefig &#8212; ImageMetaTag 0.7.7 documentation</title>
-    
+    <title>ImageMetaTag.savefig &#8212; ImageMetaTag 0.7.8 documentation</title>
     <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../',
-        VERSION:     '0.7.7',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" />
-    <link rel="top" title="ImageMetaTag 0.7.7 documentation" href="../../index.html" />
-    <link rel="up" title="Module code" href="../index.html" /> 
-  </head>
-  <body role="document">
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -38,7 +25,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">ImageMetaTag 0.7.7 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">ImageMetaTag 0.7.8 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -49,12 +36,14 @@
             </a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -108,7 +97,7 @@
             <span class="n">logo_padding</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">logo_pos</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
             <span class="n">db_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">db_timeout</span><span class="o">=</span><span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">,</span>
             <span class="n">db_attempts</span><span class="o">=</span><span class="n">DEFAULT_DB_ATTEMPTS</span><span class="p">,</span>
-            <span class="n">db_replace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">db_full_paths</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">db_replace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">db_add_strict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">db_full_paths</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    A wrapper around matplotlib.pyplot.savefig, to include file size</span>
@@ -140,6 +129,17 @@
 <span class="sd">                    database if it already exists. This can be slow, and the \</span>
 <span class="sd">                    metadata is usually the same so the default is \</span>
 <span class="sd">                    db_replace=False.</span>
+<span class="sd">     * db_add_strict - if True, any attempt to add an image whose metadata \</span>
+<span class="sd">                       tag_names are not present in a pre-existing database \</span>
+<span class="sd">                       will result in a ValueError being raised. \</span>
+<span class="sd">                       If False, then adding a new metadata tag to the \</span>
+<span class="sd">                       database will cause it be rewritten with the new item \</span>
+<span class="sd">                       as a new column. All pre-existing images will have \</span>
+<span class="sd">                       the new tag set to &#39;None&#39;. It is best to avoid using \</span>
+<span class="sd">                       this functionality as it can be slow for large \</span>
+<span class="sd">                       databases. Instead, all images should be ideally have \</span>
+<span class="sd">                       all expected metadata tags included from the start \</span>
+<span class="sd">                       but set to &#39;None&#39; where they are not used.</span>
 <span class="sd">     * dpi - change the image resolution passed into matplotlib.savefig.</span>
 <span class="sd">     * keep_open - by default, this savefig wrapper closes the figure after \</span>
 <span class="sd">                   use, except if keep_open is True.</span>
@@ -244,7 +244,8 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">db</span><span class="o">.</span><span class="n">write_img_to_dbfile</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">db_filename</span><span class="p">,</span> <span class="n">img_tags</span><span class="p">,</span>
                                        <span class="n">timeout</span><span class="o">=</span><span class="n">db_timeout</span><span class="p">,</span>
-                                       <span class="n">attempt_replace</span><span class="o">=</span><span class="n">db_replace</span><span class="p">)</span>
+                                       <span class="n">attempt_replace</span><span class="o">=</span><span class="n">db_replace</span><span class="p">,</span>
+                                       <span class="n">add_strict</span><span class="o">=</span><span class="n">db_add_strict</span><span class="p">)</span>
                 <span class="n">wrote_db</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span> <span class="k">as</span> <span class="n">op_err</span><span class="p">:</span>
                 <span class="k">if</span> <span class="s1">&#39;database is locked&#39;</span> <span class="ow">in</span> <span class="n">op_err</span><span class="o">.</span><span class="n">message</span><span class="p">:</span>
@@ -823,13 +824,13 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">ImageMetaTag 0.7.7 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">ImageMetaTag 0.7.8 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2015-2018, British Crown Copyright.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.8.
     </div>
   </body>
 </html>
