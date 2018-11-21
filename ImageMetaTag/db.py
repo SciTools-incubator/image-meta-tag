@@ -24,19 +24,24 @@ from io import StringIO
 from ImageMetaTag import META_IMG_FORMATS
 from ImageMetaTag import DEFAULT_DB_TIMEOUT
 from ImageMetaTag import DEFAULT_DB_ATTEMPTS
-from ImageMetaTag.img_dict import readmeta_from_image, check_for_required_keys
+from ImageMetaTag.img_dict import readmeta_from_image
+from ImageMetaTag.img_dict import check_for_required_keys
 
 # the name of the database table that holds the plot metadata
 SQLITE_IMG_INFO_TABLE = 'img_info'
+SQLITE_IMG_INFO_FNAME = 'fname'
+
 
 def info_key_to_db_name(in_str):
     'Consistently convert a name in the img_info dict database'
     return in_str.replace(' ', '__')
 
+
 def db_name_to_info_key(in_str):
     'Inverse of info_key_to_db_name'
     # convert to string, to remove unicode string
     return str(in_str).replace('__', ' ')
+
 
 def write_img_to_dbfile(db_file, img_filename, img_info, add_strict=False,
                         attempt_replace=False,
@@ -46,17 +51,19 @@ def write_img_to_dbfile(db_file, img_filename, img_info, add_strict=False,
 
     Arguments:
 
-    * db_file - the database file to write to. If it does not exist, it will be created.
-    * img_filename - the filename of the image to which the metadata applies. Usually \
-                     this is either the absolute path, or it is useful to make this \
-                     the relative path, from the location of the database file.
-    * img_info - a dictionary containing any number of  {tag_name: value}  pairs to be \
-                 stored.
+    * db_file - the database file to write to. If it does not exist, it will \
+                be created.
+    * img_filename - the filename of the image to which the metadata applies. \
+                     Usually this is either the absolute path, or it is \
+                     useful to make this the relative path, from the location \
+                     of the database file.
+    * img_info - a dictionary containing any number of  {tag_name: value} \
+                 pairs to be stored.
 
     Options:
 
     * add_strict - passed into :func:`ImageMetaTag.db.write_img_to_open_db`
-    * attempt_replace - passed into :func:`ImageMetaTag.db.write_img_to_open_db`
+    * attempt_replace - passed to :func:`ImageMetaTag.db.write_img_to_open_db`
     * timeout - default timeout to try and write to the database.
 
     This is commonly used in :func:`ImageMetaTag.savefig`
@@ -71,10 +78,12 @@ def write_img_to_dbfile(db_file, img_filename, img_info, add_strict=False,
         dbcn, dbcr = open_or_create_db_file(db_file, img_info, timeout=timeout)
         # now write:
         write_img_to_open_db(dbcr, img_filename, img_info,
-                             add_strict=add_strict, attempt_replace=attempt_replace)
+                             add_strict=add_strict,
+                             attempt_replace=attempt_replace)
         # now commit that databasde entry and close:
         dbcn.commit()
         dbcn.close()
+
 
 def read(db_file, required_tags=None, tag_strings=None,
          db_timeout=DEFAULT_DB_TIMEOUT,
@@ -153,22 +162,27 @@ def read(db_file, required_tags=None, tag_strings=None,
 
 read_img_info_from_dbfile = read
 
+
 def merge_db_files(main_db_file, add_db_file, delete_add_db=False,
                    delete_added_entries=False, attempt_replace=False,
-                   db_timeout=DEFAULT_DB_TIMEOUT, db_attempts=DEFAULT_DB_ATTEMPTS):
+                   add_strict=False,
+                   db_timeout=DEFAULT_DB_TIMEOUT,
+                   db_attempts=DEFAULT_DB_ATTEMPTS):
     '''
-    Merges two ImageMetaTag database files, with the contents of add_db_file added
-    to the main_db_file. The databases should have the same tags within them for the
-    merge to work.
+    Merges two ImageMetaTag database files, with the contents of add_db_file
+    added to the main_db_file. The databases should have the same tags within
+    them for the merge to work.
 
     Options:
 
-    * delete_add_db - if True, the added database file will be deleted afterwards
-    * delete_added_entries - if delete_add_db is False, this will keep the add_db_file \
-                             but remove the entries from it which were added to the \
-                             main_db_file. \
-                             This is useful if parallel processes are writing to the \
-                             databases.  It does nothing if delete_add_db is True.
+    * add_strict - passed into :func:`ImageMetaTag.db.write_img_to_open_db`
+    * attempt_replace - passed to :func:`ImageMetaTag.db.write_img_to_open_db`
+    * delete_add_db - if True, the added file will be deleted afterwards
+    * delete_added_entries - if delete_add_db is False, this will keep the \
+                             add_db_file but remove the entries from it which \
+                             were added to the main_db_file. This is useful \
+                             if parallel processes are writing to the \
+                             databases. Ignored if delete_add_db is True.
     '''
 
     # read what we want to add in:
@@ -184,6 +198,7 @@ def merge_db_files(main_db_file, add_db_file, delete_add_db=False,
                     # and add in the new contents:
                     for add_file, add_info in add_tags.items():
                         write_img_to_open_db(dbcr, add_file, add_info,
+                                             add_strict=add_strict,
                                              attempt_replace=attempt_replace)
                     dbcn.commit()
                     # if we got here, then we're good!
@@ -212,6 +227,7 @@ def merge_db_files(main_db_file, add_db_file, delete_add_db=False,
     elif delete_added_entries:
         del_plots_from_dbfile(add_db_file, add_filelist, do_vacuum=False,
                               allow_retries=True, skip_warning=True)
+
 
 def open_or_create_db_file(db_file, img_info, restart_db=False, timeout=DEFAULT_DB_TIMEOUT):
     '''
@@ -246,10 +262,12 @@ def open_or_create_db_file(db_file, img_info, restart_db=False, timeout=DEFAULT_
             create_table_for_img_info(dbcr, img_info)
     return dbcn, dbcr
 
+
 def create_table_for_img_info(dbcr, img_info):
     'Creates a database table, in a database cursor, to store for the input img_info'
 
-    create_command = 'CREATE TABLE {}(fname TEXT PRIMARY KEY,'.format(SQLITE_IMG_INFO_TABLE)
+    create_command = 'CREATE TABLE {}({} TEXT PRIMARY KEY,'.format(SQLITE_IMG_INFO_TABLE,
+                                                                   SQLITE_IMG_INFO_FNAME)
     for key in list(img_info.keys()):
         create_command += ' "{}" TEXT,'.format(info_key_to_db_name(key))
     create_command = create_command[0:-1] + ')'
@@ -284,6 +302,7 @@ def open_db_file(db_file, timeout=DEFAULT_DB_TIMEOUT):
 
     return dbcn, dbcr
 
+
 def read_db_file_to_mem(db_file, timeout=DEFAULT_DB_TIMEOUT):
     '''
     Opens a pre-existing database file into a copy held in memory. This can be accessed much
@@ -315,14 +334,18 @@ def read_db_file_to_mem(db_file, timeout=DEFAULT_DB_TIMEOUT):
 
     return dbcn, dbcr
 
-def write_img_to_open_db(dbcr, filename, img_info, add_strict=False, attempt_replace=False):
+
+def write_img_to_open_db(dbcr, filename, img_info,
+                         add_strict=False, attempt_replace=False):
     '''
-    Does the work for write_img_to_dbfile to add an image to the open database cursor (dbcr)
+    Does the work for write_img_to_dbfile to add an image
+    to the open database cursor (dbcr)
 
     * add_strict: if True then it will report a ValueError if you \
                   try and include fields that aren't defined in the table
     * attempt_replace: if True, then it will attempt to replace a database \
-                  entry if the image is already present. Otherwise it will ignore it.
+                  entry if the image is already present. \
+                  Otherwise it will ignore it.
     '''
 
     # now add in the information:
@@ -332,14 +355,28 @@ def write_img_to_open_db(dbcr, filename, img_info, add_strict=False, attempt_rep
     # convert these to keys:
     field_names = [db_name_to_info_key(x) for x in field_names]
     # now build the command
-    add_command = 'INSERT INTO {}(fname,'.format(SQLITE_IMG_INFO_TABLE)
+    add_command = 'INSERT INTO {}({},'.format(SQLITE_IMG_INFO_TABLE,
+                                              SQLITE_IMG_INFO_FNAME)
     add_list = [filename]
+    invalid_fieldnames = []
+
     for key, item in img_info.items():
-        if key in field_names:
-            add_command += ' "{}",'.format(info_key_to_db_name(key))
-            add_list.append(item)
-        elif add_strict:
-            raise ValueError('Attempting to add a line to the database that include invalid fields')
+        add_command += ' "{}",'.format(info_key_to_db_name(key))
+        add_list.append(item)
+        if key not in field_names:
+            # this is a problem that needs sorting:
+            invalid_fieldnames.append(key)
+
+    if invalid_fieldnames != []:
+        if add_strict:
+            msg = ('Attempting to add a line to the database that '
+                   'include fields not present in the database: {}')
+            raise ValueError(msg.format(invalid_fieldnames))
+        else:
+            # need to recreate the database table afresh, because if we
+            # don't then it won't be correctly labelled by column:
+            recrete_table_new_cols(dbcr, field_names, invalid_fieldnames)
+
     # add in the right number of ?
     add_command = add_command[0:-1] + ') VALUES(' + '?,'*(len(add_list)-1) + '?)'
     try:
@@ -354,14 +391,18 @@ def write_img_to_open_db(dbcr, filename, img_info, add_strict=False, attempt_rep
     except sqlite3.IntegrityError:
         if attempt_replace:
             # try an INSERT OR REPLACE
-            add_repl_command = add_command.replace('INSERT ', 'INSERT OR REPLACE ')
-            # if this fails, want it to report it's error message as is, so no 'try':
+            add_repl_command = add_command.replace('INSERT ',
+                                                   'INSERT OR REPLACE ')
+            # if this fails, want it to report it's error message as is,
+            # so do, or do not, there is no 'try':
             dbcr.execute(add_repl_command, add_list)
         else:
-            # this file is already in the database (as the primary key, so do nothing...)
+            # this file is already in the database
+            # (as the primary key, so do nothing...)
             pass
     finally:
         pass
+
 
 def list_tables(dbcr):
     'lists the tables present, from a database cursor'
@@ -369,16 +410,21 @@ def list_tables(dbcr):
     table_names = sorted([x[0] for x in result])
     return table_names
 
-def read_img_info_from_dbcursor(dbcr, required_tags=None, tag_strings=None, n_samples=None):
+
+def read_img_info_from_dbcursor(dbcr, required_tags=None, tag_strings=None,
+                                n_samples=None):
     '''
-    Reads from an open database cursor (dbcr) for :func:`ImageMetaTag.db.read` and other routines.
+    Reads from an open database cursor (dbcr) for
+    :func:`ImageMetaTag.db.read` and other routines.
 
     Options
-     * required_tags - a list of image tags to return, and to fail if not all are present
-     * tag_strings - an input list that will be populated with the unique values of the image tags
-     * n_samples - if provided, only the given number of entries will be loaded \
-                   from the database, at random. \
-                   Must be an integer or None (default None)
+     * required_tags - a list of image tags to return, and to fail if not all \
+                       are present
+     * tag_strings - an input list that will be populated with the unique \
+                     values of the image tags
+     * n_samples - if provided, only the given number of entries will be \
+                   loaded from the database, at random. Must be an integer \
+                   or None (default None)
     '''
     # read in the data from the database:
     if n_samples is None:
@@ -390,9 +436,10 @@ def read_img_info_from_dbcursor(dbcr, required_tags=None, tag_strings=None, n_sa
         elif n_samples < 1:
             raise ValueError('n_samples must be > 1')
         # read only a sample of lines:
-        read_cmd = ('SELECT * FROM {0} WHERE fname IN (SELECT fname FROM {0} '
-                    'ORDER BY RANDOM() LIMIT {1})')
-        read_cmd = read_cmd.format(SQLITE_IMG_INFO_TABLE, n_samples)
+        read_cmd = ('SELECT * FROM {0} WHERE {1} IN (SELECT {1} FROM {0} '
+                    'ORDER BY RANDOM() LIMIT {2})')
+        read_cmd = read_cmd.format(SQLITE_IMG_INFO_TABLE,
+                                   SQLITE_IMG_INFO_FNAME, n_samples)
         db_contents = dbcr.execute(read_cmd).fetchall()
     # and convert that to a useful dict/list combo:
     filename_list, out_dict = process_select_star_from(db_contents, dbcr,
@@ -400,20 +447,25 @@ def read_img_info_from_dbcursor(dbcr, required_tags=None, tag_strings=None, n_sa
                                                        tag_strings=tag_strings)
     return filename_list, out_dict
 
-def process_select_star_from(db_contents, dbcr, required_tags=None, tag_strings=None):
+
+def process_select_star_from(db_contents, dbcr, required_tags=None,
+                             tag_strings=None):
     '''
-    Converts the output from a select * from ....  command into a standard output format
-    Requires a database cursor (dbcr) to identify the field names.
+    Converts the output from a select * from ....  command into a standard
+    output format. Requires a database cursor (dbcr) to identify the field
+    names.
 
     Options:
-     * required_tags - a list of image tags to return, and to fail if not all are present
-     * tag_strings - an input list that will be populated with the unique values of the image tags
+     * required_tags - a list of image tags to return, and to fail if not \
+                       all are present
+     * tag_strings - an input list that will be populated with the unique \
+                     values of the image tags
 
     Returns:
      * as :func:`ImageMetaTag.db.read`, but filtered according to the select.
      * a list of filenames (payloads for the :class:`ImageMetaTag.ImageDict`)
-     * a dictionary, by filename, containing a dictionary of the image metadata \
-       as tagname: value
+     * a dictionary, by filename, containing a dictionary of the image \
+       metadata as tagname: value
     '''
     # get the name of the fields from the cursor descripton:
     out_dict = {}
@@ -513,9 +565,9 @@ def process_select_star_from(db_contents, dbcr, required_tags=None, tag_strings=
             if len(filename_list) == 0 and len(out_dict) == 0:
                 return None, None
 
-
     # we're good, return the data:
     return filename_list, out_dict
+
 
 def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True,
                           db_timeout=DEFAULT_DB_TIMEOUT, db_attempts=DEFAULT_DB_ATTEMPTS,
@@ -538,7 +590,7 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
         fn_list = filenames
 
     # delete command to use:
-    del_cmd = "DELETE FROM {} WHERE fname=?"
+    del_cmd = "DELETE FROM {} WHERE {}=?"
     if db_file is None:
         pass
     else:
@@ -562,7 +614,8 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
                             # go through the file chunk, one by one, and delete:
                             for fname in chunk_o_filenames:
                                 try:
-                                    dbcr.execute(del_cmd.format(SQLITE_IMG_INFO_TABLE), (fname,))
+                                    dbcr.execute(del_cmd.format(SQLITE_IMG_INFO_TABLE,
+                                                                SQLITE_IMG_INFO_FNAME), (fname,))
                                 except sqlite3.OperationalError as op_err_file:
                                     err_check = 'no such table: {}'.format(SQLITE_IMG_INFO_TABLE)
                                     if op_err_file.message == err_check:
@@ -572,13 +625,13 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
                                                    ' database "{}" as database table is missing')
                                             print(msg.format(fname, db_file))
                                         return
-                                    else:
-                                        if not skip_warning:
-                                            # if this fails, print a warning...
-                                            # need to figure out why this happens
-                                            msg = ('WARNING: unable to delete file entry:'
-                                                   ' "{}", type "{}" from database')
-                                            print(msg.format(fname, type(fname)))
+
+                                    if not skip_warning:
+                                        # if this fails, print a warning...
+                                        # need to figure out why this might happen
+                                        msg = ('WARNING: unable to delete file entry:'
+                                               ' "{}", type "{}" from database')
+                                        print(msg.format(fname, type(fname)))
                             dbcn.commit()
                             # if we got here, then we're good!
                             wrote_db = True
@@ -633,10 +686,12 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
             elif not allow_retries:
                 dbcn.close()
 
+
 def __gen_chunk_of_list(in_list, chunk_size):
     'gnerator that yields a chunk of list, of length chunk size'
     for ndx in range(0, len(in_list), chunk_size):
         yield in_list[ndx:min(ndx + chunk_size, len(in_list))]
+
 
 def select_dbfile_by_tags(db_file, select_tags):
     '''
@@ -656,6 +711,7 @@ def select_dbfile_by_tags(db_file, select_tags):
             sel_results = select_dbcr_by_tags(dbcr, select_tags)
             dbcn.close()
     return sel_results
+
 
 def select_dbcr_by_tags(dbcr, select_tags):
     '''
@@ -699,9 +755,69 @@ def select_dbcr_by_tags(dbcr, select_tags):
 
     return filename_list, out_dict
 
-def scan_dir_for_db(basedir, db_file, img_tag_req=None, subdir_excl_list=None,
-                    known_file_tags=None, verbose=False, no_file_ext=False,
-                    return_timings=False, restart_db=False):
+
+def recrete_table_new_cols(dbcr, current_cols, new_cols):
+    '''
+    for a given database cursor (bdcr) this recreates a new version of the
+    ImageMetaTag database table with new columns.
+
+    This is a major change to a database, and takes place (deliberately)
+    without any commit statements (otherwise the database file seen by other
+    connections/processes will see an intermediate/incorrect database).
+
+    Because of this, this process is slow and should be avoided if at all
+    possible.
+    '''
+    msg = 'WARNING: recreating database table with new image tags: {}'
+    print(msg.format(new_cols))
+
+    # read the cuirrent contents of the database:
+    f_list, img_infos = read_img_info_from_dbcursor(dbcr)
+    _ = dbcr.execute('select * from %s' % SQLITE_IMG_INFO_TABLE).fetchone()
+    current_flds = [r[0] for r in dbcr.description]
+    current_keys = [db_name_to_info_key(x) for x in current_flds]
+
+    # rename the current database table:
+    tmp_table = '{}_tmp'.format(SQLITE_IMG_INFO_TABLE)
+    alter_command = 'ALTER TABLE "{}" RENAME TO "{}";'
+    alter_command.format(SQLITE_IMG_INFO_TABLE, tmp_table)
+    dbcr.execute(alter_command.format(SQLITE_IMG_INFO_TABLE, tmp_table))
+
+    # now recreate the table with the new elements:
+    new_key_dict = {}
+    for keyname in current_cols + new_cols:
+        if keyname != SQLITE_IMG_INFO_FNAME:
+            new_key_dict[keyname] = ''
+    create_table_for_img_info(dbcr, new_key_dict)
+    # and pull the list of fields, in order:
+    _ = dbcr.execute('select * from %s' % SQLITE_IMG_INFO_TABLE).fetchone()
+    new_flds = [r[0] for r in dbcr.description]
+    new_keys = [db_name_to_info_key(x) for x in new_flds]
+
+    # now populate the new table:
+    ins_comm = 'INSERT INTO {} VALUES ({}?);'.format(SQLITE_IMG_INFO_TABLE,
+                                                     '?,'*(len(new_keys)-1))
+    # now make a list of tuples ordered
+    ins_this = []
+    for img in img_infos:
+        img_info = img_infos[img]
+        # now build up what into to add, starting with the img filename:
+        this_ins = [img]
+        for key in new_keys[1:]:
+            if key in current_keys:
+                # got it from previous data, so use it:
+                this_ins.append(img_info[key])
+            else:
+                # add it as None:
+                this_ins.append('None')
+        ins_this.append(tuple(this_ins))
+    # and exectuemany on the insert command:
+    dbcr.executemany(ins_comm, ins_this)
+
+
+def scan_dir_for_db(basedir, db_file, img_tag_req=None, add_strict=False,
+                    subdir_excl_list=None, known_file_tags=None, verbose=False,
+                    no_file_ext=False, return_timings=False, restart_db=False):
     '''
     A useful utility that scans a directory on disk for images that can go into a database.
     This should only be used to build a database from a directory of tagged images that
@@ -717,8 +833,12 @@ def scan_dir_for_db(basedir, db_file, img_tag_req=None, subdir_excl_list=None,
                 will fail unless restart_db is True
 
     Options:
-     * img_tag_req - a list of tag names that are to be applied/created. Tags not in this list\
-                     will not be stored. Images without all of these tags are ignored.
+     * img_tag_req - a list of tag names that are to be applied/created. See add_strict for \
+                     behaviour when tags are not present in an image.
+     * add_strict - When True, images without all of the img_tag_req are ignored, when False, \
+                    images will be used if they have at least one item in imt_tag_req. Images \
+                    with none of the metadata items are assumed to be from a different source.
+                    Images that are used, with missing tags, will set those tags to 'None'.
      * subdir_excl_list - a list of subdirectories that don't need to be scanned. ['thumbnail']\
                          for instance, will prevent the image thumbnails being included.
      * no_file_ext - logical to exclude the file extension in the filenames saved to the database.
@@ -780,17 +900,20 @@ is True, in which case the database file will be restarted as empty. Use with ca
                     (read_ok, img_info) = readmeta_from_image(img_path)
 
                 if read_ok:
-                    if img_tag_req:
+                    if img_tag_req and add_strict:
                         # check to see if an image is needed:
                         use_img = check_for_required_keys(img_info, img_tag_req)
+                    elif img_tag_req:
+                        use_img = any([x in img_tag_req for x in img_info.keys()])
                     else:
                         use_img = True
                     if use_img:
                         if first_img:
-                            db_cn, db_cr = open_or_create_db_file(db_file, img_info,
-                                                                  restart_db=True)
+                            dbcn, dbcr = open_or_create_db_file(db_file, img_info,
+                                                                restart_db=True)
                             first_img = False
-                        write_img_to_open_db(db_cr, img_name, img_info)
+                        write_img_to_open_db(dbcr, img_name, img_info,
+                                             add_strict=add_strict)
                         if verbose:
                             print(img_name)
 
@@ -811,12 +934,13 @@ is True, in which case the database file will be restarted as empty. Use with ca
 
     # commit and close, and we are done:
     if not first_img:
-        db_cn.commit()
-        db_cn.close()
+        dbcn.commit()
+        dbcn.close()
 
     if return_timings:
         return n_adds, timings_per_add
     return None
+
 
 def rmfile(path):
     """
@@ -829,6 +953,7 @@ def rmfile(path):
         if exc.errno == errno.ENOENT:
             pass
         else: raise
+
 
 def dt_now_str():
     'returns datetime.now(), as a string, in a common format'
