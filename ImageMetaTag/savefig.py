@@ -40,7 +40,7 @@ def savefig(filename, img_tags=None, img_format=None, img_converter=0,
             logo_padding=0, logo_pos=0,
             db_file=None, db_timeout=DEFAULT_DB_TIMEOUT,
             db_attempts=DEFAULT_DB_ATTEMPTS,
-            db_replace=False, db_full_paths=False,
+            db_replace=False, db_add_strict=False, db_full_paths=False,
             verbose=False):
     '''
     A wrapper around matplotlib.pyplot.savefig, to include file size
@@ -72,6 +72,17 @@ def savefig(filename, img_tags=None, img_format=None, img_converter=0,
                     database if it already exists. This can be slow, and the \
                     metadata is usually the same so the default is \
                     db_replace=False.
+     * db_add_strict - if True, any attempt to add an image whose metadata \
+                       tag_names are not present in a pre-existing database \
+                       will result in a ValueError being raised. \
+                       If False, then adding a new metadata tag to the \
+                       database will cause it be rewritten with the new item \
+                       as a new column. All pre-existing images will have \
+                       the new tag set to 'None'. It is best to avoid using \
+                       this functionality as it can be slow for large \
+                       databases. Instead, all images should be ideally have \
+                       all expected metadata tags included from the start \
+                       but set to 'None' where they are not used.
      * dpi - change the image resolution passed into matplotlib.savefig.
      * keep_open - by default, this savefig wrapper closes the figure after \
                    use, except if keep_open is True.
@@ -176,7 +187,8 @@ def savefig(filename, img_tags=None, img_format=None, img_converter=0,
             try:
                 db.write_img_to_dbfile(db_file, db_filename, img_tags,
                                        timeout=db_timeout,
-                                       attempt_replace=db_replace)
+                                       attempt_replace=db_replace,
+                                       add_strict=db_add_strict)
                 wrote_db = True
             except sqlite3.OperationalError as op_err:
                 if 'database is locked' in op_err.message:

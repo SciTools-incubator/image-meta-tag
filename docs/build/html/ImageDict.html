@@ -1,35 +1,23 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ImageMetaTag.ImageDict &#8212; ImageMetaTag 0.7.7 documentation</title>
-    
+    <title>ImageMetaTag.ImageDict &#8212; ImageMetaTag 0.7.8 documentation</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.7.7',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="ImageMetaTag 0.7.7 documentation" href="index.html" />
     <link rel="next" title="ImageMetaTag.webpage" href="webpage.html" />
     <link rel="prev" title="ImageMetaTag.db" href="db.html" /> 
-  </head>
-  <body role="document">
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -45,7 +33,7 @@
         <li class="right" >
           <a href="db.html" title="ImageMetaTag.db"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.7 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.8 documentation</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -71,18 +59,20 @@
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/ImageDict.txt"
+      <li><a href="_sources/ImageDict.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -95,12 +85,12 @@
             
   <div class="section" id="module-ImageMetaTag.img_dict">
 <span id="imagemetatag-imagedict"></span><h1>ImageMetaTag.ImageDict<a class="headerlink" href="#module-ImageMetaTag.img_dict" title="Permalink to this headline">¶</a></h1>
-<p>This submodule contains the <a class="reference internal" href="#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><code class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></code></a> class, and
+<p>This submodule contains the <a class="reference internal" href="#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageMetaTag.ImageDict</span></code></a> class, and
 functions for preparing instances of it.</p>
-<p>The purpose of an <a class="reference internal" href="#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><code class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></code></a> is to sort the image
-metadata, supplied to <a class="reference internal" href="savefig.html#ImageMetaTag.savefig" title="ImageMetaTag.savefig"><code class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.savefig()</span></code></a> and usually stored in a
+<p>The purpose of an <a class="reference internal" href="#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageMetaTag.ImageDict</span></code></a> is to sort the image
+metadata, supplied to <a class="reference internal" href="savefig.html#ImageMetaTag.savefig" title="ImageMetaTag.savefig"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.savefig()</span></code></a> and usually stored in a
 database file, into a useful form that can quickly and easily be presented as
-a webpage by <a class="reference internal" href="webpage.html#ImageMetaTag.webpage.write_full_page" title="ImageMetaTag.webpage.write_full_page"><code class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.webpage.write_full_page()</span></code></a>.</p>
+a webpage by <a class="reference internal" href="webpage.html#ImageMetaTag.webpage.write_full_page" title="ImageMetaTag.webpage.write_full_page"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.webpage.write_full_page()</span></code></a>.</p>
 <p>An easy example of creating a webpage, using an ImageDict is shown in
 <a class="reference external" href="simple.html">simplest_image_dict.py</a></p>
 <p>(C) Crown copyright Met Office. All rights reserved.
@@ -119,7 +109,7 @@ web pages for browsing the images.</p>
 <p>The input_dict should be a heirachical dictionary of dictionaries,
 containing the image metadata, in the required order. In order to convert
 a flat dictionary of metadata items, use
-<a class="reference internal" href="#ImageMetaTag.dict_heirachy_from_list" title="ImageMetaTag.dict_heirachy_from_list"><code class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.dict_heirachy_from_list()</span></code></a></p>
+<a class="reference internal" href="#ImageMetaTag.dict_heirachy_from_list" title="ImageMetaTag.dict_heirachy_from_list"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.dict_heirachy_from_list()</span></code></a></p>
 <dl class="docutils">
 <dt>Options:</dt>
 <dd><ul class="first last simple">
@@ -253,7 +243,7 @@ This also produces the unique subdirectory locations of all images.</p>
 <dt id="ImageMetaTag.ImageDict.mergedicts">
 <code class="descname">mergedicts</code><span class="sig-paren">(</span><em>dict1</em>, <em>dict2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.mergedicts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.mergedicts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alternative version of dict_union using generators which is much
-faster for large dicts but needs to be converted to a dict when it&#8217;s
+faster for large dicts but needs to be converted to a dict when it’s
 called:   new_dict = dict(mergdicts(dict1,dict))</p>
 </dd></dl>
 
@@ -298,14 +288,14 @@ method (or a list of sort methods that matches the number of keys).</p>
 and include:</p>
 <blockquote>
 <div><ul class="simple">
-<li>&#8216;sort&#8217; - just an ordinary sort</li>
-<li>&#8216;level&#8217; or &#8216;numeric&#8217; - starting with the surface and working                                   upwards, then &#8216;special&#8217; levels like cross                                   sections etc.</li>
-<li>&#8216;T+&#8217; - in ascending order of the number after a &#8216;T+&#8217; (or similar)</li>
+<li>‘sort’ - just an ordinary sort</li>
+<li>‘level’ or ‘numeric’ - starting with the surface and working                                   upwards, then ‘special’ levels like cross                                   sections etc.</li>
+<li>‘T+’ - in ascending order of the number after a ‘T+’ (or similar)</li>
 <li>an input list - Specific elements in the input list are sorted as                            per their order in the list, while the rest are                            just sorted.</li>
 </ul>
 </div></blockquote>
-<p>The methods activated by a string can be reversed as &#8216;reverse_sort&#8217; or
-&#8216;reverse_sort&#8217;, or &#8216;reverse numeric&#8217; or &#8216;reverse_numeric&#8217;.</p>
+<p>The methods activated by a string can be reversed as ‘reverse_sort’ or
+‘reverse_sort’, or ‘reverse numeric’ or ‘reverse_numeric’.</p>
 </dd></dl>
 
 </dd></dl>
@@ -327,9 +317,9 @@ file, and returns a dictionary of <em>tagname: value</em> pairs</p>
 dictionary of dictionaries according to the input heirachy
 (which is a list of tagnames).</p>
 <p>The output dictionary will only have one element per level, but can be
-used to create or append into an <a class="reference internal" href="#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><code class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></code></a>.
-The final level will be the &#8216;payload&#8217; input, which is the object the
-dictionary, with all it&#8217;s levels, is describing.
+used to create or append into an <a class="reference internal" href="#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageMetaTag.ImageDict</span></code></a>.
+The final level will be the ‘payload’ input, which is the object the
+dictionary, with all it’s levels, is describing.
 The payload would usually be the full/relative path of the image file,
 or list of image files.</p>
 <p>Returns False if the input dict does not contain the required keys.</p>
@@ -340,7 +330,7 @@ or list of image files.</p>
 <code class="descclassname">ImageMetaTag.</code><code class="descname">dict_split</code><span class="sig-paren">(</span><em>in_dict</em>, <em>n_split=None</em>, <em>size_split=None</em>, <em>extra_opts=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#dict_split"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.dict_split" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generator that breaks up a flat dictionary and yields a set of
 sub-dictionaries in n_split chunks, or size_split in size. It is split
-on it&#8217;s first level, not recursively.</p>
+on it’s first level, not recursively.</p>
 <p>It is very useful for splitting large dictionaries of image metadata
 to parallelise processing these into ImageDicts.</p>
 <p>Inputs:
@@ -366,7 +356,7 @@ in_dict - the dictionary to split</p>
 <dd><p>Tests the contents of a simple, un-heirachical dict (properties an image)
 against a set of tests.</p>
 <p>An example set of tests:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">tests</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;number of rolls&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;6 simulated rolls&#39;</span><span class="p">,</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tests</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;number of rolls&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;6 simulated rolls&#39;</span><span class="p">,</span>
                              <span class="s1">&#39;216 simulated rolls&#39;</span><span class="p">,</span>
                              <span class="s1">&#39;1296 simulated rolls&#39;</span><span class="p">],</span>
          <span class="s1">&#39;plot color&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
@@ -375,9 +365,9 @@ against a set of tests.</p>
          <span class="s1">&#39;image trim&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
 </pre></div>
 </div>
-<p>Here, the &#8216;number of rolls&#8217; is restricted to a simple list.</p>
-<p>The plot type is filtered according to &#8216;Histogram&#8217;, and there is also a
-second element that contains both &#8216;Histogram and &#8216;Line plots&#8217; which are
+<p>Here, the ‘number of rolls’ is restricted to a simple list.</p>
+<p>The plot type is filtered according to ‘Histogram’, and there is also a
+second element that contains both ‘Histogram and ‘Line plots’ which are
 to be presented together.</p>
 <p>The other image characteristics are not filtered.</p>
 <dl class="docutils">
@@ -389,8 +379,8 @@ to be presented together.</p>
 <dt>Returns three logicals:</dt>
 <dd><ul class="first last simple">
 <li>The first indicates whether the input dict passes the simple tests</li>
-<li>The second indicates whether the input dict is part of the grouped        elements of the test (the [&#8216;Histogram&#8217;, &#8216;Line plots&#8217;] list).</li>
-<li>The third indicates whether the input dict is the first element of a        list grouped elements (is &#8216;Histogram&#8217; in this        [&#8216;Histogram&#8217;, &#8216;Line plots&#8217;] list).</li>
+<li>The second indicates whether the input dict is part of the grouped        elements of the test (the [‘Histogram’, ‘Line plots’] list).</li>
+<li>The third indicates whether the input dict is the first element of a        list grouped elements (is ‘Histogram’ in this        [‘Histogram’, ‘Line plots’] list).</li>
 </ul>
 </dd>
 </dl>
@@ -428,12 +418,12 @@ list of strings</p>
         <li class="right" >
           <a href="db.html" title="ImageMetaTag.db"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.7 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.8 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2015-2018, British Crown Copyright.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.8.
     </div>
   </body>
 </html>

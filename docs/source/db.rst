@@ -29,6 +29,7 @@ Functions for working with open databases
 .. autofunction:: ImageMetaTag.db.write_img_to_open_db
 .. autofunction:: ImageMetaTag.db.read_img_info_from_dbcursor
 .. autofunction:: ImageMetaTag.db.select_dbcr_by_tags
+.. autofunction:: ImageMetaTag.db.recrete_table_new_cols
 
 Internal functions
 ------------------
