@@ -786,9 +786,17 @@ def recrete_table_new_cols(dbcr, current_cols, new_cols):
     _ = dbcr.execute('select * from %s' % SQLITE_IMG_INFO_TABLE).fetchone()
     current_flds = [r[0] for r in dbcr.description]
     current_keys = [db_name_to_info_key(x) for x in current_flds]
-
-    # rename the current database table:
+    
+    # rename the current database table, checking to see if there is already
+    # a tmp table (delete it if so):
+    table_names = list_tables(dbcr)
     tmp_table = '{}_tmp'.format(SQLITE_IMG_INFO_TABLE)
+    drop_tmp_table_comm = 'DROP TABLE "{}";'.format(tmp_table)
+    if tmp_table in table_names:
+        msg = 'WARNING: database table {} already exists. Overwriting it now.'
+        print(msg.format(tmp_table))
+        dbcr.execute(drop_tmp_table_comm)
+    # now do the rename:
     alter_command = 'ALTER TABLE "{}" RENAME TO "{}";'
     alter_command.format(SQLITE_IMG_INFO_TABLE, tmp_table)
     dbcr.execute(alter_command.format(SQLITE_IMG_INFO_TABLE, tmp_table))
@@ -798,6 +806,7 @@ def recrete_table_new_cols(dbcr, current_cols, new_cols):
     for keyname in current_cols + new_cols:
         if keyname != SQLITE_IMG_INFO_FNAME:
             new_key_dict[keyname] = ''
+            
     create_table_for_img_info(dbcr, new_key_dict)
     # and pull the list of fields, in order:
     _ = dbcr.execute('select * from %s' % SQLITE_IMG_INFO_TABLE).fetchone()
@@ -824,6 +833,9 @@ def recrete_table_new_cols(dbcr, current_cols, new_cols):
     # and exectuemany on the insert command:
     dbcr.executemany(ins_comm, ins_this)
 
+    # need to drop the _tmp table now as it has been superceded:
+    dbcr.execute(drop_tmp_table_comm)
+    
 
 def scan_dir_for_db(basedir, db_file, img_tag_req=None, add_strict=False,
                     subdir_excl_list=None, known_file_tags=None, verbose=False,

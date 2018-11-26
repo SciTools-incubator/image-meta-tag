@@ -743,6 +743,16 @@ def __main__():
     # Firstly, read the database. This simply loads ALL of the image metadata:
     db_imgs, db_img_tags = imt.db.read(imt_db)
 
+    # check that the database table contains ONLY the SQLITE_IMG_INFO_TABLE
+    dbcn, dbcr = imt.db.open_db_file(imt_db)
+    # check for the required table:
+    table_names = imt.db.list_tables(dbcr)
+    dbcn.close()
+    if table_names != [imt.db.SQLITE_IMG_INFO_TABLE]:
+        msg = 'Database integrity failre: database contains "{}", not "{}"'
+        raise ValueError(msg.format(table_names,
+                                    [imt.db.SQLITE_IMG_INFO_TABLE]))
+
     # In this test though, we also need to verfiy the integrity of the
     # database, relative to the plotting/pickling process:
     img_list = sorted(images_and_tags.keys())
