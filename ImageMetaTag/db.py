@@ -18,8 +18,8 @@ import errno
 import pdb
 
 from datetime import datetime
-import numpy as np
 from io import StringIO
+import numpy as np
 
 from ImageMetaTag import META_IMG_FORMATS
 from ImageMetaTag import DEFAULT_DB_TIMEOUT
@@ -782,11 +782,11 @@ def recrete_table_new_cols(dbcr, current_cols, new_cols):
     print(msg.format(new_cols))
 
     # read the cuirrent contents of the database:
-    f_list, img_infos = read_img_info_from_dbcursor(dbcr)
+    _f_list, img_infos = read_img_info_from_dbcursor(dbcr)
     _ = dbcr.execute('select * from %s' % SQLITE_IMG_INFO_TABLE).fetchone()
     current_flds = [r[0] for r in dbcr.description]
     current_keys = [db_name_to_info_key(x) for x in current_flds]
-    
+
     # rename the current database table, checking to see if there is already
     # a tmp table (delete it if so):
     table_names = list_tables(dbcr)
@@ -806,7 +806,7 @@ def recrete_table_new_cols(dbcr, current_cols, new_cols):
     for keyname in current_cols + new_cols:
         if keyname != SQLITE_IMG_INFO_FNAME:
             new_key_dict[keyname] = ''
-            
+
     create_table_for_img_info(dbcr, new_key_dict)
     # and pull the list of fields, in order:
     _ = dbcr.execute('select * from %s' % SQLITE_IMG_INFO_TABLE).fetchone()
@@ -835,7 +835,7 @@ def recrete_table_new_cols(dbcr, current_cols, new_cols):
 
     # need to drop the _tmp table now as it has been superceded:
     dbcr.execute(drop_tmp_table_comm)
-    
+
 
 def scan_dir_for_db(basedir, db_file, img_tag_req=None, add_strict=False,
                     subdir_excl_list=None, known_file_tags=None, verbose=False,
