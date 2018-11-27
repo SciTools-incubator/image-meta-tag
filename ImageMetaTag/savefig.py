@@ -98,10 +98,6 @@ def savefig(filename, img_tags=None, img_format=None, img_converter=0,
      * logo_pos - see :func:`ImageMetaTag.image_file_postproc`.
      * do_thumb - see :func:`ImageMetaTag.image_file_postproc`.
 
-    TODO: the logo would also be good if it could accept a list of files, \
-    widths, positions and paddings. That way different logos could be added \
-    to the top left and top right  corner, for instance.
-
     '''
 
     if img_format is None:
@@ -239,22 +235,23 @@ def image_file_postproc(filename, outfile=None, img_buf=None, img_converter=0,
                     * 1 - light compression, from RGBA to RGB
                     * 2 - moderate compression, from RGBA to RGB, then to an \
                           adaptive 256 colour palette.
-                    * 3 - heavy compression, from RGBA to RGB, then to 8-bit z
+                    * 3 - heavy compression, from RGBA to RGB, then to 8-bit \
                           web standard palette.
     * do_trim - switch to trim whitespace from the edge of the image
     * trim_border - if do_trim then this can be used to define an integer \
                     number of pixels as a border around the trim.
     * logo_file - a file, or list of image files, to be added as logo(s) to \
-                  the image. Multiple files are grouped horizontally from \
-                  left to right before being added.
+                  the image. When multiple files are added to the same \
+                  logo_pos then they are grouped horizontally from left to \
+                  right before being added.
     * logo_width - the desired width of a single logo, in pixels. If the \
                    supplied image file is not the right size, it will be \
                    resized using a method that applies filters and \
                    antialiasing that works well for shrinking images with \
                    text to a much smaller size. The aspect ratio of the logo \
                    image is always maintained. Either logo_width or \
-                   logo_height need to be specified (width overrides height).\
-                   Defaults to 40 pixels.
+                   logo_height need to be specified, and width overrides \
+                   height if both are specified. Defaults to 40 pixels.
     * logo_height - the desired height of each logo, in pixels, instead of \
                     logo_width.
     * logo_padding - a number of pixels to pad around the logo \

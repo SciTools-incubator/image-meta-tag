@@ -75,8 +75,8 @@
 <span class="kn">import</span> <span class="nn">pdb</span>
 
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">io</span> <span class="k">import</span> <span class="n">StringIO</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">ImageMetaTag</span> <span class="k">import</span> <span class="n">META_IMG_FORMATS</span>
 <span class="kn">from</span> <span class="nn">ImageMetaTag</span> <span class="k">import</span> <span class="n">DEFAULT_DB_TIMEOUT</span>
@@ -839,13 +839,21 @@
     <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">new_cols</span><span class="p">))</span>
 
     <span class="c1"># read the cuirrent contents of the database:</span>
-    <span class="n">f_list</span><span class="p">,</span> <span class="n">img_infos</span> <span class="o">=</span> <span class="n">read_img_info_from_dbcursor</span><span class="p">(</span><span class="n">dbcr</span><span class="p">)</span>
+    <span class="n">_f_list</span><span class="p">,</span> <span class="n">img_infos</span> <span class="o">=</span> <span class="n">read_img_info_from_dbcursor</span><span class="p">(</span><span class="n">dbcr</span><span class="p">)</span>
     <span class="n">_</span> <span class="o">=</span> <span class="n">dbcr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;select * from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">SQLITE_IMG_INFO_TABLE</span><span class="p">)</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
     <span class="n">current_flds</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">dbcr</span><span class="o">.</span><span class="n">description</span><span class="p">]</span>
     <span class="n">current_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">db_name_to_info_key</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">current_flds</span><span class="p">]</span>
 
-    <span class="c1"># rename the current database table:</span>
+    <span class="c1"># rename the current database table, checking to see if there is already</span>
+    <span class="c1"># a tmp table (delete it if so):</span>
+    <span class="n">table_names</span> <span class="o">=</span> <span class="n">list_tables</span><span class="p">(</span><span class="n">dbcr</span><span class="p">)</span>
     <span class="n">tmp_table</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">_tmp&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">SQLITE_IMG_INFO_TABLE</span><span class="p">)</span>
+    <span class="n">drop_tmp_table_comm</span> <span class="o">=</span> <span class="s1">&#39;DROP TABLE &quot;</span><span class="si">{}</span><span class="s1">&quot;;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tmp_table</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">tmp_table</span> <span class="ow">in</span> <span class="n">table_names</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;WARNING: database table </span><span class="si">{}</span><span class="s1"> already exists. Overwriting it now.&#39;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tmp_table</span><span class="p">))</span>
+        <span class="n">dbcr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">drop_tmp_table_comm</span><span class="p">)</span>
+    <span class="c1"># now do the rename:</span>
     <span class="n">alter_command</span> <span class="o">=</span> <span class="s1">&#39;ALTER TABLE &quot;</span><span class="si">{}</span><span class="s1">&quot; RENAME TO &quot;</span><span class="si">{}</span><span class="s1">&quot;;&#39;</span>
     <span class="n">alter_command</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">SQLITE_IMG_INFO_TABLE</span><span class="p">,</span> <span class="n">tmp_table</span><span class="p">)</span>
     <span class="n">dbcr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">alter_command</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">SQLITE_IMG_INFO_TABLE</span><span class="p">,</span> <span class="n">tmp_table</span><span class="p">))</span>
@@ -855,6 +863,7 @@
     <span class="k">for</span> <span class="n">keyname</span> <span class="ow">in</span> <span class="n">current_cols</span> <span class="o">+</span> <span class="n">new_cols</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">keyname</span> <span class="o">!=</span> <span class="n">SQLITE_IMG_INFO_FNAME</span><span class="p">:</span>
             <span class="n">new_key_dict</span><span class="p">[</span><span class="n">keyname</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
     <span class="n">create_table_for_img_info</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span> <span class="n">new_key_dict</span><span class="p">)</span>
     <span class="c1"># and pull the list of fields, in order:</span>
     <span class="n">_</span> <span class="o">=</span> <span class="n">dbcr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;select * from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">SQLITE_IMG_INFO_TABLE</span><span class="p">)</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
@@ -879,7 +888,10 @@
                 <span class="n">this_ins</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;None&#39;</span><span class="p">)</span>
         <span class="n">ins_this</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">this_ins</span><span class="p">))</span>
     <span class="c1"># and exectuemany on the insert command:</span>
-    <span class="n">dbcr</span><span class="o">.</span><span class="n">executemany</span><span class="p">(</span><span class="n">ins_comm</span><span class="p">,</span> <span class="n">ins_this</span><span class="p">)</span></div>
+    <span class="n">dbcr</span><span class="o">.</span><span class="n">executemany</span><span class="p">(</span><span class="n">ins_comm</span><span class="p">,</span> <span class="n">ins_this</span><span class="p">)</span>
+
+    <span class="c1"># need to drop the _tmp table now as it has been superceded:</span>
+    <span class="n">dbcr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">drop_tmp_table_comm</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="scan_dir_for_db"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.scan_dir_for_db">[docs]</a><span class="k">def</span> <span class="nf">scan_dir_for_db</span><span class="p">(</span><span class="n">basedir</span><span class="p">,</span> <span class="n">db_file</span><span class="p">,</span> <span class="n">img_tag_req</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">add_strict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
