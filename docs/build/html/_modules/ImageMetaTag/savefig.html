@@ -155,10 +155,6 @@
 <span class="sd">     * logo_pos - see :func:`ImageMetaTag.image_file_postproc`.</span>
 <span class="sd">     * do_thumb - see :func:`ImageMetaTag.image_file_postproc`.</span>
 
-<span class="sd">    TODO: the logo would also be good if it could accept a list of files, \</span>
-<span class="sd">    widths, positions and paddings. That way different logos could be added \</span>
-<span class="sd">    to the top left and top right  corner, for instance.</span>
-
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">if</span> <span class="n">img_format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -296,22 +292,23 @@
 <span class="sd">                    * 1 - light compression, from RGBA to RGB</span>
 <span class="sd">                    * 2 - moderate compression, from RGBA to RGB, then to an \</span>
 <span class="sd">                          adaptive 256 colour palette.</span>
-<span class="sd">                    * 3 - heavy compression, from RGBA to RGB, then to 8-bit z</span>
+<span class="sd">                    * 3 - heavy compression, from RGBA to RGB, then to 8-bit \</span>
 <span class="sd">                          web standard palette.</span>
 <span class="sd">    * do_trim - switch to trim whitespace from the edge of the image</span>
 <span class="sd">    * trim_border - if do_trim then this can be used to define an integer \</span>
 <span class="sd">                    number of pixels as a border around the trim.</span>
 <span class="sd">    * logo_file - a file, or list of image files, to be added as logo(s) to \</span>
-<span class="sd">                  the image. Multiple files are grouped horizontally from \</span>
-<span class="sd">                  left to right before being added.</span>
+<span class="sd">                  the image. When multiple files are added to the same \</span>
+<span class="sd">                  logo_pos then they are grouped horizontally from left to \</span>
+<span class="sd">                  right before being added.</span>
 <span class="sd">    * logo_width - the desired width of a single logo, in pixels. If the \</span>
 <span class="sd">                   supplied image file is not the right size, it will be \</span>
 <span class="sd">                   resized using a method that applies filters and \</span>
 <span class="sd">                   antialiasing that works well for shrinking images with \</span>
 <span class="sd">                   text to a much smaller size. The aspect ratio of the logo \</span>
 <span class="sd">                   image is always maintained. Either logo_width or \</span>
-<span class="sd">                   logo_height need to be specified (width overrides height).\</span>
-<span class="sd">                   Defaults to 40 pixels.</span>
+<span class="sd">                   logo_height need to be specified, and width overrides \</span>
+<span class="sd">                   height if both are specified. Defaults to 40 pixels.</span>
 <span class="sd">    * logo_height - the desired height of each logo, in pixels, instead of \</span>
 <span class="sd">                    logo_width.</span>
 <span class="sd">    * logo_padding - a number of pixels to pad around the logo \</span>
