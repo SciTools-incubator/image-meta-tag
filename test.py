@@ -149,7 +149,7 @@ def make_random_data(n_random_data, seed=3):
 
 
 def plot_random_data(random_data, i_rand, plot_col, col_name, trims, borders,
-                     compression_levels, img_savedir, img_format, plot_owner,
+                     compression_levels, img_savedir, img_formats, plot_owner,
                      imt_db):
     'plots a set of random data'
 
@@ -195,7 +195,9 @@ def plot_random_data(random_data, i_rand, plot_col, col_name, trims, borders,
                     trim_str = 'Image trimmed'
                 else:
                     trim_str = 'Image untrimmed'
+                img_format = img_formats.pop(0)
                 outfile += '.{}'.format(img_format)
+                img_formats.append(img_format)
                 # image tags for the web page:
                 img_tags = {'number of rolls': '{} simulated rolls'.format(n_rolls),
                             'plot type': 'Line plots',
@@ -256,7 +258,9 @@ def plot_random_data(random_data, i_rand, plot_col, col_name, trims, borders,
                     trim_str = 'Image trimmed'
                 else:
                     trim_str = 'Image untrimmed'
+                img_format = img_formats.pop(0)
                 outfile += '.{}'.format(img_format)
+                img_formats.append(img_format)
                 # tags to drive web page:
                 img_tags = {'number of rolls': '{} simulated rolls'.format(n_rolls),
                             'plot type': 'Histogram',
@@ -632,7 +636,7 @@ def __main__():
         raise ValueError('No logo file found at: %s' % LOGO_FILE)
 
     # set up the images we want to create in the test, and the webpages:
-    img_format = 'png'
+    img_formats = ['png', 'jpg']
     # this defines the order of the different tags in
     # the ImageDict, and so how they are displayed on the webpage:
     tagorder = ['data source',
@@ -697,7 +701,7 @@ def __main__():
                 new_imgs_tags = plot_random_data(random_data, i_rnd, plot_col,
                                                  col_name, trims, borders,
                                                  compress_levels, img_savedir,
-                                                 img_format, plot_owner,
+                                                 img_formats, plot_owner,
                                                  imt_db)
                 # now stick the new img ingo into the main dict:
                 for img_file, img_info in new_imgs_tags.items():
@@ -1255,12 +1259,14 @@ def __main__():
 
         # now, finally, produce a large ImageDict:
         if not args.no_biggus_dictus:
-            print('Producing a very large ImageDict, as a scalability and speed test')
+            print('Producing a very large ImageDict: scalability/speed test')
             # Make a large input dictionary, not actual images though.
             # That would take up a lot of disk space!
-            # We don't need to be big or clever for this, it's a test, so simple and readable is fine.
-            # factorial(9) is ~300K 'images', which is comparable in scale to the forecast monitoring
-            # plots this code runs in the Met Office.
+            # We don't need to be big or clever for this, it's a test, so simple
+            # and readable is fine.
+            # For reference, factorial(9) is ~300K 'images', which is comparable
+            # in scale to a small set of imagery used for the forecast
+            # monitoring at the Met Office (this modules's original use case)
 
             # store this in a database:
             bigdb = '%s/big.db' % webdir
@@ -1311,7 +1317,8 @@ def __main__():
                                                     dt_prev = dt_now
                                                     # remove the current percentage:
                                                     pcents.pop(0)
-            print('  input dictionary complete, with %s elements' % len(biggus_dictus))
+            msg = '  input dictionary complete, with {} elements'
+            print(msg.format(len(biggus_dictus)))
 
             bigdb_cn.commit()
             bigdb_cn.close()
@@ -1329,10 +1336,12 @@ def __main__():
                 msg = 'images_and_tags differ between memory and database versions of big dict'
                 raise ValueError(msg)
 
-            # run through the big dict, and delete a smallish subset of 'images' from the big database
+            # run through the big dict, and delete a smallish subset of
+            # 'images' from the big database
             db_imgs, db_img_tags = imt.db.read(bigdb)
             len_b4_del = len(db_imgs)
-            print('Length of large database before deleting subset {}'.format(len_b4_del))
+            msg = 'Length of large database before deleting subset {}'
+            print(msg.format(len_b4_del))
             del_list = db_imgs[500::1000]
             imt.db.del_plots_from_dbfile(bigdb, del_list)
 

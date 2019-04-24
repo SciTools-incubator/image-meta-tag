@@ -19,14 +19,17 @@ import sys
 import io
 import sqlite3
 import pdb
+import json
 from datetime import datetime
 import matplotlib.pyplot as plt
 
 from ImageMetaTag import db, META_IMG_FORMATS, POSTPROC_IMG_FORMATS
+from ImageMetaTag import JPEG_IMG_FORMATS
 from ImageMetaTag import DEFAULT_DB_TIMEOUT, DEFAULT_DB_ATTEMPTS
 
 # image manipulations:
-from PIL import Image, ImageChops, PngImagePlugin
+from PIL import Image, ImageChops, PngImagePlugin, ExifTags
+from PIL.ExifTags import TAGS
 import numpy as np
 
 THUMB_DEFAULT_IMG_SIZE = 150, 150
@@ -146,7 +149,7 @@ def savefig(filename, img_tags=None, img_format=None, img_converter=0,
         postproc_st = datetime.now()
 
     if img_format in POSTPROC_IMG_FORMATS:
-        image_file_postproc(write_file, img_buf=buf,
+        image_file_postproc(write_file, img_format=img_format, img_buf=buf,
                             img_converter=img_converter, do_trim=do_trim,
                             trim_border=trim_border, logo_file=logo_file,
                             logo_width=logo_width, logo_height=logo_height,
@@ -211,7 +214,8 @@ def savefig(filename, img_tags=None, img_format=None, img_converter=0,
             print(msg.format(str(datetime.now() - db_st)))
 
 
-def image_file_postproc(filename, outfile=None, img_buf=None, img_converter=0,
+def image_file_postproc(filename, outfile=None, img_buf=None,
+                        img_format=None, img_converter=0,
                         do_trim=False, trim_border=0,
                         logo_file=None, logo_width=None, logo_height=None,
                         logo_padding=0, logo_pos=0,
@@ -357,6 +361,9 @@ def image_file_postproc(filename, outfile=None, img_buf=None, img_converter=0,
         im_thumb = im_obj.copy()
         im_thumb.thumbnail(do_thumb, Image.ANTIALIAS)
 
+    if img_format in JPEG_IMG_FORMATS and img_converter > 1:
+        img_converter = 1
+
     # images start out as RGBA, strip out the alpha channel first by
     # converting to RGB,then you convert to the next format
     # (that's key to keeping image quality, I think):
@@ -392,11 +399,17 @@ def image_file_postproc(filename, outfile=None, img_buf=None, img_converter=0,
             im_thumb.save(thumb_full_path, optimize=True)
 
     # now save the main image:n
-    if img_tags:
+    if img_tags and img_format == 'png':
         # add the tags
         im_obj = _im_add_png_tags(im_obj, img_tags)
         # and save with metadata
         _im_pngsave_addmeta(im_obj, outfile, optimize=True, verbose=verbose)
+    elif img_tags and img_format in JPEG_IMG_FORMATS:
+        # for jpegs we can store the img tags in the exif info
+        # if we convert to json strcture and encode as utf-8
+        exif_tags = {37510: img_tags}
+        img_tags_exif = json.dumps(exif_tags).encode('utf-8')
+        im_obj.save(outfile, exif=img_tags_exif)
     elif modify:
         # simple save
         im_obj.save(outfile, optimize=True)

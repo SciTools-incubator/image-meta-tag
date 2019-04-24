@@ -2,18 +2,19 @@
 ImageMetaTag is a python package built around a wrapper for
 `savefig <http://matplotlib.org/api/pyplot_api.html?highlight=savefig#matplotlib.pyplot.savefig>`_
 in
-`matplotlib <http://matplotlib.org/>`_, which adds metadata tags to supported image
-file formats.
+`matplotlib <http://matplotlib.org/>`_, which adds metadata tags to supported
+image file formats.
 
 Once the images have been tagged, it can also be used to manage an
-`SQL database <https://docs.python.org/2/library/sqlite3.html>`_ of images and their
-metadata. The image metadata can be used to produce an
-:class:`ImageMetaTag.ImageDict` object: a structured/heirachical dictionary of dictionaries
-which can be used to easily create web pages to present large numbers of images.
+`SQL database <https://docs.python.org/2/library/sqlite3.html>`_ of images and
+their metadata. The image metadata can be used to produce an
+:class:`ImageMetaTag.ImageDict` object: a structured/heirachical dictionary of
+dictionaries which can be used to easily create web pages to present large
+numbers of images.
 
-As the image metadata tagging process involves reading the image using the Image library,
-a few common image post-processing options are included such as cropping, logo addition and
-colour palette manipulation to reduce filesizes.
+As the image metadata tagging process involves reading the image using the Image
+library, a few common image post-processing options are included such as
+cropping, logo addition and colour palette manipulation to reduce filesizes.
 
 .. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks
 
@@ -28,9 +29,11 @@ import platform
 __version__ = '0.7.8'
 __documentation__ = 'http://scitools-incubator.github.io/image-meta-tag/build/html/'
 # list fo file formats which are valid for saving metadata to:
-META_IMG_FORMATS = ['png']
+META_IMG_FORMATS = ['png', 'jpg', 'jpeg']
 # and which can do image post-processing
-POSTPROC_IMG_FORMATS = ['png']
+POSTPROC_IMG_FORMATS = ['png', 'jpg', 'jpeg']
+# viable names for JPEG image files:
+JPEG_IMG_FORMATS = ['jpg', 'jpeg']
 # default timeout and retries for database access:
 DEFAULT_DB_TIMEOUT = 6
 DEFAULT_DB_ATTEMPTS = 20

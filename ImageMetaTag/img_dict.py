@@ -29,6 +29,7 @@ from copy import deepcopy
 from itertools import islice, compress
 from math import ceil
 
+from ImageMetaTag import JPEG_IMG_FORMATS
 
 class ImageDict(object):
     '''
@@ -492,7 +493,7 @@ class ImageDict(object):
 
         Valid sort methods so far are mostly focused on meteorological terms,
         and include:
- 
+
          * 'sort' - just an ordinary sort
          * 'level' or 'numeric' - starting with the surface and working \
                                   upwards, then 'special' levels like cross \
@@ -742,16 +743,30 @@ def readmeta_from_image(img_file, img_format=None):
         if img_format.startswith('.'):
             img_format = img_format[1:]
 
+    try:
+        img_obj = Image.open(img_file)
+    except:
+        return (False, {})
+
     # how we read in the metadata depends on the format:
     if img_format == 'png':
         try:
-            img_obj = Image.open(img_file)
             img_info = img_obj.info
             read_ok = True
         except:
             # if anthing goes wrong, then read_ok is False and img_info None
             read_ok = False
             img_info = None
+    elif img_format in JPEG_IMG_FORMATS:
+        pdb.set_trace()
+        try:
+            img_info = img_obj.info
+            read_ok = True
+        except:
+            # if anthing goes wrong, then read_ok is False and img_info None
+            read_ok = False
+            img_info = None
+        pdb.set_trace()
     else:
         msg = 'Currently, ImageMetaTag does not support "{}" format images'
         raise NotImplementedError(msg.format(img_format))
