@@ -478,11 +478,15 @@ def test_key_sorting():
                                   ['aaa', 'zaa', '257', 'aba', 'bob'])
     # a set of numeric values common in meteorology:
     sort_tests['numeric'] = (['10m', '50m', '4mm', '62 hPa', '2m', '16 km',
-                              'Model level 7', 'Surface', '12mb',
-                              '3.344E, 16.7N', '2.344E, 18.7N', '16nm'],
-                             ['Surface', '16nm', '4mm', '2m', '10m', '50m',
+                              'Model level 7', 'Surface', '12mb', '341.434646',
+                              'Eastern England',
+                              '3.344E, 16.7N', '2.344E, 18.7N', '16.0 nm'],
+                             ['Surface', '16.0 nm', '4mm', '2m', '10m', '50m',
                               '16 km', '62 hPa', '12mb', 'Model level 7',
-                              '2.344E, 18.7N', '3.344E, 16.7N'])
+                              '2.344E, 18.7N', '3.344E, 16.7N', '341.434646',
+                              'Eastern England',])
+    # these get used/modified while prepping the sort:
+    sort_tests_copy = copy.deepcopy(sort_tests)
 
     test_order = sorted(sort_tests.keys())
     n_sorts_to_test = len(test_order)
@@ -521,7 +525,7 @@ def test_key_sorting():
                    '  Sorted list: {}\n'
                    '  Expected list: {}\n')
             print(msg.format(test_name,
-                             sort_tests[test_name][0],
+                             sort_tests_copy[test_name][0],
                              img_dict.keys[level],
                              sort_tests[test_name][1]))
             failed = True
@@ -1246,12 +1250,13 @@ def __main__():
                                                             show_singleton_selectors=False,
                                                             compression=test_zlib_compression,
                                                             css=test_css)
+    sorts_work = test_key_sorting()
+    if sorts_work:
+        print('Sorting tests pass OK')
+    else:
+        raise ValueError('Testing failed in test_key_sorting')
+
     if not args.minimal:
-        sorts_work = test_key_sorting()
-        if sorts_work:
-            print('Sorting tests pass OK')
-        else:
-            raise ValueError('Testing failed in test_key_sorting')
 
         # now, finally, produce a large ImageDict:
         if not args.no_biggus_dictus:
