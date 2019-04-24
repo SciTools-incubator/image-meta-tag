@@ -492,7 +492,7 @@ class ImageDict(object):
 
         Valid sort methods so far are mostly focused on meteorological terms,
         and include:
- 
+
          * 'sort' - just an ordinary sort
          * 'level' or 'numeric' - starting with the surface and working \
                                   upwards, then 'special' levels like cross \
@@ -601,7 +601,9 @@ class ImageDict(object):
                                                   (r'([0-9.]{1,})[W][,\s]{,}[0-9.]{1,}[NS]', -1.0)]
 
                     # now anything else with a numeric value:
-                    numeric_patterns_scalings = [(r'([0-9.eE+-]{1,})', 1.0)]
+                    numeric_patterns_scalings = [((r'([+-]{0,1}[0-9.]{1,}'
+                                                   r'[Ee]{0,1}[-+]{0,1}'
+                                                   r'[0-9]{0,})'), 1.0)]
 
                     # now loop through the different patterns/scalings, and
                     # their orders, with pressure reversed as we assume it's
