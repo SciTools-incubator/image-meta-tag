@@ -26,7 +26,7 @@ import numpy as np
 THUMB_DEFAULT_IMG_SIZE = 150, 150
 THUMB_DEFAULT_DIR_NAME = 'thumbnail'
 
-def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_border=0,
+def savefig(filename, fig=None, img_format=None, img_converter=0, do_trim=False, trim_border=0,
             do_thumb=False, img_tags=None, keep_open=False, dpi=None,
             logo_file=None, logo_width=None, logo_height=None, logo_padding=0, logo_pos=0,
             db_file=None, db_timeout=DEFAULT_DB_TIMEOUT, db_attempts=DEFAULT_DB_ATTEMPTS,
@@ -44,6 +44,7 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
 
     Options:
 
+    * fig - matplotlib figure to save
     * img_format - file format of the image. If not supplied it will be guessed from the filename.\
                    Currently only the png file format is supported for tagging/conversion.
     * img_tags - a dictionary of {tag_name : value} pairs to be added to the image metadata.
@@ -77,6 +78,14 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
 
     '''
 
+    # If fig given then use fig methods, else use pyplot methods
+    if fig is not None:
+        savefig_fn = fig.savefig
+        close_fn = fig.clear
+    else:
+        savefig_fn = plt.savefig
+        close_fn = plt.close
+
     if img_format is None:
         write_file = filename
         # get the img_format from the end of the filename
@@ -105,11 +114,11 @@ def savefig(filename, img_format=None, img_converter=0, do_trim=False, trim_bord
 
     # should probably add lots of other args, or use **kwargs
     if dpi:
-        plt.savefig(savefig_file, dpi=dpi)
+        savefig_fn(savefig_file, dpi=dpi)
     else:
-        plt.savefig(savefig_file)
+        savefig_fn(savefig_file)
     if not keep_open:
-        plt.close()
+        close_fn()
     if buf:
         # need to go to the start of the buffer, if that's where it went:
         buf.seek(0)
