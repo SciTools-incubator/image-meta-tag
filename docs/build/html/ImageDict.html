@@ -1,34 +1,25 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ImageMetaTag.ImageDict &mdash; ImageMetaTag 0.7.5 documentation</title>
-    
+    <title>ImageMetaTag.ImageDict &#8212; ImageMetaTag 0.7.9 documentation</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.7.5',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="ImageMetaTag 0.7.5 documentation" href="index.html" />
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="ImageMetaTag.webpage" href="webpage.html" />
     <link rel="prev" title="ImageMetaTag.db" href="db.html" /> 
-  </head>
-  <body>
-    <div class="related">
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -43,15 +34,15 @@
         <li class="right" >
           <a href="db.html" title="ImageMetaTag.db"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">ImageMetaTag 0.7.5 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.9 documentation</a> &#187;</li> 
       </ul>
     </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
             <p class="logo"><a href="index.html">
               <img class="logo" src="_static/logo.png" alt="Logo"/>
             </a></p>
-  <h3><a href="index.html">Table Of Contents</a></h3>
+  <h3><a href="index.html">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">ImageMetaTag.ImageDict</a><ul>
 <li><a class="reference internal" href="#the-imagedict-class">The ImageDict Class</a></li>
@@ -66,22 +57,23 @@
   <h4>Next topic</h4>
   <p class="topless"><a href="webpage.html"
                         title="next chapter">ImageMetaTag.webpage</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/ImageDict.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/ImageDict.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -90,15 +82,16 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="module-ImageMetaTag.img_dict">
 <span id="imagemetatag-imagedict"></span><h1>ImageMetaTag.ImageDict<a class="headerlink" href="#module-ImageMetaTag.img_dict" title="Permalink to this headline">¶</a></h1>
-<p>This submodule contains the <a class="reference internal" href="#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a> class, and functions for
-preparing instances of it.</p>
-<p>The purpose of an <a class="reference internal" href="#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a> is to sort the image metadata, supplied to
-<a class="reference internal" href="savefig.html#ImageMetaTag.savefig" title="ImageMetaTag.savefig"><tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.savefig()</span></tt></a> and usually stored in a database file, into a useful form that
-can quickly and easily be presented as a webpage by <a class="reference internal" href="webpage.html#ImageMetaTag.webpage.write_full_page" title="ImageMetaTag.webpage.write_full_page"><tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.webpage.write_full_page()</span></tt></a>.</p>
+<p>This submodule contains the <a class="reference internal" href="#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageMetaTag.ImageDict</span></code></a> class, and
+functions for preparing instances of it.</p>
+<p>The purpose of an <a class="reference internal" href="#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageMetaTag.ImageDict</span></code></a> is to sort the image
+metadata, supplied to <a class="reference internal" href="savefig.html#ImageMetaTag.savefig" title="ImageMetaTag.savefig"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.savefig()</span></code></a> and usually stored in a
+database file, into a useful form that can quickly and easily be presented as
+a webpage by <a class="reference internal" href="webpage.html#ImageMetaTag.webpage.write_full_page" title="ImageMetaTag.webpage.write_full_page"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.webpage.write_full_page()</span></code></a>.</p>
 <p>An easy example of creating a webpage, using an ImageDict is shown in
 <a class="reference external" href="simple.html">simplest_image_dict.py</a></p>
 <p>(C) Crown copyright Met Office. All rights reserved.
@@ -107,72 +100,76 @@ Released under BSD 3-Clause License. See LICENSE for more details.</p>
 <h2>The ImageDict Class<a class="headerlink" href="#the-imagedict-class" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="ImageMetaTag.ImageDict">
-<em class="property">class </em><tt class="descclassname">ImageMetaTag.</tt><tt class="descname">ImageDict</tt><big>(</big><em>input_dict</em>, <em>level_names=None</em>, <em>selector_widths=None</em>, <em>selector_animated=None</em>, <em>animation_direction=None</em><big>)</big><a class="headerlink" href="#ImageMetaTag.ImageDict" title="Permalink to this definition">¶</a></dt>
-<dd><p>A class which holds a heirachical dictionary of dictionaries, and the associated
-methods for appending/removing dictionaries from it.</p>
-<p>The expected use case for the dictionary is to represent a large set of images,
-which can be organised by their metadata tags.</p>
-<p>When used in this way, the ImageDict module contains functions to produce web
-pages for browsing the images.</p>
-<p>The input_dict should be a heirachical dictionary of dictionaries, containing
-the image metadata, in the required order. In order to convert a flat dictionary
-of metadata items, use <a class="reference internal" href="#ImageMetaTag.dict_heirachy_from_list" title="ImageMetaTag.dict_heirachy_from_list"><tt class="xref py py-func docutils literal"><span class="pre">ImageMetaTag.dict_heirachy_from_list()</span></tt></a></p>
+<em class="property">class </em><code class="descclassname">ImageMetaTag.</code><code class="descname">ImageDict</code><span class="sig-paren">(</span><em>input_dict</em>, <em>level_names=None</em>, <em>selector_widths=None</em>, <em>selector_animated=None</em>, <em>animation_direction=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.ImageDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class which holds a heirachical dictionary of dictionaries, and the
+associated methods for appending/removing dictionaries from it.</p>
+<p>The expected use case for the dictionary is to represent a large set of
+images, which can be organised by their metadata tags.</p>
+<p>When used in this way, the ImageDict module contains functions to produce
+web pages for browsing the images.</p>
+<p>The input_dict should be a heirachical dictionary of dictionaries,
+containing the image metadata, in the required order. In order to convert
+a flat dictionary of metadata items, use
+<a class="reference internal" href="#ImageMetaTag.dict_heirachy_from_list" title="ImageMetaTag.dict_heirachy_from_list"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.dict_heirachy_from_list()</span></code></a></p>
 <dl class="docutils">
 <dt>Options:</dt>
 <dd><ul class="first last simple">
-<li>level_names - a list of the tagnames, in full, giving a name/description of what                      the metadata item means. Ordered by level of the input dict.</li>
-<li>selector_widths - a list of html strings giving the widths of each selector in the                          output webpage. CURRENTLY UNUSED!</li>
-<li>selector_animated - an integer indicating which selector on the output webpage is                            to be animated.</li>
-<li>animation_dicrection - +1 indicates the animation moves forwards, -1 indicates it                               moves backwards.</li>
+<li>level_names - a list of the tagnames, in full, giving a                      name/description of what the metadata item means.                      Ordered by level of the input dict.</li>
+<li>selector_widths - a list of html strings giving the widths of each                          selector in the output webpage. CURRENTLY UNUSED!</li>
+<li>selector_animated - integer giving the index of the selector on the                            output webpage is to be animated.</li>
+<li>animation_dicrection - +1 indicates the animation moves forwards,                               -1 indicates it moves backwards.</li>
 </ul>
 </dd>
 <dt>Objects:</dt>
 <dd><ul class="first last simple">
-<li>dict - the heirachical dictionary of dictionaries containing the image structure.</li>
-<li>keys - a list of keys for each level of the dict, within a dictionary using the level               number as the keys.</li>
-<li>level_names - If supplied, this stores the full names of the items in keys.</li>
-<li>selector_animated - the level index which will be animated on the output webpage.</li>
-<li>animation_direction - the direction of animation (+1 for forward, -1 for backward).</li>
-<li>selector_widths - a list of desired widths on the output web page (CURRENTLY UNUSED).</li>
+<li>dict - the heirachical dictionary of dictionaries containing the               image structure.</li>
+<li>keys - a list of keys for each level of the dict, within a dictionary               using the level number as the keys.</li>
+<li>level_names - this stores the full names of the items in keys.</li>
+<li>selector_animated - the level index which will be animated on the                            output webpage.</li>
+<li>animation_direction - the direction of animation.</li>
+<li>selector_widths - a list of desired widths on the output web page                          (CURRENTLY UNUSED).</li>
 </ul>
 </dd>
 </dl>
 <dl class="method">
 <dt id="ImageMetaTag.ImageDict.append">
-<tt class="descname">append</tt><big>(</big><em>new_dict</em>, <em>devmode=False</em>, <em>skip_key_relist=False</em><big>)</big><a class="headerlink" href="#ImageMetaTag.ImageDict.append" title="Permalink to this definition">¶</a></dt>
-<dd><p>appends a new dictionary (with a single element in each layer!) into a current ImageDict.</p>
-<p>The skip_key_relist option can be set to True to stop the regeneration of key lists.</p>
+<code class="descname">append</code><span class="sig-paren">(</span><em>new_dict</em>, <em>devmode=False</em>, <em>skip_key_relist=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.append"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>appends a new dictionary (with a single element in each layer!) into
+a current ImageDict.</p>
+<p>The skip_key_relist option can be set to True to stop the
+regeneration of key lists to speed up multiple appends.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ImageMetaTag.ImageDict.copy_except_dict_and_keys">
-<tt class="descname">copy_except_dict_and_keys</tt><big>(</big><big>)</big><a class="headerlink" href="#ImageMetaTag.ImageDict.copy_except_dict_and_keys" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns a copy of an ImageDict except it will have null values for the dict and keys</p>
+<code class="descname">copy_except_dict_and_keys</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.copy_except_dict_and_keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.copy_except_dict_and_keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns a copy of an ImageDict except it will have null values for
+the dict and keys</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ImageMetaTag.ImageDict.dict_depth">
-<tt class="descname">dict_depth</tt><big>(</big><em>uniform_depth=False</em><big>)</big><a class="headerlink" href="#ImageMetaTag.ImageDict.dict_depth" title="Permalink to this definition">¶</a></dt>
-<dd><p>Uses dict_depths to get the depth of all branches of the plot_dict and,
-if required, checks they all equal the max</p>
+<code class="descname">dict_depth</code><span class="sig-paren">(</span><em>uniform_depth=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.dict_depth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.dict_depth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses dict_depths to get the depth of all branches of the plot_dict
+and, if required, checks they all equal the max.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ImageMetaTag.ImageDict.dict_depths">
-<tt class="descname">dict_depths</tt><big>(</big><em>in_dict</em>, <em>depth=0</em><big>)</big><a class="headerlink" href="#ImageMetaTag.ImageDict.dict_depths" title="Permalink to this definition">¶</a></dt>
-<dd><p>Recursively finds the depth of a ImageDict and returns a list of lists</p>
+<code class="descname">dict_depths</code><span class="sig-paren">(</span><em>in_dict</em>, <em>depth=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.dict_depths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.dict_depths" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recursively finds the depth of a ImageDict, returns a list of lists</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ImageMetaTag.ImageDict.dict_index_array">
-<tt class="descname">dict_index_array</tt><big>(</big><em>devmode=False</em>, <em>maxdepth=None</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#ImageMetaTag.ImageDict.dict_index_array" title="Permalink to this definition">¶</a></dt>
-<dd><p>Using the list of dictionary keys (at each level of a uniform_depth dictionary
-of dictionaries), this produces a list of the indices that can be used to reference
-the keys to get the result for each element.</p>
+<code class="descname">dict_index_array</code><span class="sig-paren">(</span><em>devmode=False</em>, <em>maxdepth=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.dict_index_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.dict_index_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Using the list of dictionary keys (at each level of a uniform_depth
+dictionary of dictionaries), this produces a list of the indices that
+can be used to reference the keys to get the result for each element.</p>
 <dl class="docutils">
 <dt>Options:</dt>
 <dd><ul class="first last simple">
-<li>maxdepth - the maximum desired depth to go to (ie. the number of levels)</li>
+<li>maxdepth - the maximum desired depth to go to                       (ie. the number of levels)</li>
 </ul>
 </dd>
 </dl>
@@ -180,13 +177,14 @@ the keys to get the result for each element.</p>
 
 <dl class="method">
 <dt id="ImageMetaTag.ImageDict.dict_print">
-<tt class="descname">dict_print</tt><big>(</big><em>in_dict</em>, <em>indent=0</em>, <em>outstr=''</em><big>)</big><a class="headerlink" href="#ImageMetaTag.ImageDict.dict_print" title="Permalink to this definition">¶</a></dt>
-<dd><p>recursively details a dictionary of dictionaries, with indentation, to a string</p>
+<code class="descname">dict_print</code><span class="sig-paren">(</span><em>in_dict</em>, <em>indent=0</em>, <em>outstr=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.dict_print"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.dict_print" title="Permalink to this definition">¶</a></dt>
+<dd><p>recursively details a dictionary of dictionaries, with indentation,
+to a string</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ImageMetaTag.ImageDict.dict_prune">
-<tt class="descname">dict_prune</tt><big>(</big><em>in_dict</em>, <em>dicts_pruned=False</em><big>)</big><a class="headerlink" href="#ImageMetaTag.ImageDict.dict_prune" title="Permalink to this definition">¶</a></dt>
+<code class="descname">dict_prune</code><span class="sig-paren">(</span><em>in_dict</em>, <em>dicts_pruned=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.dict_prune"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.dict_prune" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prunes the ImageDict of empty, unterminated, branches
 (which occur after parts have been removed).
 Returns True if a dict was pruned, False if not.</p>
@@ -194,7 +192,7 @@ Returns True if a dict was pruned, False if not.</p>
 
 <dl class="method">
 <dt id="ImageMetaTag.ImageDict.dict_remove">
-<tt class="descname">dict_remove</tt><big>(</big><em>in_dict</em>, <em>rm_dict</em><big>)</big><a class="headerlink" href="#ImageMetaTag.ImageDict.dict_remove" title="Permalink to this definition">¶</a></dt>
+<code class="descname">dict_remove</code><span class="sig-paren">(</span><em>in_dict</em>, <em>rm_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.dict_remove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.dict_remove" title="Permalink to this definition">¶</a></dt>
 <dd><p>removes a dictionary of dictionaries from another, larger, one.
 This can leave empty branches, at multiple levels of the dict,
 so needs cleaning up afterwards.</p>
@@ -202,25 +200,25 @@ so needs cleaning up afterwards.</p>
 
 <dl class="method">
 <dt id="ImageMetaTag.ImageDict.dict_union">
-<tt class="descname">dict_union</tt><big>(</big><em>in_dict</em>, <em>new_dict</em><big>)</big><a class="headerlink" href="#ImageMetaTag.ImageDict.dict_union" title="Permalink to this definition">¶</a></dt>
+<code class="descname">dict_union</code><span class="sig-paren">(</span><em>in_dict</em>, <em>new_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.dict_union"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.dict_union" title="Permalink to this definition">¶</a></dt>
 <dd><p>produces the union of a dictionary of dictionaries</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ImageMetaTag.ImageDict.flatten_lists">
-<tt class="descname">flatten_lists</tt><big>(</big><em>in_list</em><big>)</big><a class="headerlink" href="#ImageMetaTag.ImageDict.flatten_lists" title="Permalink to this definition">¶</a></dt>
+<code class="descname">flatten_lists</code><span class="sig-paren">(</span><em>in_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.flatten_lists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.flatten_lists" title="Permalink to this definition">¶</a></dt>
 <dd><p>Recursively flattens a list of lists:</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ImageMetaTag.ImageDict.key_at_depth">
-<tt class="descname">key_at_depth</tt><big>(</big><em>in_dict</em>, <em>depth</em><big>)</big><a class="headerlink" href="#ImageMetaTag.ImageDict.key_at_depth" title="Permalink to this definition">¶</a></dt>
+<code class="descname">key_at_depth</code><span class="sig-paren">(</span><em>in_dict</em>, <em>depth</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.key_at_depth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.key_at_depth" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns the keys of a dictionary, at a given depth</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ImageMetaTag.ImageDict.keys_by_depth">
-<tt class="descname">keys_by_depth</tt><big>(</big><em>in_dict</em>, <em>depth=0</em>, <em>keys=None</em>, <em>subdirs=None</em><big>)</big><a class="headerlink" href="#ImageMetaTag.ImageDict.keys_by_depth" title="Permalink to this definition">¶</a></dt>
+<code class="descname">keys_by_depth</code><span class="sig-paren">(</span><em>in_dict</em>, <em>depth=0</em>, <em>keys=None</em>, <em>subdirs=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.keys_by_depth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.keys_by_depth" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns:</p>
 <ul class="simple">
 <li>a dictionary of sets, containing the keys at each level of          the dictionary (keyed by the level number).</li>
@@ -230,51 +228,53 @@ so needs cleaning up afterwards.</p>
 
 <dl class="method">
 <dt id="ImageMetaTag.ImageDict.list_keys_by_depth">
-<tt class="descname">list_keys_by_depth</tt><big>(</big><em>devmode=False</em><big>)</big><a class="headerlink" href="#ImageMetaTag.ImageDict.list_keys_by_depth" title="Permalink to this definition">¶</a></dt>
-<dd><p>Lists the keys of the dictionary to create a list of keys, for each level of the
-dictionary, up to its depth.</p>
-<p>It is usually much faster to create an ImageDict by appending images to it,
-with skip_key_relist=True but this leaves an ImageDict without a list of keys. In this
-case, list_keys_by_depth needs to be called once at the end of the process to complete
-the list of keys.</p>
-<p>It works by converting the sets, from keys_by_depth to a list (where they can be ordered
-and indexed).
+<code class="descname">list_keys_by_depth</code><span class="sig-paren">(</span><em>devmode=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.list_keys_by_depth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.list_keys_by_depth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lists the keys of the dictionary to create a list of keys, for each
+level of the dictionary, up to its depth.</p>
+<p>It is usually much faster to create an ImageDict by appending images
+to it, with skip_key_relist=True but this leaves an ImageDict without
+a list of keys. In this case, list_keys_by_depth needs to be called
+once at the end of the process to complete the list of keys.</p>
+<p>It works by converting the sets, from keys_by_depth to a list
+(where they can be ordered and indexed).
 This also produces the unique subdirectory locations of all images.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ImageMetaTag.ImageDict.mergedicts">
-<tt class="descname">mergedicts</tt><big>(</big><em>dict1</em>, <em>dict2</em><big>)</big><a class="headerlink" href="#ImageMetaTag.ImageDict.mergedicts" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alternative version of dict_union using generators which is much faster for large dicts
-but needs to be converted to a dict when it&#8217;s called:
-new_dict = dict(mergdicts(dict1,dict))</p>
+<code class="descname">mergedicts</code><span class="sig-paren">(</span><em>dict1</em>, <em>dict2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.mergedicts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.mergedicts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alternative version of dict_union using generators which is much
+faster for large dicts but needs to be converted to a dict when it’s
+called:   new_dict = dict(mergdicts(dict1,dict))</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ImageMetaTag.ImageDict.remove">
-<tt class="descname">remove</tt><big>(</big><em>rm_dict</em>, <em>skip_key_relist=False</em><big>)</big><a class="headerlink" href="#ImageMetaTag.ImageDict.remove" title="Permalink to this definition">¶</a></dt>
+<code class="descname">remove</code><span class="sig-paren">(</span><em>rm_dict</em>, <em>skip_key_relist=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.remove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.remove" title="Permalink to this definition">¶</a></dt>
 <dd><p>removes a dictionary from within an ImageDict.
-The skip_key_relist option can be set to True to stop the regeneration of key lists.</p>
-<p>TIP: Because the remove process needs to prune empty sections afterwards,
-it can be slow. When working with large dictionaries, and removing a large number
-of elements from it, is often faster to build up a dictionary of things you want to
-remove, and then do one remove at the end.</p>
+The skip_key_relist option can be set to True to stop the regeneration
+of key lists.</p>
+<p>TIP: Because the remove process needs to prune empty sections
+afterwards, it can be slow. When working with large dictionaries, and
+removing a large number of elements from it, is often faster to build
+up a dictionary of things you want to remove, and then do one remove
+at the end.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ImageMetaTag.ImageDict.return_from_list">
-<tt class="descname">return_from_list</tt><big>(</big><em>vals_at_depth</em><big>)</big><a class="headerlink" href="#ImageMetaTag.ImageDict.return_from_list" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the end values of ImageDict, when given a list of values for the keys
-at different depths.
+<code class="descname">return_from_list</code><span class="sig-paren">(</span><em>vals_at_depth</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.return_from_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.return_from_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the end values of ImageDict, when given a list of values for
+the keys at different depths.
 Returns None if the set of values is not contained in the ImageDict.</p>
-<p>Assumes that the ImageDict has its keys up to date, so last time it was
-appended/removed it was with skip_key_relist=False   or  list_keys_by_depth()
-method has been called since.</p>
+<p>Assumes that the ImageDict has its keys up to date, so last time it
+was appended/removed it was with skip_key_relist=False   or
+list_keys_by_depth()    method has been called since.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ImageMetaTag.ImageDict.return_key_inds">
-<tt class="descname">return_key_inds</tt><big>(</big><em>in_dict</em>, <em>out_array=None</em>, <em>this_set_of_inds=None</em>, <em>depth=None</em>, <em>level=None</em>, <em>verbose=False</em>, <em>devmode=False</em><big>)</big><a class="headerlink" href="#ImageMetaTag.ImageDict.return_key_inds" title="Permalink to this definition">¶</a></dt>
+<code class="descname">return_key_inds</code><span class="sig-paren">(</span><em>in_dict</em>, <em>out_array=None</em>, <em>this_set_of_inds=None</em>, <em>depth=None</em>, <em>level=None</em>, <em>verbose=False</em>, <em>devmode=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.return_key_inds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.return_key_inds" title="Permalink to this definition">¶</a></dt>
 <dd><p>Does the work for dict_index_array, by recursively adding indices to
 the keys to a current list, and branching where required, and adding
 compelted lists to the out_array</p>
@@ -282,21 +282,21 @@ compelted lists to the out_array</p>
 
 <dl class="method">
 <dt id="ImageMetaTag.ImageDict.sort_keys">
-<tt class="descname">sort_keys</tt><big>(</big><em>sort_methods</em>, <em>devmode=False</em><big>)</big><a class="headerlink" href="#ImageMetaTag.ImageDict.sort_keys" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sorts the keys of a plot dictionary, according to a particular sort method
-(or a list of sort methods that matches the number of keys).</p>
-<dl class="docutils">
-<dt>Valid sort methods so far are mostly focused on meteorological terms, and include:</dt>
-<dd><ul class="first last simple">
-<li>&#8216;sort&#8217; - just an ordinary sort</li>
-<li>&#8216;level&#8217; or &#8216;numeric&#8217; - starting with the surface and working upwards, then                                   &#8216;special&#8217; levels like cross sections etc.</li>
-<li>&#8216;T+&#8217; - in ascending order of the number after a T+ (or similar) string.</li>
-<li>an input list - Specific elements in the input list are sorted as per their order                           in the list, while the rest are just sorted.</li>
+<code class="descname">sort_keys</code><span class="sig-paren">(</span><em>sort_methods</em>, <em>devmode=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.sort_keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.sort_keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sorts the keys of a plot dictionary, according to a particular sort
+method (or a list of sort methods that matches the number of keys).</p>
+<p>Valid sort methods so far are mostly focused on meteorological terms,
+and include:</p>
+<blockquote>
+<div><ul class="simple">
+<li>‘sort’ - just an ordinary sort</li>
+<li>‘level’ or ‘numeric’ - starting with the surface and working                                   upwards, then ‘special’ levels like cross                                   sections etc.</li>
+<li>‘T+’ - in ascending order of the number after a ‘T+’ (or similar)</li>
+<li>an input list - Specific elements in the input list are sorted as                            per their order in the list, while the rest are                            just sorted.</li>
 </ul>
-</dd>
-</dl>
-<p>The methods activated by a string can be reversed as &#8216;reverse_sort&#8217; or &#8216;reverse_sort&#8217;,
-or &#8216;reverse numeric&#8217; or &#8216;reverse_numeric&#8217;.</p>
+</div></blockquote>
+<p>The methods activated by a string can be reversed as ‘reverse_sort’ or
+‘reverse_sort’, or ‘reverse numeric’ or ‘reverse_numeric’.</p>
 </dd></dl>
 
 </dd></dl>
@@ -306,81 +306,92 @@ or &#8216;reverse numeric&#8217; or &#8216;reverse_numeric&#8217;.</p>
 <h2>Functions useful in preparing ImageDicts<a class="headerlink" href="#functions-useful-in-preparing-imagedicts" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="ImageMetaTag.readmeta_from_image">
-<tt class="descclassname">ImageMetaTag.</tt><tt class="descname">readmeta_from_image</tt><big>(</big><em>img_file</em>, <em>img_format=None</em><big>)</big><a class="headerlink" href="#ImageMetaTag.readmeta_from_image" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reads the metadata added by the ImageMetaTag savefig, from an image file,
-and returns a dictionary of <em>tagname: value</em> pairs</p>
+<code class="descclassname">ImageMetaTag.</code><code class="descname">readmeta_from_image</code><span class="sig-paren">(</span><em>img_file</em>, <em>img_format=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#readmeta_from_image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.readmeta_from_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the metadata added by the ImageMetaTag savefig, from an image
+file, and returns a dictionary of <em>tagname: value</em> pairs</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ImageMetaTag.dict_heirachy_from_list">
-<tt class="descclassname">ImageMetaTag.</tt><tt class="descname">dict_heirachy_from_list</tt><big>(</big><em>in_dict</em>, <em>payload</em>, <em>heirachy</em><big>)</big><a class="headerlink" href="#ImageMetaTag.dict_heirachy_from_list" title="Permalink to this definition">¶</a></dt>
-<dd><p>Converts a flat dictionary of <em>tagname: value</em> pairs, into an ordered dictionary
-of dictionaries according to the input heirachy (which is a list of tagnames).</p>
-<p>The output dictionary will only have one element per level, but can be used to create or
-append into an <a class="reference internal" href="#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a>.
-The final level will be the &#8216;payload&#8217; input, which is the object the dictionary, with all
-it&#8217;s levels, is describing.
-The payload would usually be the full/relative path of the image file, or list of image files.</p>
+<code class="descclassname">ImageMetaTag.</code><code class="descname">dict_heirachy_from_list</code><span class="sig-paren">(</span><em>in_dict</em>, <em>payload</em>, <em>heirachy</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#dict_heirachy_from_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.dict_heirachy_from_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a flat dictionary of <em>tagname: value</em> pairs, into an ordered
+dictionary of dictionaries according to the input heirachy
+(which is a list of tagnames).</p>
+<p>The output dictionary will only have one element per level, but can be
+used to create or append into an <a class="reference internal" href="#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageMetaTag.ImageDict</span></code></a>.
+The final level will be the ‘payload’ input, which is the object the
+dictionary, with all it’s levels, is describing.
+The payload would usually be the full/relative path of the image file,
+or list of image files.</p>
 <p>Returns False if the input dict does not contain the required keys.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ImageMetaTag.dict_split">
-<tt class="descclassname">ImageMetaTag.</tt><tt class="descname">dict_split</tt><big>(</big><em>in_dict</em>, <em>n_split=None</em>, <em>size_split=None</em>, <em>extra_opts=None</em><big>)</big><a class="headerlink" href="#ImageMetaTag.dict_split" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generator that breaks up a flat dictionary and yields a set of sub-dictionaries in
-n_split chunks, or size_split in size. It is split on it&#8217;s first level, not recursively.</p>
+<code class="descclassname">ImageMetaTag.</code><code class="descname">dict_split</code><span class="sig-paren">(</span><em>in_dict</em>, <em>n_split=None</em>, <em>size_split=None</em>, <em>extra_opts=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#dict_split"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.dict_split" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generator that breaks up a flat dictionary and yields a set of
+sub-dictionaries in n_split chunks, or size_split in size. It is split
+on it’s first level, not recursively.</p>
 <p>It is very useful for splitting large dictionaries of image metadata
 to parallelise processing these into ImageDicts.</p>
 <p>Inputs:
 in_dict - the dictionary to split</p>
-<p>Options:</p>
-<ul class="simple">
+<dl class="docutils">
+<dt>Options:</dt>
+<dd><ul class="first last simple">
 <li>n_split - the number of dictionaries to break the in_dict up into.</li>
 <li>size_split - the size of the required output dictionaries.</li>
-<li>extra_opts - If supplied as an iterable, this routine will yield a tuple containing the                    output sub-dictionary and then each of the elements of extra_opts.</li>
+<li>extra_opts - If supplied as an iterable, this routine will yield a                     tuple containing the output sub-dictionary and then each                     of the elements of extra_opts.</li>
 </ul>
+</dd>
+</dl>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">One, and only one, of n_slpit, or size_split must be specified, as an integer.</p>
+<p class="last">One, and only one, of n_slpit, or size_split must be specified,    as an integer.</p>
 </div>
 </dd></dl>
 
 <dl class="function">
 <dt id="ImageMetaTag.simple_dict_filter">
-<tt class="descclassname">ImageMetaTag.</tt><tt class="descname">simple_dict_filter</tt><big>(</big><em>simple_dict</em>, <em>tests</em>, <em>raise_key_mismatch=False</em><big>)</big><a class="headerlink" href="#ImageMetaTag.simple_dict_filter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Tests the contents of a simple, un-heirachical dict (properties an image) against
-a set of tests.</p>
-<p>An example set of tests:
-tests = {&#8216;number of rolls&#8217;: [&#8216;6 simulated rolls&#8217;,</p>
-<blockquote>
-<div><blockquote>
-<div>&#8216;216 simulated rolls&#8217;,
-&#8216;1296 simulated rolls&#8217;],</div></blockquote>
-<p>&#8216;plot color&#8217;: None,
-&#8216;image compression&#8217;: None,
-&#8216;plot type&#8217;: [&#8216;Histogram&#8217;, (&#8216;All&#8217;, [&#8216;Histogram&#8217;, &#8216;Line plots&#8217;])],
-&#8216;image trim&#8217;: None}</p>
-</div></blockquote>
-<p>Here, the &#8216;number of rolls&#8217; is restricted to a simple list.</p>
-<p>The plot type is filtered according to &#8216;Histogram&#8217;, and there is also a second element that
-contains both &#8216;Histogram and &#8216;Line plots&#8217; which are to be presented together.</p>
+<code class="descclassname">ImageMetaTag.</code><code class="descname">simple_dict_filter</code><span class="sig-paren">(</span><em>simple_dict</em>, <em>tests</em>, <em>raise_key_mismatch=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#simple_dict_filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.simple_dict_filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests the contents of a simple, un-heirachical dict (properties an image)
+against a set of tests.</p>
+<p>An example set of tests:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tests</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;number of rolls&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;6 simulated rolls&#39;</span><span class="p">,</span>
+                             <span class="s1">&#39;216 simulated rolls&#39;</span><span class="p">,</span>
+                             <span class="s1">&#39;1296 simulated rolls&#39;</span><span class="p">],</span>
+         <span class="s1">&#39;plot color&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+         <span class="s1">&#39;image compression&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+         <span class="s1">&#39;plot type&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;Histogram&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;All&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;Histogram&#39;</span><span class="p">,</span> <span class="s1">&#39;Line plots&#39;</span><span class="p">])],</span>
+         <span class="s1">&#39;image trim&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Here, the ‘number of rolls’ is restricted to a simple list.</p>
+<p>The plot type is filtered according to ‘Histogram’, and there is also a
+second element that contains both ‘Histogram and ‘Line plots’ which are
+to be presented together.</p>
 <p>The other image characteristics are not filtered.</p>
-<p>Options:</p>
-<ul class="simple">
-<li>raise_key_mismatch - if True, then attempting to test a dictionary with a missing key                            will raise. Default is to return all False</li>
+<dl class="docutils">
+<dt>Options:</dt>
+<dd><ul class="first last simple">
+<li>raise_key_mismatch - if True, then attempting to test a dictionary                             with a missing key will raise and exception.                             Default is to return all False.</li>
 </ul>
-<p>Returns three logicals:</p>
-<ul class="simple">
+</dd>
+<dt>Returns three logicals:</dt>
+<dd><ul class="first last simple">
 <li>The first indicates whether the input dict passes the simple tests</li>
-<li>The second indicates whether the input dict is part of the grouped elements       of the test (the [&#8216;Histogram&#8217;, &#8216;Line plots&#8217;] list).#</li>
-<li>The third indicates whether the input dict is the first element of a list grouped       elements (is &#8216;Histogram&#8217; in this [&#8216;Histogram&#8217;, &#8216;Line plots&#8217;] list).</li>
+<li>The second indicates whether the input dict is part of the grouped        elements of the test (the [‘Histogram’, ‘Line plots’] list).</li>
+<li>The third indicates whether the input dict is the first element of a        list grouped elements (is ‘Histogram’ in this        [‘Histogram’, ‘Line plots’] list).</li>
 </ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="ImageMetaTag.check_for_required_keys">
-<tt class="descclassname">ImageMetaTag.</tt><tt class="descname">check_for_required_keys</tt><big>(</big><em>img_info</em>, <em>req_keys</em><big>)</big><a class="headerlink" href="#ImageMetaTag.check_for_required_keys" title="Permalink to this definition">¶</a></dt>
-<dd><p>Checks an img_info dictionary has a set of required keys, specifed as a list of strings</p>
+<code class="descclassname">ImageMetaTag.</code><code class="descname">check_for_required_keys</code><span class="sig-paren">(</span><em>img_info</em>, <em>req_keys</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#check_for_required_keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.check_for_required_keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks an img_info dictionary has a set of required keys, specifed as a
+list of strings</p>
 <p>Returns True or False accordingly.</p>
 </dd></dl>
 
@@ -393,7 +404,7 @@ contains both &#8216;Histogram and &#8216;Line plots&#8217; which are to be pres
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -408,12 +419,12 @@ contains both &#8216;Histogram and &#8216;Line plots&#8217; which are to be pres
         <li class="right" >
           <a href="db.html" title="ImageMetaTag.db"
              >previous</a> |</li>
-        <li><a href="index.html">ImageMetaTag 0.7.5 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.9 documentation</a> &#187;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2015-2018, British Crown Copyright.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2015-2018, British Crown Copyright.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.4.
     </div>
   </body>
 </html>

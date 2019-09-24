@@ -1,0 +1,214 @@
+#!/usr/bin/env python
+'''
+Deletes images from disk and an ImageMetaTag database in a consistent way.
+
+The ImageMetaTag package: https://github.com/SciTools-incubator/image-meta-tag
+and http://scitools-incubator.github.io/image-meta-tag/build/html/index.html
+
+This script operates on a ImageMetaTag database file (imt.db in any examples).
+
+Basic example:
+  rm_imt_images imt.db file.png file2.png
+this would delete file1.png and file2.png from disk and the imt.db file
+
+Usage with wildcards:
+  rm_imt_images.py /path/to/images/imt.db  /path/to/images/subdir/*
+this would delete all files in the example subdirectory and their entry
+in the database
+
+Options:
+  * -v : verbose output
+  * -f : force deletes (similar to rm -f)
+
+Note that this utility is not designed to delete files optimally for speed
+but instead it deletes files on disk and then in the database one at a time.
+This is slower than deleting multiple files on disk, and then multiple files
+in the database, but this reduces the risk of the contents of the database
+and file system getting out of sync.
+
+Once a database file has been manipulated, and images deleted, any
+web pages prepared using the database should be recreated. Doing so is
+not part of this script.
+
+.. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks
+
+(C) Crown copyright Met Office. All rights reserved.
+Released under BSD 3-Clause License. See LICENSE for more details.
+'''
+
+import os
+import sys
+import argparse
+import errno
+# import pdb
+import distutils.util
+
+# python 2.7/3.6 compatibility:
+import __future__
+
+# make sure we use the version of the ImageMetaTag library associated with
+# this script (assumed to be in a bin directory, at the same level as the lib)
+UTIL_PATH = os.sep.join(os.path.abspath(sys.argv[0]).split(os.sep)[0:-2])
+sys.path.insert(0, UTIL_PATH)
+import ImageMetaTag as imt
+
+# is this run in python2 or 3:
+PY3 = sys.version_info[0] == 3
+
+def imt_rm_img(db_file=None, files=None, verbose=False, force_deletes=False,
+               delete_not_in_db=False):
+    '''
+    Deletes a list of images from disk and an ImageMetaTag database.
+
+    If a file in the list is in the database and on disk it is
+    removed from both.
+    If a files is in the database but do not exist on disk, it is
+    removed from the database.
+    If a file is on disk, but not in the database, it is ignored.
+    '''
+
+    # verbose info on the request:
+    if verbose:
+        msg = '''Deleting images: {}
+from database: {}
+with ImageMetaTag version {}, {}
+'''
+        print(msg.format(files, db_file, imt.__version__, imt.__path__[0]))
+
+    # sanitise inputs and check for null requests:
+    if files is None:
+        if verbose:
+            print('No files selected to delete')
+        return
+    if not isinstance(files, list):
+        raise ValueError('Input list of files should be a list')
+    if files == []:
+        if verbose:
+            print('No files selected to delete')
+        return
+
+    if verbose:
+        msg = 'Reading database file "{}"'
+        print(msg.format(db_file))
+    img_list, __img_info = imt.db.read(db_file)
+    if verbose:
+        print('  database read and contains {} images'.format(len(img_list)))
+
+    db_dir = os.path.split(db_file)[0]
+
+    # loop over thefiles:
+    for filename in files:
+        # get a list of filenames to check within the database:
+        db_variants = [filename]  # start with the supplied filename
+        # remove the file extension
+        filename_no_ext = os.path.splitext(filename)[0]
+        db_variants.append(filename_no_ext)
+
+        # if the filename is an absolute path try removing the directory
+        # of the image database from it (the database will probably store
+        # the image as a relative path to the database file):
+        if filename.startswith(db_dir):
+            filename_rel = filename[len(db_dir)+1:]
+            filename_rel_no_ext = filename_no_ext[len(db_dir)+1:]
+            db_variants.extend([filename_rel, filename_rel_no_ext])
+
+        # determine the status of the file:
+        file_on_disk = os.path.isfile(filename)
+
+        # being in the database is more complicated as we need to
+        # check the variants
+        file_in_db = False
+        variants_in_db = set([])
+        for fname in db_variants:
+            if fname in img_list:
+                file_in_db = True
+                variants_in_db.add(fname)
+
+        # now decide what to actually do:
+        db_rm = False
+        file_rm = False
+        if file_in_db and not file_on_disk:
+            # file doesn't exist any more, but the databse has it.
+            # so just remove from db.
+            db_rm = True
+        elif not file_in_db and file_on_disk:
+            # just delete on disk, if required:
+            file_rm = delete_not_in_db
+        elif file_in_db and file_on_disk:
+            db_rm = True
+            file_rm = True
+
+        # now check is we can actually delete the file:
+        if file_in_db or file_rm:
+            if not force_deletes:
+                # need to ask whether we can delete, so then be clear what
+                # we're asking to do:
+                if db_rm and file_rm:
+                    msg = "rm_imt_images: remove file & db entry '{}'? "
+                elif db_rm and not file_rm:
+                    msg = "rm_imt_images: db entry '{}'? "
+                elif not db_rm and file_rm:
+                    msg = "rm_imt_images: remove file '{}'? "
+                if PY3:
+                    allowed_to_delete = input(msg.format(filename))
+                else:
+                    allowed_to_delete = raw_input(msg.format(filename))
+                # now convert to a bool:
+                allowed_to_delete = str_to_bool(allowed_to_delete)
+            else:
+                allowed_to_delete = True
+        else:
+            # the image neither exists nor is it in the database:
+            msg = 'File "{}" not on disk nor in the database'
+            print(msg.format(filename))
+            allowed_to_delete = False
+
+        if allowed_to_delete:
+            # actually delete:
+            if db_rm:
+                imt.db.del_plots_from_dbfile(db_file, list(variants_in_db),
+                                             do_vacuum=False,
+                                             allow_retries=True)
+            if file_rm:
+                rm_f(filename)
+
+    if verbose:
+        print('re-reading database file')
+        img_list, __img_info = imt.db.read(db_file)
+        print('  database read and contains {} images'.format(len(img_list)))
+
+
+def str_to_bool(in_str):
+    'converts a string to a boolean using distutils.util.strtobool'
+    val_bool = bool(distutils.util.strtobool(in_str))
+    return val_bool
+
+
+def rm_f(path):
+    '''
+    os.remove, but does not complain if the file has already been deleted
+    (by a parallel process, for instance).
+
+    This is equivalnt to an rm -f command. Be carefull!
+    '''
+    try:
+        os.remove(path)
+    except OSError as exc:
+        if exc.errno == errno.ENOENT:
+            pass
+        else:
+            raise
+
+
+if __name__ == '__main__':
+    PARSER = argparse.ArgumentParser()
+    PARSER.add_argument('--verbose', '-v', action='store_true', dest='verbose',
+                        help='Increse verbosity')
+    PARSER.add_argument('-f', action='store_true', dest='force_deletes',
+                        help='Increse verbosity')
+    PARSER.add_argument('imt_db', nargs=1, help='ImageMetaTag database file')
+    PARSER.add_argument('files', nargs='*', help='List of files')
+    ARGS = PARSER.parse_args()
+    # call the work routine:
+    imt_rm_img(db_file=ARGS.imt_db[0], files=ARGS.files, verbose=ARGS.verbose,
+               force_deletes=ARGS.force_deletes)

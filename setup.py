@@ -12,7 +12,7 @@ for d, _, _ in os.walk(os.path.join(here, 'ImageMetaTag')):
 setup_args = dict(
     name = 'ImageMetaTag',
     # see release_process for details on incrementing the version
-    version = '0.7.5',
+    version = '0.7.9',
     description = 'Image metadata tagging, database and presentation',
     license = 'BSD3',
     author = 'Malcolm Brooks',
@@ -23,6 +23,7 @@ setup_args = dict(
                    'Programming Language :: Python :: 3.6',
                   ],
     package_data = {'ImageMetaTag': ['javascript/*']},
+    scripts = ['bin/rm_imt_images'],
 )
 
 if __name__ == '__main__':

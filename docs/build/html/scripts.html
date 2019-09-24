@@ -1,0 +1,153 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Associated scripts packaged with ImageMetaTag &#8212; ImageMetaTag 0.7.9 documentation</title>
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Versions of Python" href="versions.html" />
+    <link rel="prev" title="ImageMetaTag - simplest_img_dict.py" href="simple.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="versions.html" title="Versions of Python"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="simple.html" title="ImageMetaTag - simplest_img_dict.py"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.9 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Associated scripts packaged with ImageMetaTag</a><ul>
+<li><a class="reference internal" href="#rm-imt-images">rm_imt_images</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="simple.html"
+                        title="previous chapter">ImageMetaTag - simplest_img_dict.py</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="versions.html"
+                        title="next chapter">Versions of Python</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/scripts.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="associated-scripts-packaged-with-imagemetatag">
+<h1>Associated scripts packaged with ImageMetaTag<a class="headerlink" href="#associated-scripts-packaged-with-imagemetatag" title="Permalink to this headline">¶</a></h1>
+<p>A small number of useful scripts are pacakged alongside the ImageMetaTag
+library to interface with the library for common tasks.</p>
+<div class="section" id="rm-imt-images">
+<h2>rm_imt_images<a class="headerlink" href="#rm-imt-images" title="Permalink to this headline">¶</a></h2>
+<p>Deletes images from disk and an ImageMetaTag database in a consistent way.</p>
+<p>This script operates on a ImageMetaTag database file (imt.db in any examples).</p>
+<p>Basic example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rm_imt_images</span> <span class="n">imt</span><span class="o">.</span><span class="n">db</span> <span class="n">file</span><span class="o">.</span><span class="n">png</span> <span class="n">file2</span><span class="o">.</span><span class="n">png</span>
+</pre></div>
+</div>
+<p>this would delete file1.png and file2.png from disk and the imt.db file</p>
+<p>Usage with wildcards:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rm_imt_images</span><span class="o">.</span><span class="n">py</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">imt</span><span class="o">.</span><span class="n">db</span>  <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">subdir</span><span class="o">/*</span>
+</pre></div>
+</div>
+<p>this would delete all files in the example subdirectory and their entry
+in the database</p>
+<dl class="docutils">
+<dt>Options:</dt>
+<dd><ul class="first last simple">
+<li>-v : verbose output</li>
+<li>-f : force deletes (similar to rm -f)</li>
+</ul>
+</dd>
+</dl>
+<p>Note that this utility is not designed to delete files optimally for speed
+but instead it deletes files on disk and then in the database one at a time.
+This is slower than deleting multiple files on disk, and then multiple files
+in the database, but this reduces the risk of the contents of the database
+and file system getting out of sync.</p>
+<p>Once a database file has been manipulated, and images deleted, any
+web pages prepared using the database should be recreated. Doing so is
+not part of this script.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="versions.html" title="Versions of Python"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="simple.html" title="ImageMetaTag - simplest_img_dict.py"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.9 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2015-2018, British Crown Copyright.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.4.
+    </div>
+  </body>
+</html>

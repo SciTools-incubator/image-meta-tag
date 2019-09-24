@@ -1,33 +1,24 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ImageMetaTag - Image metadata tagging and presentation &mdash; ImageMetaTag 0.7.5 documentation</title>
-    
+    <title>ImageMetaTag - Image metadata tagging and presentation &#8212; ImageMetaTag 0.7.9 documentation</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.7.5',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="ImageMetaTag 0.7.5 documentation" href="#" />
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="ImageMetaTag.savefig" href="savefig.html" /> 
-  </head>
-  <body>
-    <div class="related">
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -39,15 +30,15 @@
         <li class="right" >
           <a href="savefig.html" title="ImageMetaTag.savefig"
              accesskey="N">next</a> |</li>
-        <li><a href="#">ImageMetaTag 0.7.5 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="#">ImageMetaTag 0.7.9 documentation</a> &#187;</li> 
       </ul>
     </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
             <p class="logo"><a href="#">
               <img class="logo" src="_static/logo.png" alt="Logo"/>
             </a></p>
-  <h3><a href="#">Table Of Contents</a></h3>
+  <h3><a href="#">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">ImageMetaTag - Image metadata tagging and presentation</a></li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
@@ -56,22 +47,23 @@
   <h4>Next topic</h4>
   <p class="topless"><a href="savefig.html"
                         title="next chapter">ImageMetaTag.savefig</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/index.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -80,18 +72,19 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="module-ImageMetaTag">
 <span id="imagemetatag-image-metadata-tagging-and-presentation"></span><h1>ImageMetaTag - Image metadata tagging and presentation<a class="headerlink" href="#module-ImageMetaTag" title="Permalink to this headline">¶</a></h1>
 <p>ImageMetaTag is a python package built around a wrapper for
 <a class="reference external" href="http://matplotlib.org/api/pyplot_api.html?highlight=savefig#matplotlib.pyplot.savefig">savefig</a>
 in
-<a class="reference external" href="http://matplotlib.org/">matplotlib</a>, which adds metadata tags to supported image file formats.</p>
+<a class="reference external" href="http://matplotlib.org/">matplotlib</a>, which adds metadata tags to supported image
+file formats.</p>
 <p>Once the images have been tagged, it can also be used to manage an
-<a class="reference external" href="https://docs.python.org/2/library/sqlite3.html">SQL database</a> of images and their metadata.
-The image metadata can be used to produce an
-<a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><tt class="xref py py-class docutils literal"><span class="pre">ImageMetaTag.ImageDict</span></tt></a> object: a structured/heirachical dictionary of dictionaries
+<a class="reference external" href="https://docs.python.org/2/library/sqlite3.html">SQL database</a> of images and their
+metadata. The image metadata can be used to produce an
+<a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageMetaTag.ImageDict</span></code></a> object: a structured/heirachical dictionary of dictionaries
 which can be used to easily create web pages to present large numbers of images.</p>
 <p>As the image metadata tagging process involves reading the image using the Image library,
 a few common image post-processing options are included such as cropping, logo addition and
@@ -129,6 +122,10 @@ Released under BSD 3-Clause License. See LICENSE for more details.</p>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="test.html">ImageMetaTag - test.py</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple.html">ImageMetaTag - simplest_img_dict.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scripts.html">Associated scripts packaged with ImageMetaTag</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="scripts.html#rm-imt-images">rm_imt_images</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="versions.html">Versions of Python</a></li>
 </ul>
 </div>
@@ -136,9 +133,9 @@ Released under BSD 3-Clause License. See LICENSE for more details.</p>
 <div class="section" id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
-<li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
-<li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
-<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
 </ul>
 </div>
 
@@ -148,7 +145,7 @@ Released under BSD 3-Clause License. See LICENSE for more details.</p>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -160,12 +157,12 @@ Released under BSD 3-Clause License. See LICENSE for more details.</p>
         <li class="right" >
           <a href="savefig.html" title="ImageMetaTag.savefig"
              >next</a> |</li>
-        <li><a href="#">ImageMetaTag 0.7.5 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="#">ImageMetaTag 0.7.9 documentation</a> &#187;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2015-2018, British Crown Copyright.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2015-2018, British Crown Copyright.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.4.
     </div>
   </body>
 </html>

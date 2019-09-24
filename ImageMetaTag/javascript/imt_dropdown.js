@@ -1,4 +1,4 @@
-// ImageMetaTag dropdown menu scripting - vn0.7.5
+// ImageMetaTag dropdown menu scripting - vn0.7.9
 // ImageMetaTag is a python package built around a wrapper for savefig in
 // matplotlib, which adds metadata tags to supported image file formats.
 // See https://github.com/SciTools-incubator/image-meta-tag for details.
