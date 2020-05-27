@@ -4,7 +4,7 @@ Produces a set of test plots using matplotlib, with just random data.
 Each plot is tagged with appropriate metadata, and an ImageDict produced
 which describes them and creates a web page.
 
-.. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks
+.. moduleauthor:: Melissa Brooks https://github.com/melissaebrooks
 
 (C) Crown copyright Met Office. All rights reserved.
 Released under BSD 3-Clause License. See LICENSE for more details.

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>ImageMetaTag.savefig &#8212; ImageMetaTag 0.7.9 documentation</title>
+    <title>ImageMetaTag.savefig &#8212; ImageMetaTag 0.7.10 documentation</title>
     <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -26,7 +26,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">ImageMetaTag 0.7.9 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">ImageMetaTag 0.7.10 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -65,7 +65,7 @@
 <span class="sd">basic image manipulation options are included to crop images, add logos and</span>
 <span class="sd">reduce their file size by simplifying their colour palette.</span>
 
-<span class="sd">.. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks</span>
+<span class="sd">.. moduleauthor:: Melissa Brooks https://github.com/melissaebrooks</span>
 
 <span class="sd">(C) Crown copyright Met Office. All rights reserved.</span>
 <span class="sd">Released under BSD 3-Clause License. See LICENSE for more details.</span>
@@ -90,8 +90,7 @@
 <span class="n">THUMB_DEFAULT_IMG_SIZE</span> <span class="o">=</span> <span class="mi">150</span><span class="p">,</span> <span class="mi">150</span>
 <span class="n">THUMB_DEFAULT_DIR_NAME</span> <span class="o">=</span> <span class="s1">&#39;thumbnail&#39;</span>
 
-
-<div class="viewcode-block" id="savefig"><a class="viewcode-back" href="../../savefig.html#ImageMetaTag.savefig">[docs]</a><span class="k">def</span> <span class="nf">savefig</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">img_tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">img_format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">img_converter</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<div class="viewcode-block" id="savefig"><a class="viewcode-back" href="../../savefig.html#ImageMetaTag.savefig">[docs]</a><span class="k">def</span> <span class="nf">savefig</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">img_tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">img_format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">img_converter</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
             <span class="n">do_trim</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">trim_border</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
             <span class="n">do_thumb</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">keep_open</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">logo_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">logo_width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">logo_height</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -112,6 +111,7 @@
 <span class="sd">       the img_format option)</span>
 
 <span class="sd">    Options:</span>
+<span class="sd">     * fig - matplotlib figure to save</span>
 <span class="sd">     * img_format - file format of the image. If not supplied it will be \</span>
 <span class="sd">                    guessed from the filename. Currently only the png file \</span>
 <span class="sd">                    format is supported for tagging/conversion.</span>
@@ -158,6 +158,14 @@
 
 <span class="sd">    &#39;&#39;&#39;</span>
 
+    <span class="c1"># If fig given then use fig methods, else use pyplot methods</span>
+    <span class="k">if</span> <span class="n">fig</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">savefig_fn</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span>
+        <span class="n">close_fn</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">clear</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">savefig_fn</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span>
+        <span class="n">close_fn</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">close</span>
+
     <span class="k">if</span> <span class="n">img_format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">write_file</span> <span class="o">=</span> <span class="n">filename</span>
         <span class="c1"># get the img_format from the end of the filename</span>
@@ -186,11 +194,11 @@
 
     <span class="c1"># should probably add lots of other args, or use **kwargs</span>
     <span class="k">if</span> <span class="n">dpi</span><span class="p">:</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">savefig_file</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="n">dpi</span><span class="p">)</span>
+        <span class="n">savefig_fn</span><span class="p">(</span><span class="n">savefig_file</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="n">dpi</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">savefig_file</span><span class="p">)</span>
+        <span class="n">savefig_fn</span><span class="p">(</span><span class="n">savefig_file</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">keep_open</span><span class="p">:</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">close_fn</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">buf</span><span class="p">:</span>
         <span class="c1"># need to go to the start of the buffer, if that&#39;s where it went:</span>
         <span class="n">buf</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -822,12 +830,12 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">ImageMetaTag 0.7.9 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">ImageMetaTag 0.7.10 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2015-2018, British Crown Copyright.
+        &#169; Copyright 2015-2020, British Crown Copyright.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.4.
     </div>
   </body>

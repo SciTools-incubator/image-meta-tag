@@ -30,7 +30,7 @@ Once a database file has been manipulated, and images deleted, any
 web pages prepared using the database should be recreated. Doing so is
 not part of this script.
 
-.. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks
+.. moduleauthor:: Melissa Brooks https://github.com/melissaebrooks
 
 (C) Crown copyright Met Office. All rights reserved.
 Released under BSD 3-Clause License. See LICENSE for more details.

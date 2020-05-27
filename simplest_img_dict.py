@@ -4,7 +4,7 @@ functionality as possible, this routine aims to show the simplest possible
 code that keeps 'best practice' to use an ImageMetaTag database of
 metadata to produce a webpage.
 
-.. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks
+.. moduleauthor:: Melissa Brooks https://github.com/melissaebrooks
 
 (C) Crown copyright Met Office. All rights reserved.
 Released under BSD 3-Clause License. See LICENSE for more details.

@@ -7,7 +7,7 @@ As the output images are already being post-processed to add the metadata,
 basic image manipulation options are included to crop images, add logos and
 reduce their file size by simplifying their colour palette.
 
-.. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks
+.. moduleauthor:: Melissa Brooks https://github.com/melissaebrooks
 
 (C) Crown copyright Met Office. All rights reserved.
 Released under BSD 3-Clause License. See LICENSE for more details.

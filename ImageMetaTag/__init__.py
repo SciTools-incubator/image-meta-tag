@@ -15,7 +15,7 @@ As the image metadata tagging process involves reading the image using the Image
 a few common image post-processing options are included such as cropping, logo addition and
 colour palette manipulation to reduce filesizes.
 
-.. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks
+.. moduleauthor:: Melissa Brooks https://github.com/melissaebrooks
 
 (C) Crown copyright Met Office. All rights reserved.
 Released under BSD 3-Clause License. See LICENSE for more details.
@@ -25,7 +25,7 @@ import platform
 
 # Set constants/properties of ImageMetaTag (before any of it is imported)
 # see release_process for details on incrementing the version
-__version__ = '0.7.9'
+__version__ = '0.7.10'
 __documentation__ = 'http://scitools-incubator.github.io/image-meta-tag/build/html/'
 # list fo file formats which are valid for saving metadata to:
 META_IMG_FORMATS = ['png']
