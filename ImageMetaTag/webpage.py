@@ -33,7 +33,7 @@ An easy example of creating a webpage, using an :class:`ImageMetaTag.ImageDict` 
 .. TIP:: At present, the only webpage style that can be produced is a set of horizontal dropdown\
 menus, but more will hopefully be added soon.
 
-.. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks
+.. moduleauthor:: Melissa Brooks https://github.com/melissaebrooks
 
 (C) Crown copyright Met Office. All rights reserved.
 Released under BSD 3-Clause License. See LICENSE for more details.

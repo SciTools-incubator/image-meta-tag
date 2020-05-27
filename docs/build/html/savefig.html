@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>ImageMetaTag.savefig &#8212; ImageMetaTag 0.7.9 documentation</title>
+    <title>ImageMetaTag.savefig &#8212; ImageMetaTag 0.7.10 documentation</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="index.html" title="ImageMetaTag - Image metadata tagging and presentation"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.9 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.10 documentation</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -92,7 +92,7 @@
 <p>The only function that is usaully needed from this module is savefig wrapper iteself:</p>
 <dl class="function">
 <dt id="ImageMetaTag.savefig">
-<code class="descclassname">ImageMetaTag.</code><code class="descname">savefig</code><span class="sig-paren">(</span><em>filename</em>, <em>img_tags=None</em>, <em>img_format=None</em>, <em>img_converter=0</em>, <em>do_trim=False</em>, <em>trim_border=0</em>, <em>do_thumb=False</em>, <em>keep_open=False</em>, <em>dpi=None</em>, <em>logo_file=None</em>, <em>logo_width=None</em>, <em>logo_height=None</em>, <em>logo_padding=0</em>, <em>logo_pos=0</em>, <em>db_file=None</em>, <em>db_timeout=6</em>, <em>db_attempts=20</em>, <em>db_replace=False</em>, <em>db_add_strict=False</em>, <em>db_full_paths=False</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/savefig.html#savefig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.savefig" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ImageMetaTag.</code><code class="descname">savefig</code><span class="sig-paren">(</span><em>filename</em>, <em>fig=None</em>, <em>img_tags=None</em>, <em>img_format=None</em>, <em>img_converter=0</em>, <em>do_trim=False</em>, <em>trim_border=0</em>, <em>do_thumb=False</em>, <em>keep_open=False</em>, <em>dpi=None</em>, <em>logo_file=None</em>, <em>logo_width=None</em>, <em>logo_height=None</em>, <em>logo_padding=0</em>, <em>logo_pos=0</em>, <em>db_file=None</em>, <em>db_timeout=6</em>, <em>db_attempts=20</em>, <em>db_replace=False</em>, <em>db_add_strict=False</em>, <em>db_full_paths=False</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/savefig.html#savefig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.savefig" title="Permalink to this definition">¶</a></dt>
 <dd><p>A wrapper around matplotlib.pyplot.savefig, to include file size
 optimisation and image tagging.</p>
 <p>The filesize optimisation depends on the img_converter input passes into
@@ -105,6 +105,7 @@ optimisation and image tagging.</p>
 </dd>
 <dt>Options:</dt>
 <dd><ul class="first last simple">
+<li>fig - matplotlib figure to save</li>
 <li>img_format - file format of the image. If not supplied it will be                     guessed from the filename. Currently only the png file                     format is supported for tagging/conversion.</li>
 <li>img_tags - a dictionary of {tag_name : value} pairs to be added to the                  image metadata.</li>
 <li>db_file - a database file to be used by                  <a class="reference internal" href="db.html#ImageMetaTag.db.write_img_to_dbfile" title="ImageMetaTag.db.write_img_to_dbfile"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.db.write_img_to_dbfile()</span></code></a> to store all                  image metadata so they can be quickly accessed.</li>
@@ -220,11 +221,11 @@ optimisation and image tagging.</p>
         <li class="right" >
           <a href="index.html" title="ImageMetaTag - Image metadata tagging and presentation"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.9 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.10 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2015-2018, British Crown Copyright.
+        &#169; Copyright 2015-2020, British Crown Copyright.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.4.
     </div>
   </body>

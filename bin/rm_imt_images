@@ -8,7 +8,7 @@ and http://scitools-incubator.github.io/image-meta-tag/build/html/index.html
 This script operates on a ImageMetaTag database file (imt.db in any examples).
 
 Basic example:
-  rm_imt_images imt.db file.png file2.png
+  rm_imt_images imt.db file1.png file2.png
 this would delete file1.png and file2.png from disk and the imt.db file
 
 Usage with wildcards:
@@ -30,7 +30,7 @@ Once a database file has been manipulated, and images deleted, any
 web pages prepared using the database should be recreated. Doing so is
 not part of this script.
 
-.. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks
+.. moduleauthor:: Melissa Brooks https://github.com/melissaebrooks
 
 (C) Crown copyright Met Office. All rights reserved.
 Released under BSD 3-Clause License. See LICENSE for more details.

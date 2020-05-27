@@ -12,10 +12,10 @@ for d, _, _ in os.walk(os.path.join(here, 'ImageMetaTag')):
 setup_args = dict(
     name = 'ImageMetaTag',
     # see release_process for details on incrementing the version
-    version = '0.7.9',
+    version = '0.7.10',
     description = 'Image metadata tagging, database and presentation',
     license = 'BSD3',
-    author = 'Malcolm Brooks',
+    author = 'Melissa Brooks',
     url = 'https://github.com/SciTools-incubator/image-meta-tag',
     packages = packages,
     test_suite = 'python test.py',

@@ -12,7 +12,7 @@ While the code in test.py aims to test as much of the ImageMetaTag functionality
     this routine aims to show the simplest possible code that keeps 'best practice' to use an
     ImageMetaTag database of metadata to produce a webpage.
     
-    .. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks
+    .. moduleauthor:: Melissa Brooks https://github.com/melissaebrooks
     '''
     
     # minimal set of imports:

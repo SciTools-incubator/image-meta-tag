@@ -49,9 +49,9 @@ number at: https://github.com/SciTools-incubator/image-meta-tag/releases
  * The main repository is:
      https://github.com/conda-forge/image-meta-tag-feedstock
  * The location of admin branches is:
-     https://github.com/malcolmbrooks/image-meta-tag-feedstock
+     https://github.com/melissaebrooks/image-meta-tag-feedstock
  * Clone the repository:
-     git clone git@github.com:malcolmbrooks/image-meta-tag-feedstock.git image-meta-tag-feedstock
+     git clone git@github.com:melissaebrooks/image-meta-tag-feedstock.git image-meta-tag-feedstock
  * Add the upstream repository:
      git remote add upstream git@github.com:conda-forge/image-meta-tag-feedstock.git
  * Before branching, make sure we have rebased to upstream/master:
@@ -66,7 +66,7 @@ number at: https://github.com/SciTools-incubator/image-meta-tag/releases
  * Commit to change with   git commit -a
  * Push the change to origin   git push origin vn0.6.7
  * Open a pull request to merge into upstream on the branches page:
-     https://github.com/malcolmbrooks/image-meta-tag-feedstock/branches
+     https://github.com/melissaebrooks/image-meta-tag-feedstock/branches
  * The pull request will automatically run the tests. These can take a while.
  * When the tests have completed succesfully the change can be merged.
  * Without an hour or so the new release should be available via conda.

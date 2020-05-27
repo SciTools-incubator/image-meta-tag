@@ -10,7 +10,7 @@ a webpage by :func:`ImageMetaTag.webpage.write_full_page`.
 An easy example of creating a webpage, using an ImageDict is shown in
 `simplest_image_dict.py <simple.html>`_
 
-.. moduleauthor:: Malcolm Brooks https://github.com/malcolmbrooks
+.. moduleauthor:: Melissa Brooks https://github.com/melissaebrooks
 
 (C) Crown copyright Met Office. All rights reserved.
 Released under BSD 3-Clause License. See LICENSE for more details.
