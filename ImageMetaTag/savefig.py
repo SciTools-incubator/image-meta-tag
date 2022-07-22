@@ -436,16 +436,10 @@ def _im_trim(im_obj, border=0):
     if not isinstance(border, int):
         msg = 'Input border must be an int, but is "{}", type {} instead'
         raise ValueError(msg.format(border, type(border)))
-    # make a white background:
-    backg = Image.new(im_obj.mode, im_obj.size, im_obj.getpixel((0, 0)))
-    # do an image difference:
-    diff = ImageChops.difference(im_obj, backg)
-    # add it together
-    diff = ImageChops.add(diff, diff, 1.0, -100)
-    # and see what the bbox is of that...
-    bbox = diff.getbbox()
 
-    if border != 0:
+    # get the bounding box for the trim:
+    bbox = _im_getbbox_for_trim(im_obj)
+    if border != 0 and bbox is not None:
         border_bbox = [-border, -border, border, border]
         # now apply that trim:
         bbox_tr = [x+y for x, y in zip(bbox, border_bbox)]
@@ -473,6 +467,34 @@ def _im_trim(im_obj, border=0):
 
     return im_obj
 
+
+def _im_getbbox_for_trim(im_obj):
+    '''
+    works out the bounding box that defines the actual conent of the image
+    assuming that the top left pixel is the background colour
+    '''
+    # make a background using the colour in the top/left corner:
+    bg_col = im_obj.getpixel((1, 1))
+    backg = Image.new(im_obj.mode, im_obj.size, bg_col)
+    # do an image difference:
+    diff = ImageChops.difference(im_obj, backg)
+    # add it together
+    diff = ImageChops.add(diff, diff, 1.0, -100)
+    # and see what the bbox is of that...
+    bbox = diff.getbbox()
+
+    if bbox is None:
+        # substitute all backgound color for alpha:
+        im_data = np.array(im_obj)
+        im_red, im_grn, im_blu, im_alp = im_data.T
+        bg_areas = (im_red == bg_col[0]) & (im_grn == bg_col[1]) & (im_blu == bg_col[2])
+        # now set that as zero
+        im_data[..., :][bg_areas.T] = (0, 0, 0, 0)
+        diff = Image.fromarray(im_data)
+        # and get the bounding box from that
+        bbox = diff.getbbox()
+
+    return bbox
 
 def _im_logos(im_obj, logo_files, logo_size, logo_padding, logo_poss):
     '''
@@ -554,17 +576,7 @@ def _im_logo(im_obj, logo_file, logo_size, logo_padding, logo_pos):
     corner_obj = im_obj.crop(corner_coords)
 
     # now get a bounding box as though we were trimming this image:
-    backg = Image.new(corner_obj.mode, corner_obj.size,
-                      corner_obj.getpixel((0, 0)))
-    # do an image difference:
-    diff = ImageChops.difference(corner_obj, backg)
-    # add it together
-    diff = ImageChops.add(diff, diff, 1.0, -100)
-    # we should do something sophisticated, and look at each row, and see
-    # where it could fit, minimise the distance to go  etc...
-    # instead, see what the bbox is of that...
-    bbox = diff.getbbox()
-
+    bbox = _im_getbbox_for_trim(corner_obj)
     if bbox is None:
         # the corner object is empty so no need to offset:
         offset_x = 0
@@ -706,7 +718,7 @@ def _im_pngsave_addmeta(im_obj, outfile, optimize=True, verbose=False):
     # these can be automatically added to Image.info dict
     # they are not user-added metadata
     reserved = ('interlace', 'gamma', 'dpi', 'transparency', 'aspect',
-                'signature', 'date:create', 'date:modify',
+                'signature', 'date:create', 'date:modify', 'chromaticity',
                 'jfif', 'jfif_unit', 'jfif_density', 'jfif_version')
 
     # undocumented class
@@ -720,7 +732,13 @@ def _im_pngsave_addmeta(im_obj, outfile, optimize=True, verbose=False):
             if verbose:
                 print('key "%s" is set to None' % key)
         else:
-            meta.add_text(key, val, 0)
+            if isinstance(val, str):
+                meta.add_text(key, val, 0)
+            else:
+                msg = ('WARNING: metadata key "{}" skipped as it is type "{}"'
+                       ' when it should be a string. Contents: \n "{}"')
+                print(msg.format(key, type(val), val))
+
 
     # and save
     im_obj.save(outfile, "PNG", optimize=optimize, pnginfo=meta)

@@ -47,6 +47,9 @@ else:
 TEST_PATH = os.sep.join(os.path.abspath(sys.argv[0]).split(os.sep)[0:-1])
 sys.path.insert(0, TEST_PATH)
 
+# and the location of the dir for test rousoruces (stock problem images etc.)
+TEST_RESOURCES = os.path.join(TEST_PATH, 'test_resources')
+
 # Now, import ImageMetaTag to do things:
 import ImageMetaTag as imt
 
@@ -234,11 +237,10 @@ def plot_random_data(random_data, i_rand, plot_col, col_name, trims, borders,
                 img_count += 1
 
     plt.close()
-
     outfile = '%s/dist_%s_%s.%s' % (img_savedir, n_rolls, plot_col, img_format)
     _count, _bins, _ignored = plt.hist(random_data[i_rand],
                                        [x + 0.5 for x in range(13)],
-                                       color=plot_col, normed=True)
+                                       color=plot_col, density=True)
     plt.xlim([1, 13])
     plt.title('Distribution of %s random integers between 1 and 6\n' % n_rolls)
 
@@ -1430,6 +1432,17 @@ def __main__():
             print('Testing of database rebuild functionality complete.')
 
     print('Web page outputs\n', web_out)
+
+
+    # testing files that have known problems:
+    print('testing image_file_postproc on known problem images:')
+    prob_imgs = os.listdir(TEST_RESOURCES)
+    for prob_img in prob_imgs:
+        test_in = os.path.join(TEST_RESOURCES, prob_img)
+        test_out = os.path.join(webdir, prob_img)
+        print('processing {} to {}'.format(test_in, test_out))
+        imt.image_file_postproc(test_in, outfile=test_out,
+                                img_tags = {'test': 'value'})
 
 
 if __name__ == '__main__':
