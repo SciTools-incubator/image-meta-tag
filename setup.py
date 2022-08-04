@@ -12,7 +12,7 @@ for d, _, _ in os.walk(os.path.join(here, 'ImageMetaTag')):
 setup_args = dict(
     name = 'ImageMetaTag',
     # see release_process for details on incrementing the version
-    version = '0.7.10',
+    version = '0.7.11',
     description = 'Image metadata tagging, database and presentation',
     license = 'BSD3',
     author = 'Melissa Brooks',
@@ -21,6 +21,8 @@ setup_args = dict(
     test_suite = 'python test.py',
     classifiers = ['Programming Language :: Python :: 2.7',
                    'Programming Language :: Python :: 3.6',
+                   'Programming Language :: Python :: 3.7',
+                   'Programming Language :: Python :: 3.8',
                   ],
     package_data = {'ImageMetaTag': ['javascript/*']},
     scripts = ['bin/rm_imt_images'],

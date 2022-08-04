@@ -8,7 +8,7 @@ ImageMetaTag - Image metadata tagging and presentation
 
 .. automodule:: ImageMetaTag
 
-All ImageMetaTag source code, unless explicitly stated, is © British Crown copyright, 2015-2020 and is released under a BSD 3-Clause License. The source code and more details of the licence are given on `github <https://github.com/SciTools-incubator/image-meta-tag>`_.
+All ImageMetaTag source code, unless explicitly stated, is © British Crown copyright, 2015-2022 and is released under a BSD 3-Clause License. The source code and more details of the licence are given on `github <https://github.com/SciTools-incubator/image-meta-tag>`_.
 
 Supported image file formats: png
 
