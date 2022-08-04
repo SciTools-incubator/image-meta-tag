@@ -107,7 +107,11 @@ optimisation and image tagging.</p>
 <dd><ul class="first last simple">
 <li>fig - matplotlib figure to save</li>
 <li>img_format - file format of the image. If not supplied it will be                     guessed from the filename. Currently only the png file                     format is supported for tagging/conversion.</li>
-<li>img_tags - a dictionary of {tag_name : value} pairs to be added to the                  image metadata.</li>
+<li><dl class="first docutils">
+<dt>img_tags - a dictionary of {tag_name <span class="classifier-delimiter">:</span> <span class="classifier">value} pairs to be added to the                  image metadata. Both tag_name and value should be strings                   and if is not possible to save a tag_name that is used for                   system purposes of image readers/writers. (e.g. dpi, gamma,</span></dt>
+<dd>interlace, transparency etc.)</dd>
+</dl>
+</li>
 <li>db_file - a database file to be used by                  <a class="reference internal" href="db.html#ImageMetaTag.db.write_img_to_dbfile" title="ImageMetaTag.db.write_img_to_dbfile"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.db.write_img_to_dbfile()</span></code></a> to store all                  image metadata so they can be quickly accessed.</li>
 <li>db_full_paths - by default, if the images can be expressed as relative                        path to the database file then the database will                        contain only relative links, unless db_full_paths is                        True.</li>
 <li>db_timeout - change the database timeout (in seconds).</li>
@@ -155,13 +159,14 @@ optimisation and image tagging.</p>
 <p>The image_file_postproc function could be used to process pre-created images:</p>
 <dl class="function">
 <dt id="ImageMetaTag.image_file_postproc">
-<code class="descclassname">ImageMetaTag.</code><code class="descname">image_file_postproc</code><span class="sig-paren">(</span><em>filename</em>, <em>outfile=None</em>, <em>img_buf=None</em>, <em>img_converter=0</em>, <em>do_trim=False</em>, <em>trim_border=0</em>, <em>logo_file=None</em>, <em>logo_width=None</em>, <em>logo_height=None</em>, <em>logo_padding=0</em>, <em>logo_pos=0</em>, <em>do_thumb=False</em>, <em>img_tags=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/savefig.html#image_file_postproc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.image_file_postproc" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ImageMetaTag.</code><code class="descname">image_file_postproc</code><span class="sig-paren">(</span><em>filename</em>, <em>outfile=None</em>, <em>img_buf=None</em>, <em>img_dpi=None</em>, <em>img_converter=0</em>, <em>do_trim=False</em>, <em>trim_border=0</em>, <em>logo_file=None</em>, <em>logo_width=None</em>, <em>logo_height=None</em>, <em>logo_padding=0</em>, <em>logo_pos=0</em>, <em>do_thumb=False</em>, <em>img_tags=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/savefig.html#image_file_postproc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.image_file_postproc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Does the image post-processing for <a class="reference internal" href="#ImageMetaTag.savefig" title="ImageMetaTag.savefig"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.savefig()</span></code></a>.</p>
 <p>Arguments: filename the name of the image file to process</p>
 <p>Options:</p>
 <ul class="simple">
 <li>outfile - If supplied, the processing will be applied to a new file,                 with this name. If not supplied, the post processing will                 overwrite the file given input file.</li>
 <li>img_buf - If the image has been saved to an in-memory buffer, then                 supply the image buffer here. This will speed up the                 post-processing.</li>
+<li>img_dpi - output image dpi (if available for the image format)                 as a tuple for horizontal/vertical values eg: (72, 72)</li>
 <li><dl class="first docutils">
 <dt>img_converter - an integer switch controlling the level of file size                      compression</dt>
 <dd><ul class="first last">
@@ -226,7 +231,7 @@ optimisation and image tagging.</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2015-2020, British Crown Copyright.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.4.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
     </div>
   </body>
 </html>

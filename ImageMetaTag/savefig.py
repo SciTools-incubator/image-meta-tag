@@ -22,7 +22,8 @@ import pdb
 from datetime import datetime
 import matplotlib.pyplot as plt
 
-from ImageMetaTag import db, META_IMG_FORMATS, POSTPROC_IMG_FORMATS
+from ImageMetaTag import db, META_IMG_FORMATS, RESERVED_TAGS
+from ImageMetaTag import POSTPROC_IMG_FORMATS, DPI_IMG_FORMATS
 from ImageMetaTag import DEFAULT_DB_TIMEOUT, DEFAULT_DB_ATTEMPTS
 
 # image manipulations:
@@ -58,7 +59,10 @@ def savefig(filename, fig=None, img_tags=None, img_format=None, img_converter=0,
                     guessed from the filename. Currently only the png file \
                     format is supported for tagging/conversion.
      * img_tags - a dictionary of {tag_name : value} pairs to be added to the\
-                  image metadata.
+                  image metadata. Both tag_name and value should be strings \
+                  and if is not possible to save a tag_name that is used for \
+                  system purposes of image readers/writers. (e.g. dpi, gamma,
+                  interlace, transparency etc.)
      * db_file - a database file to be used by \
                  :func:`ImageMetaTag.db.write_img_to_dbfile` to store all \
                  image metadata so they can be quickly accessed.
@@ -154,7 +158,11 @@ def savefig(filename, fig=None, img_tags=None, img_format=None, img_converter=0,
         postproc_st = datetime.now()
 
     if img_format in POSTPROC_IMG_FORMATS:
-        image_file_postproc(write_file, img_buf=buf,
+        if dpi is None or img_format not in DPI_IMG_FORMATS:
+            img_dpi = None
+        else:
+            img_dpi = (dpi, dpi)
+        image_file_postproc(write_file, img_buf=buf, img_dpi=img_dpi,
                             img_converter=img_converter, do_trim=do_trim,
                             trim_border=trim_border, logo_file=logo_file,
                             logo_width=logo_width, logo_height=logo_height,
@@ -219,7 +227,8 @@ def savefig(filename, fig=None, img_tags=None, img_format=None, img_converter=0,
             print(msg.format(str(datetime.now() - db_st)))
 
 
-def image_file_postproc(filename, outfile=None, img_buf=None, img_converter=0,
+def image_file_postproc(filename, outfile=None, img_buf=None,
+                        img_dpi=None, img_converter=0,
                         do_trim=False, trim_border=0,
                         logo_file=None, logo_width=None, logo_height=None,
                         logo_padding=0, logo_pos=0,
@@ -237,6 +246,8 @@ def image_file_postproc(filename, outfile=None, img_buf=None, img_converter=0,
     * img_buf - If the image has been saved to an in-memory buffer, then \
                 supply the image buffer here. This will speed up the \
                 post-processing.
+    * img_dpi - output image dpi (if available for the image format) \
+                as a tuple for horizontal/vertical values eg: (72, 72)
     * img_converter - an integer switch controlling the level of file size \
                      compression
                     * 0 - no compression
@@ -326,7 +337,7 @@ def image_file_postproc(filename, outfile=None, img_buf=None, img_converter=0,
         im_obj = Image.open(img_buf)
         if not modify:
             # if we're not doing anyhting, then save it:
-            im_obj.save(outfile, optimize=True)
+            im_obj.save(outfile, dpi=img_dpi, optimize=True)
     else:
         if modify:
             # use the image library to open the file:
@@ -404,10 +415,11 @@ def image_file_postproc(filename, outfile=None, img_buf=None, img_converter=0,
         # add the tags
         im_obj = _im_add_png_tags(im_obj, img_tags)
         # and save with metadata
-        _im_pngsave_addmeta(im_obj, outfile, optimize=True, verbose=verbose)
+        _im_pngsave_addmeta(im_obj, outfile, img_dpi=img_dpi,
+                            optimize=True, verbose=verbose)
     elif modify:
         # simple save
-        im_obj.save(outfile, optimize=True)
+        im_obj.save(outfile, dpi=img_dpi, optimize=True)
 
     if verbose:
         # now report the file size change:
@@ -713,20 +725,15 @@ def _im_add_png_tags(im_obj, png_tags):
     return im_obj
 
 
-def _im_pngsave_addmeta(im_obj, outfile, optimize=True, verbose=False):
+def _im_pngsave_addmeta(im_obj, outfile, img_dpi=None, optimize=True, verbose=False):
     'saves an image object to a png file, adding metadata using the info tag.'
-    # these can be automatically added to Image.info dict
-    # they are not user-added metadata
-    reserved = ('interlace', 'gamma', 'dpi', 'transparency', 'aspect',
-                'signature', 'date:create', 'date:modify', 'chromaticity',
-                'jfif', 'jfif_unit', 'jfif_density', 'jfif_version')
 
     # undocumented class
     meta = PngImagePlugin.PngInfo()
 
     # copy metadata into new object
     for key, val in im_obj.info.items():
-        if key in reserved:
+        if key in RESERVED_TAGS:
             pass
         elif val is None:
             if verbose:
@@ -741,7 +748,7 @@ def _im_pngsave_addmeta(im_obj, outfile, optimize=True, verbose=False):
 
 
     # and save
-    im_obj.save(outfile, "PNG", optimize=optimize, pnginfo=meta)
+    im_obj.save(outfile, "PNG", dpi=img_dpi, optimize=optimize, pnginfo=meta)
 
 
 def _img_stong_resize(img_obj, size=None):

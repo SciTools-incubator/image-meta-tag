@@ -152,7 +152,7 @@ def make_random_data(n_random_data, seed=3):
 
 
 def plot_random_data(random_data, i_rand, plot_col, col_name, trims, borders,
-                     compression_levels, img_savedir, img_format, plot_owner,
+                     compression_levels, dpis, img_savedir, img_format, plot_owner,
                      imt_db):
     'plots a set of random data'
 
@@ -191,56 +191,70 @@ def plot_random_data(random_data, i_rand, plot_col, col_name, trims, borders,
             these_borders = [0]
         for border in these_borders:
             for compression in compression_levels:
-                outfile = '%s/rolls/imt_%s_%s_compression_%s' \
-                        % (img_savedir, n_rolls, plot_col, compression)
-                if trim:
-                    outfile += '_trim_b%s' % border
-                    trim_str = 'Image trimmed'
-                else:
-                    trim_str = 'Image untrimmed'
-                outfile += '.{}'.format(img_format)
-                # image tags for the web page:
-                img_tags = {'number of rolls': '{} simulated rolls'.format(n_rolls),
-                            'plot type': 'Line plots',
-                            'image compression': 'Compression option {}'.format(compression),
-                            'image trim': trim_str,
-                            'border': '{} pixels'.format(border),
-                            'plot color': col_name}
+                for dpi in dpis:
+                    outfile = '%s/rolls/imt_%s_%s_compression_%s' \
+                            % (img_savedir, n_rolls, plot_col, compression)
+                    outfile = 'imt_{}_{}_comp{}_{}dpi'.format(n_rolls,
+                                                               plot_col,
+                                                               compression,
+                                                               dpi)
+                    outfile = os.path.join(img_savedir, 'rolls', outfile)
+                    if trim:
+                        outfile += '_trim_b%s' % border
+                        trim_str = 'Image trimmed'
+                    else:
+                        trim_str = 'Image untrimmed'
+                    outfile += '.{}'.format(img_format)
+                    # image tags for the web page:
+                    img_tags = {'number of rolls': '{} simulated rolls'.format(n_rolls),
+                                'plot type': 'Line plots',
+                                'image compression': 'Compression option {}'.format(compression),
+                                'image trim': trim_str,
+                                'border': '{} pixels'.format(border),
+                                'plot color': col_name,
+                                'expected dpi': '{} dpi'.format(dpi)}
 
-                # and other, more general tags showing the sort of
-                # thing that might be useful:
-                img_tags['data source'] = data_source
-                img_tags['plot owner'] = plot_owner
-                img_tags['plot created by'] = this_routine
-                img_tags['ImageMetaTag version'] = imt.__version__
-                if img_count > 1 and img_count < 10:
-                    # only add this one after the database exists,
-                    # to test expandning the database:
-                    img_tags['SQL-char-name:in_tag'] = 'testing SQL chars'
-                # now save the file with imt.savefig
-                # (deleting any pre-existing file first):
-                if os.path.isfile(outfile):
-                    os.remove(outfile)
-                imt.savefig(outfile, do_trim=trim, trim_border=border,
-                            do_thumb=True, img_converter=compression,
-                            img_tags=img_tags, keep_open=True,
-                            verbose=imt_verbose,
-                            db_file=imt_db, db_timeout=db_timeout,
-                            db_add_strict=False,
-                            logo_file=LOGO_FILE, logo_width=LOGO_SIZE,
-                            logo_padding=LOGO_PADDING, logo_pos=0)
-                # now store those tags
-                images_and_tags[outfile] = img_tags
-                # and check they are the same as those that come from reading
-                # the image metatadata from disk:
-                check_img_tags(outfile, img_tags)
-                img_count += 1
+                    # and other, more general tags showing the sort of
+                    # thing that might be useful:
+                    img_tags['data source'] = data_source
+                    img_tags['plot owner'] = plot_owner
+                    img_tags['plot created by'] = this_routine
+                    img_tags['ImageMetaTag version'] = imt.__version__
+                    if img_count > 1 and img_count < 10:
+                        # only add this one after the database exists,
+                        # to test expandning the database:
+                        img_tags['SQL-char-name:in_tag'] = 'testing SQL chars'
+                    # now save the file with imt.savefig
+                    # (deleting any pre-existing file first):
+                    if os.path.isfile(outfile):
+                        os.remove(outfile)
+                    imt.savefig(outfile, do_trim=trim, trim_border=border,
+                                do_thumb=True, img_converter=compression,
+                                img_tags=img_tags, keep_open=True,
+                                verbose=imt_verbose,
+                                db_file=imt_db, db_timeout=db_timeout,
+                                db_add_strict=False,
+                                dpi=dpi,
+                                logo_file=LOGO_FILE, logo_width=LOGO_SIZE,
+                                logo_padding=LOGO_PADDING, logo_pos=0)
+                    # now store those tags
+                    images_and_tags[outfile] = img_tags
+                    # and check they are the same as those that come from reading
+                    # the image metatadata from disk:
+                    check_img_tags(outfile, img_tags)
+                    img_count += 1
 
     plt.close()
     outfile = '%s/dist_%s_%s.%s' % (img_savedir, n_rolls, plot_col, img_format)
-    _count, _bins, _ignored = plt.hist(random_data[i_rand],
-                                       [x + 0.5 for x in range(13)],
-                                       color=plot_col, density=True)
+    if PY3:
+        _count, _bins, _ignored = plt.hist(random_data[i_rand],
+                                           [x + 0.5 for x in range(13)],
+                                           color=plot_col, density=True)
+    else:
+        _count, _bins, _ignored = plt.hist(random_data[i_rand],
+                                           [x + 0.5 for x in range(13)],
+                                           color=plot_col, normed=True)
+
     plt.xlim([1, 13])
     plt.title('Distribution of %s random integers between 1 and 6\n' % n_rolls)
 
@@ -251,45 +265,51 @@ def plot_random_data(random_data, i_rand, plot_col, col_name, trims, borders,
             these_borders = [0]
         for border in these_borders:
             for compression in compression_levels:
-                outfile = '%s/dists/imt_%s_%s_compression_%s' \
-                        % (img_savedir, n_rolls, plot_col, compression)
-                if trim:
-                    outfile += '_trim_b%s' % border
-                    trim_str = 'Image trimmed'
-                else:
-                    trim_str = 'Image untrimmed'
-                outfile += '.{}'.format(img_format)
-                # tags to drive web page:
-                img_tags = {'number of rolls': '{} simulated rolls'.format(n_rolls),
-                            'plot type': 'Histogram',
-                            'image compression': 'Compression option {}'.format(compression),
-                            'image trim': trim_str,
-                            'border': '{} pixels'.format(border),
-                            'plot color': col_name}
-                # again, more general tags:
-                img_tags['data source'] = data_source
-                img_tags['plot owner'] = plot_owner
-                img_tags['plot created by'] = this_routine
-                img_tags['ImageMetaTag version'] = imt.__version__
-                img_tags['SQL-char-name:in_tag'] = 'testing SQL chars'
-                # now save the file with imt.savefig
-                # (deleting any pre-existing file first):
-                if os.path.isfile(outfile):
-                    os.remove(outfile)
-                imt.savefig(outfile, do_trim=trim, trim_border=border,
-                            do_thumb=True, img_converter=compression,
-                            img_tags=img_tags, keep_open=True,
-                            verbose=imt_verbose,
-                            db_file=imt_db, db_timeout=db_timeout,
-                            db_add_strict=False,
-                            logo_file=[LOGO_FILE, LOGO_FILE],
-                            logo_height=LOGO_SIZE//2,
-                            logo_padding=LOGO_PADDING, logo_pos=[1, 1])
-                # log tags:
-                images_and_tags[outfile] = img_tags
-                # and check:
-                check_img_tags(outfile, img_tags)
-                img_count += 1
+                for dpi in dpis:
+                    outfile = 'imt_{}_{}_comp{}_{}dpi'.format(n_rolls,
+                                                               plot_col,
+                                                               compression,
+                                                               dpi)
+                    outfile = os.path.join(img_savedir, 'dists', outfile)
+                    if trim:
+                        outfile += '_trim_b%s' % border
+                        trim_str = 'Image trimmed'
+                    else:
+                        trim_str = 'Image untrimmed'
+                    outfile += '.{}'.format(img_format)
+                    # tags to drive web page:
+                    img_tags = {'number of rolls': '{} simulated rolls'.format(n_rolls),
+                                'plot type': 'Histogram',
+                                'image compression': 'Compression option {}'.format(compression),
+                                'image trim': trim_str,
+                                'border': '{} pixels'.format(border),
+                                'plot color': col_name,
+                                'expected dpi': '{} dpi'.format(dpi)}
+                    # again, more general tags:
+                    img_tags['data source'] = data_source
+                    img_tags['plot owner'] = plot_owner
+                    img_tags['plot created by'] = this_routine
+                    img_tags['ImageMetaTag version'] = imt.__version__
+                    img_tags['SQL-char-name:in_tag'] = 'testing SQL chars'
+                    # now save the file with imt.savefig
+                    # (deleting any pre-existing file first):
+                    if os.path.isfile(outfile):
+                        os.remove(outfile)
+                    imt.savefig(outfile, do_trim=trim, trim_border=border,
+                                do_thumb=True, img_converter=compression,
+                                img_tags=img_tags, keep_open=True,
+                                verbose=imt_verbose,
+                                db_file=imt_db, db_timeout=db_timeout,
+                                db_add_strict=False,
+                                dpi=dpi,
+                                logo_file=[LOGO_FILE, LOGO_FILE],
+                                logo_height=LOGO_SIZE//2,
+                                logo_padding=LOGO_PADDING, logo_pos=[1, 1])
+                    # log tags:
+                    images_and_tags[outfile] = img_tags
+                    # and check:
+                    check_img_tags(outfile, img_tags)
+                    img_count += 1
     plt.close()
 
     # NOTE: in actual usage, it's easier to refer to the database when you
@@ -361,6 +381,8 @@ def define_img_dict_in_tuple(in_tuple):
     # which I might include below:
     for img_file, img_info in sub_dict.items():
         tmp_dict = imt.dict_heirachy_from_list(img_info, img_file, tag_order)
+        if not tmp_dict:
+            raise ValueError('Input dict does not contain the required keys')
         if not img_dict:
             img_dict = imt.ImageDict(tmp_dict,
                                      selector_animated=selector_animated,
@@ -608,6 +630,7 @@ def __main__():
         compress_levels = [3]
         trims = [True]
         borders = [10]
+        dpis = [None, 72, 300]
         # colours to plot with, and the names we want in the metadata/webpage
         colours = [('g', 'Plotted in Green')]
     else:
@@ -615,13 +638,14 @@ def __main__():
         compress_levels = [0, 1, 2, 3]
         trims = [True, False]
         borders = [5, 10, 100]
+        dpis = [72, 150]
         # colours to plot with, and the names we want in the metadata/webpage
         colours = [('r', 'Plotted in Red'),
                    ('b', 'Plotted in Blue'),
                    ('k', 'Plotted in Black'),
                    ('g', 'Plotted in Green')]
     random_data = make_random_data(n_random_data)
-    borders_str = ['%s pixels' % border for border in borders]
+    borders_str = ['{} pixels'.format(border) for border in borders]
 
     # working directory to create images and webpage etc.
     webdir = get_webdir(minimal=args.minimal)
@@ -647,11 +671,12 @@ def __main__():
                 'plot color',
                 'image trim',
                 'border',
+                'expected dpi',
                 'image compression']
     selector_animated = 5  # animate the image compression
     animation_direction = +1  # move forwards
     sort_methods = ['sort', 'numeric', 'sort', 'sort', 'sort',
-                    borders_str, 'sort']
+                    borders_str, 'numeric', 'sort']
     plot_owner = 'Created by %s' % get_user_and_email()
 
     # what are the full names of those tags:
@@ -662,6 +687,7 @@ def __main__():
                       'image trim': 'Image trimmed?',
                       'border': 'Image border',
                       'image compression': 'Image compression',
+                      'expected dpi': 'Expected DPI',
                       }
     sel_widths = {'data source': '120px',
                   'number of rolls': '180px',
@@ -669,6 +695,7 @@ def __main__():
                   'plot color': '200px',
                   'image trim': '150px',
                   'border': '140px',
+                  'expected dpi': '90px',
                   'image compression': '200px',
                   }
     # if we want to present these, have them as an ordered list, by tagorder:
@@ -702,9 +729,9 @@ def __main__():
             for (plot_col, col_name) in colours:
                 new_imgs_tags = plot_random_data(random_data, i_rnd, plot_col,
                                                  col_name, trims, borders,
-                                                 compress_levels, img_savedir,
-                                                 img_format, plot_owner,
-                                                 imt_db)
+                                                 compress_levels, dpis,
+                                                 img_savedir, img_format,
+                                                 plot_owner, imt_db)
                 # now stick the new img ingo into the main dict:
                 for img_file, img_info in new_imgs_tags.items():
                     images_and_tags[img_file] = img_info
@@ -779,24 +806,21 @@ def __main__():
     # these are the tags that we actually need to work with for the web page.
     # Others are ignored:
     required_tags = ['data source', 'number of rolls', 'plot type',
-                     'plot color', 'image trim', 'border',
+                     'plot color', 'image trim', 'border', 'expected dpi',
                      'image compression', 'SQL-char-name:in_tag']
-    db_imgs, db_img_tags = imt.db.read(imt_db,
-                                                  required_tags=required_tags)
+    db_imgs, db_img_tags = imt.db.read(imt_db, required_tags=required_tags)
     # For more memory optimisation, this will return a list of all of the
     # unique metadata strings, as there is usually a lot of duplication.
     # The returned db_img_tags will then reference the strings witin
     # that list, rahter than contain the duplicated strings. This saves a
     # lot of memory for large databases of files.
     tag_strings = []
-    db_imgs, db_img_tags = imt.db.read(imt_db,
-                                                  tag_strings=tag_strings)
+    db_imgs, db_img_tags = imt.db.read(imt_db, tag_strings=tag_strings)
     # and this both filters out un-needed tags and uses the tag_strings
     # list as a reference
     tag_strings = []
-    db_imgs, db_img_tags = imt.db.read(imt_db,
-                                                  required_tags=required_tags,
-                                                  tag_strings=tag_strings)
+    db_imgs, db_img_tags = imt.db.read(imt_db, required_tags=required_tags,
+                                       tag_strings=tag_strings)
 
     # test deleting a single image from the db file, and then add it back in:
     del_img = db_imgs[0]

@@ -410,6 +410,8 @@ def write_img_to_open_db(dbcr, filename, img_info,
             # this file is already in the database
             # (as the primary key, so do nothing...)
             pass
+    except sqlite3.InterfaceError as intfc_error:
+        raise intfc_error
     finally:
         pass
 
