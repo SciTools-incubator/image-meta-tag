@@ -1,19 +1,18 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>ImageMetaTag.savefig &#8212; ImageMetaTag 0.7.10 documentation</title>
-    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>ImageMetaTag.savefig &#8212; ImageMetaTag 0.7.11 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="ImageMetaTag.db" href="db.html" />
@@ -34,16 +33,147 @@
         <li class="right" >
           <a href="index.html" title="ImageMetaTag - Image metadata tagging and presentation"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.10 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.11 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ImageMetaTag.savefig</a></li> 
       </ul>
-    </div>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="imagemetatag-savefig">
+<h1>ImageMetaTag.savefig<a class="headerlink" href="#imagemetatag-savefig" title="Permalink to this headline">¶</a></h1>
+<section id="the-savefig-wrapper">
+<h2>The savefig wrapper<a class="headerlink" href="#the-savefig-wrapper" title="Permalink to this headline">¶</a></h2>
+<p>The only function that is usaully needed from this module is savefig wrapper iteself:</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="ImageMetaTag.savefig">
+<span class="sig-prename descclassname"><span class="pre">ImageMetaTag.</span></span><span class="sig-name descname"><span class="pre">savefig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_tags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_converter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_trim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trim_border</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_thumb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_open</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logo_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logo_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logo_height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logo_padding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logo_pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_attempts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_replace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_add_strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_full_paths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/savefig.html#savefig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.savefig" title="Permalink to this definition">¶</a></dt>
+<dd><p>A wrapper around matplotlib.pyplot.savefig, to include file size
+optimisation and image tagging.</p>
+<p>The filesize optimisation depends on the img_converter input passes into
+<a class="reference internal" href="#ImageMetaTag.image_file_postproc" title="ImageMetaTag.image_file_postproc"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.image_file_postproc()</span></code></a>.</p>
+<dl class="simple">
+<dt>Arguments:</dt><dd><ul class="simple">
+<li><p>filename (can include the file extension, or that can be specified in        the img_format option)</p></li>
+</ul>
+</dd>
+<dt>Options:</dt><dd><ul class="simple">
+<li><p>fig - matplotlib figure to save</p></li>
+<li><p>img_format - file format of the image. If not supplied it will be                     guessed from the filename. Currently only the png file                     format is supported for tagging/conversion.</p></li>
+<li><dl class="simple">
+<dt>img_tags - a dictionary of {tag_name<span class="classifier">value} pairs to be added to the                  image metadata. Both tag_name and value should be strings                   and if is not possible to save a tag_name that is used for                   system purposes of image readers/writers. (e.g. dpi, gamma,</span></dt><dd><p>interlace, transparency etc.)</p>
+</dd>
+</dl>
+</li>
+<li><p>db_file - a database file to be used by                  <a class="reference internal" href="db.html#ImageMetaTag.db.write_img_to_dbfile" title="ImageMetaTag.db.write_img_to_dbfile"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.db.write_img_to_dbfile()</span></code></a> to store all                  image metadata so they can be quickly accessed.</p></li>
+<li><p>db_full_paths - by default, if the images can be expressed as relative                        path to the database file then the database will                        contain only relative links, unless db_full_paths is                        True.</p></li>
+<li><p>db_timeout - change the database timeout (in seconds).</p></li>
+<li><p>db_attempts - change the number of attempts to write to the database.</p></li>
+<li><p>db_replace - if True, an image’s metadata will be replaced in the                     database if it already exists. This can be slow, and the                     metadata is usually the same so the default is                     db_replace=False.</p></li>
+<li><p>db_add_strict - if True, any attempt to add an image whose metadata                        tag_names are not present in a pre-existing database                        will result in a ValueError being raised.                        If False, then adding a new metadata tag to the                        database will cause it be rewritten with the new item                        as a new column. All pre-existing images will have                        the new tag set to ‘None’. It is best to avoid using                        this functionality as it can be slow for large                        databases. Instead, all images should be ideally have                        all expected metadata tags included from the start                        but set to ‘None’ where they are not used.</p></li>
+<li><p>dpi - change the image resolution passed into matplotlib.savefig.</p></li>
+<li><p>keep_open - by default, this savefig wrapper closes the figure after                    use, except if keep_open is True.</p></li>
+<li><p>verbose - switch for verbose output (reports file sizes before/after                  conversion)</p></li>
+<li><p>img_converter - see <a class="reference internal" href="#ImageMetaTag.image_file_postproc" title="ImageMetaTag.image_file_postproc"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.image_file_postproc()</span></code></a>.</p></li>
+<li><p>do_trim - see <a class="reference internal" href="#ImageMetaTag.image_file_postproc" title="ImageMetaTag.image_file_postproc"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.image_file_postproc()</span></code></a>.</p></li>
+<li><p>trim_border - see <a class="reference internal" href="#ImageMetaTag.image_file_postproc" title="ImageMetaTag.image_file_postproc"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.image_file_postproc()</span></code></a>.</p></li>
+<li><p>logo_file - see <a class="reference internal" href="#ImageMetaTag.image_file_postproc" title="ImageMetaTag.image_file_postproc"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.image_file_postproc()</span></code></a>.</p></li>
+<li><p>logo_width - see <a class="reference internal" href="#ImageMetaTag.image_file_postproc" title="ImageMetaTag.image_file_postproc"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.image_file_postproc()</span></code></a>.</p></li>
+<li><p>logo_height - see <a class="reference internal" href="#ImageMetaTag.image_file_postproc" title="ImageMetaTag.image_file_postproc"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.image_file_postproc()</span></code></a>.</p></li>
+<li><p>logo_padding - see <a class="reference internal" href="#ImageMetaTag.image_file_postproc" title="ImageMetaTag.image_file_postproc"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.image_file_postproc()</span></code></a>.</p></li>
+<li><p>logo_pos - see <a class="reference internal" href="#ImageMetaTag.image_file_postproc" title="ImageMetaTag.image_file_postproc"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.image_file_postproc()</span></code></a>.</p></li>
+<li><p>do_thumb - see <a class="reference internal" href="#ImageMetaTag.image_file_postproc" title="ImageMetaTag.image_file_postproc"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.image_file_postproc()</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="recommended-file-structure">
+<h2>Recommended file structure<a class="headerlink" href="#recommended-file-structure" title="Permalink to this headline">¶</a></h2>
+<p>In order to produce a working web page in the easiest and quickest manner it is advisable to save the images in a structure along the lines of:</p>
+<ul class="simple">
+<li><p>A top level directory, in a location which will be served up by a web server. e.g. in directory in ${HOME}/public_html/ or ${HOME}/Public/.</p>
+<ul>
+<li><p>The image metadata database files should be saved to this directory.</p></li>
+<li><p>The images themselves should be saved in subdirectories within this directory.</p>
+<ul>
+<li><p>When saving an image with <a class="reference internal" href="#ImageMetaTag.savefig" title="ImageMetaTag.savefig"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.savefig()</span></code></a> and saving metadata to a database, then it will store the file paths of the images as relative paths to the database files.</p></li>
+<li><p>If you need to save these files elsewhere, due to storage limitations, then create a symbolic link to that location from the top level directory. When you save the files with <a class="reference internal" href="#ImageMetaTag.savefig" title="ImageMetaTag.savefig"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.savefig()</span></code></a> use the symbolic link in the path, so the database files still contains relative paths. The storage location will need to be accessible by the web-server which will provide access to the web pages.</p></li>
+<li><p>Use the paths relative to the databse file to create an <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageMetaTag.ImageDict</span></code></a> class with the metadata.</p></li>
+</ul>
+</li>
+<li><p>Once the <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageMetaTag.ImageDict</span></code></a> has been created, then the web pages can be created in the top level, web accessible, directory.</p></li>
+<li><p>By keeping the <strong>database and web pages in the same location</strong>, and <strong>storing relative paths</strong> in the <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageMetaTag.ImageDict</span></code></a> then the paths to the images will also be correct in the web pages without having to do any complex path manipulation.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="other-functions">
+<h2>Other functions<a class="headerlink" href="#other-functions" title="Permalink to this headline">¶</a></h2>
+<p>The image_file_postproc function could be used to process pre-created images:</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="ImageMetaTag.image_file_postproc">
+<span class="sig-prename descclassname"><span class="pre">ImageMetaTag.</span></span><span class="sig-name descname"><span class="pre">image_file_postproc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_buf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_dpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_converter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_trim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trim_border</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logo_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logo_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logo_height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logo_padding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logo_pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_thumb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_tags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/savefig.html#image_file_postproc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.image_file_postproc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Does the image post-processing for <a class="reference internal" href="#ImageMetaTag.savefig" title="ImageMetaTag.savefig"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.savefig()</span></code></a>.</p>
+<p>Arguments: filename the name of the image file to process</p>
+<p>Options:</p>
+<ul class="simple">
+<li><p>outfile - If supplied, the processing will be applied to a new file,                 with this name. If not supplied, the post processing will                 overwrite the file given input file.</p></li>
+<li><p>img_buf - If the image has been saved to an in-memory buffer, then                 supply the image buffer here. This will speed up the                 post-processing.</p></li>
+<li><p>img_dpi - output image dpi (if available for the image format)                 as a tuple for horizontal/vertical values eg: (72, 72)</p></li>
+<li><dl class="simple">
+<dt>img_converter - an integer switch controlling the level of file size                      compression</dt><dd><ul>
+<li><p>0 - no compression</p></li>
+<li><p>1 - light compression, from RGBA to RGB</p></li>
+<li><p>2 - moderate compression, from RGBA to RGB, then to an                           adaptive 256 colour palette.</p></li>
+<li><p>3 - heavy compression, from RGBA to RGB, then to 8-bit                           web standard palette.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>do_trim - switch to trim whitespace from the edge of the image</p></li>
+<li><p>trim_border - if do_trim then this can be used to define an integer                     number of pixels as a border around the trim.</p></li>
+<li><p>logo_file - a file, or list of image files, to be added as logo(s) to                   the image. When multiple files are added to the same                   logo_pos then they are grouped horizontally from left to                   right before being added.</p></li>
+<li><p>logo_width - the desired width of a single logo, in pixels. If the                    supplied image file is not the right size, it will be                    resized using a method that applies filters and                    antialiasing that works well for shrinking images with                    text to a much smaller size. The aspect ratio of the logo                    image is always maintained. Either logo_width or                    logo_height need to be specified, and width overrides                    height if both are specified. Defaults to 40 pixels.</p></li>
+<li><p>logo_height - the desired height of each logo, in pixels, instead of                     logo_width.</p></li>
+<li><p>logo_padding - a number of pixels to pad around the logo                      (default to zero)</p></li>
+<li><dl class="simple">
+<dt>logo_pos - corner, or list of corners, of the logo(s) (following                  pyplot.legend, but for corners):</dt><dd><ul>
+<li><p>0: ‘best’ in this context will be upper left (default)</p></li>
+<li><p>1: ‘upper right’ (image grows in width to fit)</p></li>
+<li><p>2: ‘upper left’ (image grows in width to fit)</p></li>
+<li><p>3: ‘lower left’ (image grows in height to fit)</p></li>
+<li><p>4: ‘lower right’ (image grows in height to fit)</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>do_thumb - switch to produce default sized thumbnail, or integer/tuple                  to define the maximum size in pixels</p></li>
+<li><p>img_tags: a dictionary of tags to be added to the image metadata</p></li>
+<li><p>verbose: switch for verbose output (reports file sizes before/after                conversion)</p></li>
+</ul>
+</dd></dl>
+
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
             <p class="logo"><a href="index.html">
               <img class="logo" src="_static/logo.png" alt="Logo"/>
             </a></p>
-  <h3><a href="index.html">Table of Contents</a></h3>
-  <ul>
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
 <li><a class="reference internal" href="#">ImageMetaTag.savefig</a><ul>
 <li><a class="reference internal" href="#the-savefig-wrapper">The savefig wrapper</a></li>
 <li><a class="reference internal" href="#recommended-file-structure">Recommended file structure</a></li>
@@ -52,12 +182,17 @@
 </li>
 </ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="index.html"
-                        title="previous chapter">ImageMetaTag - Image metadata tagging and presentation</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="db.html"
-                        title="next chapter">ImageMetaTag.db</a></p>
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="index.html"
+                          title="previous chapter">ImageMetaTag - Image metadata tagging and presentation</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="db.html"
+                          title="next chapter">ImageMetaTag.db</a></p>
+  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -66,147 +201,15 @@
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
-      </div>
-
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
-            
-  <div class="section" id="imagemetatag-savefig">
-<h1>ImageMetaTag.savefig<a class="headerlink" href="#imagemetatag-savefig" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="the-savefig-wrapper">
-<h2>The savefig wrapper<a class="headerlink" href="#the-savefig-wrapper" title="Permalink to this headline">¶</a></h2>
-<p>The only function that is usaully needed from this module is savefig wrapper iteself:</p>
-<dl class="function">
-<dt id="ImageMetaTag.savefig">
-<code class="descclassname">ImageMetaTag.</code><code class="descname">savefig</code><span class="sig-paren">(</span><em>filename</em>, <em>fig=None</em>, <em>img_tags=None</em>, <em>img_format=None</em>, <em>img_converter=0</em>, <em>do_trim=False</em>, <em>trim_border=0</em>, <em>do_thumb=False</em>, <em>keep_open=False</em>, <em>dpi=None</em>, <em>logo_file=None</em>, <em>logo_width=None</em>, <em>logo_height=None</em>, <em>logo_padding=0</em>, <em>logo_pos=0</em>, <em>db_file=None</em>, <em>db_timeout=6</em>, <em>db_attempts=20</em>, <em>db_replace=False</em>, <em>db_add_strict=False</em>, <em>db_full_paths=False</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/savefig.html#savefig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.savefig" title="Permalink to this definition">¶</a></dt>
-<dd><p>A wrapper around matplotlib.pyplot.savefig, to include file size
-optimisation and image tagging.</p>
-<p>The filesize optimisation depends on the img_converter input passes into
-<a class="reference internal" href="#ImageMetaTag.image_file_postproc" title="ImageMetaTag.image_file_postproc"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.image_file_postproc()</span></code></a>.</p>
-<dl class="docutils">
-<dt>Arguments:</dt>
-<dd><ul class="first last simple">
-<li>filename (can include the file extension, or that can be specified in        the img_format option)</li>
-</ul>
-</dd>
-<dt>Options:</dt>
-<dd><ul class="first last simple">
-<li>fig - matplotlib figure to save</li>
-<li>img_format - file format of the image. If not supplied it will be                     guessed from the filename. Currently only the png file                     format is supported for tagging/conversion.</li>
-<li><dl class="first docutils">
-<dt>img_tags - a dictionary of {tag_name <span class="classifier-delimiter">:</span> <span class="classifier">value} pairs to be added to the                  image metadata. Both tag_name and value should be strings                   and if is not possible to save a tag_name that is used for                   system purposes of image readers/writers. (e.g. dpi, gamma,</span></dt>
-<dd>interlace, transparency etc.)</dd>
-</dl>
-</li>
-<li>db_file - a database file to be used by                  <a class="reference internal" href="db.html#ImageMetaTag.db.write_img_to_dbfile" title="ImageMetaTag.db.write_img_to_dbfile"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.db.write_img_to_dbfile()</span></code></a> to store all                  image metadata so they can be quickly accessed.</li>
-<li>db_full_paths - by default, if the images can be expressed as relative                        path to the database file then the database will                        contain only relative links, unless db_full_paths is                        True.</li>
-<li>db_timeout - change the database timeout (in seconds).</li>
-<li>db_attempts - change the number of attempts to write to the database.</li>
-<li>db_replace - if True, an image’s metadata will be replaced in the                     database if it already exists. This can be slow, and the                     metadata is usually the same so the default is                     db_replace=False.</li>
-<li>db_add_strict - if True, any attempt to add an image whose metadata                        tag_names are not present in a pre-existing database                        will result in a ValueError being raised.                        If False, then adding a new metadata tag to the                        database will cause it be rewritten with the new item                        as a new column. All pre-existing images will have                        the new tag set to ‘None’. It is best to avoid using                        this functionality as it can be slow for large                        databases. Instead, all images should be ideally have                        all expected metadata tags included from the start                        but set to ‘None’ where they are not used.</li>
-<li>dpi - change the image resolution passed into matplotlib.savefig.</li>
-<li>keep_open - by default, this savefig wrapper closes the figure after                    use, except if keep_open is True.</li>
-<li>verbose - switch for verbose output (reports file sizes before/after                  conversion)</li>
-<li>img_converter - see <a class="reference internal" href="#ImageMetaTag.image_file_postproc" title="ImageMetaTag.image_file_postproc"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.image_file_postproc()</span></code></a>.</li>
-<li>do_trim - see <a class="reference internal" href="#ImageMetaTag.image_file_postproc" title="ImageMetaTag.image_file_postproc"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.image_file_postproc()</span></code></a>.</li>
-<li>trim_border - see <a class="reference internal" href="#ImageMetaTag.image_file_postproc" title="ImageMetaTag.image_file_postproc"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.image_file_postproc()</span></code></a>.</li>
-<li>logo_file - see <a class="reference internal" href="#ImageMetaTag.image_file_postproc" title="ImageMetaTag.image_file_postproc"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.image_file_postproc()</span></code></a>.</li>
-<li>logo_width - see <a class="reference internal" href="#ImageMetaTag.image_file_postproc" title="ImageMetaTag.image_file_postproc"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.image_file_postproc()</span></code></a>.</li>
-<li>logo_height - see <a class="reference internal" href="#ImageMetaTag.image_file_postproc" title="ImageMetaTag.image_file_postproc"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.image_file_postproc()</span></code></a>.</li>
-<li>logo_padding - see <a class="reference internal" href="#ImageMetaTag.image_file_postproc" title="ImageMetaTag.image_file_postproc"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.image_file_postproc()</span></code></a>.</li>
-<li>logo_pos - see <a class="reference internal" href="#ImageMetaTag.image_file_postproc" title="ImageMetaTag.image_file_postproc"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.image_file_postproc()</span></code></a>.</li>
-<li>do_thumb - see <a class="reference internal" href="#ImageMetaTag.image_file_postproc" title="ImageMetaTag.image_file_postproc"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.image_file_postproc()</span></code></a>.</li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-</div>
-<div class="section" id="recommended-file-structure">
-<h2>Recommended file structure<a class="headerlink" href="#recommended-file-structure" title="Permalink to this headline">¶</a></h2>
-<p>In order to produce a working web page in the easiest and quickest manner it is advisable to save the images in a structure along the lines of:</p>
-<ul class="simple">
-<li>A top level directory, in a location which will be served up by a web server. e.g. in directory in ${HOME}/public_html/ or ${HOME}/Public/.<ul>
-<li>The image metadata database files should be saved to this directory.</li>
-<li>The images themselves should be saved in subdirectories within this directory.<ul>
-<li>When saving an image with <a class="reference internal" href="#ImageMetaTag.savefig" title="ImageMetaTag.savefig"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.savefig()</span></code></a> and saving metadata to a database, then it will store the file paths of the images as relative paths to the database files.</li>
-<li>If you need to save these files elsewhere, due to storage limitations, then create a symbolic link to that location from the top level directory. When you save the files with <a class="reference internal" href="#ImageMetaTag.savefig" title="ImageMetaTag.savefig"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.savefig()</span></code></a> use the symbolic link in the path, so the database files still contains relative paths. The storage location will need to be accessible by the web-server which will provide access to the web pages.</li>
-<li>Use the paths relative to the databse file to create an <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageMetaTag.ImageDict</span></code></a> class with the metadata.</li>
-</ul>
-</li>
-<li>Once the <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageMetaTag.ImageDict</span></code></a> has been created, then the web pages can be created in the top level, web accessible, directory.</li>
-<li>By keeping the <strong>database and web pages in the same location</strong>, and <strong>storing relative paths</strong> in the <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageMetaTag.ImageDict</span></code></a> then the paths to the images will also be correct in the web pages without having to do any complex path manipulation.</li>
-</ul>
-</li>
-</ul>
-</div>
-<div class="section" id="other-functions">
-<h2>Other functions<a class="headerlink" href="#other-functions" title="Permalink to this headline">¶</a></h2>
-<p>The image_file_postproc function could be used to process pre-created images:</p>
-<dl class="function">
-<dt id="ImageMetaTag.image_file_postproc">
-<code class="descclassname">ImageMetaTag.</code><code class="descname">image_file_postproc</code><span class="sig-paren">(</span><em>filename</em>, <em>outfile=None</em>, <em>img_buf=None</em>, <em>img_dpi=None</em>, <em>img_converter=0</em>, <em>do_trim=False</em>, <em>trim_border=0</em>, <em>logo_file=None</em>, <em>logo_width=None</em>, <em>logo_height=None</em>, <em>logo_padding=0</em>, <em>logo_pos=0</em>, <em>do_thumb=False</em>, <em>img_tags=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/savefig.html#image_file_postproc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.image_file_postproc" title="Permalink to this definition">¶</a></dt>
-<dd><p>Does the image post-processing for <a class="reference internal" href="#ImageMetaTag.savefig" title="ImageMetaTag.savefig"><code class="xref py py-func docutils literal notranslate"><span class="pre">ImageMetaTag.savefig()</span></code></a>.</p>
-<p>Arguments: filename the name of the image file to process</p>
-<p>Options:</p>
-<ul class="simple">
-<li>outfile - If supplied, the processing will be applied to a new file,                 with this name. If not supplied, the post processing will                 overwrite the file given input file.</li>
-<li>img_buf - If the image has been saved to an in-memory buffer, then                 supply the image buffer here. This will speed up the                 post-processing.</li>
-<li>img_dpi - output image dpi (if available for the image format)                 as a tuple for horizontal/vertical values eg: (72, 72)</li>
-<li><dl class="first docutils">
-<dt>img_converter - an integer switch controlling the level of file size                      compression</dt>
-<dd><ul class="first last">
-<li>0 - no compression</li>
-<li>1 - light compression, from RGBA to RGB</li>
-<li>2 - moderate compression, from RGBA to RGB, then to an                           adaptive 256 colour palette.</li>
-<li>3 - heavy compression, from RGBA to RGB, then to 8-bit                           web standard palette.</li>
-</ul>
-</dd>
-</dl>
-</li>
-<li>do_trim - switch to trim whitespace from the edge of the image</li>
-<li>trim_border - if do_trim then this can be used to define an integer                     number of pixels as a border around the trim.</li>
-<li>logo_file - a file, or list of image files, to be added as logo(s) to                   the image. When multiple files are added to the same                   logo_pos then they are grouped horizontally from left to                   right before being added.</li>
-<li>logo_width - the desired width of a single logo, in pixels. If the                    supplied image file is not the right size, it will be                    resized using a method that applies filters and                    antialiasing that works well for shrinking images with                    text to a much smaller size. The aspect ratio of the logo                    image is always maintained. Either logo_width or                    logo_height need to be specified, and width overrides                    height if both are specified. Defaults to 40 pixels.</li>
-<li>logo_height - the desired height of each logo, in pixels, instead of                     logo_width.</li>
-<li>logo_padding - a number of pixels to pad around the logo                      (default to zero)</li>
-<li><dl class="first docutils">
-<dt>logo_pos - corner, or list of corners, of the logo(s) (following                  pyplot.legend, but for corners):</dt>
-<dd><ul class="first last">
-<li>0: ‘best’ in this context will be upper left (default)</li>
-<li>1: ‘upper right’ (image grows in width to fit)</li>
-<li>2: ‘upper left’ (image grows in width to fit)</li>
-<li>3: ‘lower left’ (image grows in height to fit)</li>
-<li>4: ‘lower right’ (image grows in height to fit)</li>
-</ul>
-</dd>
-</dl>
-</li>
-<li>do_thumb - switch to produce default sized thumbnail, or integer/tuple                  to define the maximum size in pixels</li>
-<li>img_tags: a dictionary of tags to be added to the image metadata</li>
-<li>verbose: switch for verbose output (reports file sizes before/after                conversion)</li>
-</ul>
-</dd></dl>
-
-</div>
-</div>
-
-
-          </div>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -226,12 +229,13 @@ optimisation and image tagging.</p>
         <li class="right" >
           <a href="index.html" title="ImageMetaTag - Image metadata tagging and presentation"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.10 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.11 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">ImageMetaTag.savefig</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2015-2020, British Crown Copyright.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
+        &#169; Copyright 2015-2022, British Crown Copyright.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
     </div>
   </body>
 </html>
