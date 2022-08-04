@@ -306,9 +306,12 @@ and include:</p>
 <h2>Functions useful in preparing ImageDicts<a class="headerlink" href="#functions-useful-in-preparing-imagedicts" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="ImageMetaTag.readmeta_from_image">
-<code class="descclassname">ImageMetaTag.</code><code class="descname">readmeta_from_image</code><span class="sig-paren">(</span><em>img_file</em>, <em>img_format=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#readmeta_from_image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.readmeta_from_image" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ImageMetaTag.</code><code class="descname">readmeta_from_image</code><span class="sig-paren">(</span><em>img_file</em>, <em>img_format=None</em>, <em>keep_reserved_tags=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#readmeta_from_image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ImageMetaTag.readmeta_from_image" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads the metadata added by the ImageMetaTag savefig, from an image
-file, and returns a dictionary of <em>tagname: value</em> pairs</p>
+file, and returns a dictionary of <em>tag_name: value</em> pairs</p>
+<p>By default tag names that cannot be written by ImageMetaTag savefig
+(e.g. dpi, chromaticity etc) cannot be read by readmeta_from_image.</p>
+<p>keep_reserved_tags - keeps reserved tags from the image if True</p>
 </dd></dl>
 
 <dl class="function">
@@ -424,7 +427,7 @@ list of strings</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2015-2020, British Crown Copyright.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.4.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
     </div>
   </body>
 </html>

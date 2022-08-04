@@ -31,6 +31,14 @@ __documentation__ = 'http://scitools-incubator.github.io/image-meta-tag/build/ht
 META_IMG_FORMATS = ['png']
 # and which can do image post-processing
 POSTPROC_IMG_FORMATS = ['png']
+# and which can handle setting the dpi
+DPI_IMG_FORMATS = ['png']
+# image metadata tags that are reserved for image reader/writer actions etc,
+# so can't be saved or read using this library; they are not user-added metadata
+RESERVED_TAGS = ('interlace', 'gamma', 'dpi', 'transparency', 'aspect',
+                 'signature', 'date:create', 'date:modify', 'chromaticity',
+                 'jfif', 'jfif_unit', 'jfif_density', 'jfif_version')
+
 # default timeout and retries for database access:
 DEFAULT_DB_TIMEOUT = 6
 DEFAULT_DB_ATTEMPTS = 20

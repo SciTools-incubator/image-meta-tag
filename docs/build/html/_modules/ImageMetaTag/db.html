@@ -468,6 +468,8 @@
             <span class="c1"># this file is already in the database</span>
             <span class="c1"># (as the primary key, so do nothing...)</span>
             <span class="k">pass</span>
+    <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">InterfaceError</span> <span class="k">as</span> <span class="n">intfc_error</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">intfc_error</span>
     <span class="k">finally</span><span class="p">:</span>
         <span class="k">pass</span></div>
 
@@ -1060,7 +1062,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2015-2020, British Crown Copyright.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.4.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
     </div>
   </body>
 </html>

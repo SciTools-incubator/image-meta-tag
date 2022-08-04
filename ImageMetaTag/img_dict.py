@@ -29,6 +29,8 @@ from copy import deepcopy
 from itertools import islice, compress
 from math import ceil
 
+from ImageMetaTag import RESERVED_TAGS
+
 
 class ImageDict(object):
     '''
@@ -728,9 +730,17 @@ class ImageDict(object):
         return sub_dict
 
 
-def readmeta_from_image(img_file, img_format=None):
-    '''Reads the metadata added by the ImageMetaTag savefig, from an image
-    file, and returns a dictionary of *tagname: value* pairs'''
+def readmeta_from_image(img_file, img_format=None, keep_reserved_tags=False):
+    '''
+    Reads the metadata added by the ImageMetaTag savefig, from an image
+    file, and returns a dictionary of *tag_name: value* pairs
+
+    By default tag names that cannot be written by ImageMetaTag savefig
+    (e.g. dpi, chromaticity etc) cannot be read by readmeta_from_image.
+
+    keep_reserved_tags - keeps reserved tags from the image if True
+
+    '''
 
     if img_format is None:
         # get the img_format from the end of the filename
@@ -757,6 +767,13 @@ def readmeta_from_image(img_file, img_format=None):
     else:
         msg = 'Currently, ImageMetaTag does not support "{}" format images'
         raise NotImplementedError(msg.format(img_format))
+
+    # take out system info; if we cant; write it to the image in ImageMetaTag
+    # then we can't read it:
+    if img_info is not None and not keep_reserved_tags:
+        for tag in RESERVED_TAGS:
+            if tag in img_info.keys():
+                del img_info[tag]
 
     return (read_ok, img_info)
 
