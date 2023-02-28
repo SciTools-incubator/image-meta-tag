@@ -203,7 +203,7 @@ def savefig(filename, fig=None, img_tags=None, img_format=None, img_converter=0,
                                        add_strict=db_add_strict)
                 wrote_db = True
             except sqlite3.OperationalError as op_err:
-                if 'database is locked' in op_err.message:
+                if 'database is locked' in repr(op_err):
                     # database being locked is what the retries and timeouts
                     # are for:
                     msg = ('{} database timeout for image "{}", writing to '
@@ -216,12 +216,12 @@ def savefig(filename, fig=None, img_tags=None, img_format=None, img_converter=0,
                 else:
                     # everything else needs to be reported and raised
                     # immediately:
-                    msg = '{} for file {}'.format(op_err.message, db_file)
+                    msg = '{} for file {}'.format(op_err, db_file)
                     raise sqlite3.OperationalError(msg)
             except Exception:
                 raise
         if n_tries > db_attempts:
-            raise sqlite3.OperationalError(op_err.message)
+            raise sqlite3.OperationalError(op_err)
         if verbose:
             msg = 'Database write took: {}'
             print(msg.format(str(datetime.now() - db_st)))
@@ -454,7 +454,11 @@ def _im_trim(im_obj, border=0):
     if border != 0 and bbox is not None:
         border_bbox = [-border, -border, border, border]
         # now apply that trim:
-        bbox_tr = [x+y for x, y in zip(bbox, border_bbox)]
+        try:
+            bbox_tr = [x+y for x, y in zip(bbox, border_bbox)]
+        except:
+            raise ValueError('bounding box failure')
+            #pdb.set_trace()
 
         # bbox defines the first corner as top+left, then the second corner
         # as bottom+right (not the bottom left corner, and the width,
