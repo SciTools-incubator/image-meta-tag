@@ -1,16 +1,17 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ImageMetaTag.db &#8212; ImageMetaTag 0.7.11 documentation</title>
+    <title>ImageMetaTag.db &#8212; ImageMetaTag 0.7.12 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinxdoc.css" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -24,7 +25,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">ImageMetaTag 0.7.11 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">ImageMetaTag 0.7.12 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">ImageMetaTag.db</a></li> 
       </ul>
@@ -176,22 +177,22 @@
             <span class="n">dbcn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
             <span class="n">read_db</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span> <span class="k">as</span> <span class="n">op_err</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s1">&#39;database is locked&#39;</span> <span class="ow">in</span> <span class="n">op_err</span><span class="o">.</span><span class="n">message</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;database is locked&#39;</span> <span class="ow">in</span> <span class="nb">repr</span><span class="p">(</span><span class="n">op_err</span><span class="p">):</span>
                 <span class="c1"># database being locked is what the retries and timeouts are for:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> database timeout reading from file &quot;</span><span class="si">%s</span><span class="s1">&quot;, </span><span class="si">%s</span><span class="s1"> s&#39;</span> \
                         <span class="o">%</span> <span class="p">(</span><span class="n">dt_now_str</span><span class="p">(),</span> <span class="n">db_file</span><span class="p">,</span> <span class="n">n_tries</span> <span class="o">*</span> <span class="n">db_timeout</span><span class="p">))</span>
                 <span class="n">n_tries</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="k">elif</span> <span class="n">op_err</span><span class="o">.</span><span class="n">message</span> <span class="o">==</span> <span class="s1">&#39;no such table: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">SQLITE_IMG_INFO_TABLE</span><span class="p">):</span>
+            <span class="k">elif</span> <span class="s1">&#39;no such table: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">SQLITE_IMG_INFO_TABLE</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">repr</span><span class="p">(</span><span class="n">op_err</span><span class="p">):</span>
                 <span class="c1"># the db file exists, but it doesn&#39;t have anything in it:</span>
                 <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># everything else needs to be reported and raised immediately:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> for file </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">op_err</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="n">db_file</span><span class="p">)</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> for file </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">op_err</span><span class="p">,</span> <span class="n">db_file</span><span class="p">)</span>
                 <span class="k">raise</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
     <span class="c1"># if we went through all the attempts then it is time to raise the error:</span>
     <span class="k">if</span> <span class="n">n_tries</span> <span class="o">&gt;</span> <span class="n">db_attempts</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> for file </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">op_err</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="n">db_file</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> for file </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">op_err</span><span class="p">,</span> <span class="n">db_file</span><span class="p">)</span>
         <span class="k">raise</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
     <span class="c1"># close connection:</span>
@@ -244,19 +245,19 @@
                     <span class="c1"># finally close:</span>
                     <span class="n">dbcn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
                 <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span> <span class="k">as</span> <span class="n">op_err</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="s1">&#39;database is locked&#39;</span> <span class="ow">in</span> <span class="n">op_err</span><span class="o">.</span><span class="n">message</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s1">&#39;database is locked&#39;</span> <span class="ow">in</span> <span class="nb">repr</span><span class="p">(</span><span class="n">op_err</span><span class="p">):</span>
                         <span class="c1"># database being locked is what the retries and timeouts are for:</span>
                         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> database timeout writing to file &quot;</span><span class="si">%s</span><span class="s1">&quot;, </span><span class="si">%s</span><span class="s1"> s&#39;</span> \
                                         <span class="o">%</span> <span class="p">(</span><span class="n">dt_now_str</span><span class="p">(),</span> <span class="n">main_db_file</span><span class="p">,</span> <span class="n">n_tries</span> <span class="o">*</span> <span class="n">db_timeout</span><span class="p">))</span>
                         <span class="n">n_tries</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="c1"># everything else needs to be reported and raised immediately:</span>
-                        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> for file </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">op_err</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="n">main_db_file</span><span class="p">)</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> for file </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">op_err</span><span class="p">,</span> <span class="n">main_db_file</span><span class="p">)</span>
                         <span class="k">raise</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
             <span class="c1"># if we went through all the attempts then it is time to raise the error:</span>
             <span class="k">if</span> <span class="n">n_tries</span> <span class="o">&gt;</span> <span class="n">db_attempts</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> for file </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">op_err</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="n">main_db_file</span><span class="p">)</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> for file </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">op_err</span><span class="p">,</span> <span class="n">main_db_file</span><span class="p">)</span>
                 <span class="k">raise</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
     <span class="c1"># delete or tidy:</span>
@@ -315,17 +316,17 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">dbcr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">create_command</span><span class="p">)</span>
     <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span> <span class="k">as</span> <span class="n">op_err</span><span class="p">:</span>
-        <span class="k">if</span> <span class="s1">&#39;table </span><span class="si">{}</span><span class="s1"> already exists&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">SQLITE_IMG_INFO_TABLE</span><span class="p">)</span> <span class="ow">in</span> <span class="n">op_err</span><span class="o">.</span><span class="n">message</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;table </span><span class="si">{}</span><span class="s1"> already exists&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">SQLITE_IMG_INFO_TABLE</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">repr</span><span class="p">(</span><span class="n">op_err</span><span class="p">):</span>
             <span class="c1"># another process has just created the table, so sleep(1)</span>
             <span class="c1"># This is only when a db file is created so isn&#39;t called often</span>
             <span class="c1"># (and the race condition is rare!)</span>
             <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># everything else needs to be reported and raised immediately:</span>
-            <span class="k">raise</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span><span class="p">(</span><span class="n">op_err</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span><span class="p">(</span><span class="n">op_err</span><span class="p">)</span>
     <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Error</span> <span class="k">as</span> <span class="n">sq_err</span><span class="p">:</span>
         <span class="c1"># everything else needs to be reported and raised immediately:</span>
-        <span class="k">raise</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Error</span><span class="p">(</span><span class="n">sq_err</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Error</span><span class="p">(</span><span class="n">sq_err</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="open_db_file"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.open_db_file">[docs]</a><span class="k">def</span> <span class="nf">open_db_file</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">):</span>
@@ -431,7 +432,7 @@
         <span class="n">dbcr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">add_command</span><span class="p">,</span> <span class="n">add_list</span><span class="p">)</span>
     <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span> <span class="k">as</span> <span class="n">op_err_file</span><span class="p">:</span>
         <span class="n">err_check</span> <span class="o">=</span> <span class="s1">&#39;no such table: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">SQLITE_IMG_INFO_TABLE</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">err_check</span> <span class="ow">in</span> <span class="n">op_err_file</span><span class="o">.</span><span class="n">message</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">err_check</span> <span class="ow">in</span> <span class="nb">repr</span><span class="p">(</span><span class="n">op_err_file</span><span class="p">):</span>
             <span class="n">create_table_for_img_info</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span> <span class="n">img_info</span><span class="p">)</span>
             <span class="n">dbcr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">add_command</span><span class="p">,</span> <span class="n">add_list</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -668,7 +669,7 @@
                                                                 <span class="n">SQLITE_IMG_INFO_FNAME</span><span class="p">),</span> <span class="p">(</span><span class="n">fname</span><span class="p">,))</span>
                                 <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span> <span class="k">as</span> <span class="n">op_err_file</span><span class="p">:</span>
                                     <span class="n">err_check</span> <span class="o">=</span> <span class="s1">&#39;no such table: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">SQLITE_IMG_INFO_TABLE</span><span class="p">)</span>
-                                    <span class="k">if</span> <span class="n">op_err_file</span><span class="o">.</span><span class="n">message</span> <span class="o">==</span> <span class="n">err_check</span><span class="p">:</span>
+                                    <span class="k">if</span> <span class="n">err_check</span> <span class="ow">in</span> <span class="n">op_err_file</span><span class="p">:</span>
                                         <span class="c1"># the db file exists, but it doesn&#39;t have anything in it:</span>
                                         <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_warning</span><span class="p">:</span>
                                             <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;WARNING: Unable to delete file entry &quot;</span><span class="si">{}</span><span class="s1">&quot; from&#39;</span>
@@ -688,22 +689,22 @@
                             <span class="c1"># finally close (for this chunk)</span>
                             <span class="n">dbcn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
                         <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span> <span class="k">as</span> <span class="n">op_err</span><span class="p">:</span>
-                            <span class="k">if</span> <span class="s1">&#39;database is locked&#39;</span> <span class="ow">in</span> <span class="n">op_err</span><span class="o">.</span><span class="n">message</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="s1">&#39;database is locked&#39;</span> <span class="ow">in</span> <span class="nb">repr</span><span class="p">(</span><span class="n">op_err</span><span class="p">):</span>
                                 <span class="c1"># database being locked is what the retries and timeouts are for:</span>
                                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> database timeout deleting from file &quot;</span><span class="si">%s</span><span class="s1">&quot;, </span><span class="si">%s</span><span class="s1"> s&#39;</span> \
                                                 <span class="o">%</span> <span class="p">(</span><span class="n">dt_now_str</span><span class="p">(),</span> <span class="n">db_file</span><span class="p">,</span> <span class="n">n_tries</span> <span class="o">*</span> <span class="n">db_timeout</span><span class="p">))</span>
                                 <span class="n">n_tries</span> <span class="o">+=</span> <span class="mi">1</span>
-                            <span class="k">elif</span> <span class="s1">&#39;disk I/O error&#39;</span> <span class="ow">in</span> <span class="n">op_err</span><span class="o">.</span><span class="n">message</span><span class="p">:</span>
-                                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> for file </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">op_err</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="n">db_file</span><span class="p">)</span>
+                            <span class="k">elif</span> <span class="s1">&#39;disk I/O error&#39;</span> <span class="ow">in</span> <span class="nb">repr</span><span class="p">(</span><span class="n">op_err</span><span class="p">):</span>
+                                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> for file </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">op_err</span><span class="p">,</span> <span class="n">db_file</span><span class="p">)</span>
                                 <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                             <span class="k">else</span><span class="p">:</span>
                                 <span class="c1"># everything else needs to be reported and raised immediately:</span>
-                                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> for file </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">op_err</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="n">db_file</span><span class="p">)</span>
+                                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> for file </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">op_err</span><span class="p">,</span> <span class="n">db_file</span><span class="p">)</span>
                                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
                     <span class="c1"># if we went through all the attempts then it is time to raise the error:</span>
                     <span class="k">if</span> <span class="n">n_tries</span> <span class="o">&gt;</span> <span class="n">db_attempts</span><span class="p">:</span>
-                        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> for file </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">op_err</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="n">db_file</span><span class="p">)</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> for file </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">op_err</span><span class="p">,</span> <span class="n">db_file</span><span class="p">)</span>
                         <span class="k">raise</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
             <span class="k">else</span><span class="p">:</span>
@@ -1040,7 +1041,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -1054,14 +1055,14 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">ImageMetaTag 0.7.11 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">ImageMetaTag 0.7.12 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">ImageMetaTag.db</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2015-2022, British Crown Copyright.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.0.2.
     </div>
   </body>
 </html>

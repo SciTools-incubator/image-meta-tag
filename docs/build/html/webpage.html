@@ -1,17 +1,18 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>ImageMetaTag.webpage &#8212; ImageMetaTag 0.7.11 documentation</title>
+    <title>ImageMetaTag.webpage &#8212; ImageMetaTag 0.7.12 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -33,7 +34,7 @@
         <li class="right" >
           <a href="ImageDict.html" title="ImageMetaTag.ImageDict"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.11 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.12 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">ImageMetaTag.webpage</a></li> 
       </ul>
     </div>  
@@ -44,7 +45,7 @@
           <div class="body" role="main">
             
   <section id="module-ImageMetaTag.webpage">
-<span id="imagemetatag-webpage"></span><h1>ImageMetaTag.webpage<a class="headerlink" href="#module-ImageMetaTag.webpage" title="Permalink to this headline">¶</a></h1>
+<span id="imagemetatag-webpage"></span><h1>ImageMetaTag.webpage<a class="headerlink" href="#module-ImageMetaTag.webpage" title="Permalink to this heading">¶</a></h1>
 <p>This sub-module contains functions to write out an <a class="reference internal" href="ImageDict.html#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageMetaTag.ImageDict</span></code></a> to a webpage.</p>
 <p>The webpages are made up of a single .html file, which is the page to be loaded to view the images.
 Alongside this is a short ImageMetaTag javascript library held in a ‘.js’ file
@@ -75,7 +76,7 @@ page as it is being constructed (reading in an html template, for instance).</p>
 <p>(C) Crown copyright Met Office. All rights reserved.
 Released under BSD 3-Clause License. See LICENSE for more details.</p>
 <section id="writing-a-whole-page">
-<h2>Writing a whole page<a class="headerlink" href="#writing-a-whole-page" title="Permalink to this headline">¶</a></h2>
+<h2>Writing a whole page<a class="headerlink" href="#writing-a-whole-page" title="Permalink to this heading">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="ImageMetaTag.webpage.write_full_page">
 <span class="sig-prename descclassname"><span class="pre">ImageMetaTag.webpage.</span></span><span class="sig-name descname"><span class="pre">write_full_page</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">page_filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tab_s_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preamble</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">postamble</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">postamble_no_imt_link</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compression</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_selectors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_selector_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_singleton_selectors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optgroups</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'int'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_show_rel_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'horiz</span> <span class="pre">dropdowns'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_intmed_tmpfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keywords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">css</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_err_msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/webpage.html#write_full_page"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.webpage.write_full_page" title="Permalink to this definition">¶</a></dt>
@@ -115,7 +116,7 @@ webpage styles could be added.</p>
 
 </section>
 <section id="as-indidividual-components">
-<h2>As indidividual components<a class="headerlink" href="#as-indidividual-components" title="Permalink to this headline">¶</a></h2>
+<h2>As indidividual components<a class="headerlink" href="#as-indidividual-components" title="Permalink to this heading">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="ImageMetaTag.webpage.write_js_to_header">
 <span class="sig-prename descclassname"><span class="pre">ImageMetaTag.webpage.</span></span><span class="sig-name descname"><span class="pre">write_js_to_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_selectors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optgroups</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_obj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">json_files</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">js_files</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pagename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tabname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selector_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_singleton_selectors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url_separator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'|'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'str'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_show_rel_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compression</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keywords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/webpage.html#write_js_to_header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.webpage.write_js_to_header" title="Permalink to this definition">¶</a></dt>
@@ -243,7 +244,7 @@ with zlib, if compression=True.</p>
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -263,13 +264,13 @@ with zlib, if compression=True.</p>
         <li class="right" >
           <a href="ImageDict.html" title="ImageMetaTag.ImageDict"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.11 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.12 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">ImageMetaTag.webpage</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2015-2022, British Crown Copyright.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.0.2.
     </div>
   </body>
 </html>

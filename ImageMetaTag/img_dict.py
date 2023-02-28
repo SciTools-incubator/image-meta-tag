@@ -879,39 +879,42 @@ def dict_split(in_dict, n_split=None, size_split=None, extra_opts=None):
 
 def simple_dict_filter(simple_dict, tests, raise_key_mismatch=False):
     '''
-    Tests the contents of a simple, un-heirachical dict (properties an image)
-    against a set of tests.
+Tests the contents of a simple, un-heirachical dict (properties an image)
+against a set of tests.
 
-    An example set of tests:
-    ::
-        tests = {'number of rolls': ['6 simulated rolls',
-                                     '216 simulated rolls',
-                                     '1296 simulated rolls'],
-                 'plot color': None,
-                 'image compression': None,
-                 'plot type': ['Histogram', ('All', ['Histogram', 'Line plots'])],
-                 'image trim': None}
+An example set of tests:
 
-    Here, the 'number of rolls' is restricted to a simple list.
+::
 
-    The plot type is filtered according to 'Histogram', and there is also a
-    second element that contains both 'Histogram and 'Line plots' which are
-    to be presented together.
+   tests = {'number of rolls': ['6 simulated rolls',
+                                '216 simulated rolls',
+                                '1296 simulated rolls'],
+            'plot color': None,
+            'image compression': None,
+            'plot type': ['Histogram', ('All', ['Histogram', 'Line plots'])],
+            'image trim': None}
 
-    The other image characteristics are not filtered.
 
-    Options:
-     * raise_key_mismatch - if True, then attempting to test a dictionary \
-                            with a missing key will raise and exception. \
-                            Default is to return all False.
+Here, the 'number of rolls' is restricted to a simple list.
 
-    Returns three logicals:
-     * The first indicates whether the input dict passes the simple tests
-     * The second indicates whether the input dict is part of the grouped \
-       elements of the test (the ['Histogram', 'Line plots'] list).
-     * The third indicates whether the input dict is the first element of a \
-       list grouped elements (is 'Histogram' in this \
-       ['Histogram', 'Line plots'] list).
+The plot type is filtered according to 'Histogram', and there is also a
+second element that contains both 'Histogram and 'Line plots' which are
+to be presented together.
+
+The other image characteristics are not filtered.
+
+Options:
+ * raise_key_mismatch - if True, then attempting to test a dictionary \
+                        with a missing key will raise and exception. \
+                        Default is to return all False.
+
+Returns three logicals:
+ * The first indicates whether the input dict passes the simple tests
+ * The second indicates whether the input dict is part of the grouped \
+   elements of the test (the ['Histogram', 'Line plots'] list).
+ * The third indicates whether the input dict is the first element of a \
+   list grouped elements (is 'Histogram' in this \
+   ['Histogram', 'Line plots'] list).
 
     '''
     # this is set to False if the input dict fails the simple criteria:
