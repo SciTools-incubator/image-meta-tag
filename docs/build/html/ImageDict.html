@@ -1,17 +1,18 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>ImageMetaTag.ImageDict &#8212; ImageMetaTag 0.7.11 documentation</title>
+    <title>ImageMetaTag.ImageDict &#8212; ImageMetaTag 0.7.12 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -33,7 +34,7 @@
         <li class="right" >
           <a href="db.html" title="ImageMetaTag.db"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.11 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.12 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">ImageMetaTag.ImageDict</a></li> 
       </ul>
     </div>  
@@ -44,7 +45,7 @@
           <div class="body" role="main">
             
   <section id="module-ImageMetaTag.img_dict">
-<span id="imagemetatag-imagedict"></span><h1>ImageMetaTag.ImageDict<a class="headerlink" href="#module-ImageMetaTag.img_dict" title="Permalink to this headline">¶</a></h1>
+<span id="imagemetatag-imagedict"></span><h1>ImageMetaTag.ImageDict<a class="headerlink" href="#module-ImageMetaTag.img_dict" title="Permalink to this heading">¶</a></h1>
 <p>This submodule contains the <a class="reference internal" href="#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageMetaTag.ImageDict</span></code></a> class, and
 functions for preparing instances of it.</p>
 <p>The purpose of an <a class="reference internal" href="#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageMetaTag.ImageDict</span></code></a> is to sort the image
@@ -56,7 +57,7 @@ a webpage by <a class="reference internal" href="webpage.html#ImageMetaTag.webpa
 <p>(C) Crown copyright Met Office. All rights reserved.
 Released under BSD 3-Clause License. See LICENSE for more details.</p>
 <section id="the-imagedict-class">
-<h2>The ImageDict Class<a class="headerlink" href="#the-imagedict-class" title="Permalink to this headline">¶</a></h2>
+<h2>The ImageDict Class<a class="headerlink" href="#the-imagedict-class" title="Permalink to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="ImageMetaTag.ImageDict">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ImageMetaTag.</span></span><span class="sig-name descname"><span class="pre">ImageDict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selector_widths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selector_animated</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animation_direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict" title="Permalink to this definition">¶</a></dt>
@@ -259,7 +260,7 @@ and include:</p>
 
 </section>
 <section id="functions-useful-in-preparing-imagedicts">
-<h2>Functions useful in preparing ImageDicts<a class="headerlink" href="#functions-useful-in-preparing-imagedicts" title="Permalink to this headline">¶</a></h2>
+<h2>Functions useful in preparing ImageDicts<a class="headerlink" href="#functions-useful-in-preparing-imagedicts" title="Permalink to this heading">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="ImageMetaTag.readmeta_from_image">
 <span class="sig-prename descclassname"><span class="pre">ImageMetaTag.</span></span><span class="sig-name descname"><span class="pre">readmeta_from_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_reserved_tags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#readmeta_from_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.readmeta_from_image" title="Permalink to this definition">¶</a></dt>
@@ -331,13 +332,13 @@ to be presented together.</p>
 <p>The other image characteristics are not filtered.</p>
 <dl class="simple">
 <dt>Options:</dt><dd><ul class="simple">
-<li><p>raise_key_mismatch - if True, then attempting to test a dictionary                             with a missing key will raise and exception.                             Default is to return all False.</p></li>
+<li><p>raise_key_mismatch - if True, then attempting to test a dictionary                         with a missing key will raise and exception.                         Default is to return all False.</p></li>
 </ul>
 </dd>
 <dt>Returns three logicals:</dt><dd><ul class="simple">
 <li><p>The first indicates whether the input dict passes the simple tests</p></li>
-<li><p>The second indicates whether the input dict is part of the grouped        elements of the test (the [‘Histogram’, ‘Line plots’] list).</p></li>
-<li><p>The third indicates whether the input dict is the first element of a        list grouped elements (is ‘Histogram’ in this        [‘Histogram’, ‘Line plots’] list).</p></li>
+<li><p>The second indicates whether the input dict is part of the grouped    elements of the test (the [‘Histogram’, ‘Line plots’] list).</p></li>
+<li><p>The third indicates whether the input dict is the first element of a    list grouped elements (is ‘Histogram’ in this    [‘Histogram’, ‘Line plots’] list).</p></li>
 </ul>
 </dd>
 </dl>
@@ -401,7 +402,7 @@ list of strings</p>
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -421,13 +422,13 @@ list of strings</p>
         <li class="right" >
           <a href="db.html" title="ImageMetaTag.db"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.11 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.12 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">ImageMetaTag.ImageDict</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2015-2022, British Crown Copyright.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
+        &#169; Copyright 2015-2023, British Crown Copyright.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.0.2.
     </div>
   </body>
 </html>
