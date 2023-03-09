@@ -883,8 +883,7 @@ def dict_split(in_dict, n_split=None, size_split=None, extra_opts=None):
 
 
 def simple_dict_filter(simple_dict, tests, raise_key_mismatch=False):
-    '''
-Tests the contents of a simple, un-heirachical dict (properties an image)
+    '''Tests the contents of a simple, un-heirachical dict (properties an image)
 against a set of tests.
 
 An example set of tests:
@@ -920,8 +919,7 @@ Returns three logicals:
  * The third indicates whether the input dict is the first element of a \
    list grouped elements (is 'Histogram' in this \
    ['Histogram', 'Line plots'] list).
-
-    '''
+'''
     # this is set to False if the input dict fails the simple criteria:
     passes_tests = True
     # this stores all of the tests:

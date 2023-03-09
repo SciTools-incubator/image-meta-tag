@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>ImageMetaTag.webpage &#8212; ImageMetaTag 0.7.12 documentation</title>
+    <title>ImageMetaTag.webpage &#8212; ImageMetaTag 0.7.13 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -14,6 +14,7 @@
     <script src="_static/underscore.js"></script>
     <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="ImageMetaTag - test.py" href="test.html" />
@@ -34,7 +35,7 @@
         <li class="right" >
           <a href="ImageDict.html" title="ImageMetaTag.ImageDict"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.12 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.13 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">ImageMetaTag.webpage</a></li> 
       </ul>
     </div>  
@@ -211,8 +212,17 @@ with zlib, if compression=True.</p>
     <h3><a href="index.html">Table of Contents</a></h3>
     <ul>
 <li><a class="reference internal" href="#">ImageMetaTag.webpage</a><ul>
-<li><a class="reference internal" href="#writing-a-whole-page">Writing a whole page</a></li>
-<li><a class="reference internal" href="#as-indidividual-components">As indidividual components</a></li>
+<li><a class="reference internal" href="#writing-a-whole-page">Writing a whole page</a><ul>
+<li><a class="reference internal" href="#ImageMetaTag.webpage.write_full_page"><code class="docutils literal notranslate"><span class="pre">write_full_page()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#as-indidividual-components">As indidividual components</a><ul>
+<li><a class="reference internal" href="#ImageMetaTag.webpage.write_js_to_header"><code class="docutils literal notranslate"><span class="pre">write_js_to_header()</span></code></a></li>
+<li><a class="reference internal" href="#ImageMetaTag.webpage.write_js_placeholders"><code class="docutils literal notranslate"><span class="pre">write_js_placeholders()</span></code></a></li>
+<li><a class="reference internal" href="#ImageMetaTag.webpage.write_json"><code class="docutils literal notranslate"><span class="pre">write_json()</span></code></a></li>
+<li><a class="reference internal" href="#ImageMetaTag.webpage.copy_required_javascript"><code class="docutils literal notranslate"><span class="pre">copy_required_javascript()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -264,13 +274,13 @@ with zlib, if compression=True.</p>
         <li class="right" >
           <a href="ImageDict.html" title="ImageMetaTag.ImageDict"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.12 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.13 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">ImageMetaTag.webpage</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2015-2023, British Crown Copyright.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.0.2.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
     </div>
   </body>
 </html>

@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>ImageMetaTag.ImageDict &#8212; ImageMetaTag 0.7.12 documentation</title>
+    <title>ImageMetaTag.ImageDict &#8212; ImageMetaTag 0.7.13 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -14,6 +14,7 @@
     <script src="_static/underscore.js"></script>
     <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="ImageMetaTag.webpage" href="webpage.html" />
@@ -34,7 +35,7 @@
         <li class="right" >
           <a href="db.html" title="ImageMetaTag.db"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.12 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.13 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">ImageMetaTag.ImageDict</a></li> 
       </ul>
     </div>  
@@ -369,8 +370,38 @@ list of strings</p>
     <h3><a href="index.html">Table of Contents</a></h3>
     <ul>
 <li><a class="reference internal" href="#">ImageMetaTag.ImageDict</a><ul>
-<li><a class="reference internal" href="#the-imagedict-class">The ImageDict Class</a></li>
-<li><a class="reference internal" href="#functions-useful-in-preparing-imagedicts">Functions useful in preparing ImageDicts</a></li>
+<li><a class="reference internal" href="#the-imagedict-class">The ImageDict Class</a><ul>
+<li><a class="reference internal" href="#ImageMetaTag.ImageDict"><code class="docutils literal notranslate"><span class="pre">ImageDict</span></code></a><ul>
+<li><a class="reference internal" href="#ImageMetaTag.ImageDict.append"><code class="docutils literal notranslate"><span class="pre">ImageDict.append()</span></code></a></li>
+<li><a class="reference internal" href="#ImageMetaTag.ImageDict.copy_except_dict_and_keys"><code class="docutils literal notranslate"><span class="pre">ImageDict.copy_except_dict_and_keys()</span></code></a></li>
+<li><a class="reference internal" href="#ImageMetaTag.ImageDict.dict_depth"><code class="docutils literal notranslate"><span class="pre">ImageDict.dict_depth()</span></code></a></li>
+<li><a class="reference internal" href="#ImageMetaTag.ImageDict.dict_depths"><code class="docutils literal notranslate"><span class="pre">ImageDict.dict_depths()</span></code></a></li>
+<li><a class="reference internal" href="#ImageMetaTag.ImageDict.dict_index_array"><code class="docutils literal notranslate"><span class="pre">ImageDict.dict_index_array()</span></code></a></li>
+<li><a class="reference internal" href="#ImageMetaTag.ImageDict.dict_print"><code class="docutils literal notranslate"><span class="pre">ImageDict.dict_print()</span></code></a></li>
+<li><a class="reference internal" href="#ImageMetaTag.ImageDict.dict_prune"><code class="docutils literal notranslate"><span class="pre">ImageDict.dict_prune()</span></code></a></li>
+<li><a class="reference internal" href="#ImageMetaTag.ImageDict.dict_remove"><code class="docutils literal notranslate"><span class="pre">ImageDict.dict_remove()</span></code></a></li>
+<li><a class="reference internal" href="#ImageMetaTag.ImageDict.dict_union"><code class="docutils literal notranslate"><span class="pre">ImageDict.dict_union()</span></code></a></li>
+<li><a class="reference internal" href="#ImageMetaTag.ImageDict.flatten_lists"><code class="docutils literal notranslate"><span class="pre">ImageDict.flatten_lists()</span></code></a></li>
+<li><a class="reference internal" href="#ImageMetaTag.ImageDict.key_at_depth"><code class="docutils literal notranslate"><span class="pre">ImageDict.key_at_depth()</span></code></a></li>
+<li><a class="reference internal" href="#ImageMetaTag.ImageDict.keys_by_depth"><code class="docutils literal notranslate"><span class="pre">ImageDict.keys_by_depth()</span></code></a></li>
+<li><a class="reference internal" href="#ImageMetaTag.ImageDict.list_keys_by_depth"><code class="docutils literal notranslate"><span class="pre">ImageDict.list_keys_by_depth()</span></code></a></li>
+<li><a class="reference internal" href="#ImageMetaTag.ImageDict.mergedicts"><code class="docutils literal notranslate"><span class="pre">ImageDict.mergedicts()</span></code></a></li>
+<li><a class="reference internal" href="#ImageMetaTag.ImageDict.remove"><code class="docutils literal notranslate"><span class="pre">ImageDict.remove()</span></code></a></li>
+<li><a class="reference internal" href="#ImageMetaTag.ImageDict.return_from_list"><code class="docutils literal notranslate"><span class="pre">ImageDict.return_from_list()</span></code></a></li>
+<li><a class="reference internal" href="#ImageMetaTag.ImageDict.return_key_inds"><code class="docutils literal notranslate"><span class="pre">ImageDict.return_key_inds()</span></code></a></li>
+<li><a class="reference internal" href="#ImageMetaTag.ImageDict.sort_keys"><code class="docutils literal notranslate"><span class="pre">ImageDict.sort_keys()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#functions-useful-in-preparing-imagedicts">Functions useful in preparing ImageDicts</a><ul>
+<li><a class="reference internal" href="#ImageMetaTag.readmeta_from_image"><code class="docutils literal notranslate"><span class="pre">readmeta_from_image()</span></code></a></li>
+<li><a class="reference internal" href="#ImageMetaTag.dict_heirachy_from_list"><code class="docutils literal notranslate"><span class="pre">dict_heirachy_from_list()</span></code></a></li>
+<li><a class="reference internal" href="#ImageMetaTag.dict_split"><code class="docutils literal notranslate"><span class="pre">dict_split()</span></code></a></li>
+<li><a class="reference internal" href="#ImageMetaTag.simple_dict_filter"><code class="docutils literal notranslate"><span class="pre">simple_dict_filter()</span></code></a></li>
+<li><a class="reference internal" href="#ImageMetaTag.check_for_required_keys"><code class="docutils literal notranslate"><span class="pre">check_for_required_keys()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -422,13 +453,13 @@ list of strings</p>
         <li class="right" >
           <a href="db.html" title="ImageMetaTag.db"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.12 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.7.13 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">ImageMetaTag.ImageDict</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2015-2023, British Crown Copyright.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.0.2.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
     </div>
   </body>
 </html>
