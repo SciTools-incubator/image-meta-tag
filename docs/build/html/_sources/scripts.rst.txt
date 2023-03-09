@@ -14,13 +14,15 @@ This script operates on a ImageMetaTag database file (imt.db in any examples).
 
 Basic example:
 ::
- rm_imt_images imt.db file.png file2.png
+
+  rm_imt_images imt.db file.png file2.png
 
 this would delete file1.png and file2.png from disk and the imt.db file
 
 Usage with wildcards:
 ::
- rm_imt_images.py /path/to/images/imt.db  /path/to/images/subdir/*
+
+  rm_imt_images /path/to/images/imt.db  /path/to/images/subdir/*
 
 this would delete all files in the example subdirectory and their entry
 in the database

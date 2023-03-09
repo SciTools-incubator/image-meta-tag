@@ -146,8 +146,8 @@ def make_random_data(n_random_data, seed=3):
             n_rolls = 6 ** (i_rand + 1)
         else:
             n_rolls = 6 ** (6) + 2 ** (i_rand + 1)
-        random_data.append(np.random.random_integers(1, 6, n_rolls) +
-                           np.random.random_integers(1, 6, n_rolls))
+        random_data.append(np.random.randint(1, 6, n_rolls) +
+                           np.random.randint(1, 6, n_rolls))
     return random_data
 
 

@@ -19,7 +19,8 @@ convention (http://semver.org/)
   cd docs
  * Clean the documentation build:
      make html clean
- * Rebuild the docs, ensuring that the PYTHONPATH refers to the source of the new build:
+ * Rebuild the docs, ensuring that the PYTHONPATH refers to the source of 
+   the new build:
      PYTHONPATH=../ make html
 
 4) Commit the version number and documentation changes:
@@ -29,7 +30,12 @@ convention (http://semver.org/)
 5) Start a pull request for your branch on your github fork and follow the
 process to merge it to the master branch.
 
-6) Test the package works at the commit which you intend to release by installing from the specific commit to a temporary location. Install it using the setup.py and run the test.py script.
+
+## THIS IS BROKEN NOW AND WE HAVE TO DO SOMETHING ELSE.
+## (need to ask a software engineer why and what to do...)
+6) Test the package works at the commit which you intend to release by
+   installing from the specific commit to a temporary location. Install it
+   using the setup.py and run the test.py script.
   py27 setup.py install
 
 This will also make a dist/ folder for uploading to pypi later.

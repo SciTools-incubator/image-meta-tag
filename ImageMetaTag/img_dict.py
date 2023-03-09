@@ -18,7 +18,12 @@ Released under BSD 3-Clause License. See LICENSE for more details.
 # required imports
 import os
 import re
+
 import collections
+try:
+    from collections import Iterable
+except:
+    from collections.abc import Iterable
 import inspect
 import copy
 from PIL import Image
@@ -314,7 +319,7 @@ class ImageDict(object):
     def flatten_lists(self, in_list):
         'Recursively flattens a list of lists:'
         for list_element in in_list:
-            if isinstance(list_element, collections.Iterable) and \
+            if isinstance(list_element, Iterable) and \
                not isinstance(list_element, str):
                 for sub_list in self.flatten_lists(list_element):
                     yield sub_list
@@ -878,8 +883,7 @@ def dict_split(in_dict, n_split=None, size_split=None, extra_opts=None):
 
 
 def simple_dict_filter(simple_dict, tests, raise_key_mismatch=False):
-    '''
-Tests the contents of a simple, un-heirachical dict (properties an image)
+    '''Tests the contents of a simple, un-heirachical dict (properties an image)
 against a set of tests.
 
 An example set of tests:
@@ -915,8 +919,7 @@ Returns three logicals:
  * The third indicates whether the input dict is the first element of a \
    list grouped elements (is 'Histogram' in this \
    ['Histogram', 'Line plots'] list).
-
-    '''
+'''
     # this is set to False if the input dict fails the simple criteria:
     passes_tests = True
     # this stores all of the tests:
