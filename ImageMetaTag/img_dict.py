@@ -18,7 +18,12 @@ Released under BSD 3-Clause License. See LICENSE for more details.
 # required imports
 import os
 import re
+
 import collections
+try:
+    from collections import Iterable
+except:
+    from collections.abc import Iterable
 import inspect
 import copy
 from PIL import Image
@@ -314,7 +319,7 @@ class ImageDict(object):
     def flatten_lists(self, in_list):
         'Recursively flattens a list of lists:'
         for list_element in in_list:
-            if isinstance(list_element, collections.Iterable) and \
+            if isinstance(list_element, Iterable) and \
                not isinstance(list_element, str):
                 for sub_list in self.flatten_lists(list_element):
                     yield sub_list
