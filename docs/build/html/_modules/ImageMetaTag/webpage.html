@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ImageMetaTag.webpage &#8212; ImageMetaTag 0.7.13 documentation</title>
+    <title>ImageMetaTag.webpage &#8212; ImageMetaTag 0.8.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinxdoc.css" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
@@ -26,7 +26,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">ImageMetaTag 0.7.13 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">ImageMetaTag 0.8.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">ImageMetaTag.webpage</a></li> 
       </ul>
@@ -64,7 +64,7 @@
 <span class="sd">                                                        the javascript will write images to.</span>
 <span class="sd">    * :func:`ImageMetaTag.webpage.write_json` - writes out the :class:`ImageMetaTag.ImageDict`\</span>
 <span class="sd">                                                as a json.dump to a json file</span>
-<span class="sd">    * :func:`ImageMetaTag.webpage.copy_required_javascript` - copies required javascript library \</span>
+<span class="sd">    * :func:`ImageMetaTag.webpage.copy_required_js_css_etc` - copies required javascript library \</span>
 <span class="sd">                                                          to the required location.</span>
 
 <span class="sd">An easy example of creating a webpage, using an :class:`ImageMetaTag.ImageDict` is shown in</span>
@@ -95,6 +95,8 @@
 <span class="n">PAKO_RELEASE</span> <span class="o">=</span> <span class="s1">&#39;1.0.5&#39;</span>
 <span class="n">PAKO_SOURCE_TAR</span> <span class="o">=</span> <span class="s1">&#39;https://github.com/nodeca/pako/archive/</span><span class="si">{}</span><span class="s1">.tar.gz&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">PAKO_RELEASE</span><span class="p">)</span>
 
+<span class="n">IMG_COMP_JS_FILE</span> <span class="o">=</span> <span class="s1">&#39;img_comparison_slider_styles.js&#39;</span>
+<span class="n">IMG_COMP_STYLE</span> <span class="o">=</span> <span class="s1">&#39;img_comparison_slider_styles.css&#39;</span>
 
 <div class="viewcode-block" id="write_full_page"><a class="viewcode-back" href="../../webpage.html#ImageMetaTag.webpage.write_full_page">[docs]</a><span class="k">def</span> <span class="nf">write_full_page</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">page_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tab_s_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                     <span class="n">preamble</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">postamble</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">postamble_no_imt_link</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -103,7 +105,8 @@
                     <span class="n">show_singleton_selectors</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">optgroups</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                     <span class="n">url_type</span><span class="o">=</span><span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">only_show_rel_url</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                     <span class="n">style</span><span class="o">=</span><span class="s1">&#39;horiz dropdowns&#39;</span><span class="p">,</span> <span class="n">write_intmed_tmpfile</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                    <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">css</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">load_err_msg</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                    <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">css</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">load_err_msg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">last_img_in_list_is_slider</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Writes out an :class:`ImageMetaTag.ImageDict` as a webpage, to a given file location.</span>
 <span class="sd">    The files are created as temporary files and when complete they replace any files that</span>
@@ -154,6 +157,9 @@
 <span class="sd">                      default is None, but very large pages can crash with Internet Explorer so \</span>
 <span class="sd">                      a message along the lines of this may be useful: &#39;If the page does not \</span>
 <span class="sd">                      load correctly in Internet Explorer, please try using firefox or Chrome.&#39;</span>
+<span class="sd">     * last_img_in_list_is_slider - for the &#39;horiz dropdowns&#39; page style, when the image payload \</span>
+<span class="sd">                                    contains a list of images, then when this is True, the last \</span>
+<span class="sd">                                    images is used as an on overlay/slider on the other images.</span>
 
 <span class="sd">    Returns a list of files that the the created webpage is dependent upon.</span>
 
@@ -178,8 +184,10 @@
         <span class="n">json_files</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># now make sure the required javascript library is copied over to the file_dir:</span>
-        <span class="n">js_files</span> <span class="o">=</span> <span class="n">copy_required_javascript</span><span class="p">(</span><span class="n">file_dir</span><span class="p">,</span> <span class="n">style</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="n">compression</span><span class="p">)</span>
-        <span class="n">page_dependencies</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">js_files</span><span class="p">)</span>
+        <span class="n">js_css_files</span> <span class="o">=</span> <span class="n">copy_required_js_css_etc</span><span class="p">(</span><span class="n">file_dir</span><span class="p">,</span> <span class="n">style</span><span class="p">,</span>
+                                            <span class="n">compression</span><span class="o">=</span><span class="n">compression</span><span class="p">,</span>
+                                            <span class="n">last_img_in_list_is_slider</span><span class="o">=</span><span class="n">last_img_in_list_is_slider</span><span class="p">)</span>
+        <span class="n">page_dependencies</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">js_css_files</span><span class="p">)</span>
 
         <span class="c1"># we have real data to work with:</span>
         <span class="c1"># this tests the dict has uniform_depth, which is needed for all current webpages.</span>
@@ -335,12 +343,13 @@
             <span class="c1"># Here we want the final one:</span>
             <span class="n">final_json_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">json_files</span><span class="p">]</span>
             <span class="n">write_js_to_header</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">initial_selectors</span><span class="o">=</span><span class="n">initial_selectors</span><span class="p">,</span> <span class="n">optgroups</span><span class="o">=</span><span class="n">optgroups</span><span class="p">,</span>
-                               <span class="n">file_obj</span><span class="o">=</span><span class="n">out_file</span><span class="p">,</span> <span class="n">json_files</span><span class="o">=</span><span class="n">final_json_files</span><span class="p">,</span> <span class="n">js_files</span><span class="o">=</span><span class="n">js_files</span><span class="p">,</span>
+                               <span class="n">file_obj</span><span class="o">=</span><span class="n">out_file</span><span class="p">,</span> <span class="n">json_files</span><span class="o">=</span><span class="n">final_json_files</span><span class="p">,</span> <span class="n">js_css_files</span><span class="o">=</span><span class="n">js_css_files</span><span class="p">,</span>
                                <span class="n">pagename</span><span class="o">=</span><span class="n">page_filename</span><span class="p">,</span> <span class="n">tabname</span><span class="o">=</span><span class="n">tab_s_name</span><span class="p">,</span>
                                <span class="n">selector_prefix</span><span class="o">=</span><span class="n">selector_prefix</span><span class="p">,</span> <span class="n">url_separator</span><span class="o">=</span><span class="n">url_separator</span><span class="p">,</span>
                                <span class="n">show_singleton_selectors</span><span class="o">=</span><span class="n">show_singleton_selectors</span><span class="p">,</span>
                                <span class="n">url_type</span><span class="o">=</span><span class="n">url_type</span><span class="p">,</span> <span class="n">only_show_rel_url</span><span class="o">=</span><span class="n">only_show_rel_url</span><span class="p">,</span>
                                <span class="n">style</span><span class="o">=</span><span class="n">style</span><span class="p">,</span> <span class="n">ind</span><span class="o">=</span><span class="n">ind</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="n">compression</span><span class="p">,</span>
+                               <span class="n">last_img_in_list_is_slider</span><span class="o">=</span><span class="n">last_img_in_list_is_slider</span><span class="p">,</span>
                                <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="n">keywords</span><span class="p">)</span>
         <span class="c1"># now close the script and head:</span>
         <span class="n">ind</span> <span class="o">=</span> <span class="n">_indent_down_one</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
@@ -403,11 +412,12 @@
     <span class="k">return</span> <span class="n">page_dependencies</span></div>
 
 <div class="viewcode-block" id="write_js_to_header"><a class="viewcode-back" href="../../webpage.html#ImageMetaTag.webpage.write_js_to_header">[docs]</a><span class="k">def</span> <span class="nf">write_js_to_header</span><span class="p">(</span><span class="n">img_dict</span><span class="p">,</span> <span class="n">initial_selectors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">optgroups</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                       <span class="n">file_obj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">json_files</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">js_files</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                       <span class="n">file_obj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">json_files</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">js_css_files</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                        <span class="n">pagename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tabname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">selector_prefix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                        <span class="n">show_singleton_selectors</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                        <span class="n">url_separator</span><span class="o">=</span><span class="s1">&#39;|&#39;</span><span class="p">,</span> <span class="n">url_type</span><span class="o">=</span><span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">only_show_rel_url</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                        <span class="n">ind</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                       <span class="n">last_img_in_list_is_slider</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                        <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Writes out the required ImageMetaTag config and data paths into a html header section</span>
@@ -445,6 +455,8 @@
 <span class="sd">    * only_show_rel_url - If True, the wepage will only show relative urls in is link section.</span>
 <span class="sd">    * ind - indentation going into the header section.</span>
 <span class="sd">    * compression - Indicates the json file is compressed using zlib.</span>
+<span class="sd">    * last_img_in_list_is_slider - indicates the last image in a list of images \</span>
+<span class="sd">                                   in a payload should be used as an overlay/slider</span>
 <span class="sd">    * description - html description metadata7</span>
 <span class="sd">    * keywords - html keyword metadata</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -465,8 +477,14 @@
         <span class="c1">#file_obj.write(out_str)</span>
 
         <span class="c1"># now add a reference to the javascript functions to implement the style:</span>
-        <span class="k">for</span> <span class="n">js_file</span> <span class="ow">in</span> <span class="n">js_files</span><span class="p">:</span>
-            <span class="n">out_str</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&lt;script type=&quot;text/javascript&quot; src=&quot;</span><span class="si">{}</span><span class="s1">&quot;&gt;&lt;/script&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">js_file</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">js_cs_file</span> <span class="ow">in</span> <span class="n">js_css_files</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">js_cs_file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.js&#39;</span><span class="p">):</span>
+                <span class="n">out_str</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&lt;script type=&quot;text/javascript&quot; src=&quot;</span><span class="si">{}</span><span class="s1">&quot;&gt;&lt;/script&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">js_cs_file</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">js_cs_file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.css&#39;</span><span class="p">):</span>
+                <span class="n">out_str</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&lt;link rel=&quot;stylesheet&quot; href=&quot;</span><span class="si">{}</span><span class="s1">&quot;&gt;&lt;/script&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">js_cs_file</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Unexpected file type. Expecting .js or .css but got </span><span class="si">{}</span><span class="s1">&#39;</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">js_cs_file</span><span class="p">))</span>
             <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">out_str</span><span class="p">)</span>
 
         <span class="c1"># now write out the javascript configuration variables:</span>
@@ -475,9 +493,13 @@
         <span class="c1"># define, read in and parse the json file:</span>
         <span class="n">out_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span><span class="si">{0}</span><span class="s1">var json_files = </span><span class="si">{1}</span><span class="s1">;</span>
 <span class="si">{0}</span><span class="s1">var zl_unpack = </span><span class="si">{2}</span><span class="s1">;</span>
+<span class="si">{0}</span><span class="s1">var last_img_slider = </span><span class="si">{3}</span><span class="s1">;</span>
 <span class="si">{0}</span><span class="s1">imt = read_parse_json_files(json_files, zl_unpack);</span>
 <span class="s1">&#39;&#39;&#39;</span>
-        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">out_str</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">json_files</span><span class="p">,</span> <span class="n">_py_to_js_bool</span><span class="p">(</span><span class="nb">bool</span><span class="p">(</span><span class="n">compression</span><span class="p">))))</span>
+        <span class="n">file_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">out_str</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">json_files</span><span class="p">,</span>
+                                      <span class="n">_py_to_js_bool</span><span class="p">(</span><span class="nb">bool</span><span class="p">(</span><span class="n">compression</span><span class="p">)),</span>
+                                      <span class="n">_py_to_js_bool</span><span class="p">(</span><span class="nb">bool</span><span class="p">(</span><span class="n">last_img_in_list_is_slider</span><span class="p">)),</span>
+                       <span class="p">))</span>
 
         <span class="c1"># in case the page we are writing is embedded as a frame, write out the top</span>
         <span class="c1"># level page here;</span>
@@ -921,7 +943,8 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;&quot;</span><span class="si">%s</span><span class="s1">&quot; tyle of content placeholder not defined&#39;</span> <span class="o">%</span> <span class="n">style</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="copy_required_javascript"><a class="viewcode-back" href="../../webpage.html#ImageMetaTag.webpage.copy_required_javascript">[docs]</a><span class="k">def</span> <span class="nf">copy_required_javascript</span><span class="p">(</span><span class="n">file_dir</span><span class="p">,</span> <span class="n">style</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">copy_required_js_css_etc</span><span class="p">(</span><span class="n">file_dir</span><span class="p">,</span> <span class="n">style</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                             <span class="n">last_img_in_list_is_slider</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Copies the required javascript library to the directory</span>
 <span class="sd">    containing the required page (file_dir) for a given webpage style.</span>
@@ -961,7 +984,7 @@
 <span class="s1">not being overwritten. Your webpage may be broken!&#39;&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">file_dir</span><span class="p">,</span> <span class="n">imt_js_to_copy</span><span class="p">))</span>
 
     <span class="c1"># make a list of all the required javascript files</span>
-    <span class="n">js_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">imt_js_to_copy</span><span class="p">]</span>
+    <span class="n">js_css_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">imt_js_to_copy</span><span class="p">]</span>
 
     <span class="c1"># now move on to javascript dependencies from the compression:</span>
     <span class="k">if</span> <span class="n">compression</span><span class="p">:</span>
@@ -996,9 +1019,24 @@
                 <span class="c1"># copy the file:</span>
                 <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">js_src</span><span class="p">,</span> <span class="n">js_dest</span><span class="p">)</span>
         <span class="c1"># finally, make a note:</span>
-        <span class="n">js_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">js_to_copy</span><span class="p">)</span>
+        <span class="n">js_css_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">js_to_copy</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">js_files</span></div>
+    <span class="k">if</span> <span class="n">last_img_in_list_is_slider</span><span class="p">:</span>
+        <span class="n">files_to_copy</span> <span class="o">=</span> <span class="p">[</span><span class="n">IMG_COMP_STYLE</span><span class="p">,</span> <span class="n">IMG_COMP_JS_FILE</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">js_to_copy</span> <span class="ow">in</span> <span class="n">files_to_copy</span><span class="p">:</span>
+
+            <span class="n">js_src</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_src_dir</span><span class="p">,</span> <span class="n">js_to_copy</span><span class="p">)</span>
+            <span class="n">js_dest</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_dir</span><span class="p">,</span> <span class="n">js_to_copy</span><span class="p">)</span>
+            <span class="c1"># if the file is already at destination, we&#39;re good:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">js_dest</span><span class="p">):</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># copy the file:</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">js_src</span><span class="p">,</span> <span class="n">js_dest</span><span class="p">)</span>
+            <span class="c1"># finally, make a note:</span>
+            <span class="n">js_css_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">js_to_copy</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">js_css_files</span>
 
 <span class="k">def</span> <span class="nf">get_pako</span><span class="p">(</span><span class="n">pako_to_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
@@ -1087,7 +1125,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">ImageMetaTag 0.7.13 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">ImageMetaTag 0.8.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">ImageMetaTag.webpage</a></li> 
       </ul>

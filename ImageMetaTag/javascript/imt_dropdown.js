@@ -1,4 +1,4 @@
-// ImageMetaTag dropdown menu scripting - vn0.7.13
+// ImageMetaTag dropdown menu scripting - vn0.8.0
 // ImageMetaTag is a python package built around a wrapper for savefig in
 // matplotlib, which adds metadata tags to supported image file formats.
 // See https://github.com/SciTools-incubator/image-meta-tag for details.
@@ -221,7 +221,19 @@ function apply_payload( payload ) {
     // set the file, and break the loop:
     if (Array.isArray(payload)){
         // the right number of rows for a squarish box is the floor of the square root of the number of images:
-        var n_imgs = payload.length;
+
+    	  // last_img_slider might be inherited from the top level: check for it:
+    	  if (last_img_slider && payload.length > 1){
+    	      // if the last image is a slider then it won't be used as an
+            // image directly, so doesn't count:
+      	    var n_imgs = payload.length - 1;
+    	      var this_img_slider = true;
+    	      var slider_background = payload[n_imgs];
+       	} else {
+    	      var n_imgs = payload.length;
+    	      var this_img_slider = false;
+    	  }
+
         if (n_imgs <= 3){
             var n_cols = n_imgs;
             //var n_rows = 1;
@@ -236,7 +248,11 @@ function apply_payload( payload ) {
         the_file = "<p><table cellspacing=2>";
         for (var i_img=0; i_img < n_imgs; i_img++){
             if (i_img % n_cols == 0){ the_file += "<tr>"}
-            the_file += "<td><img src=" + payload[i_img] + "></td>";
+	    if (this_img_slider){
+		    the_file += "<td>" + apply_slider(payload[i_img], slider_background, i_img) + "</td>";
+		} else {
+		    the_file += "<td><img src=" + payload[i_img] + "></td>";
+		}
         }
         the_file += "</table></p>";
     } else {
@@ -245,6 +261,16 @@ function apply_payload( payload ) {
     // now set the_image div:
     var _ = document.getElementById("the_image");
     _.innerHTML = the_file;
+}
+
+function apply_slider(foreg, backg, i_img){
+    // given an input of a foreground image and a background image,
+    // constructs a slider between them
+    out = '<img-comparison-slider value=95 tabindex=0 class="rendered">'
+    out += '<img slot="first" src="' + foreg + '">'
+    out += '<img slot="second" src="' + backg + '">'
+    out += '</img-comparison-slider>'
+    return out;
 }
 
 function cache_payload( payload ){
