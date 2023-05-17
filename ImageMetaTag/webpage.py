@@ -24,7 +24,7 @@ If the latter, then the following sections are needed:
                                                         the javascript will write images to.
     * :func:`ImageMetaTag.webpage.write_json` - writes out the :class:`ImageMetaTag.ImageDict`\
                                                 as a json.dump to a json file
-    * :func:`ImageMetaTag.webpage.copy_required_javascript` - copies required javascript library \
+    * :func:`ImageMetaTag.webpage.copy_required_js_css_etc` - copies required javascript library \
                                                           to the required location.
 
 An easy example of creating a webpage, using an :class:`ImageMetaTag.ImageDict` is shown in
@@ -55,6 +55,8 @@ PAKO_JS_FILE = 'pako_inflate.js'
 PAKO_RELEASE = '1.0.5'
 PAKO_SOURCE_TAR = 'https://github.com/nodeca/pako/archive/{}.tar.gz'.format(PAKO_RELEASE)
 
+IMG_COMP_JS_FILE = 'img_comparison_slider_styles.js'
+IMG_COMP_STYLE = 'img_comparison_slider_styles.css'
 
 def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=None,
                     preamble=None, postamble=None, postamble_no_imt_link=False,
@@ -63,7 +65,8 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
                     show_singleton_selectors=True, optgroups=None,
                     url_type='int', only_show_rel_url=False, verbose=False,
                     style='horiz dropdowns', write_intmed_tmpfile=False,
-                    description=None, keywords=None, css=None, load_err_msg=None):
+                    description=None, keywords=None, css=None,
+                    load_err_msg=None, last_img_in_list_is_slider=False):
     '''
     Writes out an :class:`ImageMetaTag.ImageDict` as a webpage, to a given file location.
     The files are created as temporary files and when complete they replace any files that
@@ -114,6 +117,9 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
                       default is None, but very large pages can crash with Internet Explorer so \
                       a message along the lines of this may be useful: 'If the page does not \
                       load correctly in Internet Explorer, please try using firefox or Chrome.'
+     * last_img_in_list_is_slider - for the 'horiz dropdowns' page style, when the image payload \
+                                    contains a list of images, then when this is True, the last \
+                                    images is used as an on overlay/slider on the other images.
 
     Returns a list of files that the the created webpage is dependent upon.
 
@@ -138,8 +144,10 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
         json_files = []
     else:
         # now make sure the required javascript library is copied over to the file_dir:
-        js_files = copy_required_javascript(file_dir, style, compression=compression)
-        page_dependencies.extend(js_files)
+        js_css_files = copy_required_js_css_etc(file_dir, style,
+                                            compression=compression,
+                                            last_img_in_list_is_slider=last_img_in_list_is_slider)
+        page_dependencies.extend(js_css_files)
 
         # we have real data to work with:
         # this tests the dict has uniform_depth, which is needed for all current webpages.
@@ -295,12 +303,13 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
             # Here we want the final one:
             final_json_files = [os.path.split(x[1])[1] for x in json_files]
             write_js_to_header(img_dict, initial_selectors=initial_selectors, optgroups=optgroups,
-                               file_obj=out_file, json_files=final_json_files, js_files=js_files,
+                               file_obj=out_file, json_files=final_json_files, js_css_files=js_css_files,
                                pagename=page_filename, tabname=tab_s_name,
                                selector_prefix=selector_prefix, url_separator=url_separator,
                                show_singleton_selectors=show_singleton_selectors,
                                url_type=url_type, only_show_rel_url=only_show_rel_url,
                                style=style, ind=ind, compression=compression,
+                               last_img_in_list_is_slider=last_img_in_list_is_slider,
                                description=description, keywords=keywords)
         # now close the script and head:
         ind = _indent_down_one(ind)
@@ -363,11 +372,12 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
     return page_dependencies
 
 def write_js_to_header(img_dict, initial_selectors=None, optgroups=None, style=None,
-                       file_obj=None, json_files=None, js_files=None,
+                       file_obj=None, json_files=None, js_css_files=None,
                        pagename=None, tabname=None, selector_prefix=None,
                        show_singleton_selectors=True,
                        url_separator='|', url_type='str', only_show_rel_url=False,
                        ind=None, compression=False,
+                       last_img_in_list_is_slider=False,
                        description=None, keywords=None):
     '''
     Writes out the required ImageMetaTag config and data paths into a html header section
@@ -405,6 +415,8 @@ def write_js_to_header(img_dict, initial_selectors=None, optgroups=None, style=N
     * only_show_rel_url - If True, the wepage will only show relative urls in is link section.
     * ind - indentation going into the header section.
     * compression - Indicates the json file is compressed using zlib.
+    * last_img_in_list_is_slider - indicates the last image in a list of images \
+                                   in a payload should be used as an overlay/slider
     * description - html description metadata7
     * keywords - html keyword metadata
     '''
@@ -425,8 +437,14 @@ def write_js_to_header(img_dict, initial_selectors=None, optgroups=None, style=N
         #file_obj.write(out_str)
 
         # now add a reference to the javascript functions to implement the style:
-        for js_file in js_files:
-            out_str = '{}<script type="text/javascript" src="{}"></script>\n'.format(ind, js_file)
+        for js_cs_file in js_css_files:
+            if js_cs_file.endswith('.js'):
+                out_str = '{}<script type="text/javascript" src="{}"></script>\n'.format(ind, js_cs_file)
+            elif js_cs_file.endswith('.css'):
+                out_str = '{}<link rel="stylesheet" href="{}"></script>\n'.format(ind, js_cs_file)
+            else:
+                msg = 'Unexpected file type. Expecting .js or .css but got {}'
+                raise ValueError(msg.format(js_cs_file))
             file_obj.write(out_str)
 
         # now write out the javascript configuration variables:
@@ -435,9 +453,13 @@ def write_js_to_header(img_dict, initial_selectors=None, optgroups=None, style=N
         # define, read in and parse the json file:
         out_str = '''{0}var json_files = {1};
 {0}var zl_unpack = {2};
+{0}var last_img_slider = {3};
 {0}imt = read_parse_json_files(json_files, zl_unpack);
 '''
-        file_obj.write(out_str.format(ind, json_files, _py_to_js_bool(bool(compression))))
+        file_obj.write(out_str.format(ind, json_files,
+                                      _py_to_js_bool(bool(compression)),
+                                      _py_to_js_bool(bool(last_img_in_list_is_slider)),
+                       ))
 
         # in case the page we are writing is embedded as a frame, write out the top
         # level page here;
@@ -881,7 +903,8 @@ def write_js_placeholders(img_dict, file_obj=None, dict_depth=None,
     else:
         raise ValueError('"%s" tyle of content placeholder not defined' % style)
 
-def copy_required_javascript(file_dir, style, compression=False, overwrite=True):
+def copy_required_js_css_etc(file_dir, style, compression=False,
+                             last_img_in_list_is_slider=False, overwrite=True):
     '''
     Copies the required javascript library to the directory
     containing the required page (file_dir) for a given webpage style.
@@ -921,7 +944,7 @@ def copy_required_javascript(file_dir, style, compression=False, overwrite=True)
 not being overwritten. Your webpage may be broken!'''.format(file_dir, imt_js_to_copy))
 
     # make a list of all the required javascript files
-    js_files = [imt_js_to_copy]
+    js_css_files = [imt_js_to_copy]
 
     # now move on to javascript dependencies from the compression:
     if compression:
@@ -956,9 +979,24 @@ not being overwritten. Your webpage may be broken!'''.format(file_dir, imt_js_to
                 # copy the file:
                 shutil.copy(js_src, js_dest)
         # finally, make a note:
-        js_files.append(js_to_copy)
+        js_css_files.append(js_to_copy)
 
-    return js_files
+    if last_img_in_list_is_slider:
+        files_to_copy = [IMG_COMP_STYLE, IMG_COMP_JS_FILE]
+        for js_to_copy in files_to_copy:
+
+            js_src = os.path.join(file_src_dir, js_to_copy)
+            js_dest = os.path.join(file_dir, js_to_copy)
+            # if the file is already at destination, we're good:
+            if os.path.isfile(js_dest):
+                pass
+            else:
+                # copy the file:
+                shutil.copy(js_src, js_dest)
+            # finally, make a note:
+            js_css_files.append(js_to_copy)
+
+    return js_css_files
 
 def get_pako(pako_to_dir=None):
     '''

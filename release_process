@@ -4,7 +4,7 @@ and making it available via conda
 1) Develop, prepare and test your changes as normal, up to the point where
 the changes warrants a new release.
 
-2) The release number should be changed using the Semantic versioning 
+2) The release number should be changed using the Semantic versioning
 convention (http://semver.org/)
  * The version number should be incemented in the following locations:
    * ImageMetaTag/__init__.py
@@ -19,7 +19,7 @@ convention (http://semver.org/)
   cd docs
  * Clean the documentation build:
      make html clean
- * Rebuild the docs, ensuring that the PYTHONPATH refers to the source of 
+ * Rebuild the docs, ensuring that the PYTHONPATH refers to the source of
    the new build:
      PYTHONPATH=../ make html
 
@@ -46,7 +46,7 @@ From this point onwards, admin rights are required to both image-meta-tag and im
 7) Pulbish a release in the image-meta-tag repository for the new release
 number at: https://github.com/SciTools-incubator/image-meta-tag/releases
  * Tag version is just the version number e.g. '0.6.7' in the code.
- * The convention used for the release title adds 'vn' before the number, e.g. 
+ * The convention used for the release title adds 'vn' before the number, e.g.
    'vn0.6.7'
  * The release description can be used to give a very brief outline of the
    changes.
@@ -78,6 +78,6 @@ number at: https://github.com/SciTools-incubator/image-meta-tag/releases
  * Without an hour or so the new release should be available via conda.
 
 
-9) With a correctly set up pypi login and .pypirc file, the following 
+9) With a correctly set up pypi login and .pypirc file, the following
 command will set up a pypi record for the release (python > 2.7.13 is needed):
   twine upload dist/*

@@ -1263,6 +1263,7 @@ def __main__():
                                                               preamble=webpage_preamble,
                                                               postamble=webpage_postamble,
                                                               postamble_no_imt_link=True,
+                                                              last_img_in_list_is_slider=True,
                                                               verbose=True, url_type='str')
         web_out[out_page_css] = imt.webpage.write_full_page(img_dict, out_page_css,
                                                             'Test ImageDict webpage with CSS',
