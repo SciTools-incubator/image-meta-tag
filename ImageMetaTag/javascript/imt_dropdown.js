@@ -266,7 +266,10 @@ function apply_payload( payload ) {
 function apply_slider(foreg, backg, i_img){
     // given an input of a foreground image and a background image,
     // constructs a slider between them
-    out = '<img-comparison-slider value=95 tabindex=0 class="rendered">'
+    // picking up the default value from the slider
+    var slider = document.getElementById("slider_default");
+    var slider_def = slider['value'];
+    out = '<img-comparison-slider value=' + slider_def + ' tabindex=0 class="rendered">'
     out += '<img slot="first" src="' + foreg + '">'
     out += '<img slot="second" src="' + backg + '">'
     out += '</img-comparison-slider>'

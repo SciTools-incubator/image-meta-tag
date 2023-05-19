@@ -341,6 +341,7 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
             write_js_placeholders(img_dict, file_obj=out_file, dict_depth=img_dict.dict_depth(),
                                   style=style, level_names=level_names,
                                   show_singleton_selectors=show_singleton_selectors,
+                                  last_img_in_list_is_slider=last_img_in_list_is_slider,
                                   animated_level=anim_level, load_err_msg=load_err_msg)
 
         # the body is done, so the postamble comes in:
@@ -775,6 +776,7 @@ def write_js_placeholders(img_dict, file_obj=None, dict_depth=None,
                           selector_prefix=None,
                           style='horiz dropdowns', level_names=False,
                           show_singleton_selectors=True,
+                          last_img_in_list_is_slider=False,
                           animated_level=None, load_err_msg=None):
     '''
     Writes the placeholders into the page body, for the javascript to
@@ -882,6 +884,14 @@ def write_js_placeholders(img_dict, file_obj=None, dict_depth=None,
    <span id="animator2">&nbsp;</span>
    <br>
 '''.format(anim_label))
+
+        if last_img_in_list_is_slider:
+            # adds in the default slider position, if needed:
+            file_obj.write('''
+   <div id='slider'>
+     Default slider position: <input type="range" min="1" max="100" value="80" class="slider" id="slider_default">
+   </div>
+   ''')
 
         # now add somewhere for the image to go:
         if load_err_msg is None:
