@@ -1265,15 +1265,14 @@ def __main__():
                                                               postamble_no_imt_link=True,
                                                               last_img_in_list_is_slider=True,
                                                               verbose=True, url_type='str')
-        web_out[out_page_css] = imt.webpage.write_full_page(img_dict, out_page_css,
+        web_out[out_page_css] = imt.webpage.write_full_page(img_dict_multi, out_page_css,
                                                             'Test ImageDict webpage with CSS',
                                                             preamble=webpage_preamble,
                                                             postamble=webpage_postamble,
-                                                            initial_selectors=initial_selectors,
-                                                            optgroups=groupings,
                                                             verbose=True, only_show_rel_url=True,
-                                                            write_intmed_tmpfile=True,
                                                             show_selector_names=True,
+                                                            last_img_in_list_is_slider=True,
+                                                            last_img_still_show=True,
                                                             show_singleton_selectors=False,
                                                             compression=test_zlib_compression,
                                                             css=test_css)

@@ -220,20 +220,27 @@ function apply_payload( payload ) {
     var the_file = "<p>Sorry, there is no image for that selection.</p>";
     // set the file, and break the loop:
     if (Array.isArray(payload)){
-        // the right number of rows for a squarish box is the floor of the square root of the number of images:
-
-    	  // last_img_slider might be inherited from the top level: check for it:
-    	  if (last_img_slider && payload.length > 1){
-    	      // if the last image is a slider then it won't be used as an
-            // image directly, so doesn't count:
-      	    var n_imgs = payload.length - 1;
-    	      var this_img_slider = true;
-    	      var slider_background = payload[n_imgs];
+	// how many images we have depends on what the last image is used for:
+	if (last_img_slider && payload.length > 1){
+            if (!last_img_still_show){
+   		// if the last image is a slider then it won't be used as an
+		// image directly, so doesn't count:
+      		var n_imgs = payload.length - 1;
+		var this_img_slider = Array(n_imgs).fill(true);
+	    } else {
+		// the last image is a slider underlay, but we want to show it:
+		var n_imgs = payload.length;
+		var this_img_slider = Array(n_imgs).fill(true);
+		this_img_slider[n_imgs-1] = false
+	    }
+    	    var slider_background = payload[payload.length - 1];
        	} else {
-    	      var n_imgs = payload.length;
-    	      var this_img_slider = false;
-    	  }
-
+	    // no sliders so show all the images
+    	    var n_imgs = payload.length;
+    	    var this_img_slider = Array(n_imgs).fill(false);
+    	}
+	
+	// the right number of rows for a squarish box is the floor of the square root of the number of images:
         if (n_imgs <= 3){
             var n_cols = n_imgs;
             //var n_rows = 1;
@@ -248,7 +255,7 @@ function apply_payload( payload ) {
         the_file = "<p><table cellspacing=2>";
         for (var i_img=0; i_img < n_imgs; i_img++){
             if (i_img % n_cols == 0){ the_file += "<tr>"}
-	    if (this_img_slider){
+	    if (this_img_slider[i_img]){
 		    the_file += "<td>" + apply_slider(payload[i_img], slider_background, i_img) + "</td>";
 		} else {
 		    the_file += "<td><img src=" + payload[i_img] + "></td>";

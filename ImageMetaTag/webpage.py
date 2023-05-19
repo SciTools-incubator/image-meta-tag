@@ -66,7 +66,9 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
                     url_type='int', only_show_rel_url=False, verbose=False,
                     style='horiz dropdowns', write_intmed_tmpfile=False,
                     description=None, keywords=None, css=None,
-                    load_err_msg=None, last_img_in_list_is_slider=False):
+                    load_err_msg=None,
+                    last_img_in_list_is_slider=False,
+                    last_img_still_show=False):
     '''
     Writes out an :class:`ImageMetaTag.ImageDict` as a webpage, to a given file location.
     The files are created as temporary files and when complete they replace any files that
@@ -120,6 +122,9 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
      * last_img_in_list_is_slider - for the 'horiz dropdowns' page style, when the image payload \
                                     contains a list of images, then when this is True, the last \
                                     images is used as an on overlay/slider on the other images.
+     * last_img_still_show - when last_img_in_list_is_slider applies a set of sliders, this \
+                             toggles whether or not the last image is still shown, as a static \
+                             image or not.
 
     Returns a list of files that the the created webpage is dependent upon.
 
@@ -310,6 +315,7 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
                                url_type=url_type, only_show_rel_url=only_show_rel_url,
                                style=style, ind=ind, compression=compression,
                                last_img_in_list_is_slider=last_img_in_list_is_slider,
+                               last_img_still_show=last_img_still_show,
                                description=description, keywords=keywords)
         # now close the script and head:
         ind = _indent_down_one(ind)
@@ -379,6 +385,7 @@ def write_js_to_header(img_dict, initial_selectors=None, optgroups=None, style=N
                        url_separator='|', url_type='str', only_show_rel_url=False,
                        ind=None, compression=False,
                        last_img_in_list_is_slider=False,
+                       last_img_still_show=False,
                        description=None, keywords=None):
     '''
     Writes out the required ImageMetaTag config and data paths into a html header section
@@ -418,6 +425,8 @@ def write_js_to_header(img_dict, initial_selectors=None, optgroups=None, style=N
     * compression - Indicates the json file is compressed using zlib.
     * last_img_in_list_is_slider - indicates the last image in a list of images \
                                    in a payload should be used as an overlay/slider
+    * last_img_still_show - if last_img_in_list_is_slider, then this controls if the last image \
+                            is shown as a static image or not, at the end.
     * description - html description metadata7
     * keywords - html keyword metadata
     '''
@@ -455,11 +464,13 @@ def write_js_to_header(img_dict, initial_selectors=None, optgroups=None, style=N
         out_str = '''{0}var json_files = {1};
 {0}var zl_unpack = {2};
 {0}var last_img_slider = {3};
+{0}var last_img_still_show = {4};
 {0}imt = read_parse_json_files(json_files, zl_unpack);
 '''
         file_obj.write(out_str.format(ind, json_files,
                                       _py_to_js_bool(bool(compression)),
                                       _py_to_js_bool(bool(last_img_in_list_is_slider)),
+                                      _py_to_js_bool(bool(last_img_still_show)),
                        ))
 
         # in case the page we are writing is embedded as a frame, write out the top
@@ -891,7 +902,7 @@ def write_js_placeholders(img_dict, file_obj=None, dict_depth=None,
    <div id='slider'>
      Default slider position: <input type="range" min="1" max="100" value="80" class="slider" id="slider_default">
    </div>
-   ''')
+''')
 
         # now add somewhere for the image to go:
         if load_err_msg is None:
