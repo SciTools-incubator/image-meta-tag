@@ -1,4 +1,4 @@
-// ImageMetaTag dropdown menu scripting - vn0.8.0
+// ImageMetaTag dropdown menu scripting - vn0.8.1
 // ImageMetaTag is a python package built around a wrapper for savefig in
 // matplotlib, which adds metadata tags to supported image file formats.
 // See https://github.com/SciTools-incubator/image-meta-tag for details.
@@ -239,7 +239,7 @@ function apply_payload( payload ) {
     	    var n_imgs = payload.length;
     	    var this_img_slider = Array(n_imgs).fill(false);
     	}
-	
+
 	// the right number of rows for a squarish box is the floor of the square root of the number of images:
         if (n_imgs <= 3){
             var n_cols = n_imgs;
