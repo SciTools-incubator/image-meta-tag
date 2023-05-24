@@ -15,6 +15,4 @@ As indidividual components
 .. autofunction:: ImageMetaTag.webpage.write_js_to_header
 .. autofunction:: ImageMetaTag.webpage.write_js_placeholders
 .. autofunction:: ImageMetaTag.webpage.write_json
-.. autofunction:: ImageMetaTag.webpage.copy_required_javascript
-
-
+.. autofunction:: ImageMetaTag.webpage.copy_required_js_css_etc
