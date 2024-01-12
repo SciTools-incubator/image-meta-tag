@@ -374,10 +374,10 @@ def image_file_postproc(filename, outfile=None, img_buf=None,
             do_thumb = (do_thumb, do_thumb)
         # create the thumbnail
         im_thumb = im_obj.copy()
-        if hasattr(Image, "ANTIALIAS"):
-            im_thumb.thumbnail(do_thumb, Image.ANTIALIAS)
-        else:
+        if hasattr(Image, "LANCZOS"):
             im_thumb.thumbnail(do_thumb, Image.LANCZOS)
+        else:
+            im_thumb.thumbnail(do_thumb, Image.ANTIALIAS)
 
     # images start out as RGBA, strip out the alpha channel first by
     # converting to RGB,then you convert to the next format
