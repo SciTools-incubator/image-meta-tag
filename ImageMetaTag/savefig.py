@@ -374,7 +374,10 @@ def image_file_postproc(filename, outfile=None, img_buf=None,
             do_thumb = (do_thumb, do_thumb)
         # create the thumbnail
         im_thumb = im_obj.copy()
-        im_thumb.thumbnail(do_thumb, Image.ANTIALIAS)
+        if hasattr(Image, "LANCZOS"):
+            im_thumb.thumbnail(do_thumb, Image.LANCZOS)
+        else:
+            im_thumb.thumbnail(do_thumb, Image.ANTIALIAS)
 
     # images start out as RGBA, strip out the alpha channel first by
     # converting to RGB,then you convert to the next format
@@ -772,7 +775,11 @@ def _img_stong_resize(img_obj, size=None):
     # if max(shrink_ratio) >= 2:
     #    new_img_obj = new_img_obj.filter(ImageFilter.SMOOTH)
     # now resize:
-    res_img_obj = new_img_obj.resize(size, Image.ANTIALIAS)
+    if hasattr(Image, "LANCZOS"):
+        res_img_obj = new_img_obj.resize(size, Image.LANCZOS)
+    else:
+        res_img_obj = new_img_obj.resize(size, Image.ANTIALIAS)
+
     return res_img_obj
 
 
