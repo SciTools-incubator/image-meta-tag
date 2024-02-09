@@ -1,19 +1,15 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ImageMetaTag.db &#8212; ImageMetaTag 0.8.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sphinxdoc.css" />
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/jquery.js"></script>
-    <script src="../../_static/underscore.js"></script>
-    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/sphinx_highlight.js"></script>
+    <title>ImageMetaTag.db &#8212; ImageMetaTag 0.8.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinxdoc.css?v=d59dc883" />
+    <script src="../../_static/documentation_options.js?v=dbee5847"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
   </head><body>
@@ -26,7 +22,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">ImageMetaTag 0.8.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">ImageMetaTag 0.8.2 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">ImageMetaTag.db</a></li> 
       </ul>
@@ -72,21 +68,29 @@
 <span class="n">SQLITE_IMG_INFO_FNAME</span> <span class="o">=</span> <span class="s1">&#39;fname&#39;</span>
 
 
-<div class="viewcode-block" id="info_key_to_db_name"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.info_key_to_db_name">[docs]</a><span class="k">def</span> <span class="nf">info_key_to_db_name</span><span class="p">(</span><span class="n">in_str</span><span class="p">):</span>
+<div class="viewcode-block" id="info_key_to_db_name">
+<a class="viewcode-back" href="../../db.html#ImageMetaTag.db.info_key_to_db_name">[docs]</a>
+<span class="k">def</span> <span class="nf">info_key_to_db_name</span><span class="p">(</span><span class="n">in_str</span><span class="p">):</span>
     <span class="s1">&#39;Consistently convert a name in the img_info dict database&#39;</span>
     <span class="k">return</span> <span class="n">in_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;__&#39;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="db_name_to_info_key"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.db_name_to_info_key">[docs]</a><span class="k">def</span> <span class="nf">db_name_to_info_key</span><span class="p">(</span><span class="n">in_str</span><span class="p">):</span>
+
+<div class="viewcode-block" id="db_name_to_info_key">
+<a class="viewcode-back" href="../../db.html#ImageMetaTag.db.db_name_to_info_key">[docs]</a>
+<span class="k">def</span> <span class="nf">db_name_to_info_key</span><span class="p">(</span><span class="n">in_str</span><span class="p">):</span>
     <span class="s1">&#39;Inverse of info_key_to_db_name&#39;</span>
     <span class="c1"># convert to string, to remove unicode string</span>
     <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">in_str</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;__&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="write_img_to_dbfile"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.write_img_to_dbfile">[docs]</a><span class="k">def</span> <span class="nf">write_img_to_dbfile</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">img_filename</span><span class="p">,</span> <span class="n">img_info</span><span class="p">,</span> <span class="n">add_strict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+
+<div class="viewcode-block" id="write_img_to_dbfile">
+<a class="viewcode-back" href="../../db.html#ImageMetaTag.db.write_img_to_dbfile">[docs]</a>
+<span class="k">def</span> <span class="nf">write_img_to_dbfile</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">img_filename</span><span class="p">,</span> <span class="n">img_info</span><span class="p">,</span> <span class="n">add_strict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                         <span class="n">attempt_replace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                         <span class="n">timeout</span><span class="o">=</span><span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Writes image metadata to a database.</span>
 
 <span class="sd">    Arguments:</span>
@@ -125,11 +129,14 @@
         <span class="n">dbcn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="read"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.read">[docs]</a><span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">required_tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tag_strings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+
+<div class="viewcode-block" id="read">
+<a class="viewcode-back" href="../../db.html#ImageMetaTag.db.read">[docs]</a>
+<span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">required_tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tag_strings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
          <span class="n">db_timeout</span><span class="o">=</span><span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">,</span>
          <span class="n">db_attempts</span><span class="o">=</span><span class="n">DEFAULT_DB_ATTEMPTS</span><span class="p">,</span>
          <span class="n">n_samples</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    reads in the database written by write_img_to_dbfile</span>
 
 <span class="sd">    Options:</span>
@@ -200,15 +207,18 @@
     <span class="n">dbcn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">f_list</span><span class="p">,</span> <span class="n">out_dict</span></div>
 
+
 <span class="n">read_img_info_from_dbfile</span> <span class="o">=</span> <span class="n">read</span>
 
 
-<div class="viewcode-block" id="merge_db_files"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.merge_db_files">[docs]</a><span class="k">def</span> <span class="nf">merge_db_files</span><span class="p">(</span><span class="n">main_db_file</span><span class="p">,</span> <span class="n">add_db_file</span><span class="p">,</span> <span class="n">delete_add_db</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<div class="viewcode-block" id="merge_db_files">
+<a class="viewcode-back" href="../../db.html#ImageMetaTag.db.merge_db_files">[docs]</a>
+<span class="k">def</span> <span class="nf">merge_db_files</span><span class="p">(</span><span class="n">main_db_file</span><span class="p">,</span> <span class="n">add_db_file</span><span class="p">,</span> <span class="n">delete_add_db</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                    <span class="n">delete_added_entries</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">attempt_replace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                    <span class="n">add_strict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                    <span class="n">db_timeout</span><span class="o">=</span><span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">,</span>
                    <span class="n">db_attempts</span><span class="o">=</span><span class="n">DEFAULT_DB_ATTEMPTS</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Merges two ImageMetaTag database files, with the contents of add_db_file</span>
 <span class="sd">    added to the main_db_file. The databases should have the same tags within</span>
 <span class="sd">    them for the merge to work.</span>
@@ -269,8 +279,11 @@
                               <span class="n">allow_retries</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">skip_warning</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="open_or_create_db_file"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.open_or_create_db_file">[docs]</a><span class="k">def</span> <span class="nf">open_or_create_db_file</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">img_info</span><span class="p">,</span> <span class="n">restart_db</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="open_or_create_db_file">
+<a class="viewcode-back" href="../../db.html#ImageMetaTag.db.open_or_create_db_file">[docs]</a>
+<span class="k">def</span> <span class="nf">open_or_create_db_file</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">img_info</span><span class="p">,</span> <span class="n">restart_db</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Opens a database file and sets up initial tables, then returns the connection and cursor.</span>
 
 <span class="sd">    Arguments:</span>
@@ -303,6 +316,7 @@
     <span class="k">return</span> <span class="n">dbcn</span><span class="p">,</span> <span class="n">dbcr</span></div>
 
 
+
 <span class="k">def</span> <span class="nf">create_table_for_img_info</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span> <span class="n">img_info</span><span class="p">):</span>
     <span class="s1">&#39;Creates a database table, in a database cursor, to store for the input img_info&#39;</span>
 
@@ -330,8 +344,10 @@
         <span class="k">raise</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Error</span><span class="p">(</span><span class="n">sq_err</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="open_db_file"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.open_db_file">[docs]</a><span class="k">def</span> <span class="nf">open_db_file</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+<div class="viewcode-block" id="open_db_file">
+<a class="viewcode-back" href="../../db.html#ImageMetaTag.db.open_db_file">[docs]</a>
+<span class="k">def</span> <span class="nf">open_db_file</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Just opens an existing db_file, using timeouts but no retries.</span>
 
 <span class="sd">    Returns an open database connection (dbcn) and cursor (dbcr)</span>
@@ -343,8 +359,11 @@
     <span class="k">return</span> <span class="n">dbcn</span><span class="p">,</span> <span class="n">dbcr</span></div>
 
 
-<div class="viewcode-block" id="read_db_file_to_mem"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.read_db_file_to_mem">[docs]</a><span class="k">def</span> <span class="nf">read_db_file_to_mem</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="read_db_file_to_mem">
+<a class="viewcode-back" href="../../db.html#ImageMetaTag.db.read_db_file_to_mem">[docs]</a>
+<span class="k">def</span> <span class="nf">read_db_file_to_mem</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Opens a pre-existing database file into a copy held in memory. This can be accessed much</span>
 <span class="sd">    faster when doing extenstive work (a lot of select operations, for instance).</span>
 
@@ -375,9 +394,12 @@
     <span class="k">return</span> <span class="n">dbcn</span><span class="p">,</span> <span class="n">dbcr</span></div>
 
 
-<div class="viewcode-block" id="write_img_to_open_db"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.write_img_to_open_db">[docs]</a><span class="k">def</span> <span class="nf">write_img_to_open_db</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">img_info</span><span class="p">,</span>
+
+<div class="viewcode-block" id="write_img_to_open_db">
+<a class="viewcode-back" href="../../db.html#ImageMetaTag.db.write_img_to_open_db">[docs]</a>
+<span class="k">def</span> <span class="nf">write_img_to_open_db</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">img_info</span><span class="p">,</span>
                          <span class="n">add_strict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">attempt_replace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Does the work for write_img_to_dbfile to add an image</span>
 <span class="sd">    to the open database cursor (dbcr)</span>
 
@@ -456,6 +478,7 @@
         <span class="k">pass</span></div>
 
 
+
 <span class="k">def</span> <span class="nf">list_tables</span><span class="p">(</span><span class="n">dbcr</span><span class="p">):</span>
     <span class="s1">&#39;lists the tables present, from a database cursor&#39;</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">dbcr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT name FROM sqlite_master WHERE type=&#39;table&#39;;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
@@ -463,9 +486,11 @@
     <span class="k">return</span> <span class="n">table_names</span>
 
 
-<div class="viewcode-block" id="read_img_info_from_dbcursor"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.read_img_info_from_dbcursor">[docs]</a><span class="k">def</span> <span class="nf">read_img_info_from_dbcursor</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span> <span class="n">required_tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tag_strings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="read_img_info_from_dbcursor">
+<a class="viewcode-back" href="../../db.html#ImageMetaTag.db.read_img_info_from_dbcursor">[docs]</a>
+<span class="k">def</span> <span class="nf">read_img_info_from_dbcursor</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span> <span class="n">required_tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tag_strings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                 <span class="n">n_samples</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Reads from an open database cursor (dbcr) for</span>
 <span class="sd">    :func:`ImageMetaTag.db.read` and other routines.</span>
 
@@ -500,9 +525,12 @@
     <span class="k">return</span> <span class="n">filename_list</span><span class="p">,</span> <span class="n">out_dict</span></div>
 
 
-<div class="viewcode-block" id="process_select_star_from"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.process_select_star_from">[docs]</a><span class="k">def</span> <span class="nf">process_select_star_from</span><span class="p">(</span><span class="n">db_contents</span><span class="p">,</span> <span class="n">dbcr</span><span class="p">,</span> <span class="n">required_tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+
+<div class="viewcode-block" id="process_select_star_from">
+<a class="viewcode-back" href="../../db.html#ImageMetaTag.db.process_select_star_from">[docs]</a>
+<span class="k">def</span> <span class="nf">process_select_star_from</span><span class="p">(</span><span class="n">db_contents</span><span class="p">,</span> <span class="n">dbcr</span><span class="p">,</span> <span class="n">required_tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                              <span class="n">tag_strings</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Converts the output from a select * from ....  command into a standard</span>
 <span class="sd">    output format. Requires a database cursor (dbcr) to identify the field</span>
 <span class="sd">    names.</span>
@@ -621,10 +649,13 @@
     <span class="k">return</span> <span class="n">filename_list</span><span class="p">,</span> <span class="n">out_dict</span></div>
 
 
-<div class="viewcode-block" id="del_plots_from_dbfile"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.del_plots_from_dbfile">[docs]</a><span class="k">def</span> <span class="nf">del_plots_from_dbfile</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">filenames</span><span class="p">,</span> <span class="n">do_vacuum</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">allow_retries</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+
+<div class="viewcode-block" id="del_plots_from_dbfile">
+<a class="viewcode-back" href="../../db.html#ImageMetaTag.db.del_plots_from_dbfile">[docs]</a>
+<span class="k">def</span> <span class="nf">del_plots_from_dbfile</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">filenames</span><span class="p">,</span> <span class="n">do_vacuum</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">allow_retries</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                           <span class="n">db_timeout</span><span class="o">=</span><span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">,</span> <span class="n">db_attempts</span><span class="o">=</span><span class="n">DEFAULT_DB_ATTEMPTS</span><span class="p">,</span>
                           <span class="n">skip_warning</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    deletes a list of files from a database file created by :mod:`ImageMetaTag.db`</span>
 
 <span class="sd">    * do_vacuum - if True, the database will be restructured/cleaned after the delete</span>
@@ -692,8 +723,8 @@
                         <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">OperationalError</span> <span class="k">as</span> <span class="n">op_err</span><span class="p">:</span>
                             <span class="k">if</span> <span class="s1">&#39;database is locked&#39;</span> <span class="ow">in</span> <span class="nb">repr</span><span class="p">(</span><span class="n">op_err</span><span class="p">):</span>
                                 <span class="c1"># database being locked is what the retries and timeouts are for:</span>
-                                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> database timeout deleting from file &quot;</span><span class="si">%s</span><span class="s1">&quot;, </span><span class="si">%s</span><span class="s1"> s&#39;</span> \
-                                                <span class="o">%</span> <span class="p">(</span><span class="n">dt_now_str</span><span class="p">(),</span> <span class="n">db_file</span><span class="p">,</span> <span class="n">n_tries</span> <span class="o">*</span> <span class="n">db_timeout</span><span class="p">))</span>
+                                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> database timeout deleting from file &quot;</span><span class="si">{}</span><span class="s1">&quot;, </span><span class="si">{}</span><span class="s1"> s&#39;</span>
+                                <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dt_now_str</span><span class="p">(),</span> <span class="n">db_file</span><span class="p">,</span> <span class="n">n_tries</span> <span class="o">*</span> <span class="n">db_timeout</span><span class="p">))</span>
                                 <span class="n">n_tries</span> <span class="o">+=</span> <span class="mi">1</span>
                             <span class="k">elif</span> <span class="s1">&#39;disk I/O error&#39;</span> <span class="ow">in</span> <span class="nb">repr</span><span class="p">(</span><span class="n">op_err</span><span class="p">):</span>
                                 <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> for file </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">op_err</span><span class="p">,</span> <span class="n">db_file</span><span class="p">)</span>
@@ -739,14 +770,17 @@
                 <span class="n">dbcn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 
+
 <span class="k">def</span> <span class="nf">__gen_chunk_of_list</span><span class="p">(</span><span class="n">in_list</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">):</span>
     <span class="s1">&#39;gnerator that yields a chunk of list, of length chunk size&#39;</span>
     <span class="k">for</span> <span class="n">ndx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">in_list</span><span class="p">),</span> <span class="n">chunk_size</span><span class="p">):</span>
         <span class="k">yield</span> <span class="n">in_list</span><span class="p">[</span><span class="n">ndx</span><span class="p">:</span><span class="nb">min</span><span class="p">(</span><span class="n">ndx</span> <span class="o">+</span> <span class="n">chunk_size</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">in_list</span><span class="p">))]</span>
 
 
-<div class="viewcode-block" id="select_dbfile_by_tags"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.select_dbfile_by_tags">[docs]</a><span class="k">def</span> <span class="nf">select_dbfile_by_tags</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">select_tags</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+<div class="viewcode-block" id="select_dbfile_by_tags">
+<a class="viewcode-back" href="../../db.html#ImageMetaTag.db.select_dbfile_by_tags">[docs]</a>
+<span class="k">def</span> <span class="nf">select_dbfile_by_tags</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">select_tags</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Selects from a database file the entries that match a dict of field names/acceptable values.</span>
 
 <span class="sd">    Returns the output, processed by :func:`ImageMetaTag.db.process_select_star_from`</span>
@@ -765,8 +799,11 @@
     <span class="k">return</span> <span class="n">sel_results</span></div>
 
 
-<div class="viewcode-block" id="select_dbcr_by_tags"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.select_dbcr_by_tags">[docs]</a><span class="k">def</span> <span class="nf">select_dbcr_by_tags</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span> <span class="n">select_tags</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="select_dbcr_by_tags">
+<a class="viewcode-back" href="../../db.html#ImageMetaTag.db.select_dbcr_by_tags">[docs]</a>
+<span class="k">def</span> <span class="nf">select_dbcr_by_tags</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span> <span class="n">select_tags</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Selects from an open database cursor (dbcr) the entries that match a dict of field</span>
 <span class="sd">    names &amp; acceptable values.</span>
 
@@ -808,8 +845,11 @@
     <span class="k">return</span> <span class="n">filename_list</span><span class="p">,</span> <span class="n">out_dict</span></div>
 
 
-<div class="viewcode-block" id="recrete_table_new_cols"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.recrete_table_new_cols">[docs]</a><span class="k">def</span> <span class="nf">recrete_table_new_cols</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span> <span class="n">current_cols</span><span class="p">,</span> <span class="n">new_cols</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="recrete_table_new_cols">
+<a class="viewcode-back" href="../../db.html#ImageMetaTag.db.recrete_table_new_cols">[docs]</a>
+<span class="k">def</span> <span class="nf">recrete_table_new_cols</span><span class="p">(</span><span class="n">dbcr</span><span class="p">,</span> <span class="n">current_cols</span><span class="p">,</span> <span class="n">new_cols</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    for a given database cursor (bdcr) this recreates a new version of the</span>
 <span class="sd">    ImageMetaTag database table with new columns.</span>
 
@@ -879,10 +919,13 @@
     <span class="n">dbcr</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">drop_tmp_table_comm</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="scan_dir_for_db"><a class="viewcode-back" href="../../db.html#ImageMetaTag.db.scan_dir_for_db">[docs]</a><span class="k">def</span> <span class="nf">scan_dir_for_db</span><span class="p">(</span><span class="n">basedir</span><span class="p">,</span> <span class="n">db_file</span><span class="p">,</span> <span class="n">img_tag_req</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">add_strict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+
+<div class="viewcode-block" id="scan_dir_for_db">
+<a class="viewcode-back" href="../../db.html#ImageMetaTag.db.scan_dir_for_db">[docs]</a>
+<span class="k">def</span> <span class="nf">scan_dir_for_db</span><span class="p">(</span><span class="n">basedir</span><span class="p">,</span> <span class="n">db_file</span><span class="p">,</span> <span class="n">img_tag_req</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">add_strict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                     <span class="n">subdir_excl_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">known_file_tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                     <span class="n">no_file_ext</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_timings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">restart_db</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    A useful utility that scans a directory on disk for images that can go into a database.</span>
 <span class="sd">    This should only be used to build a database from a directory of tagged images that</span>
 <span class="sd">    did not previously use a database, or where the database file has been deleted but the</span>
@@ -1006,8 +1049,9 @@
     <span class="k">return</span> <span class="kc">None</span></div>
 
 
+
 <span class="k">def</span> <span class="nf">rmfile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    os.remove, but does not complain if the file has already been</span>
 <span class="sd">    deleted (by a parallel process, for instance).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1056,14 +1100,14 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">ImageMetaTag 0.8.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">ImageMetaTag 0.8.2 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">ImageMetaTag.db</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2015-2023, British Crown Copyright.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
+    &#169; Copyright 2015-2023, British Crown Copyright.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
     </div>
   </body>
 </html>

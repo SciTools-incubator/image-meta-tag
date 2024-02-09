@@ -1,20 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>ImageMetaTag.ImageDict &#8212; ImageMetaTag 0.8.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/sphinx_highlight.js"></script>
+    <title>ImageMetaTag.ImageDict &#8212; ImageMetaTag 0.8.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css?v=d59dc883" />
+    <script src="_static/documentation_options.js?v=dbee5847"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="ImageMetaTag.webpage" href="webpage.html" />
@@ -35,7 +31,7 @@
         <li class="right" >
           <a href="db.html" title="ImageMetaTag.db"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.8.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.8.2 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">ImageMetaTag.ImageDict</a></li> 
       </ul>
     </div>  
@@ -46,7 +42,7 @@
           <div class="body" role="main">
             
   <section id="module-ImageMetaTag.img_dict">
-<span id="imagemetatag-imagedict"></span><h1>ImageMetaTag.ImageDict<a class="headerlink" href="#module-ImageMetaTag.img_dict" title="Permalink to this heading">¶</a></h1>
+<span id="imagemetatag-imagedict"></span><h1>ImageMetaTag.ImageDict<a class="headerlink" href="#module-ImageMetaTag.img_dict" title="Link to this heading">¶</a></h1>
 <p>This submodule contains the <a class="reference internal" href="#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageMetaTag.ImageDict</span></code></a> class, and
 functions for preparing instances of it.</p>
 <p>The purpose of an <a class="reference internal" href="#ImageMetaTag.ImageDict" title="ImageMetaTag.ImageDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageMetaTag.ImageDict</span></code></a> is to sort the image
@@ -58,10 +54,10 @@ a webpage by <a class="reference internal" href="webpage.html#ImageMetaTag.webpa
 <p>(C) Crown copyright Met Office. All rights reserved.
 Released under BSD 3-Clause License. See LICENSE for more details.</p>
 <section id="the-imagedict-class">
-<h2>The ImageDict Class<a class="headerlink" href="#the-imagedict-class" title="Permalink to this heading">¶</a></h2>
+<h2>The ImageDict Class<a class="headerlink" href="#the-imagedict-class" title="Link to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="ImageMetaTag.ImageDict">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ImageMetaTag.</span></span><span class="sig-name descname"><span class="pre">ImageDict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selector_widths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selector_animated</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animation_direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ImageMetaTag.</span></span><span class="sig-name descname"><span class="pre">ImageDict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selector_widths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selector_animated</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animation_direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict" title="Link to this definition">¶</a></dt>
 <dd><p>A class which holds a heirachical dictionary of dictionaries, and the
 associated methods for appending/removing dictionaries from it.</p>
 <p>The expected use case for the dictionary is to represent a large set of
@@ -92,7 +88,7 @@ a flat dictionary of metadata items, use
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="ImageMetaTag.ImageDict.append">
-<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">devmode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_key_relist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.append"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.append" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">devmode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_key_relist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.append"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.append" title="Link to this definition">¶</a></dt>
 <dd><p>appends a new dictionary (with a single element in each layer!) into
 a current ImageDict.</p>
 <p>The skip_key_relist option can be set to True to stop the
@@ -101,27 +97,27 @@ regeneration of key lists to speed up multiple appends.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ImageMetaTag.ImageDict.copy_except_dict_and_keys">
-<span class="sig-name descname"><span class="pre">copy_except_dict_and_keys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.copy_except_dict_and_keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.copy_except_dict_and_keys" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">copy_except_dict_and_keys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.copy_except_dict_and_keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.copy_except_dict_and_keys" title="Link to this definition">¶</a></dt>
 <dd><p>returns a copy of an ImageDict except it will have null values for
 the dict and keys</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ImageMetaTag.ImageDict.dict_depth">
-<span class="sig-name descname"><span class="pre">dict_depth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uniform_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.dict_depth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.dict_depth" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">dict_depth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uniform_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.dict_depth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.dict_depth" title="Link to this definition">¶</a></dt>
 <dd><p>Uses dict_depths to get the depth of all branches of the plot_dict
 and, if required, checks they all equal the max.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ImageMetaTag.ImageDict.dict_depths">
-<span class="sig-name descname"><span class="pre">dict_depths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.dict_depths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.dict_depths" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">dict_depths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.dict_depths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.dict_depths" title="Link to this definition">¶</a></dt>
 <dd><p>Recursively finds the depth of a ImageDict, returns a list of lists</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ImageMetaTag.ImageDict.dict_index_array">
-<span class="sig-name descname"><span class="pre">dict_index_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">devmode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxdepth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.dict_index_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.dict_index_array" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">dict_index_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">devmode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxdepth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.dict_index_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.dict_index_array" title="Link to this definition">¶</a></dt>
 <dd><p>Using the list of dictionary keys (at each level of a uniform_depth
 dictionary of dictionaries), this produces a list of the indices that
 can be used to reference the keys to get the result for each element.</p>
@@ -135,14 +131,14 @@ can be used to reference the keys to get the result for each element.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ImageMetaTag.ImageDict.dict_print">
-<span class="sig-name descname"><span class="pre">dict_print</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outstr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.dict_print"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.dict_print" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">dict_print</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outstr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.dict_print"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.dict_print" title="Link to this definition">¶</a></dt>
 <dd><p>recursively details a dictionary of dictionaries, with indentation,
 to a string</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ImageMetaTag.ImageDict.dict_prune">
-<span class="sig-name descname"><span class="pre">dict_prune</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dicts_pruned</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.dict_prune"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.dict_prune" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">dict_prune</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dicts_pruned</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.dict_prune"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.dict_prune" title="Link to this definition">¶</a></dt>
 <dd><p>Prunes the ImageDict of empty, unterminated, branches
 (which occur after parts have been removed).
 Returns True if a dict was pruned, False if not.</p>
@@ -150,7 +146,7 @@ Returns True if a dict was pruned, False if not.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ImageMetaTag.ImageDict.dict_remove">
-<span class="sig-name descname"><span class="pre">dict_remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rm_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.dict_remove"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.dict_remove" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">dict_remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rm_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.dict_remove"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.dict_remove" title="Link to this definition">¶</a></dt>
 <dd><p>removes a dictionary of dictionaries from another, larger, one.
 This can leave empty branches, at multiple levels of the dict,
 so needs cleaning up afterwards.</p>
@@ -158,25 +154,25 @@ so needs cleaning up afterwards.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ImageMetaTag.ImageDict.dict_union">
-<span class="sig-name descname"><span class="pre">dict_union</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.dict_union"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.dict_union" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">dict_union</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.dict_union"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.dict_union" title="Link to this definition">¶</a></dt>
 <dd><p>produces the union of a dictionary of dictionaries</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ImageMetaTag.ImageDict.flatten_lists">
-<span class="sig-name descname"><span class="pre">flatten_lists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.flatten_lists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.flatten_lists" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">flatten_lists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.flatten_lists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.flatten_lists" title="Link to this definition">¶</a></dt>
 <dd><p>Recursively flattens a list of lists:</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ImageMetaTag.ImageDict.key_at_depth">
-<span class="sig-name descname"><span class="pre">key_at_depth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.key_at_depth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.key_at_depth" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">key_at_depth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.key_at_depth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.key_at_depth" title="Link to this definition">¶</a></dt>
 <dd><p>returns the keys of a dictionary, at a given depth</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ImageMetaTag.ImageDict.keys_by_depth">
-<span class="sig-name descname"><span class="pre">keys_by_depth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subdirs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.keys_by_depth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.keys_by_depth" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">keys_by_depth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subdirs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.keys_by_depth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.keys_by_depth" title="Link to this definition">¶</a></dt>
 <dd><p>Returns:</p>
 <ul class="simple">
 <li><p>a dictionary of sets, containing the keys at each level of          the dictionary (keyed by the level number).</p></li>
@@ -186,7 +182,7 @@ so needs cleaning up afterwards.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ImageMetaTag.ImageDict.list_keys_by_depth">
-<span class="sig-name descname"><span class="pre">list_keys_by_depth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">devmode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.list_keys_by_depth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.list_keys_by_depth" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">list_keys_by_depth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">devmode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.list_keys_by_depth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.list_keys_by_depth" title="Link to this definition">¶</a></dt>
 <dd><p>Lists the keys of the dictionary to create a list of keys, for each
 level of the dictionary, up to its depth.</p>
 <p>It is usually much faster to create an ImageDict by appending images
@@ -200,7 +196,7 @@ This also produces the unique subdirectory locations of all images.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ImageMetaTag.ImageDict.mergedicts">
-<span class="sig-name descname"><span class="pre">mergedicts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dict2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.mergedicts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.mergedicts" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">mergedicts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dict2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.mergedicts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.mergedicts" title="Link to this definition">¶</a></dt>
 <dd><p>Alternative version of dict_union using generators which is much
 faster for large dicts but needs to be converted to a dict when it’s
 called:   new_dict = dict(mergdicts(dict1,dict))</p>
@@ -208,7 +204,7 @@ called:   new_dict = dict(mergdicts(dict1,dict))</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ImageMetaTag.ImageDict.remove">
-<span class="sig-name descname"><span class="pre">remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rm_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_key_relist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.remove"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.remove" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rm_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_key_relist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.remove"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.remove" title="Link to this definition">¶</a></dt>
 <dd><p>removes a dictionary from within an ImageDict.
 The skip_key_relist option can be set to True to stop the regeneration
 of key lists.</p>
@@ -221,7 +217,7 @@ at the end.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ImageMetaTag.ImageDict.return_from_list">
-<span class="sig-name descname"><span class="pre">return_from_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vals_at_depth</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.return_from_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.return_from_list" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">return_from_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vals_at_depth</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.return_from_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.return_from_list" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the end values of ImageDict, when given a list of values for
 the keys at different depths.
 Returns None if the set of values is not contained in the ImageDict.</p>
@@ -232,7 +228,7 @@ list_keys_by_depth()    method has been called since.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ImageMetaTag.ImageDict.return_key_inds">
-<span class="sig-name descname"><span class="pre">return_key_inds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_array</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">this_set_of_inds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">devmode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.return_key_inds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.return_key_inds" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">return_key_inds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_array</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">this_set_of_inds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">devmode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.return_key_inds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.return_key_inds" title="Link to this definition">¶</a></dt>
 <dd><p>Does the work for dict_index_array, by recursively adding indices to
 the keys to a current list, and branching where required, and adding
 compelted lists to the out_array</p>
@@ -240,7 +236,7 @@ compelted lists to the out_array</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ImageMetaTag.ImageDict.sort_keys">
-<span class="sig-name descname"><span class="pre">sort_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sort_methods</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">devmode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.sort_keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.sort_keys" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">sort_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sort_methods</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">devmode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#ImageDict.sort_keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.ImageDict.sort_keys" title="Link to this definition">¶</a></dt>
 <dd><p>Sorts the keys of a plot dictionary, according to a particular sort
 method (or a list of sort methods that matches the number of keys).</p>
 <p>Valid sort methods so far are mostly focused on meteorological terms,
@@ -261,10 +257,10 @@ and include:</p>
 
 </section>
 <section id="functions-useful-in-preparing-imagedicts">
-<h2>Functions useful in preparing ImageDicts<a class="headerlink" href="#functions-useful-in-preparing-imagedicts" title="Permalink to this heading">¶</a></h2>
+<h2>Functions useful in preparing ImageDicts<a class="headerlink" href="#functions-useful-in-preparing-imagedicts" title="Link to this heading">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="ImageMetaTag.readmeta_from_image">
-<span class="sig-prename descclassname"><span class="pre">ImageMetaTag.</span></span><span class="sig-name descname"><span class="pre">readmeta_from_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_reserved_tags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#readmeta_from_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.readmeta_from_image" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ImageMetaTag.</span></span><span class="sig-name descname"><span class="pre">readmeta_from_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_reserved_tags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#readmeta_from_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.readmeta_from_image" title="Link to this definition">¶</a></dt>
 <dd><p>Reads the metadata added by the ImageMetaTag savefig, from an image
 file, and returns a dictionary of <em>tag_name: value</em> pairs</p>
 <p>By default tag names that cannot be written by ImageMetaTag savefig
@@ -274,7 +270,7 @@ file, and returns a dictionary of <em>tag_name: value</em> pairs</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ImageMetaTag.dict_heirachy_from_list">
-<span class="sig-prename descclassname"><span class="pre">ImageMetaTag.</span></span><span class="sig-name descname"><span class="pre">dict_heirachy_from_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">heirachy</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#dict_heirachy_from_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.dict_heirachy_from_list" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ImageMetaTag.</span></span><span class="sig-name descname"><span class="pre">dict_heirachy_from_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">heirachy</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#dict_heirachy_from_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.dict_heirachy_from_list" title="Link to this definition">¶</a></dt>
 <dd><p>Converts a flat dictionary of <em>tagname: value</em> pairs, into an ordered
 dictionary of dictionaries according to the input heirachy
 (which is a list of tagnames).</p>
@@ -289,7 +285,7 @@ or list of image files.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ImageMetaTag.dict_split">
-<span class="sig-prename descclassname"><span class="pre">ImageMetaTag.</span></span><span class="sig-name descname"><span class="pre">dict_split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_split</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size_split</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#dict_split"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.dict_split" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ImageMetaTag.</span></span><span class="sig-name descname"><span class="pre">dict_split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_split</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size_split</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#dict_split"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.dict_split" title="Link to this definition">¶</a></dt>
 <dd><p>Generator that breaks up a flat dictionary and yields a set of
 sub-dictionaries in n_split chunks, or size_split in size. It is split
 on it’s first level, not recursively.</p>
@@ -313,7 +309,7 @@ in_dict - the dictionary to split</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ImageMetaTag.simple_dict_filter">
-<span class="sig-prename descclassname"><span class="pre">ImageMetaTag.</span></span><span class="sig-name descname"><span class="pre">simple_dict_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simple_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raise_key_mismatch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#simple_dict_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.simple_dict_filter" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ImageMetaTag.</span></span><span class="sig-name descname"><span class="pre">simple_dict_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simple_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raise_key_mismatch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#simple_dict_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.simple_dict_filter" title="Link to this definition">¶</a></dt>
 <dd><p>Tests the contents of a simple, un-heirachical dict (properties an image)
 against a set of tests.</p>
 <p>An example set of tests:</p>
@@ -347,7 +343,7 @@ to be presented together.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ImageMetaTag.check_for_required_keys">
-<span class="sig-prename descclassname"><span class="pre">ImageMetaTag.</span></span><span class="sig-name descname"><span class="pre">check_for_required_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">req_keys</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#check_for_required_keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.check_for_required_keys" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ImageMetaTag.</span></span><span class="sig-name descname"><span class="pre">check_for_required_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">req_keys</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ImageMetaTag/img_dict.html#check_for_required_keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ImageMetaTag.check_for_required_keys" title="Link to this definition">¶</a></dt>
 <dd><p>Checks an img_info dictionary has a set of required keys, specifed as a
 list of strings</p>
 <p>Returns True or False accordingly.</p>
@@ -453,13 +449,13 @@ list of strings</p>
         <li class="right" >
           <a href="db.html" title="ImageMetaTag.db"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.8.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">ImageMetaTag 0.8.2 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">ImageMetaTag.ImageDict</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2015-2023, British Crown Copyright.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
+    &#169; Copyright 2015-2023, British Crown Copyright.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
     </div>
   </body>
 </html>
