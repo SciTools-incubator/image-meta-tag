@@ -40,10 +40,10 @@ Released under BSD 3-Clause License. See LICENSE for more details.
 '''
 
 import os, json, pdb, shutil, tempfile, copy, zlib
+from multiprocessing import Pool
 import numpy as np
 import ImageMetaTag as imt
 
-from multiprocessing import Pool
 
 # single indent to be used on the output webpage
 INDENT = '  '
@@ -1019,6 +1019,7 @@ not being overwritten. Your webpage may be broken!'''.format(file_dir, imt_js_to
 
     return js_css_files
 
+
 def get_pako(pako_to_dir=None):
     '''
     Obtains the required pako javascript code from remote host, to a given
@@ -1045,24 +1046,26 @@ def get_pako(pako_to_dir=None):
     with tarfile.open(name=targz_file, mode='r:gz') as tgz:
         if not tarfile.is_tarfile:
             raise ValueError('Downloaded pako tar.gz file cannot be read.')
-        else:
-            target = 'pako-{}/dist/{}'.format(PAKO_RELEASE, PAKO_JS_FILE)
-            target_file = tgz.extractfile(target)
-            if target_file:
-                with open(os.path.join(pako_to_dir, PAKO_JS_FILE), 'w') as final_file:
-                    for line in target_file:
-                        final_file.write(line)
+        target = 'pako-{}/dist/{}'.format(PAKO_RELEASE, PAKO_JS_FILE)
+        target_file = tgz.extractfile(target)
+        if target_file:
+            with open(os.path.join(pako_to_dir, PAKO_JS_FILE), 'w') as final_file:
+                for line in target_file:
+                    final_file.write(line)
     os.remove(targz_file)
+
 
 def _indent_up_one(ind):
     'increases the indent level of an input ind by one'
     n_indents = int(len(ind) / LEN_INDENT)
     return INDENT * (n_indents + 1)
 
+
 def _indent_down_one(ind):
     'decreases the indent level of an input ind by one'
     n_indents = int(len(ind) / LEN_INDENT)
     return INDENT * max(n_indents - 1, 0)
+
 
 def _py_to_js_bool(py_bool):
     'Converts a python boolean to a string, in javascript bool format (all lower case)'
@@ -1070,5 +1073,4 @@ def _py_to_js_bool(py_bool):
         return 'true'
     elif py_bool is False:
         return 'false'
-    else:
-        raise ValueError('input to _py_to_js_bool is not a boolean, it is: %s' % py_bool)
+    raise ValueError('input to _py_to_js_bool is not a boolean, it is: %s' % py_bool)

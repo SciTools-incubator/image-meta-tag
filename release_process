@@ -4,7 +4,9 @@ and making it available via conda
 1) Develop, prepare and test your changes as normal, up to the point where
 the changes warrants a new release.
 
-2) The release number should be changed using the Semantic versioning
+2) Run the test.py script with multiple python environments to give version coverage. Check for deprecation messages and resolve them so that future versions don't break.
+
+3) The release number should be changed using the Semantic versioning
 convention (http://semver.org/)
  * The version number should be incemented in the following locations:
    * ImageMetaTag/__init__.py
@@ -15,7 +17,7 @@ convention (http://semver.org/)
    time to make sure it works, as the code at this stage is what will be
    released.
 
-3) Update the documentation, from the docs directory:
+4) Update the documentation, from the docs directory:
   cd docs
  * Clean the documentation build:
      make html clean
@@ -23,17 +25,17 @@ convention (http://semver.org/)
    the new build:
      PYTHONPATH=../ make html
 
-4) Commit the version number and documentation changes:
+5) Commit the version number and documentation changes:
   git commit -a
   git push origin {{ branch_name }}
 
-5) Start a pull request for your branch on your github fork and follow the
+6) Start a pull request for your branch on your github fork and follow the
 process to merge it to the master branch.
 
 
 ## THIS IS BROKEN NOW AND WE HAVE TO DO SOMETHING ELSE.
 ## (need to ask a software engineer why and what to do...)
-6) Test the package works at the commit which you intend to release by
+7) Test the package works at the commit which you intend to release by
    installing from the specific commit to a temporary location. Install it
    using the setup.py and run the test.py script.
   py27 setup.py install
@@ -43,7 +45,7 @@ This will also make a dist/ folder for uploading to pypi later.
 From this point onwards, admin rights are required to both image-meta-tag and image-meta-tag-feedstock repositories.
 
 
-7) Pulbish a release in the image-meta-tag repository for the new release
+8) Pulbish a release in the image-meta-tag repository for the new release
 number at: https://github.com/SciTools-incubator/image-meta-tag/releases
  * Tag version is just the version number e.g. '0.6.7' in the code.
  * The convention used for the release title adds 'vn' before the number, e.g.
@@ -51,7 +53,7 @@ number at: https://github.com/SciTools-incubator/image-meta-tag/releases
  * The release description can be used to give a very brief outline of the
    changes.
 
-8) Update the recipe on the conda-forge-feedstock:
+9) Update the recipe on the conda-forge-feedstock:
  * The main repository is:
      https://github.com/conda-forge/image-meta-tag-feedstock
  * The location of admin branches is:
@@ -78,6 +80,6 @@ number at: https://github.com/SciTools-incubator/image-meta-tag/releases
  * Without an hour or so the new release should be available via conda.
 
 
-9) With a correctly set up pypi login and .pypirc file, the following
+10) With a correctly set up pypi login and .pypirc file, the following
 command will set up a pypi record for the release (python > 2.7.13 is needed):
   twine upload dist/*

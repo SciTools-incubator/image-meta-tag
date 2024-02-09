@@ -16,19 +16,18 @@ Released under BSD 3-Clause License. See LICENSE for more details.
 
 import os
 import sys
-import io
+import ionn
 import sqlite3
 import pdb
 from datetime import datetime
 import matplotlib.pyplot as plt
+# image manipulations:
+from PIL import Image, ImageChops, PngImagePlugin
+import numpy as np
 
 from ImageMetaTag import db, META_IMG_FORMATS, RESERVED_TAGS
 from ImageMetaTag import POSTPROC_IMG_FORMATS, DPI_IMG_FORMATS
 from ImageMetaTag import DEFAULT_DB_TIMEOUT, DEFAULT_DB_ATTEMPTS
-
-# image manipulations:
-from PIL import Image, ImageChops, PngImagePlugin
-import numpy as np
 
 THUMB_DEFAULT_IMG_SIZE = 150, 150
 THUMB_DEFAULT_DIR_NAME = 'thumbnail'

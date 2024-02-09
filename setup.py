@@ -12,7 +12,7 @@ for d, _, _ in os.walk(os.path.join(here, 'ImageMetaTag')):
 setup_args = dict(
     name = 'ImageMetaTag',
     # see release_process for details on incrementing the version
-    version = '0.8.1',
+    version = '0.8.2',
     description = 'Image metadata tagging, database and presentation',
     license = 'BSD3',
     author = 'Melissa Brooks',

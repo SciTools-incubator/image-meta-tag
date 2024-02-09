@@ -19,14 +19,15 @@ import argparse
 import copy
 import random
 import platform
+import math
 import pdb
 from multiprocessing import Pool
 from datetime import datetime
 
-# common python modeuls:
+# common python modules:
 import matplotlib
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 # for timings:
 DATE_START = datetime.now()
@@ -990,7 +991,8 @@ def __main__():
                                     # change what is presented depening on
                                     # the order that the img_file, img_info
                                     # comes up in images_and_tags.iteritems()
-                                    msg = 'A multi image group has the same img name as a single image'
+                                    msg = ('A multi image group has the same img '
+                                           'name as a single image')
                                     raise ValueError(msg)
                                 all_img_relpaths = []
 
@@ -998,13 +1000,12 @@ def __main__():
                                     # now use the key_lookup again,
                                     # only this time looking for this_value
                                     key_lookup[multi_depth] = this_value
-                                    # and look in the main img_dict as that already has all the images,
-                                    # sorted and easily accessible:
+                                    # and look in the main img_dict as that already has all
+                                    # the images, sorted and easily accessible:
                                     all_img_relpaths.append(img_dict.return_from_list(key_lookup))
                                     #
-                                    # If more complicated processing is required, substitutions or
-                                    # fudging values, then this could be done here.
-
+                                    # If more complicated processing is required, substitutions
+                                    # or fudging values, then this could be done here.
 
                                 if multi_req_all and any([x is None for x in all_img_relpaths]):
                                     # we need all images in this list, and one fails, so just pass:
@@ -1025,7 +1026,8 @@ def __main__():
                                     img_dict_multi.append(imt.ImageDict(tmp_dict))
 
                     else:
-                        # this test is a standard one, not a tuple defining a multi image, so just pass:
+                        # this test is a standard one, not a tuple defining a
+                        # multi image, so just pass:
                         pass
 
         # sort img_dict_multi - the sorter will need to include new info though
@@ -1067,7 +1069,8 @@ def __main__():
                 tmp_dict = imt.dict_heirachy_from_list(img_info, img_file, tagorder)
                 img_dict_multi.append(imt.ImageDict(tmp_dict))
 
-            # now we are filterig one of the levels of the dict (multi_depth) by the multi_keys list:
+            # now we are filterig one of the levels of the dict (multi_depth)
+            # by the multi_keys list:
             if use_multi and first_multi:
                 for tuple_test in key_filter[tagorder[multi_depth]]:
                     if isinstance(tuple_test, tuple):
@@ -1207,7 +1210,6 @@ def __main__():
                 next_sel = random.choice(list(img_dict.return_from_list(initial_selectors).keys()))
                 initial_selectors.append(next_sel)
 
-
     # on one of the pages, we'll test the ability to group selections using <optgroup>:
     # These groups are specified as a 2-level dictionary where the first level is the index
     # of the selector. The second level contains the {'group name': [contents]}
@@ -1300,8 +1302,8 @@ def __main__():
             date_start_bigdb = datetime.now()
             biggus_dictus = {}
             i_count = 0
-            n_to_do = np.math.factorial(9)
-            n_to_do_flt = float(np.math.factorial(9))
+            n_to_do = math.factorial(9)
+            n_to_do_flt = float(math.factorial(9))
             dt_prev = datetime.now()
             pcents = list(range(5, 101, 5)) # write out every 5% completed
             for i_1 in range(1):
@@ -1314,8 +1316,9 @@ def __main__():
                                         for i_8 in range(8):
                                             for i_9 in range(9):
                                                 # we don't want to actually make an image!
-                                                img_name = 'no_image_%s_%s_%s_%s_%s_%s_%s_%s_%s.png ' \
-                                                        % (i_1, i_2, i_3, i_4, i_5, i_6, i_7, i_8, i_9)
+                                                img_name = 'no_image_{}_{}_{}_{}_{}_{}_{}_{}_{}.png'
+                                                img_name = img_name.format(i_1, i_2, i_3, i_4, i_5,
+                                                                           i_6, i_7, i_8, i_9)
                                                 img_info = {'l1': 'Lev 1: %s' % i_1,
                                                             'l2': 'Lev 2: %s' % i_2,
                                                             'l3': 'Lev 3: %s' % i_3,
@@ -1327,7 +1330,9 @@ def __main__():
                                                             'l9': 'Lev 9: %s' % i_9}
                                                 biggus_dictus[img_name] = img_info
                                                 if first_img:
-                                                    bigdb_cn, bigdb_cr = imt.db.open_or_create_db_file(bigdb, img_info, restart_db=True)
+                                                    bigdb_cn, bigdb_cr = imt.db.open_or_create_db_file(bigdb,
+                                                                                                       img_info,
+                                                                                                       restart_db=True)
                                                     first_img = False
                                                 imt.db.write_img_to_open_db(bigdb_cr, img_name, img_info)
                                                 i_count += 1
@@ -1354,13 +1359,16 @@ def __main__():
             img_list = sorted(biggus_dictus.keys())
             db_imgs.sort()
             if img_list != db_imgs:
-                msg = 'List of plots differ between memory and database versions of big dict'
+                msg = ('List of plots differ between memory and '
+                       'database versions of big dict')
                 raise ValueError(msg)
             if biggus_dictus != db_img_tags:
-                msg = 'images_and_tags differ between memory and database versions of big dict'
+                msg = ('images_and_tags differ between memory and '
+                       'database versions of big dict')
                 raise ValueError(msg)
 
-            # run through the big dict, and delete a smallish subset of 'images' from the big database
+            # run through the big dict, and delete a smallish subset of
+            # 'images' from the big database
             db_imgs, db_img_tags = imt.db.read(bigdb)
             len_b4_del = len(db_imgs)
             print('Length of large database before deleting subset {}'.format(len_b4_del))
@@ -1380,8 +1388,7 @@ def __main__():
             len_sample = len(db_imgs)
             if len_sample != n_samples:
                 raise ValueError('error loading subsample from database')
-            else:
-                print('Tested ability to load a random subset of images - OK')
+            print('Tested ability to load a random subset of images - OK')
 
             # now process that big dict in parallel to an ImageDict, with this tag order:
             tagorder = ['l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'l8', 'l9']
@@ -1457,7 +1464,6 @@ def __main__():
 
     print('Web page outputs\n', web_out)
 
-
     # testing files that have known problems:
     print('testing image_file_postproc on known problem images:')
     prob_imgs = os.listdir(TEST_RESOURCES)
@@ -1466,8 +1472,9 @@ def __main__():
         test_out = os.path.join(webdir, prob_img)
         print('processing {} to {}'.format(test_in, test_out))
         imt.image_file_postproc(test_in, outfile=test_out,
-                                img_tags = {'test': 'value'})
+                                img_tags={'test': 'value'})
 
+    print('test.py completed')
 
 if __name__ == '__main__':
     __main__()
