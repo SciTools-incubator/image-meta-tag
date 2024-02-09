@@ -18,21 +18,19 @@ Released under BSD 3-Clause License. See LICENSE for more details.
 # required imports
 import os
 import re
-
+import inspect
+import copy
+import pdb
 import collections
+
+from copy import deepcopy
 try:
     from collections import Iterable
 except:
     from collections.abc import Iterable
-import inspect
-import copy
-from PIL import Image
-# useful for debugging
-import pdb
-
-from copy import deepcopy
-from itertools import islice, compress
 from math import ceil
+from itertools import islice, compress
+from PIL import Image
 
 from ImageMetaTag import RESERVED_TAGS
 
@@ -86,8 +84,7 @@ class ImageDict(object):
             if not isinstance(level_names, list):
                 msg = 'The mapping of key names to full should be a list'
                 raise ValueError(msg)
-            else:
-                self.level_names = level_names
+            self.level_names = level_names
 
         # set the dictionary:
         self.dict = input_dict
@@ -721,11 +718,9 @@ class ImageDict(object):
             msg = ('Length of input list, vals_at_depth, greater than the '
                    'length of the keys list')
             raise ValueError(msg)
-
         if vals_at_depth[0] not in self.keys[0]:
             return None
-        else:
-            sub_dict = self.dict[vals_at_depth[0]]
+        sub_dict = self.dict[vals_at_depth[0]]
 
         for depth in range(1, len(vals_at_depth)):
             if vals_at_depth[depth] in sub_dict:
@@ -942,9 +937,8 @@ Returns three logicals:
                            'input dict "{}"')
                     if raise_key_mismatch:
                         raise ValueError(msg.format(test, simple_dict))
-                    else:
-                        print(msg.format(test, simple_dict))
-                        return (False, False, False)
+                    print(msg.format(test, simple_dict))
+                    return (False, False, False)
                 if isinstance(tests[test], list):
                     # simple test, does it meet the normal criteria:
                     # now check to see if the test includes a tuple, marking

@@ -652,8 +652,8 @@ def del_plots_from_dbfile(db_file, filenames, do_vacuum=True, allow_retries=True
                         except sqlite3.OperationalError as op_err:
                             if 'database is locked' in repr(op_err):
                                 # database being locked is what the retries and timeouts are for:
-                                print('%s database timeout deleting from file "%s", %s s' \
-                                                % (dt_now_str(), db_file, n_tries * db_timeout))
+                                msg = '{} database timeout deleting from file "{}", {} s'
+                                print(msg.format(dt_now_str(), db_file, n_tries * db_timeout))
                                 n_tries += 1
                             elif 'disk I/O error' in repr(op_err):
                                 msg = '{} for file {}'.format(op_err, db_file)
