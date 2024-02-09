@@ -1,19 +1,15 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ImageMetaTag.savefig &#8212; ImageMetaTag 0.8.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sphinxdoc.css" />
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/jquery.js"></script>
-    <script src="../../_static/underscore.js"></script>
-    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/sphinx_highlight.js"></script>
+    <title>ImageMetaTag.savefig &#8212; ImageMetaTag 0.8.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinxdoc.css?v=d59dc883" />
+    <script src="../../_static/documentation_options.js?v=dbee5847"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
   </head><body>
@@ -26,7 +22,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">ImageMetaTag 0.8.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">ImageMetaTag 0.8.2 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">ImageMetaTag.savefig</a></li> 
       </ul>
@@ -61,19 +57,20 @@
 <span class="kn">import</span> <span class="nn">pdb</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="c1"># image manipulations:</span>
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">ImageChops</span><span class="p">,</span> <span class="n">PngImagePlugin</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">ImageMetaTag</span> <span class="kn">import</span> <span class="n">db</span><span class="p">,</span> <span class="n">META_IMG_FORMATS</span><span class="p">,</span> <span class="n">RESERVED_TAGS</span>
 <span class="kn">from</span> <span class="nn">ImageMetaTag</span> <span class="kn">import</span> <span class="n">POSTPROC_IMG_FORMATS</span><span class="p">,</span> <span class="n">DPI_IMG_FORMATS</span>
 <span class="kn">from</span> <span class="nn">ImageMetaTag</span> <span class="kn">import</span> <span class="n">DEFAULT_DB_TIMEOUT</span><span class="p">,</span> <span class="n">DEFAULT_DB_ATTEMPTS</span>
 
-<span class="c1"># image manipulations:</span>
-<span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">ImageChops</span><span class="p">,</span> <span class="n">PngImagePlugin</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-
 <span class="n">THUMB_DEFAULT_IMG_SIZE</span> <span class="o">=</span> <span class="mi">150</span><span class="p">,</span> <span class="mi">150</span>
 <span class="n">THUMB_DEFAULT_DIR_NAME</span> <span class="o">=</span> <span class="s1">&#39;thumbnail&#39;</span>
 
-<div class="viewcode-block" id="savefig"><a class="viewcode-back" href="../../savefig.html#ImageMetaTag.savefig">[docs]</a><span class="k">def</span> <span class="nf">savefig</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">img_tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">img_format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">img_converter</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<div class="viewcode-block" id="savefig">
+<a class="viewcode-back" href="../../savefig.html#ImageMetaTag.savefig">[docs]</a>
+<span class="k">def</span> <span class="nf">savefig</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">img_tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">img_format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">img_converter</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
             <span class="n">do_trim</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">trim_border</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
             <span class="n">do_thumb</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">keep_open</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">logo_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">logo_width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">logo_height</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -82,7 +79,7 @@
             <span class="n">db_attempts</span><span class="o">=</span><span class="n">DEFAULT_DB_ATTEMPTS</span><span class="p">,</span>
             <span class="n">db_replace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">db_add_strict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">db_full_paths</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    A wrapper around matplotlib.pyplot.savefig, to include file size</span>
 <span class="sd">    optimisation and image tagging.</span>
 
@@ -267,13 +264,16 @@
             <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">db_st</span><span class="p">)))</span></div>
 
 
-<div class="viewcode-block" id="image_file_postproc"><a class="viewcode-back" href="../../savefig.html#ImageMetaTag.image_file_postproc">[docs]</a><span class="k">def</span> <span class="nf">image_file_postproc</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">img_buf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+
+<div class="viewcode-block" id="image_file_postproc">
+<a class="viewcode-back" href="../../savefig.html#ImageMetaTag.image_file_postproc">[docs]</a>
+<span class="k">def</span> <span class="nf">image_file_postproc</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">img_buf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                         <span class="n">img_dpi</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">img_converter</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                         <span class="n">do_trim</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">trim_border</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                         <span class="n">logo_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">logo_width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">logo_height</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                         <span class="n">logo_padding</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">logo_pos</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                         <span class="n">do_thumb</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">img_tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Does the image post-processing for :func:`ImageMetaTag.savefig`.</span>
 
 <span class="sd">    Arguments: filename the name of the image file to process</span>
@@ -414,7 +414,10 @@
             <span class="n">do_thumb</span> <span class="o">=</span> <span class="p">(</span><span class="n">do_thumb</span><span class="p">,</span> <span class="n">do_thumb</span><span class="p">)</span>
         <span class="c1"># create the thumbnail</span>
         <span class="n">im_thumb</span> <span class="o">=</span> <span class="n">im_obj</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="n">im_thumb</span><span class="o">.</span><span class="n">thumbnail</span><span class="p">(</span><span class="n">do_thumb</span><span class="p">,</span> <span class="n">Image</span><span class="o">.</span><span class="n">ANTIALIAS</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">Image</span><span class="p">,</span> <span class="s2">&quot;LANCZOS&quot;</span><span class="p">):</span>
+            <span class="n">im_thumb</span><span class="o">.</span><span class="n">thumbnail</span><span class="p">(</span><span class="n">do_thumb</span><span class="p">,</span> <span class="n">Image</span><span class="o">.</span><span class="n">LANCZOS</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">im_thumb</span><span class="o">.</span><span class="n">thumbnail</span><span class="p">(</span><span class="n">do_thumb</span><span class="p">,</span> <span class="n">Image</span><span class="o">.</span><span class="n">ANTIALIAS</span><span class="p">)</span>
 
     <span class="c1"># images start out as RGBA, strip out the alpha channel first by</span>
     <span class="c1"># converting to RGB,then you convert to the next format</span>
@@ -467,6 +470,7 @@
         <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;File: &quot;</span><span class="si">{}</span><span class="s1">&quot;. Size: </span><span class="si">{}</span><span class="s1">, to </span><span class="si">{}</span><span class="s1"> bytes (</span><span class="si">{}% o</span><span class="s1">riginal size)&#39;</span>
         <span class="n">relative_size</span> <span class="o">=</span> <span class="p">(</span><span class="mf">100.0</span> <span class="o">*</span> <span class="n">en_fsize</span><span class="p">)</span><span class="o">/</span><span class="n">st_fsize</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">st_fsize</span><span class="p">,</span> <span class="n">en_fsize</span><span class="p">,</span> <span class="n">relative_size</span><span class="p">))</span></div>
+
 
 
 <span class="k">def</span> <span class="nf">_im_P256</span><span class="p">(</span><span class="n">im_obj</span><span class="p">):</span>
@@ -525,7 +529,7 @@
 
 
 <span class="k">def</span> <span class="nf">_im_getbbox_for_trim</span><span class="p">(</span><span class="n">im_obj</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    works out the bounding box that defines the actual conent of the image</span>
 <span class="sd">    assuming that the top left pixel is the background colour</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -553,7 +557,7 @@
     <span class="k">return</span> <span class="n">bbox</span>
 
 <span class="k">def</span> <span class="nf">_im_logos</span><span class="p">(</span><span class="n">im_obj</span><span class="p">,</span> <span class="n">logo_files</span><span class="p">,</span> <span class="n">logo_size</span><span class="p">,</span> <span class="n">logo_padding</span><span class="p">,</span> <span class="n">logo_poss</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    adds logo or logos to the corners of an image object (usually after an</span>
 <span class="sd">    im_trim)</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -594,7 +598,7 @@
 
 
 <span class="k">def</span> <span class="nf">_im_logo</span><span class="p">(</span><span class="n">im_obj</span><span class="p">,</span> <span class="n">logo_file</span><span class="p">,</span> <span class="n">logo_size</span><span class="p">,</span> <span class="n">logo_padding</span><span class="p">,</span> <span class="n">logo_pos</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    adds a logo to the required corner of an image object (usually after an</span>
 <span class="sd">    im_trim)</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -796,7 +800,7 @@
 
 
 <span class="k">def</span> <span class="nf">_img_stong_resize</span><span class="p">(</span><span class="n">img_obj</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    does image pre-processing before a strong resize,</span>
 <span class="sd">    to get rid of halo effects</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -812,12 +816,16 @@
     <span class="c1"># if max(shrink_ratio) &gt;= 2:</span>
     <span class="c1">#    new_img_obj = new_img_obj.filter(ImageFilter.SMOOTH)</span>
     <span class="c1"># now resize:</span>
-    <span class="n">res_img_obj</span> <span class="o">=</span> <span class="n">new_img_obj</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">Image</span><span class="o">.</span><span class="n">ANTIALIAS</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">Image</span><span class="p">,</span> <span class="s2">&quot;LANCZOS&quot;</span><span class="p">):</span>
+        <span class="n">res_img_obj</span> <span class="o">=</span> <span class="n">new_img_obj</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">Image</span><span class="o">.</span><span class="n">LANCZOS</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">res_img_obj</span> <span class="o">=</span> <span class="n">new_img_obj</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">Image</span><span class="o">.</span><span class="n">ANTIALIAS</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">res_img_obj</span>
 
 
 <span class="k">def</span> <span class="nf">_img_premultiplyAlpha</span><span class="p">(</span><span class="n">img_obj</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Premultiplies an input image by its alpha channel, which is useful for</span>
 <span class="sd">    strong resizes</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -859,14 +867,14 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">ImageMetaTag 0.8.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">ImageMetaTag 0.8.2 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">ImageMetaTag.savefig</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2015-2023, British Crown Copyright.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
+    &#169; Copyright 2015-2023, British Crown Copyright.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
     </div>
   </body>
 </html>
