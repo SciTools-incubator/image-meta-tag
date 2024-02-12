@@ -63,7 +63,7 @@ number at: https://github.com/SciTools-incubator/image-meta-tag/releases
  * Add the upstream repository:
      git remote add upstream git@github.com:conda-forge/image-meta-tag-feedstock.git
  * Before branching, make sure we have rebased to upstream/master:
-     git rebase upstream/master
+     git rebase upstream/main
  * Create a branch within that clone, typically named after the release:
      git checkout -b vn0.6.7
  * Update the recipe/meta.yaml
