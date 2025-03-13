@@ -229,7 +229,7 @@ def write_full_page(img_dict, filepath, title, page_filename=None, tab_s_name=No
 {0}    margin: 0;
 {0}    padding: 0;
 {0}  }}
-{0}  h3, h4, h5, h6, pre, form, fieldset, input {{'
+{0}  h3, h4, h5, h6, pre, form, fieldset, input {{
 {0}    margin: 0;
 {0}    padding: 0;
 {0}  }}
